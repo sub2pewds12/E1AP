@@ -4,20 +4,21 @@ package e1ap_ies
 
 // General INTEGER Constants
 const (
+	Prioritylevel                         int64 = 0
 	Maxnooftimeperiods                    int64 = 2
 	Maxnoofcellgroups                     int64 = 4
-	Maxnoofqosparasets                    int64 = 8
-	Maxnooftnladdresses                   int64 = 8
 	Maxnoofupparameters                   int64 = 8
+	Maxnooftnladdresses                   int64 = 8
+	Maxnoofqosparasets                    int64 = 8
 	Maxnoofsplmns                         int64 = 12
+	Maxnooftlas                           int64 = 16
 	Maxnoofgtptlas                        int64 = 16
 	Maxnoofmdtplmns                       int64 = 16
-	Maxnooftlas                           int64 = 16
 	Maxnoofdrbs                           int64 = 32
 	Maxnooftnlassociations                int64 = 32
 	Maxnoofqosflows                       int64 = 64
-	Maxnoofeutranqosparameters            int64 = 256
 	Maxnooferrors                         int64 = 256
+	Maxnoofeutranqosparameters            int64 = 256
 	Maxnoofngranqosparameters             int64 = 256
 	Maxnoofpdusessionresource             int64 = 256
 	Maxnoofnrcgi                          int64 = 512
