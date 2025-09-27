@@ -1,36 +1,48 @@
+# In asn1_parser.py
 import re
 import logging
-from typing import Dict, List, Optional, Any
-
+from typing import Dict, List, Optional, Any, Tuple
 
 logger = logging.getLogger(__name__)
-# A simple data structure is better than a raw dictionary
+
 class ASN1Definition:
-    def __init__(self, name: str, def_type: str):
-        self.name = name
-        self.type = def_type
-        self.ies: List[Dict[str, Any]] = []
-        self.list_item_type: Optional[str] = None
-        self.enum_values: List[str] = []
+    def __init__(self, name: str, def_type: str, source_file: str = "", source_line: int = -1, full_text: str = ""):
+        self.name, self.type, self.source_file, self.source_line, self.full_text = name, def_type, source_file, source_line, full_text
         self.min_val: Optional[str] = None
         self.max_val: Optional[str] = None
-        self.is_extensible: bool = False
+        self.enum_values: List[str] = []
+        self.ies: List[Dict[str, Any]] = []
+        self.list_item_type: Optional[str] = None
         self.is_constant: bool = False
+        self.is_extensible: bool = False
 
 class ASN1Parser:
-    def __init__(self, spec_content: str):
-        self.lines = spec_content.splitlines()
+    def __init__(self, lines: List[Tuple[str, str, int]]):
+        self.lines = lines
         self.definitions: Dict[str, ASN1Definition] = {}
-        logger.debug(f"ASN1Parser initialized with {len(self.lines)} lines of spec content.")
 
     def _parse_constraints(self, line_part: str) -> Dict[str, Any]:
-        """Helper to parse (SIZE) or value range constraints."""
-        constraints = {'min_val': None, 'max_val': None, 'is_extensible': "..." in line_part}
-        match = re.search(r"\((?:SIZE\s*\()?\s*([\w-]+)(?:\s*\.\.\s*([\w-]+))?\s*\)?\)", line_part)
+        """
+        Final, correct version of the constraint parser.
+        This regex does not greedily consume '..' as part of a token.
+        """
+        constraints = {'min_val': None, 'max_val': None}
+        
+        # A token is a word, possibly with hyphens.
+        # This regex looks for a token, then an optional range '..' and another token.
+        token_pattern = r"[\w-]+"
+        pattern = rf"\((?:SIZE\s*\()?\s*({token_pattern})(?:\s*\.\.\s*({token_pattern}))?.*?\)"
+        
+        match = re.search(pattern, line_part)
         if match:
-            constraints['min_val'] = match.group(1)
-            constraints['max_val'] = match.group(2) or match.group(1)
+            lower_bound = match.group(1)
+            upper_bound = match.group(2)
+            
+            constraints['min_val'] = lower_bound
+            constraints['max_val'] = upper_bound if upper_bound is not None else lower_bound
+            
         return constraints
+    
 
     def _parse_presence(self, line_part: str) -> str:
         """Helper to determine member presence."""
@@ -38,275 +50,224 @@ class ASN1Parser:
         if "CONDITIONAL" in line_part: return "conditional"
         return "mandatory"
 
-    def parse(self) -> Dict[str, ASN1Definition]:
-        """Parses the entire spec content into a dictionary of structured definitions."""
+    def _extract_full_definition(self, start_index: int) -> Tuple[str, int]:
+        """Consumes lines to get a complete single definition, handling continuations."""
+        full_def_str = self.lines[start_index][0].strip()
+        i = start_index
+        if "::=" in full_def_str:
+            open_braces = full_def_str.count('{') - full_def_str.count('}')
+            while open_braces > 0 and i + 1 < len(self.lines):
+                i += 1
+                line = self.lines[i][0].strip()
+                if not line or line.startswith("--"): continue
+                open_braces += line.count('{') - line.count('}')
+                full_def_str += " " + line
+        return full_def_str.replace('\n', ' ').replace('\r', ' '), i
+
+    def _parse_simple_definition(self, name: str, def_part: str, source_file: str, source_line: int, full_text: str) -> Optional[ASN1Definition]:
+        """
+        Parses a simple, non-structured type. This version correctly distinguishes
+        between a TYPE definition, a CONSTANT definition, and a BASE TYPE definition.
+        """
+        def_part_stripped = def_part.strip()
+        
+        # --- PATH 1: This is a TYPE definition ---
+        if def_part_stripped.startswith("INTEGER"):
+            # Check if this is a special BASE TYPE that other constants rely on.
+            if name in ["ProcedureCode", "ProtocolIE-ID", "ProtocolExtensionID"]:
+                # Correctly classify it as a BASE_TYPE, not a regular INTEGER.
+                item = ASN1Definition(name, "BASE_TYPE", source_file, source_line, full_text)
+                # We can still parse its constraints if needed, but the type is what matters.
+                constraints = self._parse_constraints(def_part)
+                item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
+                return item
+
+            # This is a legitimate new integer type.
+            item = ASN1Definition(name, "INTEGER", source_file, source_line, full_text)
+            constraints = self._parse_constraints(def_part)
+            item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
+            return item
+
+        elif def_part_stripped.startswith("ENUMERATED"):
+            item = ASN1Definition(name, "ENUMERATED", source_file, source_line, full_text)
+            
+            # Use a robust regex to find the content inside the braces
+            match = re.search(r'ENUMERATED\s*\{(.*?)\}', def_part, re.DOTALL)
+            
+            if match:
+                # This is the standard case with an explicit value list {...}
+                content = match.group(1).replace("...", "").strip()
+                values = [v.strip() for v in content.split(',') if v.strip()]
+                item.enum_values = values
+            else:
+                # --- THIS IS THE FIX ---
+                # This handles the case where the definition is just "ENUMERATED"
+                # without a value list, which is common for boolean flags.
+                # We will create a default value, which is a standard practice.
+                item.enum_values = ["present"]
+
+            return item
+        
+        # (Add back BIT STRING, OCTET STRING etc. here using the same .startswith() logic)
+
+        # --- PATH 2: This must be a CONSTANT definition ---
+        else:
+            name_parts = name.strip().split()
+            if len(name_parts) < 2: return None
+            const_type = name_parts[-1]
+            const_name = " ".join(name_parts[:-1])
+            const_value = def_part_stripped
+            
+            item = ASN1Definition(const_name, const_type, source_file, source_line, full_text)
+            item.min_val = item.max_val = const_value
+            item.is_constant = True
+            return item
+    
+
+    def _parse_block_definition(self, name: str, def_part: str, source_file: str, source_line: int, full_text: str) -> Optional[ASN1Definition]:
+        """
+        Parses a SEQUENCE or CHOICE block. This version correctly handles inline
+        definitions and is robust against malformed member lines that could
+        otherwise cause an IndexError.
+        """
+        def_type = "SEQUENCE" if "SEQUENCE" in def_part else "CHOICE"
+        item = ASN1Definition(name, def_type, source_file, source_line, full_text)
+        item.is_extensible = "..." in def_part
+        
+        block_match = re.search(r'\{(.*)\}', def_part, re.DOTALL)
+        if not block_match: return item
+        
+        block_content = block_match.group(1).strip()
+        member_lines = re.split(r',(?![^(){}]*\))', block_content)
+        
+        for member_line in member_lines:
+            clean_line = member_line.strip()
+            if not clean_line or clean_line.startswith("...") or "iE-Extensions" in clean_line:
+                continue
+            
+            parts = clean_line.split()
+            if len(parts) < 2: continue
+            
+            member_name = parts[0]
+            raw_type_str = " ".join(parts[1:])
+            presence = self._parse_presence(raw_type_str)
+            
+            inline_keywords = ["INTEGER", "ENUMERATED", "BIT STRING", "OCTET STRING"]
+            is_inline = any(keyword in raw_type_str for keyword in inline_keywords)
+            
+            member_type_name = ""
+            if is_inline:
+                synthetic_name = member_name
+                inline_def = self._parse_simple_definition(synthetic_name, raw_type_str, source_file, source_line, raw_type_str)
+                
+                if inline_def:
+                    if inline_def.name not in self.definitions:
+                        self.definitions[inline_def.name] = inline_def
+                    member_type_name = inline_def.name
+            else:
+                # It's a reference to an existing type.
+                type_str_cleaned = raw_type_str.replace("OPTIONAL", "").replace("CONDITIONAL", "").strip()
+                
+                # --- THIS IS THE CRASH-PROOF FIX ---
+                type_parts = type_str_cleaned.split()
+                if not type_parts:
+                    # This happens if the line was something like "memberName OPTIONAL" with no type.
+                    # It's malformed or a syntax we don't handle. We log it and skip it safely.
+                    logger.warning(f"Could not determine type for member '{member_name}' in '{name}'. Skipping line: '{clean_line}'")
+                    continue
+                
+                member_type_name = type_parts[0]
+            
+            if member_type_name:
+                item.ies.append({"ie": member_name, "type": member_type_name, "presence": presence})
+                
+        return item
+
+    def parse(self) -> Tuple[Dict[str, ASN1Definition], List[Dict[str, Any]]]:
+        """
+        The main parsing dispatcher. This FINAL version includes a check to
+        explicitly identify and skip advanced parameterized type definitions,
+        preventing them from being mis-parsed.
+        """
+        failures = []
         i = 0
+        in_abstract_block = False
+
+        class_macro_pattern = re.compile(
+            r"{\s*ID\s+([\w-]+)\s+CRITICALITY\s+\w+\s+TYPE\s+([^}]+?)\s+PRESENCE\s+\w+\s*}"
+        )
+
         while i < len(self.lines):
-            line = self.lines[i].strip()
-            if not line or line.startswith("--"):
+            line_text, source_file, source_line = self.lines[i]
+            line = line_text.strip()
+            
+            # --- NEW: Check for and skip parameterized definitions ---
+            # A parameterized definition contains '{' and '}' on the LEFT side of '::='
+            if "::=" in line and "{" in line.split("::=")[0] and "}" in line.split("::=")[0]:
+                param_name = line.split("::=")[0].strip()
+                failures.append({"name": param_name, "text": line, "file": source_file, "line": source_line})
+                i += 1
+                continue # Skip this line entirely
+
+            line = line.replace("...", "")
+            if i + 1 < len(self.lines) and not self.lines[i+1][0].strip().startswith('{') and not '::=' in self.lines[i+1][0]:
+                line += " " + self.lines[i+1][0].strip()
+
+            abstract_containers = ["E1AP-PROTOCOL-IES", "E1AP-ELEMENTARY-PROCEDURE"]
+            if "::= {" in line and any(keyword in line for keyword in abstract_containers):
+                in_abstract_block = True
+                failures.append({"name": line.split("::=")[0].strip(), "text": line, "file": source_file, "line": source_line})
                 i += 1
                 continue
 
-            if "::=" in line:
-                if line.endswith("{"):
-                    item, end_index = self._parse_block_definition(i)
-                    if item: self.definitions[item.name] = item
+            if line.startswith("}") and in_abstract_block:
+                in_abstract_block = False
+                i += 1
+                continue
+
+            target_line_text = line
+            is_synthetic = False
+
+            if in_abstract_block:
+                match = class_macro_pattern.search(target_line_text)
+                if match:
+                    id_name = match.group(1).strip()
+                    type_def = match.group(2).strip()
+                    target_line_text = f"{id_name} ::= {type_def}"
+                    is_synthetic = True
+                else:
+                    i += 1
+                    continue
+
+            if "::=" in target_line_text:
+                if not is_synthetic:
+                    full_def_str, end_index = self._extract_full_definition(i)
                     i = end_index
                 else:
-                    item, end_index = self._parse_line_definition(i)
-                    if item: self.definitions[item.name] = item
-                    i = end_index
+                    full_def_str = target_line_text
+
+                name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
+                item = None
+
+                keywords_to_always_skip = ["E1AP-PROTOCOL-EXTENSION", "E1AP-PRIVATE-IES", "CLASS"]
+                if any(keyword in full_def_str for keyword in keywords_to_always_skip):
+                    if name_part not in [f['name'] for f in failures]:
+                        failures.append({"name": name_part, "text": full_def_str, "file": source_file, "line": source_line})
+                elif "SEQUENCE" in def_part and "OF" in def_part:
+                    item = ASN1Definition(name_part, "LIST", source_file, source_line, full_def_str)
+                    constraints = self._parse_constraints(def_part)
+                    item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
+                elif ("SEQUENCE" in def_part or "CHOICE" in def_part) and "{" in def_part:
+                    item = self._parse_block_definition(name_part, def_part, source_file, source_line, full_def_str)
+                else:
+                    item = self._parse_simple_definition(name_part, def_part, source_file, source_line, full_def_str)
+
+                if item:
+                    if item.name not in self.definitions:
+                        self.definitions[item.name] = item
+                elif "AUTOMATIC TAGS" not in full_def_str and not any(keyword in full_def_str for keyword in keywords_to_always_skip):
+                    if name_part not in [f['name'] for f in failures]:
+                        failures.append({"name": name_part, "text": full_def_str, "file": source_file, "line": source_line})
             i += 1
-        return self.definitions
 
-    def _parse_block_definition(self, start_index: int):
-        """
-        Parses a multi-line SEQUENCE or CHOICE block.
-        Crucially, it now IGNORES other block types (like IE Contaiers).
-        """
-        line = self.lines[start_index].strip()
-        name = line.split("::=")[0].strip()
-        
-        # --- FIX: Be specific. Only handle SEQUENCE and CHOICE blocks. ---
-        if "::= SEQUENCE" in line and line.endswith("{"):
-            item = ASN1Definition(name, "SEQUENCE")
-            logger.debug(f"Parsing SEQUENCE block definition for: {name}")
-        elif "::= CHOICE" in line and line.endswith("{"):
-            item = ASN1Definition(name, "CHOICE")
-            logger.debug(f"Parsing CHOICE block definition for: {name}")
-        else:
-            # This is not a block type we handle. Ignore it and return.
-            logger.debug(f"Skipping unhandled block definition: {name}")
-            return None, start_index
-
-        block_content, end_index = self._extract_block(start_index)
-        item.is_extensible = "..." in "".join(block_content)
-
-        for member_line in block_content:
-            # --- FIX: Defensive initialization to prevent crashes ---
-            raw_type_str = ""
-
-            if not member_line or member_line.startswith("--") or "..." in member_line:
-                continue
-            
-            parts = member_line.split()
-            if len(parts) < 2: continue
-
-            member_name = parts[0].replace(',', '')
-            raw_type_str = " ".join(parts[1:]).split(',')[0].strip()
-            member_type = parts[1].replace(',', '')
-
-            inline_base_types = ["BIT STRING", "INTEGER", "ENUMERATED", "OCTET STRING"]
-            for base_type in inline_base_types:
-                if raw_type_str.startswith(base_type):
-                    synthetic_name = f"{name}-{member_name}"
-                    logger.debug(f"  Found inline '{base_type}' for member '{member_name}'. Creating synthetic type: {synthetic_name}")
-                    
-                    new_def = ASN1Definition(synthetic_name, base_type)
-                    if base_type in ["BIT STRING", "INTEGER", "OCTET STRING"]:
-                        constraints = self._parse_constraints(raw_type_str)
-                        new_def.min_val, new_def.max_val = constraints['min_val'], constraints['max_val']
-                    elif base_type == "ENUMERATED":
-                         match = re.search(r'\{(.*)\}', raw_type_str)
-                         if match:
-                             new_def.enum_values = [v.strip() for v in match.group(1).replace("...", "").split(',') if v.strip()]
-                    
-                    self.definitions[synthetic_name] = new_def
-                    member_type = synthetic_name
-                    break
-            
-            constraints = self._parse_constraints(member_line)
-            member_details = {
-                "ie": member_name,
-                "type": member_type,
-                "presence": self._parse_presence(member_line),
-                "min": constraints['min_val'],
-                "max": constraints['max_val'],
-                "ext": constraints['is_extensible']
-            }
-            item.ies.append(member_details)
-        return item, end_index
-    
-
-    
-    def _extract_block(self, start_index: int):
-        """Safely extracts content between matching braces {}."""
-        block_content = []
-        nest_level = 1
-        j = start_index + 1
-        while j < len(self.lines):
-            line_in_block = self.lines[j] # Don't strip yet, preserve indentation
-            if "{" in line_in_block: nest_level += 1
-            if "}" in line_in_block: nest_level -= 1
-            if nest_level == 0: break
-            block_content.append(line_in_block.strip())
-            j += 1
-        return block_content, j
-
-    def _parse_line_definition(self, start_index: int):
-        """Parses a single-line or simple multi-line definition."""
-        full_line = self.lines[start_index].strip()
-        if start_index + 1 < len(self.lines) and self.lines[start_index+1].strip().startswith(('(', '{')):
-            full_line += " " + self.lines[start_index+1].strip()
-            end_index = start_index + 1
-        else:
-            end_index = start_index
-
-        if "::=" not in full_line:
-            return None, end_index
-
-        name_part, def_part = [p.strip() for p in full_line.split("::=", 1)]
-        item = None
-
-        # --- IMPROVED LOGIC: Check for the most specific types first ---
-
-        # Handles all SEQUENCE OF definitions, even with constraints in the middle.
-        if "SEQUENCE" in full_line and "OF" in full_line:
-            name = name_part.split("SEQUENCE")[0].strip()
-            item = ASN1Definition(name, "LIST")
-            match = re.search(r'OF\s+([\w-]+)', def_part)
-            if match: item.list_item_type = match.group(1).replace('}', '') # Clean up potential trailing braces
-            constraints = self._parse_constraints(def_part)
-            item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
-        
-        # This handles all INTEGER definitions
-        elif "INTEGER" in full_line:
-            name = name_part.split("INTEGER")[0].strip()
-            item = ASN1Definition(name, "INTEGER")
-            if def_part.isdigit():
-                item.min_val = item.max_val = def_part
-            else:
-                constraints = self._parse_constraints(def_part)
-                item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
-                if item.min_val and not item.max_val:
-                    item.max_val = item.min_val
-
-        # This handles all BIT STRING definitions
-        elif "BIT STRING" in full_line:
-            name = name_part.split("BIT STRING")[0].strip()
-            item = ASN1Definition(name, "BIT STRING")
-            constraints = self._parse_constraints(def_part)
-            item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
-
-        # --- NEW: Handle OCTET STRING and other common string types ---
-        elif "OCTET STRING" in full_line:
-            name = name_part.split("OCTET STRING")[0].strip()
-            item = ASN1Definition(name, "OCTET STRING")
-            constraints = self._parse_constraints(def_part)
-            item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
-        
-        elif any(s in full_line for s in ["PrintableString", "VisibleString", "UTF8String"]):
-            # Find which string type it is
-            str_type = "PrintableString"
-            if "VisibleString" in full_line: str_type = "VisibleString"
-            if "UTF8String" in full_line: str_type = "UTF8String"
-            
-            name = name_part.split(str_type)[0].strip()
-            item = ASN1Definition(name, str_type) # Store the specific type
-            constraints = self._parse_constraints(def_part)
-            item.min_val, item.max_val = constraints['min_val'], constraints['max_val']
-        # --- END NEW ---
-
-        # This handles all ENUMERATED definitions
-        elif "ENUMERATED" in full_line:
-            name = name_part.split("ENUMERATED")[0].strip()
-            item = ASN1Definition(name, "ENUMERATED")
-            match = re.search(r'\{(.*)\}', def_part)
-            if match:
-                item.enum_values = [v.strip() for v in match.group(1).replace("...", "").split(',') if v.strip()]
-
-        elif "NULL" in full_line:
-            name = name_part.split("NULL")[0].strip()
-            item = ASN1Definition(name, "NULL")
-        
-        # This handles ProcedureCode constants
-        elif "ProcedureCode" in full_line:
-             name = name_part.split("ProcedureCode")[0].strip()
-             item = ASN1Definition(name, "ProcedureCode")
-             value = def_part.split()[-1]
-             if value.isdigit():
-                 item.min_val = item.max_val = value
-
-        # This handles ProtocolIE-ID constants
-        elif "ProtocolIE-ID" in full_line:
-             name = name_part.split("ProtocolIE-ID")[0].strip()
-             item = ASN1Definition(name, "ProtocolIE-ID")
-             value = def_part.split()[-1]
-             if value.isdigit():
-                 item.min_val = item.max_val = value
-        
-        if item:
-            logger.debug(f"Parsed line definition: {item.name} (Type: {item.type})")
-            if item.min_val and item.min_val == item.max_val and item.min_val.isdigit():
-                item.is_constant = True
-        else:
-            logger.warning(f"Skipped unhandled line definition: {full_line}")
-            
-        return item, end_index
-
-    def resolve_type_references(self):
-        """
-        Post-parsing step to link custom types within SEQUENCE and CHOICE definitions.
-
-        This method iterates through all definitions. For SEQUENCEs and CHOICEs,
-        it inspects each member's type. If that type corresponds to another
-        definition we've parsed, it enriches the member's data with details
-        from the referenced definition (like its base type and constraints).
-
-        Returns:
-            Tuple[int, set]: A tuple containing:
-                - The total count of successfully resolved type references.
-                - A set of type names that were referenced but could not be found.
-        """
-        resolved_count = 0
-        unresolved_types = set()
-        
-        # A set of known, fundamental ASN.1 types that don't need a custom definition.
-        # We also include types we parse directly, like BIT STRING.
-        known_base_types = {
-            "INTEGER", "BIT STRING", "OCTET STRING", "ENUMERATED", "BOOLEAN",
-            "NULL", "SEQUENCE", "CHOICE", "UTF8String", "PrintableString",
-            "VisibleString", "IA5String", "NumericString"
-        }
-
-        logger.debug("--- Starting Type Resolution ---")
-
-        # Sort for deterministic logging order
-        for def_name, def_body in sorted(self.definitions.items()):
-            if def_body.type in ["SEQUENCE", "CHOICE"]:
-                logger.debug(f"Analyzing members of '{def_name}' ({def_body.type})")
-                for member in def_body.ies:
-                    member_name = member.get("ie")
-                    member_type_name = member.get("type")
-
-                    # Check if the member's type is a custom type we have parsed
-                    if member_type_name in self.definitions:
-                        resolved_count += 1
-                        ref_def = self.definitions[member_type_name]
-                        
-                        logger.debug(f"  Resolving member '{member_name}' -> type '{member_type_name}'")
-                        
-                        # Add the base type (e.g., INTEGER, BIT STRING) for clarity
-                        member['base_type'] = ref_def.type
-                        logger.debug(f"    -> Base type is '{ref_def.type}'")
-
-                        # Inherit constraints ONLY if not defined locally on the member
-                        if member.get('min') is None and ref_def.min_val is not None:
-                            member['min'] = ref_def.min_val
-                            logger.debug(f"    -> Inherited min: {ref_def.min_val}")
-                        
-                        if member.get('max') is None and ref_def.max_val is not None:
-                            member['max'] = ref_def.max_val
-                            logger.debug(f"    -> Inherited max: {ref_def.max_val}")
-
-                    # If not a custom type, check if it's a known base type
-                    elif member_type_name in known_base_types:
-                        logger.debug(f"  Member '{member_name}' is a known base type: '{member_type_name}'")
-                    
-                    # Otherwise, it's an unresolved type
-                    else:
-                        logger.debug(f"  Member '{member_name}' has UNRESOLVED type: '{member_type_name}'")
-                        unresolved_types.add(member_type_name)
-
-        logger.debug("--- Finished Type Resolution ---")
-        return resolved_count, unresolved_types
+        return self.definitions, failures
