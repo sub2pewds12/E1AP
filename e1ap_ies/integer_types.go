@@ -1,5 +1,17 @@
 package e1ap_ies
 
+type AlternativeQoSParameterIndex int64
+const (
+	AlternativeQoSParameterIndexMinValue int64 = 1
+	AlternativeQoSParameterIndexMaxValue int64 = 8
+)
+
+type AvailableThroughput int64
+const (
+	AvailableThroughputMinValue int64 = 0
+	AvailableThroughputMaxValue int64 = 100
+)
+
 type AveragingWindow int64
 const (
 	AveragingWindowMinValue int64 = 0
@@ -18,6 +30,18 @@ const (
 	CellGroupIdMaxValue int64 = 3
 )
 
+type DLTnlAvailableCapacity int64
+const (
+	DLTnlAvailableCapacityMinValue int64 = 0
+	DLTnlAvailableCapacityMaxValue int64 = 100
+)
+
+type DLTnlOfferedCapacity int64
+const (
+	DLTnlOfferedCapacityMinValue int64 = 0
+	DLTnlOfferedCapacityMaxValue int64 = 16777216
+)
+
 type DrbId int64
 const (
 	DrbIdMinValue int64 = 1
@@ -28,6 +52,24 @@ type ExtendedPacketDelayBudget int64
 const (
 	ExtendedPacketDelayBudgetMinValue int64 = 1
 	ExtendedPacketDelayBudgetMaxValue int64 = 65535
+)
+
+type FiveQI int64
+const (
+	FiveQIMinValue int64 = 0
+	FiveQIMaxValue int64 = 255
+)
+
+type GNBCuCpMeasurementId int64
+const (
+	GNBCuCpMeasurementIdMinValue int64 = 1
+	GNBCuCpMeasurementIdMaxValue int64 = 4095
+)
+
+type GNBCuUpMeasurementId int64
+const (
+	GNBCuUpMeasurementIdMinValue int64 = 1
+	GNBCuUpMeasurementIdMaxValue int64 = 4095
 )
 
 type GnbCuCpUeE1apId int64
@@ -72,16 +114,28 @@ const (
 	InactivityTimerMaxValue int64 = 7200
 )
 
+type Local int64
+const (
+	LocalMinValue int64 = 0
+	LocalMaxValue int64 = MaxPrivateIEs
+)
+
 type M7period int64
 const (
 	M7periodMinValue int64 = 1
 	M7periodMaxValue int64 = 60
 )
 
+type MaxCID int64
+const (
+	MaxCIDMinValue int64 = 0
+	MaxCIDMaxValue int64 = 16383
+)
+
 type MaxDataBurstVolume int64
 const (
 	MaxDataBurstVolumeMinValue int64 = 0
-	MaxDataBurstVolumeMaxValue int64 = 4095
+	MaxDataBurstVolumeMaxValue int64 = 2000000
 )
 
 type MaxPacketLossRate int64
@@ -94,6 +148,24 @@ type NetworkInstance int64
 const (
 	NetworkInstanceMinValue int64 = 1
 	NetworkInstanceMaxValue int64 = 256
+)
+
+type OfferedThroughput int64
+const (
+	OfferedThroughputMinValue int64 = 1
+	OfferedThroughputMaxValue int64 = 16777216
+)
+
+type PacketDelayBudget int64
+const (
+	PacketDelayBudgetMinValue int64 = 0
+	PacketDelayBudgetMaxValue int64 = 1023
+)
+
+type PagingPolicyIndicator int64
+const (
+	PagingPolicyIndicatorMinValue int64 = 1
+	PagingPolicyIndicatorMaxValue int64 = 8
 )
 
 type PdcpSn int64
@@ -120,28 +192,22 @@ const (
 	PerScalarMaxValue int64 = 9
 )
 
-type Ppi int64
-const (
-	PpiMinValue int64 = 0
-	PpiMaxValue int64 = 7
-)
-
-type PacketDelayBudget int64
-const (
-	PacketDelayBudgetMinValue int64 = 0
-	PacketDelayBudgetMaxValue int64 = 1023
-)
-
 type Periodicity int64
 const (
 	PeriodicityMinValue int64 = 1
 	PeriodicityMaxValue int64 = 640000
 )
 
+type Ppi int64
+const (
+	PpiMinValue int64 = 0
+	PpiMaxValue int64 = 7
+)
+
 type PriorityLevel int64
 const (
 	PriorityLevelMinValue int64 = 0
-	PriorityLevelMaxValue int64 = 0
+	PriorityLevelMaxValue int64 = 15
 )
 
 type ProcedureCode int64
@@ -180,6 +246,12 @@ const (
 	QoSPriorityLevelMaxValue int64 = 127
 )
 
+type ROHCProfiles int64
+const (
+	ROHCProfilesMinValue int64 = 0
+	ROHCProfilesMaxValue int64 = 511
+)
+
 type SubscriberProfileIDforRFP int64
 const (
 	SubscriberProfileIDforRFPMinValue int64 = 1
@@ -190,78 +262,6 @@ type TransactionID int64
 const (
 	TransactionIDMinValue int64 = 0
 	TransactionIDMaxValue int64 = 255
-)
-
-type AlternativeQoSParameterIndex int64
-const (
-	AlternativeQoSParameterIndexMinValue int64 = 1
-	AlternativeQoSParameterIndexMaxValue int64 = 8
-)
-
-type AvailableThroughput int64
-const (
-	AvailableThroughputMinValue int64 = 0
-	AvailableThroughputMaxValue int64 = 100
-)
-
-type DLTnlAvailableCapacity int64
-const (
-	DLTnlAvailableCapacityMinValue int64 = 0
-	DLTnlAvailableCapacityMaxValue int64 = 100
-)
-
-type DLTnlOfferedCapacity int64
-const (
-	DLTnlOfferedCapacityMinValue int64 = 0
-	DLTnlOfferedCapacityMaxValue int64 = 16777216
-)
-
-type FiveQI int64
-const (
-	FiveQIMinValue int64 = 0
-	FiveQIMaxValue int64 = 255
-)
-
-type GNBCuCpMeasurementId int64
-const (
-	GNBCuCpMeasurementIdMinValue int64 = 1
-	GNBCuCpMeasurementIdMaxValue int64 = 4095
-)
-
-type GNBCuUpMeasurementId int64
-const (
-	GNBCuUpMeasurementIdMinValue int64 = 1
-	GNBCuUpMeasurementIdMaxValue int64 = 4095
-)
-
-type Local int64
-const (
-	LocalMinValue int64 = 0
-	LocalMaxValue int64 = MaxPrivateIEs
-)
-
-type MaxCID int64
-const (
-	MaxCIDMinValue int64 = 0
-	MaxCIDMaxValue int64 = 16383
-)
-
-type OfferedThroughput int64
-const (
-	OfferedThroughputMinValue int64 = 1
-	OfferedThroughputMaxValue int64 = 16777216
-)
-
-type PagingPolicyIndicator int64
-const (
-	PagingPolicyIndicatorMinValue int64 = 1
-	PagingPolicyIndicatorMaxValue int64 = 8
-)
-
-type ROHCProfiles int64
-const (
-	ROHCProfilesMinValue int64 = 0
-	ROHCProfilesMaxValue int64 = 511
 )
 
 type ULTnlAvailableCapacity int64
