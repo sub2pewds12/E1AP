@@ -552,6 +552,12 @@ const (
 	ContinueROHC_Present ContinueROHC = 0
 )
 
+type DRBReleasedInSession int32
+const (
+	DRBReleasedInSession_ReleasedInSession DRBReleasedInSession = 0
+	DRBReleasedInSession_NotReleasedInSession DRBReleasedInSession = 1
+)
+
 type DapsIndicator int32
 const (
 	DapsIndicator_Present DapsIndicator = 0
@@ -600,5 +606,11 @@ const (
 type S1DlUpUnchanged int32
 const (
 	S1DlUpUnchanged_Present S1DlUpUnchanged = 0
+)
+
+type SecondaryRATType int32
+const (
+	SecondaryRATType_Nr SecondaryRATType = 0
+	SecondaryRATType_EUtra SecondaryRATType = 1
 )
 
