@@ -1,0 +1,10 @@
+package e1ap_ies
+
+// ConfidentialityProtectionIndication represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:251
+type ConfidentialityProtectionIndication int32
+
+const (
+	ConfidentialityProtectionIndication_Required  ConfidentialityProtectionIndication = 0
+	ConfidentialityProtectionIndication_Preferred ConfidentialityProtectionIndication = 1
+	ConfidentialityProtectionIndication_NotNeeded ConfidentialityProtectionIndication = 2
+)

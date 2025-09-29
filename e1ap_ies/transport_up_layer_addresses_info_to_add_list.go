@@ -1,0 +1,5 @@
+package e1ap_ies
+
+// TransportUPLayerAddressesInfoToAddList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2331
+// TransportUPLayerAddressesInfoToAddList is a list of TransportUPLayerAddressesInfoToAddItem
+type TransportUPLayerAddressesInfoToAddList []TransportUPLayerAddressesInfoToAddItem

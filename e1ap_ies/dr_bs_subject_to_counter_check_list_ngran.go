@@ -1,0 +1,5 @@
+package e1ap_ies
+
+// DRBsSubjectToCounterCheckListNGRAN represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:710
+// DRBsSubjectToCounterCheckListNGRAN is a list of DRBsSubjectToCounterCheckItemNGRAN
+type DRBsSubjectToCounterCheckListNGRAN []DRBsSubjectToCounterCheckItemNGRAN

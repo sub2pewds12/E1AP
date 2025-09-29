@@ -1,0 +1,5 @@
+package e1ap_ies
+
+// PDUSessionResourceRequiredToModifyList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1739
+// PDUSessionResourceRequiredToModifyList is a list of PDUSessionResourceRequiredToModifyItem
+type PDUSessionResourceRequiredToModifyList []PDUSessionResourceRequiredToModifyItem

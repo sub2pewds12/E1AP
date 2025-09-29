@@ -1,0 +1,5 @@
+package e1ap_ies
+
+// PDUSessionResourceConfirmModifiedList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1667
+// PDUSessionResourceConfirmModifiedList is a list of PDUSessionResourceConfirmModifiedItem
+type PDUSessionResourceConfirmModifiedList []PDUSessionResourceConfirmModifiedItem

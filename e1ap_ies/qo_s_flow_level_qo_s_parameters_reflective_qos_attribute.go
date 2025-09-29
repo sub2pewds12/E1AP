@@ -1,0 +1,8 @@
+package e1ap_ies
+
+// QoSFlowLevelQoSParametersReflectiveQOSAttribute represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2019
+type QoSFlowLevelQoSParametersReflectiveQOSAttribute int32
+
+const (
+	QoSFlowLevelQoSParametersReflectiveQOSAttribute_Present QoSFlowLevelQoSParametersReflectiveQOSAttribute = 0
+)

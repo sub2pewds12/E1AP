@@ -10,6 +10,30 @@ class ASN1Parser:
     def __init__(self, lines: List[Tuple[str, str, int]]):
         self.lines = lines
         self.definitions: Dict[str, ASN1Definition] = {}
+        self._prepopulate_builtin_types()
+
+    def _prepopulate_builtin_types(self):
+        """Creates ASN1Definition objects for built-in ASN.1 types."""
+        builtins = {
+            "INTEGER": "INTEGER",
+            "ENUMERATED": "ENUMERATED",
+            "BIT STRING": "BIT STRING",
+            "OCTET STRING": "OCTET STRING",
+            "PrintableString": "PrintableString",
+            "VisibleString": "VisibleString",
+            "UTF8String": "UTF8String",
+            "SEQUENCE": "SEQUENCE",
+            "CHOICE": "CHOICE",
+            "NULL": "NULL",
+            "OCTET": "OCTET STRING",
+            "STRING": "OCTET STRING",
+            "OBJECT IDENTIFIER": "OBJECT IDENTIFIER",
+        }
+
+        for name, def_type in builtins.items():
+            item = ASN1Definition(name=name, def_type=def_type, source_file="builtin")
+            item.is_builtin = True
+            self.definitions[name] = item
 
     def _parse_constraints(self, line_part: str) -> Dict[str, Any]:
         constraints = {"min_val": None, "max_val": None}
@@ -123,10 +147,18 @@ class ASN1Parser:
             return item
 
         value_parts = def_part_stripped.split()
-        if len(value_parts) == 1 and value_parts[0][0].isupper():
-            item = ASN1Definition(name, "ALIAS", source_file, source_line, full_text)
-            item.alias_of = value_parts[0]
-            return item
+        if value_parts:
+            base_type = value_parts[0].split('(')[0].strip()
+            is_complex_list = "SEQUENCE" in def_part_stripped and "OF" in def_part_stripped
+            is_potential_alias = base_type[0].isupper() and "{" not in def_part_stripped and not is_complex_list
+            
+            if is_potential_alias:
+                item = ASN1Definition(name, "ALIAS", source_file, source_line, full_text)
+                item.alias_of = base_type
+                
+                constraints = self._parse_constraints(def_part)
+                item.min_val, item.max_val = constraints["min_val"], constraints["max_val"]
+                return item
 
         return None
 
@@ -142,6 +174,7 @@ class ASN1Parser:
         item = ASN1Definition(name, def_type, source_file, source_line, full_text)
         item.is_extensible = "..." in def_part
 
+        
         start_brace_index = def_part.find("{")
         if start_brace_index == -1:
             return item
@@ -158,13 +191,16 @@ class ASN1Parser:
             return item
         block_content = def_part[start_brace_index + 1 : end_brace_index].strip()
 
+        
         member_lines = re.split(r",(?![^(){}]*\))", block_content)
+        
         for member_line in member_lines:
             clean_line = member_line.strip()
             if (
                 not clean_line
                 or clean_line.startswith("...")
                 or "iE-Extensions" in clean_line
+                or "choice-extension" in clean_line 
             ):
                 continue
 
@@ -175,42 +211,51 @@ class ASN1Parser:
             member_name, raw_type_str = parts[0], " ".join(parts[1:])
             presence = self._parse_presence(raw_type_str)
 
-            inline_keywords = ["INTEGER", "ENUMERATED", "BIT STRING", "OCTET STRING"]
-            is_inline = any(keyword in raw_type_str for keyword in inline_keywords)
+            
+            
+            
+            inline_keywords = ["INTEGER", "ENUMERATED", "BIT STRING", "OCTET STRING", "SEQUENCE", "CHOICE"]
+            is_inline = any(raw_type_str.strip().startswith(keyword) for keyword in inline_keywords)
 
             ie_name_to_add = member_name
             type_name_to_add = ""
 
             if is_inline:
-
-                synthetic_type_name = member_name
-
-                if synthetic_type_name not in self.definitions:
-                    inline_def = self._parse_simple_definition(
-                        synthetic_type_name,
-                        raw_type_str,
-                        source_file,
-                        source_line,
-                        raw_type_str,
-                    )
-                    if inline_def:
+                
+                
+                synthetic_type_name = f"{name}-{member_name}"
+                
+                
+                inline_def = None
+                if raw_type_str.strip().startswith("SEQUENCE") and "OF" in raw_type_str:
+                    inline_def = self._parse_simple_definition(synthetic_type_name, raw_type_str, source_file, source_line, raw_type_str)
+                else:
+                    inline_def = self._parse_simple_definition(synthetic_type_name, raw_type_str, source_file, source_line, raw_type_str)
+                    if not inline_def:
+                        
+                        inline_def = self._parse_block_definition(synthetic_type_name, raw_type_str, source_file, source_line, raw_type_str)
+                
+                if inline_def:
+                    if inline_def.name not in self.definitions:
                         self.definitions[inline_def.name] = inline_def
+                    type_name_to_add = inline_def.name
 
-                type_name_to_add = synthetic_type_name
             else:
-
-                type_str_cleaned = (
-                    raw_type_str.replace("OPTIONAL", "")
-                    .replace("CONDITIONAL", "")
-                    .strip()
-                )
-                type_parts = type_str_cleaned.split()
+                
+                
+                base_type_name = raw_type_str
+                if '{' in base_type_name:
+                    base_type_name = base_type_name.split('{', 1)[0]
+                if '(' in base_type_name:
+                    base_type_name = base_type_name.split('(', 1)[0]
+                
+                base_type_name = base_type_name.replace("OPTIONAL", "").replace("CONDITIONAL", "").strip()
+                type_parts = base_type_name.split()
                 if not type_parts:
                     continue
-                type_name_to_add = type_parts[0]
-
+                type_name_to_add = " ".join(type_parts)
+            
             if ie_name_to_add and type_name_to_add:
-
                 item.ies.append(
                     {
                         "ie": ie_name_to_add,
@@ -258,11 +303,10 @@ class ASN1Parser:
                 item = None
 
                 abstract_keywords = [
-                    "E1AP-ELEMENTARY-PROCEDURE",
-                    "E1AP-PROTOCOL-IES",
-                    "E1AP-PROTOCOL-EXTENSION",
-                    "E1AP-PRIVATE-IES",
-                    "CLASS",
+                    "E1AP-ELEMENTARY-PROCEDURE", "E1AP-PROTOCOL-IES",
+                    "E1AP-PROTOCOL-EXTENSION", "E1AP-PRIVATE-IES", "CLASS",
+                    "InitiatingMessage", "SuccessfulOutcome", "UnsuccessfulOutcome",
+                    "E1AP-PDU" 
                 ]
                 if any(keyword in full_def_str for keyword in abstract_keywords):
                     if name_part not in [f["name"] for f in failures]:
@@ -274,7 +318,11 @@ class ASN1Parser:
                                 "line": source_line,
                             }
                         )
-                elif "SEQUENCE" in def_part and "OF" in def_part:
+                    continue
+                is_sequence_of = "SEQUENCE OF " in def_part or def_part.startswith("SEQUENCE (") and " OF " in def_part
+
+                if is_sequence_of:
+                    
                     item = ASN1Definition(
                         name_part, "LIST", source_file, source_line, full_def_str
                     )
@@ -283,6 +331,50 @@ class ASN1Parser:
                         constraints["min_val"],
                         constraints["max_val"],
                     )
+                    split_parts = def_part.split(" OF ", 1)
+                    if len(split_parts) > 1:
+                        of_part = split_parts[1].strip()
+
+                    if of_part.startswith("SEQUENCE {"):
+                        
+                        
+                        synthetic_name = name_part.replace("-List", "-Item")
+                        if synthetic_name == name_part: 
+                            synthetic_name = name_part + "Item"
+                        
+                        logger.info(f"Detected inline SEQUENCE for LIST '{name_part}'. Creating synthetic type '{synthetic_name}'.")
+
+                        
+                        
+                        inline_def = self._parse_block_definition(
+                            synthetic_name, of_part, source_file, source_line, full_def_str
+                        )
+                        if inline_def:
+                            
+                            if inline_def.name not in self.definitions:
+                                self.definitions[inline_def.name] = inline_def
+                            
+                            
+                            item.of_type = inline_def.name
+                        else:
+                            logger.warning(f"Failed to parse inline SEQUENCE for LIST: {name_part}")
+
+                    else:
+                        
+                        
+                        match = re.search(r"([\w-]+)", of_part)
+                        if match:
+                            item.of_type = match.group(1)
+                        else:
+                            logger.warning(f"Could not determine the 'OF' type for LIST: {name_part}")
+                    
+                    
+                    match = re.search(r"SEQUENCE(?:.*?)OF\s+([\w-]+)", def_part)
+                    if match:
+                        item.of_type = match.group(1)
+                    else:
+                        logger.warning(f"Could not determine the 'OF' type for LIST: {name_part}")
+                
                 elif (
                     "SEQUENCE" in def_part or "CHOICE" in def_part
                 ) and "{" in def_part:

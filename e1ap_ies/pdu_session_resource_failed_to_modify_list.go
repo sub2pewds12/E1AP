@@ -1,0 +1,5 @@
+package e1ap_ies
+
+// PDUSessionResourceFailedToModifyList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1706
+// PDUSessionResourceFailedToModifyList is a list of PDUSessionResourceFailedToModifyItem
+type PDUSessionResourceFailedToModifyList []PDUSessionResourceFailedToModifyItem

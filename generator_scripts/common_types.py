@@ -14,3 +14,5 @@ class ASN1Definition:
         self.is_constant: bool = False
         self.is_extensible: bool = False
         self.alias_of: Optional[str] = None
+        self.of_type: Optional[str] = None
+        self.is_builtin: bool = False

@@ -2,7 +2,7 @@ import os
 import re
 import logging
 import shutil
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,34 +17,46 @@ class GoCodeGenerator:
         self.definitions = definitions
         self.failures = failures
         self.output_dir = output_dir
+        self.generated_files = set()
 
     def _standard_string(self, input_string: str) -> str:
         if not input_string:
             return ""
 
+        
         overrides = {
-            "ProcedureCode": "ProcedureCode",
-            "ProtocolIE-ID": "ProtocolIeId",
-            "ProtocolExtensionID": "ProtocolExtensionId",
-            "ProtocolIE-ID": "ProtocolIeId",
+            "ProtocolIE-SingleContainer": "ProtocolIESingleContainer",
+            "ProtocolIE-Container": "ProtocolIEContainer",
+            "ProtocolExtensionContainer": "ProtocolExtensionContainer",
+            "OBJECT IDENTIFIER": "ObjectIdentifier",
+            "CriticalityDiagnostics-IE-List": "CriticalityDiagnosticsIEList", 
         }
         if input_string in overrides:
             return overrides[input_string]
 
-        s = re.sub(r"^(id-)", "", input_string)
+        
+        known_acronyms = {
+            "ID", "IE", "PDU", "E1AP", "GNB", "CU", "CP", "UP", "QOS",
+            "DRB", "IP", "ASN", "TEID", "URI", "SCTP", "GTP"
+        }
 
+        s = re.sub(r"^(id-)", "", input_string)
         parts = re.split(r"[-_\s]", s)
 
         processed_parts = []
         for part in parts:
             if not part:
                 continue
-
-            if part.isupper():
-                processed_parts.append(part.capitalize())
+            
+            
+            if part.upper() in known_acronyms:
+                processed_parts.append(part.upper())
             else:
-
+                
+                
+                
                 processed_parts.append(part[0].upper() + part[1:])
+                
 
         return "".join(processed_parts)
 
@@ -59,19 +71,139 @@ class GoCodeGenerator:
 
                 sanitized_value = self._standard_string(value)
         return sanitized_value
+    
+    def _go_name_to_snake_case(self, go_name: str) -> str:
+        """Converts a PascalCase string to snake_case for filenames."""
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', go_name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    
+    def _classify_definition(self, item: Any) -> str:
+        """Classifies a definition as 'constant', 'simple', or 'complex'."""
+        if item.is_constant:
+            return 'constant'
+        
+        
+        if item.type in ["SEQUENCE", "CHOICE", "LIST", "ENUMERATED"]:
+            return 'complex'
+            
+        
+        if item.type in ["INTEGER", "BIT STRING", "OCTET STRING", "ALIAS", "BASE_TYPE", "PrintableString", "VisibleString", "UTF8String", "NULL"]:
+            return 'simple'
+            
+        return 'unknown'
+    
+    def _resolve_go_type(self, type_name: str) -> Tuple[str, Optional[Any]]:
+        """
+        Resolves an ASN.1 type name to its final, concrete Go type and returns
+        the concrete ASN1Definition object.
 
+        This function traverses the alias chain (e.g., TypeC ::= TypeB, TypeB ::= TypeA,
+        TypeA ::= INTEGER) to find the underlying base type.
+
+        Args:
+            type_name: The starting ASN.1 type name string.
+
+        Returns:
+            A tuple containing:
+            1. The corresponding base Go type as a string (e.g., "int64", "[]byte",
+               or the standardized name of a complex type).
+            2. The final, concrete ASN1Definition object, or None if not found.
+        """
+        definition = self.definitions.get(type_name)
+
+        
+        
+        if not definition:
+            return self._standard_string(type_name), None
+
+        
+        
+        visited = {type_name}
+        while definition and definition.alias_of:
+            next_alias = definition.alias_of
+            if next_alias in visited:
+                logger.warning(f"Circular alias dependency detected for '{type_name}' at '{next_alias}'.")
+                
+                break
+            
+            visited.add(next_alias)
+            next_def = self.definitions.get(next_alias)
+
+            if not next_def:
+                logger.warning(f"Alias '{next_alias}' for type '{definition.name}' not found in definitions.")
+                
+                break
+            
+            definition = next_def
+
+        
+        if definition.type in ["INTEGER", "BASE_TYPE"]:
+            return "int64", definition
+        elif definition.type in ["BIT STRING", "OCTET STRING", "PrintableString", "VisibleString", "UTF8String"]:
+            return "[]byte", definition
+        elif definition.type == "OBJECT IDENTIFIER": 
+            return "string", definition
+        elif definition.type == "NULL":
+            return "bool", definition 
+        elif definition.type in ["ENUMERATED", "SEQUENCE", "CHOICE", "LIST"]:
+            
+            return self._standard_string(definition.name), definition
+        
+        
+        logger.warning(f"Could not resolve a specific Go type for ASN.1 type '{definition.type}'. Defaulting to its name.")
+        return self._standard_string(definition.name), definition
+    
     def generate_files(self):
-        if os.path.exists(self.output_dir):
-            shutil.rmtree(self.output_dir)
-        os.makedirs(self.output_dir)
+        
+        os.makedirs(self.output_dir, exist_ok=True)
 
-        self._generate_constants_file()
-        self._generate_integer_types_file()
-        self._generate_enumerated_types_file()
-        self._generate_bit_string_types_file()
+        
+        
+        
 
-    def _generate_constants_file(self):
+        
+        classified_defs = { 'constant': [], 'simple': [], 'complex': [] }
+        
+        for item in self.definitions.values():
+            classification = self._classify_definition(item)
+            if classification != 'unknown':
+                classified_defs[classification].append(item)
+
+        
+        
+        self._generate_constants_file(classified_defs['constant'])
+        self._generate_common_types_file(classified_defs['simple'])
+        self._generate_complex_type_files(classified_defs['complex'])
+        
+        
+        
+
+        stale_files_found = 0
+        for filename_on_disk in os.listdir(self.output_dir):
+            
+            if not filename_on_disk.endswith(".go"):
+                continue
+
+            if filename_on_disk not in self.generated_files:
+                
+                
+                
+                if filename_on_disk not in ["e1ap_manual_types.go"]: 
+                    file_to_delete = os.path.join(self.output_dir, filename_on_disk)
+                    os.remove(file_to_delete)
+                    logger.info(f"Cleaned up stale generated file: {filename_on_disk}")
+                    stale_files_found += 1
+        
+        if stale_files_found == 0:
+            logger.info("No stale generated files to clean up.")
+
+        
+        self._format_generated_code()
+
+    def _generate_constants_file(self, constant_items: List[Any]):
         integer_consts, proc_code_consts, protocol_ie_consts = [], [], []
+        proc_code_type_name = self._standard_string("ProcedureCode")
+        protocol_ie_id_type_name = self._standard_string("ProtocolIE-ID")
 
         for item in self.definitions.values():
             if not item.is_constant:
@@ -113,8 +245,8 @@ class GoCodeGenerator:
             max_len = max(len(name) for name, _ in proc_code_consts)
             for name, value in proc_code_consts:
                 padding = " " * (max_len - len(name))
-
-                go_code += f"\t{name}{padding} ProcedureCode = {value}\n"
+                
+                go_code += f"\t{name}{padding} {proc_code_type_name} = {value}\n"
             go_code += ")\n\n"
 
         if protocol_ie_consts:
@@ -122,8 +254,8 @@ class GoCodeGenerator:
             max_len = max(len(name) for name, _ in protocol_ie_consts)
             for name, value in protocol_ie_consts:
                 padding = " " * (max_len - len(name))
-
-                go_code += f"\t{name}{padding} ProtocolIeId = {value}\n"
+                
+                go_code += f"\t{name}{padding} {protocol_ie_id_type_name} = {value}\n"
             go_code += ")\n\n"
 
         total_consts = (
@@ -133,124 +265,155 @@ class GoCodeGenerator:
             file_path = os.path.join(self.output_dir, "e1ap_constants.go")
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(f"package e1ap_ies\n\n{go_code}")
+            self.generated_files.add("e1ap_constants.go")
             logger.info(
                 f"SUCCESS: Wrote {total_consts} constants to 'e1ap_constants.go'."
             )
         else:
             logger.info("No constants found to generate.")
 
-    def _generate_integer_types_file(self):
-        go_code, count = "", 0
-        MAX_INT64 = 9223372036854775807
+    def _generate_common_types_file(self, simple_items: List[Any]):
+        """Generates a single file for all simple, reusable type definitions."""
+        if not simple_items:
+            logger.info("No simple types found to generate in common file.")
+            return
 
-        base_types = [
-            item for item in self.definitions.values() if item.type == "BASE_TYPE"
-        ]
-        integers = [
-            item
-            for item in self.definitions.values()
-            if item.type == "INTEGER" and not item.is_constant
-        ]
-
-        all_integer_defs = sorted(
-            base_types + integers, key=lambda x: self._standard_string(x.name)
-        )
-
-        for item in all_integer_defs:
-            go_name = self._standard_string(item.name)
-            go_type = "int64"
-
-            try:
-                if item.max_val and int(item.max_val) > MAX_INT64:
-                    go_type = "uint64"
-            except (ValueError, TypeError):
-                pass
-
-            go_code += f"type {go_name} {go_type}\n"
-
-            if item.min_val is not None:
-                go_code += "const (\n"
-
-                min_val_str = self._format_go_value(item.min_val)
-                max_val_str = self._format_go_value(item.max_val)
-
-                go_code += f"\t{go_name}MinValue {go_type} = {min_val_str}\n"
-                go_code += f"\t{go_name}MaxValue {go_type} = {max_val_str}\n"
-                go_code += ")\n"
-            go_code += "\n"
-            count += 1
-
-        if go_code:
-            file_path = os.path.join(self.output_dir, "integer_types.go")
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(f"package e1ap_ies\n\n{go_code}")
-            logger.info(
-                f"SUCCESS: Wrote {count} INTEGER type definitions to 'integer_types.go'."
-            )
-
-    def _generate_enumerated_types_file(self):
-        go_code, count = "", 0
-        enums = sorted(
-            [item for item in self.definitions.values() if item.type == "ENUMERATED"],
-            key=lambda x: x.name,
-        )
-
-        for item in enums:
-            go_name = self._standard_string(item.name)
-            go_code += f"type {go_name} int32\n"
-
-            if item.enum_values:
-                go_code += "const (\n"
-                for i, val in enumerate(item.enum_values):
-                    enum_name = self._standard_string(val)
-                    go_code += f"\t{go_name}_{enum_name} {go_name} = {i}\n"
-                go_code += ")\n"
-            go_code += "\n"
-            count += 1
-
-        if go_code:
-            file_path = os.path.join(self.output_dir, "enumerated_types.go")
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(f"package e1ap_ies\n\n{go_code}")
-            logger.info(
-                f"SUCCESS: Wrote {count} ENUMERATED type definitions to 'enumerated_types.go'."
-            )
-
-    def _generate_bit_string_types_file(self):
+        go_code = "package e1ap_ies\n\n"
         count = 0
 
-        go_file_content = "package e1ap_ies\n\n"
-
-        bit_strings = sorted(
-            [item for item in self.definitions.values() if item.type == "BIT STRING"],
-            key=lambda x: self._standard_string(x.name),
-        )
-
-        for item in bit_strings:
+        sorted_items = sorted(simple_items, key=lambda x: self._standard_string(x.name))
+        
+        for item in sorted_items:
             go_name = self._standard_string(item.name)
+            
+            
+            
+            go_base_type, _ = self._resolve_go_type(item.name)
+            
+            
+            
+            if go_name.lower() != go_base_type.lower():
+                go_code += f"type {go_name} {go_base_type} // From: {item.source_file}:{item.source_line}\n\n"
+                count += 1
+            
 
-            go_code_block = ""
-            go_code_block += f"// {go_name} represents the ASN.1 BIT STRING type.\n"
-            go_code_block += f"type {go_name} []byte\n\n"
-
-            if item.min_val is not None:
-                go_code_block += "const (\n"
-                min_val_str = self._format_go_value(item.min_val)
-                max_val_str = self._format_go_value(item.max_val)
-                go_code_block += f"\t{go_name}MinSize int = {min_val_str}\n"
-                go_code_block += f"\t{go_name}MaxSize int = {max_val_str}\n"
-                go_code_block += ")\n"
-
-            go_file_content += go_code_block + "\n\n"
-            count += 1
-
+        file_path = os.path.join(self.output_dir, "e1ap_common_types.go")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(go_code)
+        self.generated_files.add("e1ap_common_types.go")
+        
         if count > 0:
-            file_path = os.path.join(self.output_dir, "bit_string_types.go")
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(go_file_content)
             logger.info(
-                f"SUCCESS: Wrote {count} BIT STRING type definitions to 'bit_string_types.go'."
+                f"SUCCESS: Wrote {count} simple type definitions to 'e1ap_common_types.go'."
             )
+
+    def _generate_complex_type_files(self, complex_items: List[Any]):
+        """Generates a dedicated file for each complex or meaningful type."""
+        if not complex_items:
+            logger.info("No complex types found to generate individual files for.")
+            return
+
+        count = 0
+        for item in complex_items:
+            go_name = self._standard_string(item.name)
+            filename = self._go_name_to_snake_case(go_name) + ".go"
+            file_path = os.path.join(self.output_dir, filename)
+
+            item_code = ""
+
+            if item.type == "ENUMERATED":
+                
+                item_code += f"type {go_name} int32\n\n"
+                item_code += "const (\n"
+                for i, val in enumerate(item.enum_values):
+                    enum_name = self._standard_string(val)
+                    item_code += f"\t{go_name}_{enum_name} {go_name} = {i}\n"
+                item_code += ")\n"
+            
+            elif item.type in ["SEQUENCE", "CHOICE"]:
+                if item.type == "CHOICE":
+                    item_code += f"// {go_name} represents a CHOICE type.\n"
+                
+                item_code += f"type {go_name} struct {{\n"
+                for member in item.ies:
+                    member_go_name = self._standard_string(member['ie'])
+                    original_type_name = member['type']
+
+                    if not member_go_name or not original_type_name:
+                        continue
+
+                    
+
+                    
+                    base_go_type, concrete_def = self._resolve_go_type(original_type_name)
+                    
+                    
+                    final_go_type = base_go_type
+                    is_list = False
+                    if concrete_def and concrete_def.type == "LIST":
+                        
+                        of_type_go_name = self._standard_string(concrete_def.of_type)
+                        final_go_type = f"[]{of_type_go_name}"
+                        is_list = True
+
+                    
+                    is_optional = member['presence'] in ["optional", "conditional"]
+                    
+                    pointer = "*" if is_optional and not is_list else ""
+
+                    
+                    tag_parts = []
+                    if concrete_def:
+                        if concrete_def.min_val is not None:
+                            tag_parts.append(f"lb:{self._format_go_value(concrete_def.min_val)}")
+                        if concrete_def.max_val is not None:
+                            tag_parts.append(f"ub:{self._format_go_value(concrete_def.max_val)}")
+                    
+                    tag_parts.append(member['presence'])
+                    if item.is_extensible:
+                        tag_parts.append("ext")
+                    
+                    tag_string = f'`asn1:"{",".join(tag_parts)}"`'
+
+                    item_code += f"\t{member_go_name}\t{pointer}{final_go_type}\t{tag_string}\n"
+                    
+                item_code += "}\n"
+
+            
+            elif item.type == "LIST":
+                if not item.of_type:
+                    logger.warning(f"Skipping LIST {item.name} because its element type is unknown.")
+                    continue
+                
+                of_type_go_name = self._standard_string(item.of_type)
+                item_code += f"// {go_name} is a list of {of_type_go_name}\n"
+                item_code += f"type {go_name} []{of_type_go_name}\n"
+            
+
+            if item_code:
+                
+                file_content = "package e1ap_ies\n\n"
+                file_content += f"// {go_name} represents the ASN.1 definition from {item.source_file}:{item.source_line}\n"
+                file_content += item_code
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(file_content)
+                self.generated_files.add(filename)
+                count += 1
+        
+        if count > 0:
+            logger.info(
+                f"SUCCESS: Wrote {count} complex type definitions to individual files."
+            )
+
+    def _format_generated_code(self):
+        """Runs gofmt and goimports on the output directory."""
+        logger.info("Formatting generated Go code...")
+        try:
+            os.system(f"goimports -w {self.output_dir}")
+            os.system(f"gofmt -w {self.output_dir}")
+            logger.info("Formatting complete.")
+        except Exception as e:
+            logger.warning(f"Could not format Go code. Please run 'goimports -w' and 'gofmt -w' on the '{self.output_dir}' directory manually. Error: {e}")
 
     def run_full_diagnostic(self):
         print("\n" + "=" * 80)
