@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// QoSFlowLevelQoSParametersAdditionalQOSInformation represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2019
-type QoSFlowLevelQoSParametersAdditionalQOSInformation int32
+import "github.com/lvdund/ngap/aper"
 
+// QoSFlowLevelQoSParametersAdditionalQOSInformation From: 9_4_5_Information_Element_Definitions.txt:2019
 const (
-	QoSFlowLevelQoSParametersAdditionalQOSInformation_Present QoSFlowLevelQoSParametersAdditionalQOSInformation = 0
+	QoSFlowLevelQoSParametersAdditionalQOSInformationMoreLikely aper.Enumerated = 0
 )
+
+type QoSFlowLevelQoSParametersAdditionalQOSInformation struct {
+	Value aper.Enumerated
+}

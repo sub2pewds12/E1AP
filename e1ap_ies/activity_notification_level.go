@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// ActivityNotificationLevel represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:96
-type ActivityNotificationLevel int32
+import "github.com/lvdund/ngap/aper"
 
+// ActivityNotificationLevel From: 9_4_5_Information_Element_Definitions.txt:96
 const (
-	ActivityNotificationLevel_DRB        ActivityNotificationLevel = 0
-	ActivityNotificationLevel_PDUSession ActivityNotificationLevel = 1
-	ActivityNotificationLevel_Ue         ActivityNotificationLevel = 2
+	ActivityNotificationLevelDRB        aper.Enumerated = 0
+	ActivityNotificationLevelPDUSession aper.Enumerated = 1
+	ActivityNotificationLevelUe         aper.Enumerated = 2
 )
+
+type ActivityNotificationLevel struct {
+	Value aper.Enumerated
+}

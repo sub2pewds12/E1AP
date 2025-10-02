@@ -1,8 +1,5 @@
 package e1ap_ies
 
-// This file contains constant values extracted from the ASN.1 specification.
-
-// General INTEGER Constants
 const (
 	Maxnooftimeperiods                    int64 = 2
 	MaxnoofCellGroups                     int64 = 4
@@ -29,7 +26,6 @@ const (
 	MaxnoofIndividualE1ConnectionsToReset int64 = 65536
 )
 
-// Procedure Codes
 const (
 	ProcedureCode_Reset                               ProcedureCode = 0
 	ProcedureCode_ErrorIndication                     ProcedureCode = 1
@@ -60,7 +56,6 @@ const (
 	ProcedureCode_EarlyForwardingSNTransfer           ProcedureCode = 26
 )
 
-// Protocol IE IDs
 const (
 	ProtocolIEID_Cause                                      ProtocolIEID = 0
 	ProtocolIEID_CriticalityDiagnostics                     ProtocolIEID = 1

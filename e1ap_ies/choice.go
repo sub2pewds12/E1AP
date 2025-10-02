@@ -1,6 +1,10 @@
 package e1ap_ies
 
-// CHOICE represents the ASN.1 definition from builtin:-1
-// CHOICE represents a CHOICE type.
+// CHOICE From: builtin:-1
+const (
+	CHOICEPresentNothing uint64 = iota
+)
+
 type CHOICE struct {
+	Choice uint64
 }

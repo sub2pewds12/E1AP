@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// RedundantQoSFlowIndicator represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2065
-type RedundantQoSFlowIndicator int32
+import "github.com/lvdund/ngap/aper"
 
+// RedundantQoSFlowIndicator From: 9_4_5_Information_Element_Definitions.txt:2065
 const (
-	RedundantQoSFlowIndicator_True  RedundantQoSFlowIndicator = 0
-	RedundantQoSFlowIndicator_False RedundantQoSFlowIndicator = 1
+	RedundantQoSFlowIndicatorTrue  aper.Enumerated = 0
+	RedundantQoSFlowIndicatorFalse aper.Enumerated = 1
 )
+
+type RedundantQoSFlowIndicator struct {
+	Value aper.Enumerated
+}

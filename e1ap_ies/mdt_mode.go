@@ -1,7 +1,12 @@
 package e1ap_ies
 
-// MDTMode represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1394
-// MDTMode represents a CHOICE type.
+// MDTMode From: 9_4_5_Information_Element_Definitions.txt:1394
+const (
+	MDTModePresentNothing uint64 = iota
+	MDTModePresentImmediateMDT
+)
+
 type MDTMode struct {
-	ImmediateMDT ImmediateMDT `asn1:"mandatory"`
+	Choice       uint64
+	ImmediateMDT *ImmediateMDT
 }

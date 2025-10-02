@@ -1,5 +1,10 @@
 package e1ap_ies
 
-// DRBFailedModListEUTRAN represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:477
-// DRBFailedModListEUTRAN is a list of DRBFailedModItemEUTRAN
+// DRBFailedModListEUTRAN From: 9_4_5_Information_Element_Definitions.txt:477
 type DRBFailedModListEUTRAN []DRBFailedModItemEUTRAN
+
+// DRBFailedModItemEUTRAN From: 9_4_5_Information_Element_Definitions.txt:479
+type DRBFailedModItemEUTRAN struct {
+	DRBID int64 `asn1:"mandatory,ext"`
+	Cause Cause `asn1:"mandatory,ext"`
+}

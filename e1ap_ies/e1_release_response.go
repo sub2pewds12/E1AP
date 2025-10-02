@@ -1,6 +1,6 @@
 package e1ap_ies
 
-// E1ReleaseResponse represents the ASN.1 definition from 9_4_4_PDU_Definitions.txt:650
+// E1ReleaseResponse From: 9_4_4_PDU_Definitions.txt:650
 type E1ReleaseResponse struct {
-	ProtocolIEs ProtocolIEContainer `asn1:"mandatory,ext"`
+	TransactionID int64 `asn1:"mandatory,reject,ext"`
 }

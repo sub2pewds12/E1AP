@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// DRBActivity represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:419
-type DRBActivity int32
+import "github.com/lvdund/ngap/aper"
 
+// DRBActivity From: 9_4_5_Information_Element_Definitions.txt:419
 const (
-	DRBActivity_Active    DRBActivity = 0
-	DRBActivity_NotActive DRBActivity = 1
+	DRBActivityActive    aper.Enumerated = 0
+	DRBActivityNotActive aper.Enumerated = 1
 )
+
+type DRBActivity struct {
+	Value aper.Enumerated
+}

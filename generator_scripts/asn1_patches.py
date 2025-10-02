@@ -44,4 +44,13 @@ class ASN1Patcher:
         secondary_rat.enum_values = ["nr", "e-UTRA"]
         definitions.append(secondary_rat)
 
+        diag_list = ASN1Definition(
+            name="CriticalityDiagnostics-IE-List",
+            def_type="LIST",
+            source_file="manual_patch",
+            full_text="MANUALLY CREATED DEFINITION FOR CriticalityDiagnostics-IE-List"
+        )
+        diag_list.of_type = "CriticalityDiagnostics-IE-Item"
+        definitions.append(diag_list)
+
         return definitions

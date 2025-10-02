@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// ULConfiguration represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2375
-type ULConfiguration int32
+import "github.com/lvdund/ngap/aper"
 
+// ULConfiguration From: 9_4_5_Information_Element_Definitions.txt:2375
 const (
-	ULConfiguration_NoData ULConfiguration = 0
-	ULConfiguration_Shared ULConfiguration = 1
-	ULConfiguration_Only   ULConfiguration = 2
+	ULConfigurationNoData aper.Enumerated = 0
+	ULConfigurationShared aper.Enumerated = 1
+	ULConfigurationOnly   aper.Enumerated = 2
 )
+
+type ULConfiguration struct {
+	Value aper.Enumerated
+}

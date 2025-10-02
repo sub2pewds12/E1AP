@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// DefaultDRB represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:385
-type DefaultDRB int32
+import "github.com/lvdund/ngap/aper"
 
+// DefaultDRB From: 9_4_5_Information_Element_Definitions.txt:385
 const (
-	DefaultDRB_True  DefaultDRB = 0
-	DefaultDRB_False DefaultDRB = 1
+	DefaultDRBTrue  aper.Enumerated = 0
+	DefaultDRBFalse aper.Enumerated = 1
 )
+
+type DefaultDRB struct {
+	Value aper.Enumerated
+}

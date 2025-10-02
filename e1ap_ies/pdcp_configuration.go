@@ -1,6 +1,6 @@
 package e1ap_ies
 
-// PDCPConfiguration represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1539
+// PDCPConfiguration From: 9_4_5_Information_Element_Definitions.txt:1539
 type PDCPConfiguration struct {
 	PDCPSNSizeUL          PDCPSNSize             `asn1:"mandatory,ext"`
 	PDCPSNSizeDL          PDCPSNSize             `asn1:"mandatory,ext"`

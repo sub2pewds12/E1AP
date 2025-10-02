@@ -1,5 +1,10 @@
 package e1ap_ies
 
-// DRBConfirmModifiedListEUTRAN represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:438
-// DRBConfirmModifiedListEUTRAN is a list of DRBConfirmModifiedItemEUTRAN
+// DRBConfirmModifiedListEUTRAN From: 9_4_5_Information_Element_Definitions.txt:438
 type DRBConfirmModifiedListEUTRAN []DRBConfirmModifiedItemEUTRAN
+
+// DRBConfirmModifiedItemEUTRAN From: 9_4_5_Information_Element_Definitions.txt:440
+type DRBConfirmModifiedItemEUTRAN struct {
+	DRBID                int64                      `asn1:"mandatory,ext"`
+	CellGroupInformation []CellGroupInformationItem `asn1:"optional,ext"`
+}

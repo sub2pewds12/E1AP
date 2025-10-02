@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// CNSupport represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:242
-type CNSupport int32
+import "github.com/lvdund/ngap/aper"
 
+// CNSupport From: 9_4_5_Information_Element_Definitions.txt:242
 const (
-	CNSupport_CEpc CNSupport = 0
-	CNSupport_C5gc CNSupport = 1
-	CNSupport_Both CNSupport = 2
+	CNSupportCEpc aper.Enumerated = 0
+	CNSupportC5gc aper.Enumerated = 1
+	CNSupportBoth aper.Enumerated = 2
 )
+
+type CNSupport struct {
+	Value aper.Enumerated
+}

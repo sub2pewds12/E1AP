@@ -1,12 +1,16 @@
 package e1ap_ies
 
-// M4period represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1350
-type M4period int32
+import "github.com/lvdund/ngap/aper"
 
+// M4period From: 9_4_5_Information_Element_Definitions.txt:1350
 const (
-	M4period_Ms1024  M4period = 0
-	M4period_Ms2048  M4period = 1
-	M4period_Ms5120  M4period = 2
-	M4period_Ms10240 M4period = 3
-	M4period_Min1    M4period = 4
+	M4periodMs1024  aper.Enumerated = 0
+	M4periodMs2048  aper.Enumerated = 1
+	M4periodMs5120  aper.Enumerated = 2
+	M4periodMs10240 aper.Enumerated = 3
+	M4periodMin1    aper.Enumerated = 4
 )
+
+type M4period struct {
+	Value aper.Enumerated
+}

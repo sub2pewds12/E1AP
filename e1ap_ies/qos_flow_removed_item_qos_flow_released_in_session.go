@@ -1,8 +1,13 @@
 package e1ap_ies
 
-// QOSFlowRemovedItemQOSFlowReleasedInSession represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2037
-type QOSFlowRemovedItemQOSFlowReleasedInSession int32
+import "github.com/lvdund/ngap/aper"
 
+// QOSFlowRemovedItemQOSFlowReleasedInSession From: 9_4_5_Information_Element_Definitions.txt:2037
 const (
-	QOSFlowRemovedItemQOSFlowReleasedInSession_Present QOSFlowRemovedItemQOSFlowReleasedInSession = 0
+	QOSFlowRemovedItemQOSFlowReleasedInSessionReleasedInSession    aper.Enumerated = 0
+	QOSFlowRemovedItemQOSFlowReleasedInSessionNotReleasedInSession aper.Enumerated = 1
 )
+
+type QOSFlowRemovedItemQOSFlowReleasedInSession struct {
+	Value aper.Enumerated
+}

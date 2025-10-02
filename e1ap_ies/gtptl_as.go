@@ -1,5 +1,9 @@
 package e1ap_ies
 
-// GTPTLAs represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1196
-// GTPTLAs is a list of GTPTLAItem
+// GTPTLAs From: 9_4_5_Information_Element_Definitions.txt:1196
 type GTPTLAs []GTPTLAItem
+
+// GTPTLAItem From: 9_4_5_Information_Element_Definitions.txt:1198
+type GTPTLAItem struct {
+	GTPTransportLayerAddresses []byte `asn1:"mandatory,ext"`
+}

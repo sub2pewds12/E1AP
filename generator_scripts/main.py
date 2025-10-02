@@ -81,7 +81,6 @@ def main():
     patcher = ASN1Patcher()
     hardcoded_defs = patcher.get_hardcoded_definitions()
     for definition in hardcoded_defs:
-
         definitions[definition.name] = definition
     logger.info(
         f"Applied {len(hardcoded_defs)} hardcoded definitions. Total definitions now: {len(definitions)}."

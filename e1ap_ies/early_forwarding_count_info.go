@@ -1,9 +1,16 @@
 package e1ap_ies
 
-// EarlyForwardingCOUNTInfo represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:965
-// EarlyForwardingCOUNTInfo represents a CHOICE type.
+// EarlyForwardingCOUNTInfo From: 9_4_5_Information_Element_Definitions.txt:965
+const (
+	EarlyForwardingCOUNTInfoPresentNothing uint64 = iota
+	EarlyForwardingCOUNTInfoPresentFirstDLCount
+	EarlyForwardingCOUNTInfoPresentDLDiscardingCount
+	EarlyForwardingCOUNTInfoPresentChoiceExtension
+)
+
 type EarlyForwardingCOUNTInfo struct {
-	FirstDLCount      FirstDLCount              `asn1:"mandatory"`
-	DLDiscardingCount DLDiscarding              `asn1:"mandatory"`
-	ChoiceExtension   ProtocolIESingleContainer `asn1:"mandatory"`
+	Choice            uint64
+	FirstDLCount      *FirstDLCount
+	DLDiscardingCount *DLDiscarding
+	ChoiceExtension   *ProtocolIESingleContainer
 }

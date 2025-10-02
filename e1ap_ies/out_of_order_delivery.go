@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// OutOfOrderDelivery represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1515
-type OutOfOrderDelivery int32
+import "github.com/lvdund/ngap/aper"
 
+// OutOfOrderDelivery From: 9_4_5_Information_Element_Definitions.txt:1515
 const (
-	OutOfOrderDelivery_True OutOfOrderDelivery = 0
+	OutOfOrderDeliveryTrue aper.Enumerated = 0
 )
+
+type OutOfOrderDelivery struct {
+	Value aper.Enumerated
+}

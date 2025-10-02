@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// TriggeringMessage represents the ASN.1 definition from 9_4_6_Common_Definitions.txt:49
-type TriggeringMessage int32
+import "github.com/lvdund/ngap/aper"
 
+// TriggeringMessage From: 9_4_6_Common_Definitions.txt:49
 const (
-	TriggeringMessage_InitiatingMessage   TriggeringMessage = 0
-	TriggeringMessage_SuccessfulOutcome   TriggeringMessage = 1
-	TriggeringMessage_UnsuccessfulOutcome TriggeringMessage = 2
+	TriggeringMessageInitiatingMessage   aper.Enumerated = 0
+	TriggeringMessageSuccessfulOutcome   aper.Enumerated = 1
+	TriggeringMessageUnsuccessfulOutcome aper.Enumerated = 2
 )
+
+type TriggeringMessage struct {
+	Value aper.Enumerated
+}

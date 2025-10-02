@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// PDUSessionResourceSetupItemNGDLUPUnchanged represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1757
-type PDUSessionResourceSetupItemNGDLUPUnchanged int32
+import "github.com/lvdund/ngap/aper"
 
+// PDUSessionResourceSetupItemNGDLUPUnchanged From: 9_4_5_Information_Element_Definitions.txt:1757
 const (
-	PDUSessionResourceSetupItemNGDLUPUnchanged_Present PDUSessionResourceSetupItemNGDLUPUnchanged = 0
+	PDUSessionResourceSetupItemNGDLUPUnchangedTrue aper.Enumerated = 0
 )
+
+type PDUSessionResourceSetupItemNGDLUPUnchanged struct {
+	Value aper.Enumerated
+}

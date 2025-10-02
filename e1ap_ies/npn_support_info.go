@@ -1,7 +1,12 @@
 package e1ap_ies
 
-// NPNSupportInfo represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1453
-// NPNSupportInfo represents a CHOICE type.
+// NPNSupportInfo From: 9_4_5_Information_Element_Definitions.txt:1453
+const (
+	NPNSupportInfoPresentNothing uint64 = iota
+	NPNSupportInfoPresentSNPN
+)
+
 type NPNSupportInfo struct {
-	SNPN NPNSupportInfoSNPN `asn1:"mandatory"`
+	Choice uint64
+	SNPN   *NPNSupportInfoSNPN
 }

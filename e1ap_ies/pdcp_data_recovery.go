@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// PDCPDataRecovery represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1580
-type PDCPDataRecovery int32
+import "github.com/lvdund/ngap/aper"
 
+// PDCPDataRecovery From: 9_4_5_Information_Element_Definitions.txt:1580
 const (
-	PDCPDataRecovery_True PDCPDataRecovery = 0
+	PDCPDataRecoveryTrue aper.Enumerated = 0
 )
+
+type PDCPDataRecovery struct {
+	Value aper.Enumerated
+}

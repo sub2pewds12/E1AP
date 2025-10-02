@@ -1,8 +1,13 @@
 package e1ap_ies
 
-// DRBRemovedItemDRBReleasedInSession represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:577
-type DRBRemovedItemDRBReleasedInSession int32
+import "github.com/lvdund/ngap/aper"
 
+// DRBRemovedItemDRBReleasedInSession From: 9_4_5_Information_Element_Definitions.txt:577
 const (
-	DRBRemovedItemDRBReleasedInSession_Present DRBRemovedItemDRBReleasedInSession = 0
+	DRBRemovedItemDRBReleasedInSessionReleasedInSession    aper.Enumerated = 0
+	DRBRemovedItemDRBReleasedInSessionNotReleasedInSession aper.Enumerated = 1
 )
+
+type DRBRemovedItemDRBReleasedInSession struct {
+	Value aper.Enumerated
+}

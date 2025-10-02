@@ -1,6 +1,8 @@
 package e1ap_ies
 
-// Reset represents the ASN.1 definition from 9_4_4_PDU_Definitions.txt:249
+// Reset From: 9_4_4_PDU_Definitions.txt:249
 type Reset struct {
-	ProtocolIEs ProtocolIEContainer `asn1:"mandatory,ext"`
+	TransactionID int64     `asn1:"mandatory,reject,ext"`
+	Cause         Cause     `asn1:"mandatory,ignore,ext"`
+	ResetType     ResetType `asn1:"mandatory,reject,ext"`
 }

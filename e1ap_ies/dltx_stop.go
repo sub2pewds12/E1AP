@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// DLTXStop represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:413
-type DLTXStop int32
+import "github.com/lvdund/ngap/aper"
 
+// DLTXStop From: 9_4_5_Information_Element_Definitions.txt:413
 const (
-	DLTXStop_Stop   DLTXStop = 0
-	DLTXStop_Resume DLTXStop = 1
+	DLTXStopStop   aper.Enumerated = 0
+	DLTXStopResume aper.Enumerated = 1
 )
+
+type DLTXStop struct {
+	Value aper.Enumerated
+}

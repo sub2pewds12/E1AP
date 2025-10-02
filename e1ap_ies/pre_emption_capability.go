@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// PreEmptionCapability represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1916
-type PreEmptionCapability int32
+import "github.com/lvdund/ngap/aper"
 
+// PreEmptionCapability From: 9_4_5_Information_Element_Definitions.txt:1916
 const (
-	PreEmptionCapability_ShallNotTriggerPreEmption PreEmptionCapability = 0
-	PreEmptionCapability_MayTriggerPreEmption      PreEmptionCapability = 1
+	PreEmptionCapabilityShallNotTriggerPreEmption aper.Enumerated = 0
+	PreEmptionCapabilityMayTriggerPreEmption      aper.Enumerated = 1
 )
+
+type PreEmptionCapability struct {
+	Value aper.Enumerated
+}

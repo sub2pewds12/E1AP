@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// PDCPSNSize represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1610
-type PDCPSNSize int32
+import "github.com/lvdund/ngap/aper"
 
+// PDCPSNSize From: 9_4_5_Information_Element_Definitions.txt:1610
 const (
-	PDCPSNSize_S12 PDCPSNSize = 0
-	PDCPSNSize_S18 PDCPSNSize = 1
+	PDCPSNSizeS12 aper.Enumerated = 0
+	PDCPSNSizeS18 aper.Enumerated = 1
 )
+
+type PDCPSNSize struct {
+	Value aper.Enumerated
+}

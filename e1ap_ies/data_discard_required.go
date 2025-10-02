@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// DataDiscardRequired represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:958
-type DataDiscardRequired int32
+import "github.com/lvdund/ngap/aper"
 
+// DataDiscardRequired From: 9_4_5_Information_Element_Definitions.txt:958
 const (
-	DataDiscardRequired_Required DataDiscardRequired = 0
+	DataDiscardRequiredRequired aper.Enumerated = 0
 )
+
+type DataDiscardRequired struct {
+	Value aper.Enumerated
+}

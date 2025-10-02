@@ -1,8 +1,14 @@
 package e1ap_ies
 
-// SystemBearerContextModificationRequired represents the ASN.1 definition from 9_4_4_PDU_Definitions.txt:936
-// SystemBearerContextModificationRequired represents a CHOICE type.
+// SystemBearerContextModificationRequired From: 9_4_4_PDU_Definitions.txt:936
+const (
+	SystemBearerContextModificationRequiredPresentNothing uint64 = iota
+	SystemBearerContextModificationRequiredPresentDRBRequiredToModifyListEUTRAN
+	SystemBearerContextModificationRequiredPresentDRBRequiredToRemoveListEUTRAN
+)
+
 type SystemBearerContextModificationRequired struct {
-	EUTRANBearerContextModificationRequired ProtocolIEContainer `asn1:"mandatory"`
-	NGRANBearerContextModificationRequired  ProtocolIEContainer `asn1:"mandatory"`
+	Choice                        uint64
+	DRBRequiredToModifyListEUTRAN []DRBRequiredToModifyItemEUTRAN
+	DRBRequiredToRemoveListEUTRAN []DRBRequiredToRemoveItemEUTRAN
 }

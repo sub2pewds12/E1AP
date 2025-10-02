@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// SecondaryRATType represents the ASN.1 definition from manual_patch:-1
-type SecondaryRATType int32
+import "github.com/lvdund/ngap/aper"
 
+// SecondaryRATType From: manual_patch:-1
 const (
-	SecondaryRATType_Nr    SecondaryRATType = 0
-	SecondaryRATType_EUTRA SecondaryRATType = 1
+	SecondaryRATTypeNr    aper.Enumerated = 0
+	SecondaryRATTypeEUTRA aper.Enumerated = 1
 )
+
+type SecondaryRATType struct {
+	Value aper.Enumerated
+}

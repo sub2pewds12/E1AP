@@ -1,5 +1,10 @@
 package e1ap_ies
 
-// PDUSessionResourceFailedToModifyList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1706
-// PDUSessionResourceFailedToModifyList is a list of PDUSessionResourceFailedToModifyItem
+// PDUSessionResourceFailedToModifyList From: 9_4_5_Information_Element_Definitions.txt:1706
 type PDUSessionResourceFailedToModifyList []PDUSessionResourceFailedToModifyItem
+
+// PDUSessionResourceFailedToModifyItem From: 9_4_5_Information_Element_Definitions.txt:1708
+type PDUSessionResourceFailedToModifyItem struct {
+	PDUSessionID int64 `asn1:"lb:0,ub:255,mandatory,ext"`
+	Cause        Cause `asn1:"mandatory,ext"`
+}

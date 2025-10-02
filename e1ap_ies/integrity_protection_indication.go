@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// IntegrityProtectionIndication represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1241
-type IntegrityProtectionIndication int32
+import "github.com/lvdund/ngap/aper"
 
+// IntegrityProtectionIndication From: 9_4_5_Information_Element_Definitions.txt:1241
 const (
-	IntegrityProtectionIndication_Required  IntegrityProtectionIndication = 0
-	IntegrityProtectionIndication_Preferred IntegrityProtectionIndication = 1
-	IntegrityProtectionIndication_NotNeeded IntegrityProtectionIndication = 2
+	IntegrityProtectionIndicationRequired  aper.Enumerated = 0
+	IntegrityProtectionIndicationPreferred aper.Enumerated = 1
+	IntegrityProtectionIndicationNotNeeded aper.Enumerated = 2
 )
+
+type IntegrityProtectionIndication struct {
+	Value aper.Enumerated
+}

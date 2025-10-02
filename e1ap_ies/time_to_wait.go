@@ -1,13 +1,17 @@
 package e1ap_ies
 
-// TimeToWait represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2224
-type TimeToWait int32
+import "github.com/lvdund/ngap/aper"
 
+// TimeToWait From: 9_4_5_Information_Element_Definitions.txt:2224
 const (
-	TimeToWait_V1s  TimeToWait = 0
-	TimeToWait_V2s  TimeToWait = 1
-	TimeToWait_V5s  TimeToWait = 2
-	TimeToWait_V10s TimeToWait = 3
-	TimeToWait_V20s TimeToWait = 4
-	TimeToWait_V60s TimeToWait = 5
+	TimeToWaitV1s  aper.Enumerated = 0
+	TimeToWaitV2s  aper.Enumerated = 1
+	TimeToWaitV5s  aper.Enumerated = 2
+	TimeToWaitV10s aper.Enumerated = 3
+	TimeToWaitV20s aper.Enumerated = 4
+	TimeToWaitV60s aper.Enumerated = 5
 )
+
+type TimeToWait struct {
+	Value aper.Enumerated
+}

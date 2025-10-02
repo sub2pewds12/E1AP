@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// SDAPHeaderDL represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2208
-type SDAPHeaderDL int32
+import "github.com/lvdund/ngap/aper"
 
+// SDAPHeaderDL From: 9_4_5_Information_Element_Definitions.txt:2208
 const (
-	SDAPHeaderDL_Present SDAPHeaderDL = 0
-	SDAPHeaderDL_Absent  SDAPHeaderDL = 1
+	SDAPHeaderDLPresent aper.Enumerated = 0
+	SDAPHeaderDLAbsent  aper.Enumerated = 1
 )
+
+type SDAPHeaderDL struct {
+	Value aper.Enumerated
+}

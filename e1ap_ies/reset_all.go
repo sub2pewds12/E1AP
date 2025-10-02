@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// ResetAll represents the ASN.1 definition from 9_4_4_PDU_Definitions.txt:271
-type ResetAll int32
+import "github.com/lvdund/ngap/aper"
 
+// ResetAll From: 9_4_4_PDU_Definitions.txt:271
 const (
-	ResetAll_ResetAll ResetAll = 0
+	ResetAllResetAll aper.Enumerated = 0
 )
+
+type ResetAll struct {
+	Value aper.Enumerated
+}

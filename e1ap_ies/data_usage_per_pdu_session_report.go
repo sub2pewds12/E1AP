@@ -1,6 +1,7 @@
 package e1ap_ies
 
-// DataUsagePerPDUSessionReport represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:346
+// DataUsagePerPDUSessionReport From: 9_4_5_Information_Element_Definitions.txt:346
 type DataUsagePerPDUSessionReport struct {
-	SecondaryRATType DataUsagePerPDUSessionReportSecondaryRATType `asn1:"mandatory,ext"`
+	SecondaryRATType          DataUsagePerPDUSessionReportSecondaryRATType `asn1:"mandatory,ext"`
+	PDUSessionTimedReportList SEQUENCE                                     `asn1:"mandatory,ext"`
 }

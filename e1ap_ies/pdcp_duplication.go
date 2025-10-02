@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// PDCPDuplication represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1585
-type PDCPDuplication int32
+import "github.com/lvdund/ngap/aper"
 
+// PDCPDuplication From: 9_4_5_Information_Element_Definitions.txt:1585
 const (
-	PDCPDuplication_True PDCPDuplication = 0
+	PDCPDuplicationTrue aper.Enumerated = 0
 )
+
+type PDCPDuplication struct {
+	Value aper.Enumerated
+}

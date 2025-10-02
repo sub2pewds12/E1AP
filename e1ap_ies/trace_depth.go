@@ -1,13 +1,17 @@
 package e1ap_ies
 
-// TraceDepth represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2285
-type TraceDepth int32
+import "github.com/lvdund/ngap/aper"
 
+// TraceDepth From: 9_4_5_Information_Element_Definitions.txt:2285
 const (
-	TraceDepth_Minimum                               TraceDepth = 0
-	TraceDepth_Medium                                TraceDepth = 1
-	TraceDepth_Maximum                               TraceDepth = 2
-	TraceDepth_MinimumWithoutVendorSpecificExtension TraceDepth = 3
-	TraceDepth_MediumWithoutVendorSpecificExtension  TraceDepth = 4
-	TraceDepth_MaximumWithoutVendorSpecificExtension TraceDepth = 5
+	TraceDepthMinimum                               aper.Enumerated = 0
+	TraceDepthMedium                                aper.Enumerated = 1
+	TraceDepthMaximum                               aper.Enumerated = 2
+	TraceDepthMinimumWithoutVendorSpecificExtension aper.Enumerated = 3
+	TraceDepthMediumWithoutVendorSpecificExtension  aper.Enumerated = 4
+	TraceDepthMaximumWithoutVendorSpecificExtension aper.Enumerated = 5
 )
+
+type TraceDepth struct {
+	Value aper.Enumerated
+}

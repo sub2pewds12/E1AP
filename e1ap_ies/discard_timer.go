@@ -1,23 +1,27 @@
 package e1ap_ies
 
-// DiscardTimer represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:391
-type DiscardTimer int32
+import "github.com/lvdund/ngap/aper"
 
+// DiscardTimer From: 9_4_5_Information_Element_Definitions.txt:391
 const (
-	DiscardTimer_Ms10     DiscardTimer = 0
-	DiscardTimer_Ms20     DiscardTimer = 1
-	DiscardTimer_Ms30     DiscardTimer = 2
-	DiscardTimer_Ms40     DiscardTimer = 3
-	DiscardTimer_Ms50     DiscardTimer = 4
-	DiscardTimer_Ms60     DiscardTimer = 5
-	DiscardTimer_Ms75     DiscardTimer = 6
-	DiscardTimer_Ms100    DiscardTimer = 7
-	DiscardTimer_Ms150    DiscardTimer = 8
-	DiscardTimer_Ms200    DiscardTimer = 9
-	DiscardTimer_Ms250    DiscardTimer = 10
-	DiscardTimer_Ms300    DiscardTimer = 11
-	DiscardTimer_Ms500    DiscardTimer = 12
-	DiscardTimer_Ms750    DiscardTimer = 13
-	DiscardTimer_Ms1500   DiscardTimer = 14
-	DiscardTimer_Infinity DiscardTimer = 15
+	DiscardTimerMs10     aper.Enumerated = 0
+	DiscardTimerMs20     aper.Enumerated = 1
+	DiscardTimerMs30     aper.Enumerated = 2
+	DiscardTimerMs40     aper.Enumerated = 3
+	DiscardTimerMs50     aper.Enumerated = 4
+	DiscardTimerMs60     aper.Enumerated = 5
+	DiscardTimerMs75     aper.Enumerated = 6
+	DiscardTimerMs100    aper.Enumerated = 7
+	DiscardTimerMs150    aper.Enumerated = 8
+	DiscardTimerMs200    aper.Enumerated = 9
+	DiscardTimerMs250    aper.Enumerated = 10
+	DiscardTimerMs300    aper.Enumerated = 11
+	DiscardTimerMs500    aper.Enumerated = 12
+	DiscardTimerMs750    aper.Enumerated = 13
+	DiscardTimerMs1500   aper.Enumerated = 14
+	DiscardTimerInfinity aper.Enumerated = 15
 )
+
+type DiscardTimer struct {
+	Value aper.Enumerated
+}

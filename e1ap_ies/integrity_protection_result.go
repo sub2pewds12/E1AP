@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// IntegrityProtectionResult represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1258
-type IntegrityProtectionResult int32
+import "github.com/lvdund/ngap/aper"
 
+// IntegrityProtectionResult From: 9_4_5_Information_Element_Definitions.txt:1258
 const (
-	IntegrityProtectionResult_Performed    IntegrityProtectionResult = 0
-	IntegrityProtectionResult_NotPerformed IntegrityProtectionResult = 1
+	IntegrityProtectionResultPerformed    aper.Enumerated = 0
+	IntegrityProtectionResultNotPerformed aper.Enumerated = 1
 )
+
+type IntegrityProtectionResult struct {
+	Value aper.Enumerated
+}

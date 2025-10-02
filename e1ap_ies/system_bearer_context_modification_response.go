@@ -1,8 +1,20 @@
 package e1ap_ies
 
-// SystemBearerContextModificationResponse represents the ASN.1 definition from 9_4_4_PDU_Definitions.txt:861
-// SystemBearerContextModificationResponse represents a CHOICE type.
+// SystemBearerContextModificationResponse From: 9_4_4_PDU_Definitions.txt:861
+const (
+	SystemBearerContextModificationResponsePresentNothing uint64 = iota
+	SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN
+	SystemBearerContextModificationResponsePresentDRBFailedModListEUTRAN
+	SystemBearerContextModificationResponsePresentDRBModifiedListEUTRAN
+	SystemBearerContextModificationResponsePresentDRBFailedToModifyListEUTRAN
+	SystemBearerContextModificationResponsePresentRetainabilityMeasurementsInfo
+)
+
 type SystemBearerContextModificationResponse struct {
-	EUTRANBearerContextModificationResponse ProtocolIEContainer `asn1:"mandatory"`
-	NGRANBearerContextModificationResponse  ProtocolIEContainer `asn1:"mandatory"`
+	Choice                        uint64
+	DRBSetupModListEUTRAN         []DRBSetupModItemEUTRAN
+	DRBFailedModListEUTRAN        []DRBFailedModItemEUTRAN
+	DRBModifiedListEUTRAN         []DRBModifiedItemEUTRAN
+	DRBFailedToModifyListEUTRAN   []DRBFailedToModifyItemEUTRAN
+	RetainabilityMeasurementsInfo []DRBRemovedItem
 }

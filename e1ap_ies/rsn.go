@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// RSN represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2077
-type RSN int32
+import "github.com/lvdund/ngap/aper"
 
+// RSN From: 9_4_5_Information_Element_Definitions.txt:2077
 const (
-	RSN_V1 RSN = 0
-	RSN_V2 RSN = 1
+	RSNV1 aper.Enumerated = 0
+	RSNV2 aper.Enumerated = 1
 )
+
+type RSN struct {
+	Value aper.Enumerated
+}

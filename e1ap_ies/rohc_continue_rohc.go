@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// ROHCContinueROHC represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2115
-type ROHCContinueROHC int32
+import "github.com/lvdund/ngap/aper"
 
+// ROHCContinueROHC From: 9_4_5_Information_Element_Definitions.txt:2115
 const (
-	ROHCContinueROHC_Present ROHCContinueROHC = 0
+	ROHCContinueROHCTrue aper.Enumerated = 0
 )
+
+type ROHCContinueROHC struct {
+	Value aper.Enumerated
+}

@@ -1,8 +1,13 @@
 package e1ap_ies
 
-// Dynamic5QIDescriptorDelayCritical represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:940
-type Dynamic5QIDescriptorDelayCritical int32
+import "github.com/lvdund/ngap/aper"
 
+// Dynamic5QIDescriptorDelayCritical From: 9_4_5_Information_Element_Definitions.txt:940
 const (
-	Dynamic5QIDescriptorDelayCritical_Present Dynamic5QIDescriptorDelayCritical = 0
+	Dynamic5QIDescriptorDelayCriticalDelayCritical    aper.Enumerated = 0
+	Dynamic5QIDescriptorDelayCriticalNonDelayCritical aper.Enumerated = 1
 )
+
+type Dynamic5QIDescriptorDelayCritical struct {
+	Value aper.Enumerated
+}

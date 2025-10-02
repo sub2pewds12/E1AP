@@ -1,31 +1,35 @@
 package e1ap_ies
 
-// ULDataSplitThreshold represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2393
-type ULDataSplitThreshold int32
+import "github.com/lvdund/ngap/aper"
 
+// ULDataSplitThreshold From: 9_4_5_Information_Element_Definitions.txt:2393
 const (
-	ULDataSplitThreshold_B0       ULDataSplitThreshold = 0
-	ULDataSplitThreshold_B100     ULDataSplitThreshold = 1
-	ULDataSplitThreshold_B200     ULDataSplitThreshold = 2
-	ULDataSplitThreshold_B400     ULDataSplitThreshold = 3
-	ULDataSplitThreshold_B800     ULDataSplitThreshold = 4
-	ULDataSplitThreshold_B1600    ULDataSplitThreshold = 5
-	ULDataSplitThreshold_B3200    ULDataSplitThreshold = 6
-	ULDataSplitThreshold_B6400    ULDataSplitThreshold = 7
-	ULDataSplitThreshold_B12800   ULDataSplitThreshold = 8
-	ULDataSplitThreshold_B25600   ULDataSplitThreshold = 9
-	ULDataSplitThreshold_B51200   ULDataSplitThreshold = 10
-	ULDataSplitThreshold_B102400  ULDataSplitThreshold = 11
-	ULDataSplitThreshold_B204800  ULDataSplitThreshold = 12
-	ULDataSplitThreshold_B409600  ULDataSplitThreshold = 13
-	ULDataSplitThreshold_B819200  ULDataSplitThreshold = 14
-	ULDataSplitThreshold_B1228800 ULDataSplitThreshold = 15
-	ULDataSplitThreshold_B1638400 ULDataSplitThreshold = 16
-	ULDataSplitThreshold_B2457600 ULDataSplitThreshold = 17
-	ULDataSplitThreshold_B3276800 ULDataSplitThreshold = 18
-	ULDataSplitThreshold_B4096000 ULDataSplitThreshold = 19
-	ULDataSplitThreshold_B4915200 ULDataSplitThreshold = 20
-	ULDataSplitThreshold_B5734400 ULDataSplitThreshold = 21
-	ULDataSplitThreshold_B6553600 ULDataSplitThreshold = 22
-	ULDataSplitThreshold_Infinity ULDataSplitThreshold = 23
+	ULDataSplitThresholdB0       aper.Enumerated = 0
+	ULDataSplitThresholdB100     aper.Enumerated = 1
+	ULDataSplitThresholdB200     aper.Enumerated = 2
+	ULDataSplitThresholdB400     aper.Enumerated = 3
+	ULDataSplitThresholdB800     aper.Enumerated = 4
+	ULDataSplitThresholdB1600    aper.Enumerated = 5
+	ULDataSplitThresholdB3200    aper.Enumerated = 6
+	ULDataSplitThresholdB6400    aper.Enumerated = 7
+	ULDataSplitThresholdB12800   aper.Enumerated = 8
+	ULDataSplitThresholdB25600   aper.Enumerated = 9
+	ULDataSplitThresholdB51200   aper.Enumerated = 10
+	ULDataSplitThresholdB102400  aper.Enumerated = 11
+	ULDataSplitThresholdB204800  aper.Enumerated = 12
+	ULDataSplitThresholdB409600  aper.Enumerated = 13
+	ULDataSplitThresholdB819200  aper.Enumerated = 14
+	ULDataSplitThresholdB1228800 aper.Enumerated = 15
+	ULDataSplitThresholdB1638400 aper.Enumerated = 16
+	ULDataSplitThresholdB2457600 aper.Enumerated = 17
+	ULDataSplitThresholdB3276800 aper.Enumerated = 18
+	ULDataSplitThresholdB4096000 aper.Enumerated = 19
+	ULDataSplitThresholdB4915200 aper.Enumerated = 20
+	ULDataSplitThresholdB5734400 aper.Enumerated = 21
+	ULDataSplitThresholdB6553600 aper.Enumerated = 22
+	ULDataSplitThresholdInfinity aper.Enumerated = 23
 )
+
+type ULDataSplitThreshold struct {
+	Value aper.Enumerated
+}

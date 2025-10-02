@@ -1,5 +1,12 @@
 package e1ap_ies
 
-// DRBUsageReportList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:918
-// DRBUsageReportList is a list of DRBUsageReportItem
+// DRBUsageReportList From: 9_4_5_Information_Element_Definitions.txt:918
 type DRBUsageReportList []DRBUsageReportItem
+
+// DRBUsageReportItem From: 9_4_5_Information_Element_Definitions.txt:920
+type DRBUsageReportItem struct {
+	StartTimeStamp []byte `asn1:"mandatory,ext"`
+	EndTimeStamp   []byte `asn1:"mandatory,ext"`
+	UsageCountUL   int64  `asn1:"mandatory,ext"`
+	UsageCountDL   int64  `asn1:"mandatory,ext"`
+}

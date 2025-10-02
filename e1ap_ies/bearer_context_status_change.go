@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// BearerContextStatusChange represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:131
-type BearerContextStatusChange int32
+import "github.com/lvdund/ngap/aper"
 
+// BearerContextStatusChange From: 9_4_5_Information_Element_Definitions.txt:131
 const (
-	BearerContextStatusChange_Suspend BearerContextStatusChange = 0
-	BearerContextStatusChange_Resume  BearerContextStatusChange = 1
+	BearerContextStatusChangeSuspend aper.Enumerated = 0
+	BearerContextStatusChangeResume  aper.Enumerated = 1
 )
+
+type BearerContextStatusChange struct {
+	Value aper.Enumerated
+}

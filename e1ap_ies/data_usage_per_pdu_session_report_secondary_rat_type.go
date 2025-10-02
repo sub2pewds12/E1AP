@@ -1,8 +1,13 @@
 package e1ap_ies
 
-// DataUsagePerPDUSessionReportSecondaryRATType represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:346
-type DataUsagePerPDUSessionReportSecondaryRATType int32
+import "github.com/lvdund/ngap/aper"
 
+// DataUsagePerPDUSessionReportSecondaryRATType From: 9_4_5_Information_Element_Definitions.txt:346
 const (
-	DataUsagePerPDUSessionReportSecondaryRATType_Present DataUsagePerPDUSessionReportSecondaryRATType = 0
+	DataUsagePerPDUSessionReportSecondaryRATTypeNR    aper.Enumerated = 0
+	DataUsagePerPDUSessionReportSecondaryRATTypeEUTRA aper.Enumerated = 1
 )
+
+type DataUsagePerPDUSessionReportSecondaryRATType struct {
+	Value aper.Enumerated
+}

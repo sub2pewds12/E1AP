@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// EHCDownlinkParametersDRBContinueEHCDL represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:986
-type EHCDownlinkParametersDRBContinueEHCDL int32
+import "github.com/lvdund/ngap/aper"
 
+// EHCDownlinkParametersDRBContinueEHCDL From: 9_4_5_Information_Element_Definitions.txt:986
 const (
-	EHCDownlinkParametersDRBContinueEHCDL_Present EHCDownlinkParametersDRBContinueEHCDL = 0
+	EHCDownlinkParametersDRBContinueEHCDLTrue aper.Enumerated = 0
 )
+
+type EHCDownlinkParametersDRBContinueEHCDL struct {
+	Value aper.Enumerated
+}

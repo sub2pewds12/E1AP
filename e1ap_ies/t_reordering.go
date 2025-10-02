@@ -1,43 +1,47 @@
 package e1ap_ies
 
-// TReordering represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2301
-type TReordering int32
+import "github.com/lvdund/ngap/aper"
 
+// TReordering From: 9_4_5_Information_Element_Definitions.txt:2301
 const (
-	TReordering_Ms0    TReordering = 0
-	TReordering_Ms1    TReordering = 1
-	TReordering_Ms2    TReordering = 2
-	TReordering_Ms4    TReordering = 3
-	TReordering_Ms5    TReordering = 4
-	TReordering_Ms8    TReordering = 5
-	TReordering_Ms10   TReordering = 6
-	TReordering_Ms15   TReordering = 7
-	TReordering_Ms20   TReordering = 8
-	TReordering_Ms30   TReordering = 9
-	TReordering_Ms40   TReordering = 10
-	TReordering_Ms50   TReordering = 11
-	TReordering_Ms60   TReordering = 12
-	TReordering_Ms80   TReordering = 13
-	TReordering_Ms100  TReordering = 14
-	TReordering_Ms120  TReordering = 15
-	TReordering_Ms140  TReordering = 16
-	TReordering_Ms160  TReordering = 17
-	TReordering_Ms180  TReordering = 18
-	TReordering_Ms200  TReordering = 19
-	TReordering_Ms220  TReordering = 20
-	TReordering_Ms240  TReordering = 21
-	TReordering_Ms260  TReordering = 22
-	TReordering_Ms280  TReordering = 23
-	TReordering_Ms300  TReordering = 24
-	TReordering_Ms500  TReordering = 25
-	TReordering_Ms750  TReordering = 26
-	TReordering_Ms1000 TReordering = 27
-	TReordering_Ms1250 TReordering = 28
-	TReordering_Ms1500 TReordering = 29
-	TReordering_Ms1750 TReordering = 30
-	TReordering_Ms2000 TReordering = 31
-	TReordering_Ms2250 TReordering = 32
-	TReordering_Ms2500 TReordering = 33
-	TReordering_Ms2750 TReordering = 34
-	TReordering_Ms3000 TReordering = 35
+	TReorderingMs0    aper.Enumerated = 0
+	TReorderingMs1    aper.Enumerated = 1
+	TReorderingMs2    aper.Enumerated = 2
+	TReorderingMs4    aper.Enumerated = 3
+	TReorderingMs5    aper.Enumerated = 4
+	TReorderingMs8    aper.Enumerated = 5
+	TReorderingMs10   aper.Enumerated = 6
+	TReorderingMs15   aper.Enumerated = 7
+	TReorderingMs20   aper.Enumerated = 8
+	TReorderingMs30   aper.Enumerated = 9
+	TReorderingMs40   aper.Enumerated = 10
+	TReorderingMs50   aper.Enumerated = 11
+	TReorderingMs60   aper.Enumerated = 12
+	TReorderingMs80   aper.Enumerated = 13
+	TReorderingMs100  aper.Enumerated = 14
+	TReorderingMs120  aper.Enumerated = 15
+	TReorderingMs140  aper.Enumerated = 16
+	TReorderingMs160  aper.Enumerated = 17
+	TReorderingMs180  aper.Enumerated = 18
+	TReorderingMs200  aper.Enumerated = 19
+	TReorderingMs220  aper.Enumerated = 20
+	TReorderingMs240  aper.Enumerated = 21
+	TReorderingMs260  aper.Enumerated = 22
+	TReorderingMs280  aper.Enumerated = 23
+	TReorderingMs300  aper.Enumerated = 24
+	TReorderingMs500  aper.Enumerated = 25
+	TReorderingMs750  aper.Enumerated = 26
+	TReorderingMs1000 aper.Enumerated = 27
+	TReorderingMs1250 aper.Enumerated = 28
+	TReorderingMs1500 aper.Enumerated = 29
+	TReorderingMs1750 aper.Enumerated = 30
+	TReorderingMs2000 aper.Enumerated = 31
+	TReorderingMs2250 aper.Enumerated = 32
+	TReorderingMs2500 aper.Enumerated = 33
+	TReorderingMs2750 aper.Enumerated = 34
+	TReorderingMs3000 aper.Enumerated = 35
 )
+
+type TReordering struct {
+	Value aper.Enumerated
+}

@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// RegistrationRequest represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2081
-type RegistrationRequest int32
+import "github.com/lvdund/ngap/aper"
 
+// RegistrationRequest From: 9_4_5_Information_Element_Definitions.txt:2081
 const (
-	RegistrationRequest_Start RegistrationRequest = 0
-	RegistrationRequest_Stop  RegistrationRequest = 1
+	RegistrationRequestStart aper.Enumerated = 0
+	RegistrationRequestStop  aper.Enumerated = 1
 )
+
+type RegistrationRequest struct {
+	Value aper.Enumerated
+}

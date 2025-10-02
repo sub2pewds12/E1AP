@@ -1,5 +1,10 @@
 package e1ap_ies
 
-// TransportUPLayerAddressesInfoToAddList represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2331
-// TransportUPLayerAddressesInfoToAddList is a list of TransportUPLayerAddressesInfoToAddItem
+// TransportUPLayerAddressesInfoToAddList From: 9_4_5_Information_Element_Definitions.txt:2331
 type TransportUPLayerAddressesInfoToAddList []TransportUPLayerAddressesInfoToAddItem
+
+// TransportUPLayerAddressesInfoToAddItem From: 9_4_5_Information_Element_Definitions.txt:2333
+type TransportUPLayerAddressesInfoToAddItem struct {
+	IPSecTransportLayerAddress      []byte       `asn1:"mandatory,ext"`
+	GTPTransportLayerAddressesToAdd []GTPTLAItem `asn1:"optional,ext"`
+}

@@ -16,3 +16,4 @@ class ASN1Definition:
         self.alias_of: Optional[str] = None
         self.of_type: Optional[str] = None
         self.is_builtin: bool = False
+        self.is_synthetic: bool = False

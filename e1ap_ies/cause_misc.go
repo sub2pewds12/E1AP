@@ -1,12 +1,16 @@
 package e1ap_ies
 
-// CauseMisc represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:153
-type CauseMisc int32
+import "github.com/lvdund/ngap/aper"
 
+// CauseMisc From: 9_4_5_Information_Element_Definitions.txt:153
 const (
-	CauseMisc_ControlProcessingOverload             CauseMisc = 0
-	CauseMisc_NotEnoughUserPlaneProcessingResources CauseMisc = 1
-	CauseMisc_HardwareFailure                       CauseMisc = 2
-	CauseMisc_OmIntervention                        CauseMisc = 3
-	CauseMisc_Unspecified                           CauseMisc = 4
+	CauseMiscControlProcessingOverload             aper.Enumerated = 0
+	CauseMiscNotEnoughUserPlaneProcessingResources aper.Enumerated = 1
+	CauseMiscHardwareFailure                       aper.Enumerated = 2
+	CauseMiscOmIntervention                        aper.Enumerated = 3
+	CauseMiscUnspecified                           aper.Enumerated = 4
 )
+
+type CauseMisc struct {
+	Value aper.Enumerated
+}

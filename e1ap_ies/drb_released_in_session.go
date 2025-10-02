@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// DRBReleasedInSession represents the ASN.1 definition from manual_patch:-1
-type DRBReleasedInSession int32
+import "github.com/lvdund/ngap/aper"
 
+// DRBReleasedInSession From: manual_patch:-1
 const (
-	DRBReleasedInSession_ReleasedInSession    DRBReleasedInSession = 0
-	DRBReleasedInSession_NotReleasedInSession DRBReleasedInSession = 1
+	DRBReleasedInSessionReleasedInSession    aper.Enumerated = 0
+	DRBReleasedInSessionNotReleasedInSession aper.Enumerated = 1
 )
+
+type DRBReleasedInSession struct {
+	Value aper.Enumerated
+}

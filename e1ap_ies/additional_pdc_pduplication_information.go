@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// AdditionalPDCPduplicationInformation represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:103
-type AdditionalPDCPduplicationInformation int32
+import "github.com/lvdund/ngap/aper"
 
+// AdditionalPDCPduplicationInformation From: 9_4_5_Information_Element_Definitions.txt:103
 const (
-	AdditionalPDCPduplicationInformation_Three AdditionalPDCPduplicationInformation = 0
-	AdditionalPDCPduplicationInformation_Four  AdditionalPDCPduplicationInformation = 1
+	AdditionalPDCPduplicationInformationThree aper.Enumerated = 0
+	AdditionalPDCPduplicationInformationFour  aper.Enumerated = 1
 )
+
+type AdditionalPDCPduplicationInformation struct {
+	Value aper.Enumerated
+}

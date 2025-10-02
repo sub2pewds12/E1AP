@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// PrivacyIndicator represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1926
-type PrivacyIndicator int32
+import "github.com/lvdund/ngap/aper"
 
+// PrivacyIndicator From: 9_4_5_Information_Element_Definitions.txt:1926
 const (
-	PrivacyIndicator_ImmediateMDT PrivacyIndicator = 0
-	PrivacyIndicator_LoggedMDT    PrivacyIndicator = 1
+	PrivacyIndicatorImmediateMDT aper.Enumerated = 0
+	PrivacyIndicatorLoggedMDT    aper.Enumerated = 1
 )
+
+type PrivacyIndicator struct {
+	Value aper.Enumerated
+}

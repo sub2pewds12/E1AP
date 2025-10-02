@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// QoSFlowLevelQoSParametersReflectiveQOSAttribute represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2019
-type QoSFlowLevelQoSParametersReflectiveQOSAttribute int32
+import "github.com/lvdund/ngap/aper"
 
+// QoSFlowLevelQoSParametersReflectiveQOSAttribute From: 9_4_5_Information_Element_Definitions.txt:2019
 const (
-	QoSFlowLevelQoSParametersReflectiveQOSAttribute_Present QoSFlowLevelQoSParametersReflectiveQOSAttribute = 0
+	QoSFlowLevelQoSParametersReflectiveQOSAttributeSubjectTo aper.Enumerated = 0
 )
+
+type QoSFlowLevelQoSParametersReflectiveQOSAttribute struct {
+	Value aper.Enumerated
+}

@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// TypeOfError represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2314
-type TypeOfError int32
+import "github.com/lvdund/ngap/aper"
 
+// TypeOfError From: 9_4_5_Information_Element_Definitions.txt:2314
 const (
-	TypeOfError_NotUnderstood TypeOfError = 0
-	TypeOfError_Missing       TypeOfError = 1
+	TypeOfErrorNotUnderstood aper.Enumerated = 0
+	TypeOfErrorMissing       aper.Enumerated = 1
 )
+
+type TypeOfError struct {
+	Value aper.Enumerated
+}

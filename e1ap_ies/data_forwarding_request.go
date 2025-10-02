@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// DataForwardingRequest represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:339
-type DataForwardingRequest int32
+import "github.com/lvdund/ngap/aper"
 
+// DataForwardingRequest From: 9_4_5_Information_Element_Definitions.txt:339
 const (
-	DataForwardingRequest_UL   DataForwardingRequest = 0
-	DataForwardingRequest_DL   DataForwardingRequest = 1
-	DataForwardingRequest_Both DataForwardingRequest = 2
+	DataForwardingRequestUL   aper.Enumerated = 0
+	DataForwardingRequestDL   aper.Enumerated = 1
+	DataForwardingRequestBoth aper.Enumerated = 2
 )
+
+type DataForwardingRequest struct {
+	Value aper.Enumerated
+}

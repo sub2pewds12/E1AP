@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// MaxIPrate represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1307
-type MaxIPrate int32
+import "github.com/lvdund/ngap/aper"
 
+// MaxIPrate From: 9_4_5_Information_Element_Definitions.txt:1307
 const (
-	MaxIPrate_Bitrate64kbs MaxIPrate = 0
-	MaxIPrate_MaxUErate    MaxIPrate = 1
+	MaxIPrateBitrate64kbs aper.Enumerated = 0
+	MaxIPrateMaxUErate    aper.Enumerated = 1
 )
+
+type MaxIPrate struct {
+	Value aper.Enumerated
+}

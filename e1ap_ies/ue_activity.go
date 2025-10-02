@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// UEActivity represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:2358
-type UEActivity int32
+import "github.com/lvdund/ngap/aper"
 
+// UEActivity From: 9_4_5_Information_Element_Definitions.txt:2358
 const (
-	UEActivity_Active    UEActivity = 0
-	UEActivity_NotActive UEActivity = 1
+	UEActivityActive    aper.Enumerated = 0
+	UEActivityNotActive aper.Enumerated = 1
 )
+
+type UEActivity struct {
+	Value aper.Enumerated
+}

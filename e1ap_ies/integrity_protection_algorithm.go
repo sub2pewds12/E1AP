@@ -1,11 +1,15 @@
 package e1ap_ies
 
-// IntegrityProtectionAlgorithm represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1248
-type IntegrityProtectionAlgorithm int32
+import "github.com/lvdund/ngap/aper"
 
+// IntegrityProtectionAlgorithm From: 9_4_5_Information_Element_Definitions.txt:1248
 const (
-	IntegrityProtectionAlgorithm_NIA0     IntegrityProtectionAlgorithm = 0
-	IntegrityProtectionAlgorithm_I128NIA1 IntegrityProtectionAlgorithm = 1
-	IntegrityProtectionAlgorithm_I128NIA2 IntegrityProtectionAlgorithm = 2
-	IntegrityProtectionAlgorithm_I128NIA3 IntegrityProtectionAlgorithm = 3
+	IntegrityProtectionAlgorithmNIA0     aper.Enumerated = 0
+	IntegrityProtectionAlgorithmI128NIA1 aper.Enumerated = 1
+	IntegrityProtectionAlgorithmI128NIA2 aper.Enumerated = 2
+	IntegrityProtectionAlgorithmI128NIA3 aper.Enumerated = 3
 )
+
+type IntegrityProtectionAlgorithm struct {
+	Value aper.Enumerated
+}

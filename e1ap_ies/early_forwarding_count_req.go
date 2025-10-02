@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// EarlyForwardingCOUNTReq represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:975
-type EarlyForwardingCOUNTReq int32
+import "github.com/lvdund/ngap/aper"
 
+// EarlyForwardingCOUNTReq From: 9_4_5_Information_Element_Definitions.txt:975
 const (
-	EarlyForwardingCOUNTReq_FirstDlCount EarlyForwardingCOUNTReq = 0
-	EarlyForwardingCOUNTReq_DlDiscarding EarlyForwardingCOUNTReq = 1
+	EarlyForwardingCOUNTReqFirstDlCount aper.Enumerated = 0
+	EarlyForwardingCOUNTReqDlDiscarding aper.Enumerated = 1
 )
+
+type EarlyForwardingCOUNTReq struct {
+	Value aper.Enumerated
+}

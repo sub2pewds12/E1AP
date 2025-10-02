@@ -1,9 +1,13 @@
 package e1ap_ies
 
-// PDUSessionResourceActivity represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1647
-type PDUSessionResourceActivity int32
+import "github.com/lvdund/ngap/aper"
 
+// PDUSessionResourceActivity From: 9_4_5_Information_Element_Definitions.txt:1647
 const (
-	PDUSessionResourceActivity_Active    PDUSessionResourceActivity = 0
-	PDUSessionResourceActivity_NotActive PDUSessionResourceActivity = 1
+	PDUSessionResourceActivityActive    aper.Enumerated = 0
+	PDUSessionResourceActivityNotActive aper.Enumerated = 1
 )
+
+type PDUSessionResourceActivity struct {
+	Value aper.Enumerated
+}

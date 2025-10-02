@@ -1,14 +1,18 @@
 package e1ap_ies
 
-// CauseProtocol represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:162
-type CauseProtocol int32
+import "github.com/lvdund/ngap/aper"
 
+// CauseProtocol From: 9_4_5_Information_Element_Definitions.txt:162
 const (
-	CauseProtocol_TransferSyntaxError                          CauseProtocol = 0
-	CauseProtocol_AbstractSyntaxErrorReject                    CauseProtocol = 1
-	CauseProtocol_AbstractSyntaxErrorIgnoreAndNotify           CauseProtocol = 2
-	CauseProtocol_MessageNotCompatibleWithReceiverState        CauseProtocol = 3
-	CauseProtocol_SemanticError                                CauseProtocol = 4
-	CauseProtocol_AbstractSyntaxErrorFalselyConstructedMessage CauseProtocol = 5
-	CauseProtocol_Unspecified                                  CauseProtocol = 6
+	CauseProtocolTransferSyntaxError                          aper.Enumerated = 0
+	CauseProtocolAbstractSyntaxErrorReject                    aper.Enumerated = 1
+	CauseProtocolAbstractSyntaxErrorIgnoreAndNotify           aper.Enumerated = 2
+	CauseProtocolMessageNotCompatibleWithReceiverState        aper.Enumerated = 3
+	CauseProtocolSemanticError                                aper.Enumerated = 4
+	CauseProtocolAbstractSyntaxErrorFalselyConstructedMessage aper.Enumerated = 5
+	CauseProtocolUnspecified                                  aper.Enumerated = 6
 )
+
+type CauseProtocol struct {
+	Value aper.Enumerated
+}

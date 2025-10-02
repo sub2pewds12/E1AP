@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// Presence represents the ASN.1 definition from 9_4_6_Common_Definitions.txt:36
-type Presence int32
+import "github.com/lvdund/ngap/aper"
 
+// Presence From: 9_4_6_Common_Definitions.txt:36
 const (
-	Presence_Optional    Presence = 0
-	Presence_Conditional Presence = 1
-	Presence_Mandatory   Presence = 2
+	PresenceOptional    aper.Enumerated = 0
+	PresenceConditional aper.Enumerated = 1
+	PresenceMandatory   aper.Enumerated = 2
 )
+
+type Presence struct {
+	Value aper.Enumerated
+}

@@ -1,11 +1,15 @@
 package e1ap_ies
 
-// CipheringAlgorithm represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:234
-type CipheringAlgorithm int32
+import "github.com/lvdund/ngap/aper"
 
+// CipheringAlgorithm From: 9_4_5_Information_Element_Definitions.txt:234
 const (
-	CipheringAlgorithm_NEA0     CipheringAlgorithm = 0
-	CipheringAlgorithm_C128NEA1 CipheringAlgorithm = 1
-	CipheringAlgorithm_C128NEA2 CipheringAlgorithm = 2
-	CipheringAlgorithm_C128NEA3 CipheringAlgorithm = 3
+	CipheringAlgorithmNEA0     aper.Enumerated = 0
+	CipheringAlgorithmC128NEA1 aper.Enumerated = 1
+	CipheringAlgorithmC128NEA2 aper.Enumerated = 2
+	CipheringAlgorithmC128NEA3 aper.Enumerated = 3
 )
+
+type CipheringAlgorithm struct {
+	Value aper.Enumerated
+}

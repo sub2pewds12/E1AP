@@ -1,10 +1,14 @@
 package e1ap_ies
 
-// CauseTransport represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:207
-type CauseTransport int32
+import "github.com/lvdund/ngap/aper"
 
+// CauseTransport From: 9_4_5_Information_Element_Definitions.txt:207
 const (
-	CauseTransport_Unspecified                  CauseTransport = 0
-	CauseTransport_TransportResourceUnavailable CauseTransport = 1
-	CauseTransport_UnknownTNLAddressForIAB      CauseTransport = 2
+	CauseTransportUnspecified                  aper.Enumerated = 0
+	CauseTransportTransportResourceUnavailable aper.Enumerated = 1
+	CauseTransportUnknownTNLAddressForIAB      aper.Enumerated = 2
 )
+
+type CauseTransport struct {
+	Value aper.Enumerated
+}

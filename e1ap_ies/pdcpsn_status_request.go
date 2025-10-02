@@ -1,8 +1,12 @@
 package e1ap_ies
 
-// PDCPSNStatusRequest represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:1575
-type PDCPSNStatusRequest int32
+import "github.com/lvdund/ngap/aper"
 
+// PDCPSNStatusRequest From: 9_4_5_Information_Element_Definitions.txt:1575
 const (
-	PDCPSNStatusRequest_Requested PDCPSNStatusRequest = 0
+	PDCPSNStatusRequestRequested aper.Enumerated = 0
 )
+
+type PDCPSNStatusRequest struct {
+	Value aper.Enumerated
+}

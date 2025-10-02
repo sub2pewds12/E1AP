@@ -1,8 +1,13 @@
 package e1ap_ies
 
-// DataUsagePerQOSFlowItemSecondaryRATType represents the ASN.1 definition from 9_4_5_Information_Element_Definitions.txt:359
-type DataUsagePerQOSFlowItemSecondaryRATType int32
+import "github.com/lvdund/ngap/aper"
 
+// DataUsagePerQOSFlowItemSecondaryRATType From: 9_4_5_Information_Element_Definitions.txt:359
 const (
-	DataUsagePerQOSFlowItemSecondaryRATType_Present DataUsagePerQOSFlowItemSecondaryRATType = 0
+	DataUsagePerQOSFlowItemSecondaryRATTypeNR    aper.Enumerated = 0
+	DataUsagePerQOSFlowItemSecondaryRATTypeEUTRA aper.Enumerated = 1
 )
+
+type DataUsagePerQOSFlowItemSecondaryRATType struct {
+	Value aper.Enumerated
+}

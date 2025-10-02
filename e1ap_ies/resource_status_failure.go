@@ -1,6 +1,8 @@
 package e1ap_ies
 
-// ResourceStatusFailure represents the ASN.1 definition from 9_4_4_PDU_Definitions.txt:1381
+// ResourceStatusFailure From: 9_4_4_PDU_Definitions.txt:1381
 type ResourceStatusFailure struct {
-	ProtocolIEs ProtocolIEContainer `asn1:"mandatory,ext"`
+	TransactionID          int64                   `asn1:"mandatory,reject,ext"`
+	Cause                  Cause                   `asn1:"mandatory,ignore,ext"`
+	CriticalityDiagnostics *CriticalityDiagnostics `asn1:"optional,ignore,ext"`
 }
