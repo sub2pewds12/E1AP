@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // RLCMode From: 9_4_5_Information_Element_Definitions.txt:2095
+// ASN.1 Data Type: ENUMERATED
 const (
 	RLCModeRlcTm                 aper.Enumerated = 0
 	RLCModeRlcAm                 aper.Enumerated = 1

@@ -1,9 +1,12 @@
 package e1ap_ies
 
+import "github.com/lvdund/ngap/aper"
+
 // GNBCUUPE1SetupFailure From: 9_4_4_PDU_Definitions.txt:402
+// ASN.1 Data Type: SEQUENCE
 type GNBCUUPE1SetupFailure struct {
-	TransactionID          int64                   `asn1:"mandatory,reject,ext"`
-	Cause                  Cause                   `asn1:"mandatory,ignore,ext"`
-	TimeToWait             *TimeToWait             `asn1:"optional,ignore,ext"`
-	CriticalityDiagnostics *CriticalityDiagnostics `asn1:"optional,ignore,ext"`
+	TransactionID          aper.Integer            `aper:"mandatory,reject,ext"`
+	Cause                  Cause                   `aper:"mandatory,ignore,ext"`
+	TimeToWait             *TimeToWait             `aper:"optional,ignore,ext"`
+	CriticalityDiagnostics *CriticalityDiagnostics `aper:"optional,ignore,ext"`
 }

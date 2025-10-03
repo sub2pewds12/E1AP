@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // M6reportInterval From: 9_4_5_Information_Element_Definitions.txt:1363
+// ASN.1 Data Type: ENUMERATED
 const (
 	M6reportIntervalMs120   aper.Enumerated = 0
 	M6reportIntervalMs240   aper.Enumerated = 1

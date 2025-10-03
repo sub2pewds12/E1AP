@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // CauseMisc From: 9_4_5_Information_Element_Definitions.txt:153
+// ASN.1 Data Type: ENUMERATED
 const (
 	CauseMiscControlProcessingOverload             aper.Enumerated = 0
 	CauseMiscNotEnoughUserPlaneProcessingResources aper.Enumerated = 1

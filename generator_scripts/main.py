@@ -45,14 +45,11 @@ def main():
         description="Parse 3GPP E1AP ASN.1 specs and generate Go code."
     )
     parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
+        "-v", "--verbose", action="store_true",
         help="Enable detailed DEBUG logging for deep analysis.",
     )
     parser.add_argument(
-        "--diagnose",
-        action="store_true",
+        "--diagnose", action="store_true",
         help="Run a full diagnostic report on parsed and failed definitions instead of generating files.",
     )
     args = parser.parse_args()
@@ -72,9 +69,14 @@ def main():
 
     logger.info("--- STAGE 2: PARSING DEFINITIONS ---")
     asn1_parser = ASN1Parser(lines)
-    definitions, failures = asn1_parser.parse()
+    
+    # --- START: THE FIX ---
+    # Capture all four return values from the upgraded parse method.
+    definitions, failures, procedures, message_map = asn1_parser.parse()
+    # --- END: THE FIX ---
+    
     logger.info(
-        f"Parsing complete. Found {len(definitions)} definitions and {len(failures)} failures."
+        f"Parsing complete. Found {len(definitions)} definitions, {len(procedures)} procedures, and {len(failures)} failures."
     )
 
     logger.info("--- STAGE 2.5: APPLYING MANUAL PATCHES ---")
@@ -86,7 +88,10 @@ def main():
         f"Applied {len(hardcoded_defs)} hardcoded definitions. Total definitions now: {len(definitions)}."
     )
 
-    generator = GoCodeGenerator(definitions, failures, output_dir)
+    # --- START: THE FIX ---
+    # Pass all the required arguments to the GoCodeGenerator.
+    generator = GoCodeGenerator(definitions, failures, procedures, message_map, output_dir)
+    # --- END: THE FIX ---
 
     if args.diagnose:
         logger.info("--- STAGE 3: RUNNING DIAGNOSTIC REPORT ---")

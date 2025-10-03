@@ -1,8 +1,11 @@
 package e1ap_ies
 
+import "github.com/lvdund/ngap/aper"
+
 // ResetAcknowledge From: 9_4_4_PDU_Definitions.txt:291
+// ASN.1 Data Type: SEQUENCE
 type ResetAcknowledge struct {
-	TransactionID                             int64                       `asn1:"mandatory,reject,ext"`
-	UEAssociatedLogicalE1ConnectionListResAck []ProtocolIESingleContainer `asn1:"optional,ignore,ext"`
-	CriticalityDiagnostics                    *CriticalityDiagnostics     `asn1:"optional,ignore,ext"`
+	TransactionID                             aper.Integer                `aper:"mandatory,reject,ext"`
+	UEAssociatedLogicalE1ConnectionListResAck []ProtocolIESingleContainer `aper:"optional,ignore,ext"`
+	CriticalityDiagnostics                    *CriticalityDiagnostics     `aper:"optional,ignore,ext"`
 }

@@ -1,7 +1,7 @@
 import re
 import logging
 from typing import Dict, List, Optional, Any, Tuple
-from common_types import ASN1Definition
+from common_types import ASN1Definition, ASN1Procedure
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +11,9 @@ class ASN1Parser:
         self.lines = lines
         self.definitions: Dict[str, ASN1Definition] = {}
         self.ie_sets: Dict[str, List[Dict[str, str]]] = {}
+        self.type_metadata: Dict[str, Dict[str, str]] = {}
+        self.procedures: Dict[str, ASN1Procedure] = {}
+        self.message_to_procedure_map: Dict[str, str] = {}
         self._prepopulate_builtin_types()
 
     def _prepopulate_builtin_types(self):
@@ -37,29 +40,29 @@ class ASN1Parser:
             self.definitions[name] = item
 
     def _parse_ie_set(self, name: str, def_part: str):
-        """Parses an E1AP-PROTOCOL-IES block into a structured list."""
-        # --- START: THE FIX - Capture criticality and presence ---
+        """
+        Parses a ...-PROTOCOL-IES block into a rich, structured list of metadata.
+        It also creates a reverse mapping in the dedicated self.type_metadata dictionary.
+        """
         ie_pattern = re.compile(
-            r"\{\s*ID\s+(?P<id>[\w-]+)\s+CRITICALITY\s+(?P<crit>[\w-]+)\s+TYPE\s+(?P<type>[\w-]+)\s+PRESENCE\s+(?P<pres>[\w-]+)\s*\}"
+            r"\{\s*ID\s+(?P<id>[\w-]+)\s+CRITICALITY\s+(?P<crit>[\w-]+)\s+(?:TYPE|EXTENSION)\s+(?P<type>[\w-]+)\s+PRESENCE\s+(?P<pres>[\w-]+)\s*\}"
         )
-        # --- END: THE FIX ---
-        
         matches = ie_pattern.finditer(def_part)
+        ie_list_for_set = []
         
-        ie_list = []
         for match in matches:
-            # --- START: THE FIX - Save the new data ---
-            ie_list.append({
+            ie_data = {
                 "id": match.group("id"),
                 "type": match.group("type"),
                 "crit": match.group("crit").lower(),
                 "pres": match.group("pres").lower()
-            })
-            # --- END: THE FIX ---
-        
-        if ie_list:
-            self.ie_sets[name] = ie_list
-            logger.info(f"Successfully parsed IE Set '{name}' with {len(ie_list)} items.")
+            }
+            ie_list_for_set.append(ie_data)
+            self.type_metadata[ie_data['type']] = ie_data
+
+        if ie_list_for_set:
+            self.ie_sets[name] = ie_list_for_set
+            #logger.info(f"Successfully parsed and indexed IE Set '{name}' with {len(ie_list_for_set)} items.")
 
     def _parse_constraints(self, line_part: str) -> Dict[str, Any]:
         constraints = {"min_val": None, "max_val": None}
@@ -291,8 +294,19 @@ class ASN1Parser:
             parts = clean_line.split(None, 1)
             if len(parts) < 2:
                 continue
-
             member_name, raw_type_str = parts[0], parts[1]
+
+            member_type_name_for_lookup = raw_type_str.split('{')[0].split('(')[0].replace("OPTIONAL", "").replace("CONDITIONAL", "").strip()
+            
+            # Look up this type in our new metadata dictionary
+            member_metadata = self.type_metadata.get(member_type_name_for_lookup)
+
+            # Determine presence: prioritize the rich metadata, otherwise parse from the line
+            if member_metadata and 'pres' in member_metadata:
+                presence = member_metadata['pres']
+            else:
+                presence = self._parse_presence(raw_type_str)
+
             presence = self._parse_presence(raw_type_str)
             inline_keywords = ["INTEGER", "ENUMERATED", "BIT STRING", "OCTET STRING", "SEQUENCE", "CHOICE"]
             is_inline = any(raw_type_str.strip().startswith(keyword) for keyword in inline_keywords)
@@ -303,64 +317,99 @@ class ASN1Parser:
             ie_name_to_add = member_name
             type_name_to_add = ""
 
-            if is_inline_enum:
-                synthetic_type_name = f"{name}-{member_name}"
-                inline_def = ASN1Definition(synthetic_type_name, "ENUMERATED", source_file, source_line, raw_type_str)
-
-                # Use our robust regex directly on the raw type string
-                enum_match = re.search(r"ENUMERATED\s*\{([^}]+)\}", raw_type_str, re.DOTALL)
-                if enum_match:
-                    content = enum_match.group(1).replace("...", "").strip()
-                    values = [v.strip() for v in content.split(",") if v.strip()]
-                    inline_def.enum_values = values if values else ["inline-parse-failed"]
+            class_type_match = re.search(r"\.&([\w-]+)", raw_type_str)
+            if class_type_match:
+                field_from_class = class_type_match.group(1)
+                
+                if field_from_class == 'procedureCode':
+                    type_name_to_add = 'ProcedureCode'
+                elif field_from_class == 'criticality':
+                    type_name_to_add = 'Criticality'
+                # Check for any of the PDU value types
+                elif any(val_type in field_from_class for val_type in ['InitiatingMessage', 'SuccessfulOutcome', 'UnsuccessfulOutcome']):
+                    type_name_to_add = 'ANY'
                 else:
-                    inline_def.enum_values = ["present"] # Fallback for abstract enums
-
-                if inline_def.name not in self.definitions:
-                    self.definitions[inline_def.name] = inline_def
-                type_name_to_add = inline_def.name
-            # --- END: NEW INLINE ENUM LOGIC ---
-            
-            elif is_inline_struct:
-                synthetic_type_name = f"{name}-{member_name}"
-                inline_def = self._parse_block_definition(synthetic_type_name, raw_type_str, source_file, source_line, raw_type_str)
-                if inline_def:
-                    if inline_def.name not in self.definitions:
-                        self.definitions[inline_def.name] = inline_def
-                    type_name_to_add = inline_def.name
+                    logger.warning(f"Found unknown CLASS field '&{field_from_class}' in '{name}'. Defaulting to ANY.")
+                    type_name_to_add = 'ANY'
 
             else:
-                base_type_name = raw_type_str
-                if '{' in base_type_name:
-                    base_type_name = base_type_name.split('{', 1)[0]
-                if '(' in base_type_name:
-                    base_type_name = base_type_name.split('(', 1)[0]
+                # --- This is the ORIGINAL logic for all non-CLASS types ---
+                is_inline_enum = raw_type_str.strip().startswith("ENUMERATED")
+                is_inline_struct = any(k in raw_type_str for k in ["SEQUENCE {", "CHOICE {"])
+                is_simple_inline = any(raw_type_str.strip().startswith(k) for k in ["INTEGER", "BIT STRING", "OCTET STRING"])
+
+                if is_inline_enum:
+                    synthetic_type_name = f"{name}-{member_name}"
+                    inline_def = ASN1Definition(synthetic_type_name, "ENUMERATED", source_file, source_line, raw_type_str)
+                    enum_match = re.search(r"ENUMERATED\s*\{([^}]+)\}", raw_type_str, re.DOTALL)
+                    if enum_match:
+                        content = enum_match.group(1).replace("...", "").strip()
+                        values = [v.strip() for v in content.split(",") if v.strip()]
+                        inline_def.enum_values = values if values else ["inline-parse-failed"]
+                    else:
+                        inline_def.enum_values = ["present"]
+                    if inline_def.name not in self.definitions: self.definitions[inline_def.name] = inline_def
+                    type_name_to_add = inline_def.name
                 
-                base_type_name = base_type_name.replace("OPTIONAL", "").replace("CONDITIONAL", "").strip()
-                type_parts = base_type_name.split()
-                if not type_parts:
-                    continue
-                type_name_to_add = " ".join(type_parts)
+                elif is_inline_struct:
+                    synthetic_type_name = f"{name}-{member_name}"
+                    inline_def = self._parse_block_definition(synthetic_type_name, raw_type_str, source_file, source_line, raw_type_str)
+                    if inline_def:
+                        if inline_def.name not in self.definitions: self.definitions[inline_def.name] = inline_def
+                        type_name_to_add = inline_def.name
+
+                elif is_simple_inline:
+                    synthetic_type_name = f"{name}-{member_name}"
+                    inline_def = self._parse_simple_definition(synthetic_type_name, raw_type_str, source_file, source_line, raw_type_str)
+                    if inline_def:
+                        if inline_def.name not in self.definitions: self.definitions[inline_def.name] = inline_def
+                        type_name_to_add = inline_def.name
+                else:
+                    base_type_name = raw_type_str.split('{', 1)[0].split('(', 1)[0].replace("OPTIONAL", "").replace("CONDITIONAL", "").strip()
+                    type_parts = base_type_name.split()
+                    if not type_parts: continue
+                    type_name_to_add = " ".join(type_parts)
             
             if ie_name_to_add and type_name_to_add:
-                item.ies.append(
-                    {
-                        "ie": ie_name_to_add,
-                        "type": type_name_to_add,
-                        "presence": presence,
-                    }
-                )
-
+                # Assemble the final member info dictionary
+                member_info = {
+                    "ie": ie_name_to_add,
+                    "type": type_name_to_add,
+                    "presence": presence
+                }
+                if member_metadata and 'crit' in member_metadata:
+                    member_info['criticality'] = member_metadata['crit']
+                item.ies.append(member_info)
         return item
+    
+    def _parse_procedure(self, name: str, def_part: str):
+        """Parses an E1AP-ELEMENTARY-PROCEDURE and builds the message->procedure map."""
+        proc = ASN1Procedure(name)
+        
+        init_msg_match = re.search(r"INITIATING MESSAGE\s+([\w-]+)", def_part)
+        succ_out_match = re.search(r"SUCCESSFUL OUTCOME\s+([\w-]+)", def_part)
+        unsucc_out_match = re.search(r"UNSUCCESSFUL OUTCOME\s+([\w-]+)", def_part)
+        proc_code_match = re.search(r"PROCEDURE CODE\s+([\w-]+)", def_part)
+
+        if init_msg_match:
+            proc.initiating_message = init_msg_match.group(1)
+            # Create the reverse mapping: Message Type -> 'InitiatingMessage'
+            self.message_to_procedure_map[proc.initiating_message] = 'InitiatingMessage'
+        if succ_out_match:
+            proc.successful_outcome = succ_out_match.group(1)
+            self.message_to_procedure_map[proc.successful_outcome] = 'SuccessfulOutcome'
+        if unsucc_out_match:
+            proc.unsuccessful_outcome = unsucc_out_match.group(1)
+            self.message_to_procedure_map[proc.unsuccessful_outcome] = 'UnsuccessfulOutcome'
+        if proc_code_match:
+            proc.procedure_code = proc_code_match.group(1)
+            
+        self.procedures[proc.name] = proc
+        logger.info(f"Successfully parsed and mapped procedure '{proc.name}'.")
 
     def parse(self) -> Tuple[Dict[str, ASN1Definition], List[Dict[str, Any]]]:
         failures = []
         
-        # =====================================================================
-        # PASS 1: PARSE ONLY THE IE SETS (the "manifests")
-        # This pass populates self.ie_sets so that PDU containers can be expanded correctly in Pass 2,
-        # regardless of the definition order in the source files.
-        # =====================================================================
         logger.info("PASS 1: Scanning for and parsing all IE Set definitions...")
         for i in range(len(self.lines)):
             line_text, _, _ = self.lines[i]
@@ -375,12 +424,6 @@ class ASN1Parser:
                     ie_set_name = name_part.replace("E1AP-PROTOCOL-IES", "").strip()
                     self._parse_ie_set(ie_set_name, def_part)
         logger.info(f"PASS 1 COMPLETE: Found and parsed {len(self.ie_sets)} IE Sets.")
-
-        # =====================================================================
-        # PASS 2: PARSE ALL OTHER DEFINITIONS
-        # This pass parses all concrete types. When it encounters a PDU container,
-        # it will now be able to find its corresponding IE Set in self.ie_sets.
-        # =====================================================================
         logger.info("PASS 2: Parsing all other ASN.1 definitions...")
         i = 0
         while i < len(self.lines):
@@ -402,15 +445,21 @@ class ASN1Parser:
                 name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
                 item = None
 
-                # In Pass 2, we SKIP the IE Set definitions as they are already processed.
+                proc_match = re.match(r"^([a-z][\w-]*)\s+E1AP-ELEMENTARY-PROCEDURE", name_part)
+                if proc_match:
+                    proc_name = proc_match.group(1)
+                    self._parse_procedure(proc_name, def_part)
+                    i = end_index + 1
+                    continue
+
                 if "E1AP-PROTOCOL-IES" in name_part:
                     i = end_index + 1
                     continue
 
                 abstract_keywords = [
-                    "E1AP-ELEMENTARY-PROCEDURE", "E1AP-PROTOCOL-EXTENSION",
-                    "E1AP-PRIVATE-IES", "CLASS", "InitiatingMessage", 
-                    "SuccessfulOutcome", "UnsuccessfulOutcome", "E1AP-PDU"
+                    "E1AP-PROTOCOL-EXTENSION",
+                    "E1AP-PRIVATE-IES", "CLASS",
+                    "E1AP-PDU"
                 ]
                 if any(keyword in full_def_str for keyword in abstract_keywords):
                     if name_part not in [f["name"] for f in failures]:
@@ -469,4 +518,6 @@ class ASN1Parser:
                 i = end_index
             i += 1
         logger.info("PASS 2 COMPLETE.")
-        return self.definitions, failures
+        return self.definitions, failures, self.procedures, self.message_to_procedure_map
+    
+    

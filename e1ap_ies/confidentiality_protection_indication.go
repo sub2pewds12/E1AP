@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // ConfidentialityProtectionIndication From: 9_4_5_Information_Element_Definitions.txt:251
+// ASN.1 Data Type: ENUMERATED
 const (
 	ConfidentialityProtectionIndicationRequired  aper.Enumerated = 0
 	ConfidentialityProtectionIndicationPreferred aper.Enumerated = 1

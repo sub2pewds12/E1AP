@@ -1,8 +1,9 @@
 package e1ap_ies
 
 // SDAPConfiguration From: 9_4_5_Information_Element_Definitions.txt:2196
+// ASN.1 Data Type: SEQUENCE
 type SDAPConfiguration struct {
-	DefaultDRB   DefaultDRB   `asn1:"mandatory,ext"`
-	SDAPHeaderUL SDAPHeaderUL `asn1:"mandatory,ext"`
-	SDAPHeaderDL SDAPHeaderDL `asn1:"mandatory,ext"`
+	DefaultDRB   DefaultDRB   `aper:"mandatory,ext"`
+	SDAPHeaderUL SDAPHeaderUL `aper:"mandatory,ext"`
+	SDAPHeaderDL SDAPHeaderDL `aper:"mandatory,ext"`
 }

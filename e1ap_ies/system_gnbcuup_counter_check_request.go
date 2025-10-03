@@ -1,6 +1,7 @@
 package e1ap_ies
 
 // SystemGNBCUUPCounterCheckRequest From: 9_4_4_PDU_Definitions.txt:1190
+// ASN.1 Data Type: CHOICE
 const (
 	SystemGNBCUUPCounterCheckRequestPresentNothing uint64 = iota
 	SystemGNBCUUPCounterCheckRequestPresentDRBsSubjectToCounterCheckListEUTRAN

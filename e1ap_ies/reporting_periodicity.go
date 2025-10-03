@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // ReportingPeriodicity From: 9_4_5_Information_Element_Definitions.txt:2090
+// ASN.1 Data Type: ENUMERATED
 const (
 	ReportingPeriodicityMs500    aper.Enumerated = 0
 	ReportingPeriodicityMs1000   aper.Enumerated = 1

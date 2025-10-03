@@ -3,6 +3,7 @@ import re
 import logging
 import shutil
 from typing import Dict, List, Any, Tuple, Optional
+from common_types import ASN1Procedure 
 
 logger = logging.getLogger(__name__)
 
@@ -12,17 +13,20 @@ class GoCodeGenerator:
         self,
         definitions: Dict[str, Any],
         failures: List[Dict[str, Any]],
+        procedures: Dict[str, ASN1Procedure],
+        message_to_procedure_map: Dict[str, str],
         output_dir: str,
     ):
         self.definitions = definitions
         self.failures = failures
+        self.procedures = procedures
+        self.message_to_procedure_map = message_to_procedure_map
         self.output_dir = output_dir
         self.generated_files = set()
 
     def _standard_string(self, input_string: str) -> str:
         if not input_string:
             return ""
-
         
         overrides = {
             "ProtocolIE-SingleContainer": "ProtocolIESingleContainer",
@@ -33,7 +37,6 @@ class GoCodeGenerator:
         }
         if input_string in overrides:
             return overrides[input_string]
-
         
         known_acronyms = {
             "ID", "IE", "PDU", "E1AP", "GNB", "CU", "CP", "UP", "QOS",
@@ -47,30 +50,19 @@ class GoCodeGenerator:
         for part in parts:
             if not part:
                 continue
-            
-            
             if part.upper() in known_acronyms:
                 processed_parts.append(part.upper())
             else:
-                
-                
-                
                 processed_parts.append(part[0].upper() + part[1:])
                 
-
         return "".join(processed_parts)
 
     def _format_go_value(self, value: str) -> str:
         if not value:
             return "0"
-        
-        # If the value is a valid integer, return it as a string.
         try:
             return str(int(value))
         except (ValueError, TypeError):
-            # If it's not an integer, it must be a named constant.
-            # Standardize its name to the Go constant convention.
-            # e.g., "maxnoofAllowedAreas" -> "MaxnoofAllowedAreas"
             return self._standard_string(value)
     
     def _go_name_to_snake_case(self, go_name: str) -> str:
@@ -80,15 +72,16 @@ class GoCodeGenerator:
     
     def _classify_definition(self, item: Any) -> str:
         """Classifies a definition as 'constant', 'simple', or 'complex'."""
+        if isinstance(item, dict):
+            return 'unknown'
+
         if item.is_constant:
             return 'constant'
-        
         
         if item.type in ["SEQUENCE", "CHOICE", "LIST", "ENUMERATED"]:
             return 'complex'
             
-        
-        if item.type in ["INTEGER", "BIT STRING", "OCTET STRING", "ALIAS", "BASE_TYPE", "PrintableString", "VisibleString", "UTF8String", "NULL"]:
+        if item.type in ["INTEGER", "BIT STRING", "OCTET STRING", "ALIAS", "BASE_TYPE", "PrintableString", "VisibleString", "UTF8String", "NULL", "ANY"]:
             return 'simple'
             
         return 'unknown'
@@ -97,93 +90,97 @@ class GoCodeGenerator:
         """
         Resolves an ASN.1 type name to its final, concrete Go type and returns
         the concrete ASN1Definition object.
-
-        This function traverses the alias chain (e.g., TypeC ::= TypeB, TypeB ::= TypeA,
-        TypeA ::= INTEGER) to find the underlying base type.
-
-        Args:
-            type_name: The starting ASN.1 type name string.
-
-        Returns:
-            A tuple containing:
-            1. The corresponding base Go type as a string (e.g., "int64", "[]byte",
-               or the standardized name of a complex type).
-            2. The final, concrete ASN1Definition object, or None if not found.
         """
+        if type_name == "ANY":
+            return "aper.OctetString", self.definitions.get("ANY")
+
         definition = self.definitions.get(type_name)
 
-        
-        
-        if not definition:
+        if not definition or isinstance(definition, dict):
             return self._standard_string(type_name), None
 
-        
-        
         visited = {type_name}
         while definition and definition.alias_of:
             next_alias = definition.alias_of
             if next_alias in visited:
                 logger.warning(f"Circular alias dependency detected for '{type_name}' at '{next_alias}'.")
-                
                 break
-            
             visited.add(next_alias)
             next_def = self.definitions.get(next_alias)
-
-            if not next_def:
+            if not next_def or isinstance(next_def, dict):
                 logger.warning(f"Alias '{next_alias}' for type '{definition.name}' not found in definitions.")
-                
                 break
-            
             definition = next_def
 
-        
         if definition.type in ["INTEGER", "BASE_TYPE"]:
-            return "int64", definition
-        elif definition.type in ["BIT STRING", "OCTET STRING", "PrintableString", "VisibleString", "UTF8String"]:
-            return "[]byte", definition
+            return "aper.Integer", definition
+        elif definition.type == "BIT STRING":
+            return "aper.BitString", definition
+        elif definition.type in ["OCTET STRING", "PrintableString", "VisibleString", "UTF8String", "ANY"]:
+            return "aper.OctetString", definition
         elif definition.type == "OBJECT IDENTIFIER": 
             return "string", definition
         elif definition.type == "NULL":
             return "bool", definition 
         elif definition.type in ["ENUMERATED", "SEQUENCE", "CHOICE", "LIST"]:
-            
             return self._standard_string(definition.name), definition
-        
         
         logger.warning(f"Could not resolve a specific Go type for ASN.1 type '{definition.type}'. Defaulting to its name.")
         return self._standard_string(definition.name), definition
+
+    def _generate_header_comment(self, item: Any, go_name: str) -> str:
+        """Builds the standard comment block for a generated Go definition."""
+        header = f"// {go_name} From: {item.source_file}:{item.source_line}\n"
+        if hasattr(item, 'type'):
+             header += f"// ASN.1 Data Type: {item.type}\n"
+        return header
     
     def generate_files(self):
         os.makedirs(self.output_dir, exist_ok=True)
+
         classified_defs = { 'constant': [], 'simple': [], 'complex': [] }
         
+        # Classify all valid definitions, ignoring metadata dictionaries
         for item in self.definitions.values():
-            classification = self._classify_definition(item)
-            if classification != 'unknown':
-                classified_defs[classification].append(item)
+            if not isinstance(item, dict):
+                classification = self._classify_definition(item)
+                if classification != 'unknown':
+                    classified_defs[classification].append(item)
 
+        # --- Generation Stages ---
         self._generate_constants_file(classified_defs['constant'])
         self._generate_common_types_file(classified_defs['simple'])
         self._generate_complex_type_files(classified_defs['complex'])
-        self._combine_list_item_files()
-
+        
+        # --- File Cleanup ---
         stale_files_found = 0
         for filename_on_disk in os.listdir(self.output_dir):
-            
             if not filename_on_disk.endswith(".go"):
                 continue
 
-            if filename_on_disk not in self.generated_files:
-                if filename_on_disk not in ["e1ap_manual_types.go"]: 
-                    file_to_delete = os.path.join(self.output_dir, filename_on_disk)
-                    os.remove(file_to_delete)
-                    logger.info(f"Cleaned up stale generated file: {filename_on_disk}")
-                    stale_files_found += 1
+            # Do not delete hand-written helper files
+            if filename_on_disk not in self.generated_files and filename_on_disk not in ["e1ap_manual_types.go", "e1ap_pdu.go"]: 
+                file_to_delete = os.path.join(self.output_dir, filename_on_disk)
+                os.remove(file_to_delete)
+                logger.info(f"Cleaned up stale generated file: {filename_on_disk}")
+                stale_files_found += 1
         
         if stale_files_found == 0:
             logger.info("No stale generated files to clean up.")
+
+        # --- Final Formatting ---
         self._format_generated_code()
+
+    def _format_generated_code(self):
+        """Runs gofmt and goimports on the output directory."""
+        logger.info("Formatting generated Go code...")
+        try:
+            # Using os.system for simplicity; subprocess is more robust for production
+            os.system(f"goimports -w {self.output_dir}")
+            os.system(f"gofmt -w {self.output_dir}")
+            logger.info("Formatting complete.")
+        except Exception as e:
+            logger.warning(f"Could not format Go code. Please run 'goimports -w' and 'gofmt -w' on the '{self.output_dir}' directory manually. Error: {e}")
 
     def _generate_constants_file(self, constant_items: List[Any]):
         integer_consts, proc_code_consts, protocol_ie_consts = [], [], []
@@ -215,7 +212,7 @@ class GoCodeGenerator:
         proc_code_consts.sort(key=sorter)
         protocol_ie_consts.sort(key=sorter)
 
-        go_code = "" # No header comment
+        go_code = "" 
 
         if integer_consts:
             go_code += "const (\n"
@@ -262,7 +259,8 @@ class GoCodeGenerator:
             logger.info("No simple types found to generate in common file.")
             return
 
-        go_code = "package e1ap_ies\n\nimport \"fmt\"\n\n"
+        # Start with package and necessary imports for validation errors
+        go_code = "package e1ap_ies\n\nimport (\n\t\"fmt\"\n\t\"github.com/lvdund/ngap/aper\"\n)\n\n"
         
         from collections import defaultdict
         type_counts = defaultdict(int)
@@ -279,12 +277,16 @@ class GoCodeGenerator:
             is_redundant_builtin = item.is_builtin and go_name.lower() == go_base_type.lower()
             if go_name.lower() != go_base_type.lower() and not is_redundant_builtin:
                 
-                original_comment = f"// From: {item.source_file}:{item.source_line}"
-                go_code += f"type {go_name} {go_base_type} {original_comment}\n\n"
+                go_code += self._generate_header_comment(final_item, go_name)
+                go_code += f"type {go_name} {go_base_type}\n\n"
                 
                 has_constraints = final_item.min_val is not None
                 
-                if has_constraints:
+                # Only generate validation for types where it makes sense.
+                is_validatable_integer = (final_item.type == "INTEGER" and final_item.max_val != "18446744073709551615")
+                is_validatable_octet_string = final_item.type == "OCTET STRING"
+
+                if has_constraints and (is_validatable_integer or is_validatable_octet_string):
                     min_val_unformatted = final_item.min_val
                     max_val_unformatted = final_item.max_val if final_item.max_val is not None else final_item.min_val
                     
@@ -309,6 +311,7 @@ class GoCodeGenerator:
                         go_code += f"\tMax{go_name} {go_name} = {max_val_assign}\n"
                         go_code += ")\n\n"
 
+                    go_code += f"// Validate checks if the value is within the specified range.\n"
                     go_code += f"func (v {go_name}) Validate() error {{\n"
                     
                     min_check = f"Min{go_name}" if min_val_str != max_val_str else min_val_assign
@@ -317,10 +320,10 @@ class GoCodeGenerator:
                     check_logic = ""
                     error_range_str = ""
                     
-                    if final_item.type == "BIT STRING" or final_item.type == "OCTET STRING":
+                    if final_item.type == "OCTET STRING":
                         check_logic = f"len(v) < int({min_check}) || len(v) > int({max_check})"
                         error_range_str = f"length ({min_check}..{max_check})"
-                    else:
+                    else: # INTEGER
                         check_logic = f"v < {min_check} || v > {max_check}"
                         error_range_str = f"range ({min_check}..{max_check})"
 
@@ -354,9 +357,7 @@ class GoCodeGenerator:
 
         type_counts = { "SEQUENCE": 0, "CHOICE": 0, "ENUMERATED": 0, "LIST": 0 }
         
-        # --- PASS 1: Generate all non-list types (SEQUENCE, CHOICE, ENUMERATED) ---
-        # This ensures all ITEM structs exist before any LISTs that reference them are created.
-        
+        # --- PASS 1: Generate all non-list types ---
         logger.info("Complex types pass 1: Generating SEQUENCE, CHOICE, and ENUMERATED files...")
         for item in complex_items:
             if item.type in ["SEQUENCE", "CHOICE", "ENUMERATED"]:
@@ -364,12 +365,28 @@ class GoCodeGenerator:
                 filename = self._go_name_to_snake_case(go_name) + ".go"
                 file_path = os.path.join(self.output_dir, filename)
                 
-                item_code = f"// {go_name} From: {item.source_file}:{item.source_line}\n"
+                item_code = self._generate_header_comment(item, go_name)
                 item_code += self._generate_code_for_item(item)
                 
                 file_content = "package e1ap_ies\n\n"
-                if item.type == "ENUMERATED":
-                    file_content += 'import "github.com/lvdund/ngap/aper"\n\n'
+                
+                imports = set()
+                # ENUMERATED and CHOICE types always need the aper library.
+                if item.type in ["ENUMERATED", "CHOICE"]:
+                    imports.add('"github.com/lvdund/ngap/aper"')
+
+                # PDU SEQUENCE types need all three imports for their Encode/Decode methods.
+                is_pdu = item.type == "SEQUENCE" and item.ies and 'id' in item.ies[0]
+                if is_pdu:
+                    imports.add('"fmt"')
+                    imports.add('"io"')
+                    imports.add('"github.com/lvdund/ngap/aper"')
+
+                if imports:
+                    file_content += "import (\n"
+                    for imp in sorted(list(imports)):
+                        file_content += f"\t{imp}\n"
+                    file_content += ")\n\n"
                 
                 file_content += item_code
                 with open(file_path, "w", encoding="utf-8") as f:
@@ -381,7 +398,6 @@ class GoCodeGenerator:
 
         # --- PASS 2: Generate all LIST types ---
         # These files will now correctly reference the item files created in Pass 1.
-        
         logger.info("Complex types pass 2: Generating LIST files...")
         for item in complex_items:
             if item.type == "LIST":
@@ -395,7 +411,7 @@ class GoCodeGenerator:
 
                 of_type_go_name = self._standard_string(item.of_type)
                 
-                item_code = f"// {go_name} From: {item.source_file}:{item.source_line}\n"
+                item_code = self._generate_header_comment(item, go_name)
                 item_code += f"type {go_name} []{of_type_go_name}\n"
 
                 file_content = f"package e1ap_ies\n\n{item_code}"
@@ -413,8 +429,10 @@ class GoCodeGenerator:
                 if count > 0:
                     logger.info(f"SUCCESS: Wrote {count} {def_type} definitions to individual files.")
 
+
     def _generate_code_for_item(self, item: Any) -> str:
-        """Generates the Go code string for a single complex ASN.1 definition."""
+        """Generates the Go code string for a single complex ASN.1 definition,
+           including advanced Encode/Decode methods for PDUs."""
         go_name = self._standard_string(item.name)
         item_code = ""
 
@@ -430,6 +448,11 @@ class GoCodeGenerator:
             item_code += "}\n"
 
         elif item.type == "SEQUENCE":
+            # Heuristic: A SEQUENCE is a PDU if its members were expanded from a manifest.
+            # We check if the 'id' key exists in the FIRST member as a reliable indicator.
+            is_pdu = item.ies and 'id' in item.ies[0]
+
+            # 1. Generate the Struct Definition
             item_code += f"type {go_name} struct {{\n"
             for member in item.ies:
                 member_go_name = self._standard_string(member['ie'])
@@ -458,12 +481,82 @@ class GoCodeGenerator:
                 tag_parts.append(member['presence'])
                 if 'criticality' in member:
                     tag_parts.append(member['criticality'])
+
                 if item.is_extensible:
                     tag_parts.append("ext")
                 
-                tag_string = f'`asn1:"{",".join(tag_parts)}"`'
+                tag_string = f'`aper:"{",".join(tag_parts)}"`'
                 item_code += f"\t{member_go_name}\t{pointer}{final_go_type}\t{tag_string}\n"
-            item_code += "}\n"
+            item_code += "}\n\n"
+
+            # 2. If it's a PDU, generate the advanced methods
+            if is_pdu:
+                # --- The toIes() method ---
+                item_code += f"// toIes converts the PDU struct into a list of generic IEs.\n"
+                item_code += f"func (s *{go_name}) toIes() ([]E1apMessageIE, error) {{\n"
+                item_code += "\ties := []E1apMessageIE{}\n"
+                item_code += "\tvar err error\n\n"
+
+                for member in item.ies:
+                    member_go_name = self._standard_string(member['ie'])
+                    
+                    # This code is now safe because we know 'id' exists for all members of a PDU.
+                    ie_id_name = self._standard_string(member['id'].replace("id-",""))
+                    crit_name = self._standard_string(member['criticality'])
+                    _, concrete_def = self._resolve_go_type(member['type'])
+                    
+                    is_optional = member['presence'] == 'optional'
+
+                    if is_optional:
+                        item_code += f"\tif s.{member_go_name} != nil {{\n\t" # Indent for optional block
+                    
+                    item_code += "\ties = append(ies, E1apMessageIE{\n"
+                    item_code += f"\t\tId:          ProtocolIEID{{Value: ProtocolIEID_{ie_id_name}}},\n"
+                    item_code += f"\t\tCriticality: Criticality{{Value: Criticality_Present{crit_name}}},\n"
+                    
+                    value_code = "nil // TODO: Implement value encoding"
+                    if concrete_def:
+                        val_prefix = "s." if not is_optional else "(*s."
+                        val_suffix = "" if not is_optional else ")"
+                        
+                        if concrete_def.type == "INTEGER":
+                            value_code = f"&INTEGER{{Value: {val_prefix}{member_go_name}{val_suffix}}}"
+                        elif concrete_def.type == "OCTET STRING":
+                            value_code = f"&OCTETSTRING{{Value: {val_prefix}{member_go_name}{val_suffix}}}"
+                        elif concrete_def.type == "BIT STRING":
+                            value_code = f"&BITSTRING{{Value: {val_prefix}{member_go_name}{val_suffix}}}"
+                        elif concrete_def.type in ["SEQUENCE", "CHOICE", "LIST", "ENUMERATED"]:
+                            value_code = f"s.{member_go_name}"
+
+                    item_code += f"\t\tValue: {value_code},\n"
+                    item_code += "\t})\n"
+
+                    if is_optional:
+                        item_code += f"\t}}\n\n"
+
+                item_code += "\treturn ies, err\n}\n\n"
+
+                # --- The Encode() method ---
+                message_category = self.message_to_procedure_map.get(item.name, "Unknown")
+                pdu_type = f"E1apPdu{message_category}"
+                
+                proc_code = "0 // TODO: Find ProcedureCode"
+                for proc in self.procedures.values():
+                    if proc.initiating_message == item.name or proc.successful_outcome == item.name or proc.unsuccessful_outcome == item.name:
+                        if proc.procedure_code:
+                            proc_code = f"ProcedureCode_{self._standard_string(proc.procedure_code.replace('id-',''))}"
+                        break
+                
+                item_code += f"// Encode implements the aper.AperMarshaller interface.\n"
+                item_code += f"func (s *{go_name}) Encode(w io.Writer) error {{\n"
+                item_code += "\ties, err := s.toIes()\n"
+                item_code += "\tif err != nil {\n\t\treturn fmt.Errorf(\"Encode %s failed: %v\", \"{go_name}\", err)\n\t}\n"
+                item_code += f"\treturn encodeMessage(w, {pdu_type}, {proc_code}, Criticality_PresentIgnore, ies)\n}}\n\n"
+                
+                # --- The Decode() method ---
+                item_code += f"// Decode implements the aper.AperUnmarshaller interface.\n"
+                item_code += f"func (s *{go_name}) Decode(r io.Reader) error {{\n"
+                item_code += "\treturn fmt.Errorf(\"Decode not implemented for {go_name}\")\n}}\n\n"
 
         elif item.type == "CHOICE":
             item_code += "const (\n"
@@ -489,103 +582,6 @@ class GoCodeGenerator:
             
         return item_code
 
-
-    def _format_generated_code(self):
-        """Runs gofmt and goimports on the output directory."""
-        logger.info("Formatting generated Go code...")
-        try:
-            os.system(f"goimports -w {self.output_dir}")
-            os.system(f"gofmt -w {self.output_dir}")
-            logger.info("Formatting complete.")
-        except Exception as e:
-            logger.warning(f"Could not format Go code. Please run 'goimports -w' and 'gofmt -w' on the '{self.output_dir}' directory manually. Error: {e}")
-
-    def _combine_list_item_files(self):
-        """
-        POST-PROCESSING STEP: Finds list-item pairs and merges them into a single file.
-        This runs after all individual files have been generated.
-        """
-        logger.info("--- STAGE 3.5: COMBINING LIST/ITEM FILES ---")
-        
-        items_to_combine = {} # Maps a list file to the item file it needs to absorb
-
-        # First, identify all the pairs we need to process
-        for item in self.definitions.values():
-            if item.type == "LIST" and item.of_type:
-                item_def = self.definitions.get(item.of_type)
-                
-                # We only combine if the item is a complex type (not a simple alias)
-                if item_def and item_def.type in ["SEQUENCE", "CHOICE", "ENUMERATED"]:
-                    list_name = self._standard_string(item.name)
-                    item_name = self._standard_string(item_def.name)
-
-                    list_filename = self._go_name_to_snake_case(list_name) + ".go"
-                    item_filename = self._go_name_to_snake_case(item_name) + ".go"
-                    
-                    # Store the relationship
-                    items_to_combine[list_filename] = item_filename
-        
-        combined_count = 0
-        # Now, perform the file operations
-        for list_filename, item_filename in items_to_combine.items():
-            
-            # Check if both files were actually generated before trying to merge
-            if list_filename not in self.generated_files or item_filename not in self.generated_files:
-                continue
-
-            list_filepath = os.path.join(self.output_dir, list_filename)
-            item_filepath = os.path.join(self.output_dir, item_filename)
-
-            try:
-                # 1. Read all content from the item file
-                with open(item_filepath, "r", encoding="utf-8") as f_item:
-                    item_lines = f_item.read().splitlines()
-
-                # 2. Read all content from the list file
-                with open(list_filepath, "r", encoding="utf-8") as f_list:
-                    list_lines = f_list.read().splitlines()
-
-                # 3. Smartly merge imports
-                list_imports = {line for line in list_lines if line.strip().startswith('import ')}
-                item_imports = {line for line in item_lines if line.strip().startswith('import ')}
-                
-                # Combine unique imports
-                all_imports = sorted(list(list_imports.union(item_imports)))
-
-                # 4. Reconstruct the final file content
-                final_content = ["package e1ap_ies\n"]
-                if all_imports:
-                    final_content.append("\n".join(all_imports) + "\n")
-
-                # Add content from the list file (skipping package/imports)
-                for line in list_lines:
-                    if not (line.strip().startswith('package ') or line.strip().startswith('import ')):
-                        final_content.append(line)
-                
-                final_content.append("") # Add a newline for separation
-
-                # Add content from the item file (skipping package/imports)
-                for line in item_lines:
-                     if not (line.strip().startswith('package ') or line.strip().startswith('import ')):
-                        final_content.append(line)
-
-                # 5. Write the new combined content back to the list file
-                with open(list_filepath, "w", encoding="utf-8") as f_final:
-                    f_final.write("\n".join(final_content))
-                
-                # 6. Delete the original item file
-                os.remove(item_filepath)
-                self.generated_files.remove(item_filename)
-                combined_count += 1
-                logger.info(f"Successfully combined '{item_filename}' into '{list_filename}'.")
-
-            except Exception as e:
-                logger.warning(f"Could not combine {item_filename} into {list_filename}. Error: {e}")
-        
-        if combined_count > 0:
-            logger.info(f"--- COMBINING COMPLETE: Merged {combined_count} item files. ---")
-        else:
-            logger.info("--- No list-item files to combine. ---")
 
     def run_full_diagnostic(self):
         print("\n" + "=" * 80)

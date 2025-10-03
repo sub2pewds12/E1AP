@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // PDUSessionType From: 9_4_5_Information_Element_Definitions.txt:1899
+// ASN.1 Data Type: ENUMERATED
 const (
 	PDUSessionTypeIpv4         aper.Enumerated = 0
 	PDUSessionTypeIpv6         aper.Enumerated = 1

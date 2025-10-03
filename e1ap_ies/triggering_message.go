@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // TriggeringMessage From: 9_4_6_Common_Definitions.txt:49
+// ASN.1 Data Type: ENUMERATED
 const (
 	TriggeringMessageInitiatingMessage   aper.Enumerated = 0
 	TriggeringMessageSuccessfulOutcome   aper.Enumerated = 1

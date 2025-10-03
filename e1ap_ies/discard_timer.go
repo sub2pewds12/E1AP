@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // DiscardTimer From: 9_4_5_Information_Element_Definitions.txt:391
+// ASN.1 Data Type: ENUMERATED
 const (
 	DiscardTimerMs10     aper.Enumerated = 0
 	DiscardTimerMs20     aper.Enumerated = 1

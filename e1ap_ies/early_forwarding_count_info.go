@@ -1,6 +1,7 @@
 package e1ap_ies
 
 // EarlyForwardingCOUNTInfo From: 9_4_5_Information_Element_Definitions.txt:965
+// ASN.1 Data Type: CHOICE
 const (
 	EarlyForwardingCOUNTInfoPresentNothing uint64 = iota
 	EarlyForwardingCOUNTInfoPresentFirstDLCount

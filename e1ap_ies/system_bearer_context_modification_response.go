@@ -1,6 +1,7 @@
 package e1ap_ies
 
 // SystemBearerContextModificationResponse From: 9_4_4_PDU_Definitions.txt:861
+// ASN.1 Data Type: CHOICE
 const (
 	SystemBearerContextModificationResponsePresentNothing uint64 = iota
 	SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN

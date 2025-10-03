@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // IntegrityProtectionAlgorithm From: 9_4_5_Information_Element_Definitions.txt:1248
+// ASN.1 Data Type: ENUMERATED
 const (
 	IntegrityProtectionAlgorithmNIA0     aper.Enumerated = 0
 	IntegrityProtectionAlgorithmI128NIA1 aper.Enumerated = 1

@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // DataDiscardRequired From: 9_4_5_Information_Element_Definitions.txt:958
+// ASN.1 Data Type: ENUMERATED
 const (
 	DataDiscardRequiredRequired aper.Enumerated = 0
 )

@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // M4period From: 9_4_5_Information_Element_Definitions.txt:1350
+// ASN.1 Data Type: ENUMERATED
 const (
 	M4periodMs1024  aper.Enumerated = 0
 	M4periodMs2048  aper.Enumerated = 1

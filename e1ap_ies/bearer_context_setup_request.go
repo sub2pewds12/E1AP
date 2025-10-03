@@ -1,20 +1,23 @@
 package e1ap_ies
 
+import "github.com/lvdund/ngap/aper"
+
 // BearerContextSetupRequest From: 9_4_4_PDU_Definitions.txt:672
+// ASN.1 Data Type: SEQUENCE
 type BearerContextSetupRequest struct {
-	GNBCUCPUEE1APID                       int64                           `asn1:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	SecurityInformation                   SecurityInformation             `asn1:"mandatory,reject,ext"`
-	UEDLAggregateMaximumBitRate           int64                           `asn1:"mandatory,reject,ext"`
-	UEDLMaximumIntegrityProtectedDataRate *int64                          `asn1:"optional,reject,ext"`
-	ServingPLMN                           []byte                          `asn1:"lb:3,ub:3,mandatory,ignore,ext"`
-	ActivityNotificationLevel             ActivityNotificationLevel       `asn1:"mandatory,reject,ext"`
-	UEInactivityTimer                     *int64                          `asn1:"optional,reject,ext"`
-	BearerContextStatusChange             *BearerContextStatusChange      `asn1:"optional,reject,ext"`
-	SystemBearerContextSetupRequest       SystemBearerContextSetupRequest `asn1:"mandatory,reject,ext"`
-	RANUEID                               *[]byte                         `asn1:"lb:8,ub:8,optional,ignore,ext"`
-	GNBDUID                               *int64                          `asn1:"lb:0,ub:68719476735,optional,ignore,ext"`
-	TraceActivation                       *TraceActivation                `asn1:"optional,ignore,ext"`
-	NPNContextInfo                        *NPNContextInfo                 `asn1:"optional,reject,ext"`
-	ManagementBasedMDTPLMNList            []PLMNIdentity                  `asn1:"lb:1,ub:MaxnoofMDTPLMNs,optional,ignore,ext"`
-	CHOInitiation                         *CHOInitiation                  `asn1:"optional,reject,ext"`
+	GNBCUCPUEE1APID                       aper.Integer                    `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	SecurityInformation                   SecurityInformation             `aper:"mandatory,reject,ext"`
+	UEDLAggregateMaximumBitRate           aper.Integer                    `aper:"mandatory,reject,ext"`
+	UEDLMaximumIntegrityProtectedDataRate *aper.Integer                   `aper:"optional,reject,ext"`
+	ServingPLMN                           aper.OctetString                `aper:"lb:3,ub:3,mandatory,ignore,ext"`
+	ActivityNotificationLevel             ActivityNotificationLevel       `aper:"mandatory,reject,ext"`
+	UEInactivityTimer                     *aper.Integer                   `aper:"optional,reject,ext"`
+	BearerContextStatusChange             *BearerContextStatusChange      `aper:"optional,reject,ext"`
+	SystemBearerContextSetupRequest       SystemBearerContextSetupRequest `aper:"mandatory,reject,ext"`
+	RANUEID                               *aper.OctetString               `aper:"lb:8,ub:8,optional,ignore,ext"`
+	GNBDUID                               *aper.Integer                   `aper:"lb:0,ub:68719476735,optional,ignore,ext"`
+	TraceActivation                       *TraceActivation                `aper:"optional,ignore,ext"`
+	NPNContextInfo                        *NPNContextInfo                 `aper:"optional,reject,ext"`
+	ManagementBasedMDTPLMNList            []PLMNIdentity                  `aper:"lb:1,ub:MaxnoofMDTPLMNs,optional,ignore,ext"`
+	CHOInitiation                         *CHOInitiation                  `aper:"optional,reject,ext"`
 }

@@ -17,3 +17,12 @@ class ASN1Definition:
         self.of_type: Optional[str] = None
         self.is_builtin: bool = False
         self.is_synthetic: bool = False
+
+class ASN1Procedure:
+    """A simple container for a parsed E1AP Elementary Procedure."""
+    def __init__(self, name: str):
+        self.name: str = name
+        self.initiating_message: Optional[str] = None
+        self.successful_outcome: Optional[str] = None
+        self.unsuccessful_outcome: Optional[str] = None
+        self.procedure_code: Optional[str] = None

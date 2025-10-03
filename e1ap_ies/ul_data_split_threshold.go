@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // ULDataSplitThreshold From: 9_4_5_Information_Element_Definitions.txt:2393
+// ASN.1 Data Type: ENUMERATED
 const (
 	ULDataSplitThresholdB0       aper.Enumerated = 0
 	ULDataSplitThresholdB100     aper.Enumerated = 1

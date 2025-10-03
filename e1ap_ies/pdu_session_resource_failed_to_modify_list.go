@@ -1,10 +1,5 @@
 package e1ap_ies
 
 // PDUSessionResourceFailedToModifyList From: 9_4_5_Information_Element_Definitions.txt:1706
+// ASN.1 Data Type: LIST
 type PDUSessionResourceFailedToModifyList []PDUSessionResourceFailedToModifyItem
-
-// PDUSessionResourceFailedToModifyItem From: 9_4_5_Information_Element_Definitions.txt:1708
-type PDUSessionResourceFailedToModifyItem struct {
-	PDUSessionID int64 `asn1:"lb:0,ub:255,mandatory,ext"`
-	Cause        Cause `asn1:"mandatory,ext"`
-}

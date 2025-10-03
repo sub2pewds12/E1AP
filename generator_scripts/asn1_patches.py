@@ -52,5 +52,28 @@ class ASN1Patcher:
         )
         diag_list.of_type = "CriticalityDiagnostics-IE-Item"
         definitions.append(diag_list)
+    
+        diag_item = ASN1Definition(
+            name="CriticalityDiagnostics-IE-Item",
+            def_type="SEQUENCE",
+            source_file="manual_patch",
+            full_text="MANUALLY CREATED DEFINITION FOR CriticalityDiagnostics-IE-Item"
+        )
+        # Manually add its members based on the ASN.1 spec
+        diag_item.ies.extend([
+            {"ie": "iECriticality", "type": "Criticality", "presence": "mandatory", "criticality": "ignore"},
+            {"ie": "iE-ID", "type": "ProtocolIE-ID", "presence": "mandatory", "criticality": "ignore"},
+            {"ie": "typeOfError", "type": "TypeOfError", "presence": "mandatory", "criticality": "ignore"},
+        ])
+        definitions.append(diag_item)
 
+        diag_list = ASN1Definition(
+            name="CriticalityDiagnostics-IE-List",
+            def_type="LIST",
+            source_file="manual_patch",
+            full_text="MANUALLY CREATED DEFINITION FOR CriticalityDiagnostics-IE-List"
+        )
+        diag_list.of_type = "CriticalityDiagnostics-IE-Item" # Link it to the item
+        definitions.append(diag_list)
+        
         return definitions

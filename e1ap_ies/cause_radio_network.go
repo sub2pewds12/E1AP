@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // CauseRadioNetwork From: 9_4_5_Information_Element_Definitions.txt:173
+// ASN.1 Data Type: ENUMERATED
 const (
 	CauseRadioNetworkUnspecified                               aper.Enumerated = 0
 	CauseRadioNetworkUnknownOrAlreadyAllocatedGNBCUCPUeE1APID  aper.Enumerated = 1

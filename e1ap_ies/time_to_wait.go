@@ -1,8 +1,11 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // TimeToWait From: 9_4_5_Information_Element_Definitions.txt:2224
+// ASN.1 Data Type: ENUMERATED
 const (
 	TimeToWaitV1s  aper.Enumerated = 0
 	TimeToWaitV2s  aper.Enumerated = 1
