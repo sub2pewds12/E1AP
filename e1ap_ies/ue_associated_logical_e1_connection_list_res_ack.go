@@ -1,5 +1,4 @@
 package e1ap_ies
 
 // UEAssociatedLogicalE1ConnectionListResAck From: 9_4_4_PDU_Definitions.txt:304
-// ASN.1 Data Type: LIST
 type UEAssociatedLogicalE1ConnectionListResAck []ProtocolIESingleContainer

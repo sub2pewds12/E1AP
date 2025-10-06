@@ -1,16 +1,6 @@
 package e1ap_ies
 
-// SystemBearerContextModificationResponse From: 9_4_4_PDU_Definitions.txt:861
-// ASN.1 Data Type: CHOICE
-const (
-	SystemBearerContextModificationResponsePresentNothing uint64 = iota
-	SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN
-	SystemBearerContextModificationResponsePresentDRBFailedModListEUTRAN
-	SystemBearerContextModificationResponsePresentDRBModifiedListEUTRAN
-	SystemBearerContextModificationResponsePresentDRBFailedToModifyListEUTRAN
-	SystemBearerContextModificationResponsePresentRetainabilityMeasurementsInfo
-)
-
+// SystemBearerContextModificationResponse is a generated CHOICE type.
 type SystemBearerContextModificationResponse struct {
 	Choice                        uint64
 	DRBSetupModListEUTRAN         []DRBSetupModItemEUTRAN
@@ -19,3 +9,12 @@ type SystemBearerContextModificationResponse struct {
 	DRBFailedToModifyListEUTRAN   []DRBFailedToModifyItemEUTRAN
 	RetainabilityMeasurementsInfo []DRBRemovedItem
 }
+
+const (
+	SystemBearerContextModificationResponsePresentNothing uint64 = iota
+	SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN
+	SystemBearerContextModificationResponsePresentDRBFailedModListEUTRAN
+	SystemBearerContextModificationResponsePresentDRBModifiedListEUTRAN
+	SystemBearerContextModificationResponsePresentDRBFailedToModifyListEUTRAN
+	SystemBearerContextModificationResponsePresentRetainabilityMeasurementsInfo
+)

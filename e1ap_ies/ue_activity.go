@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// UEActivity From: 9_4_5_Information_Element_Definitions.txt:2358
-// ASN.1 Data Type: ENUMERATED
+// UEActivity is a generated ENUMERATED type.
+type UEActivity struct {
+	Value aper.Enumerated
+}
+
 const (
 	UEActivityActive    aper.Enumerated = 0
 	UEActivityNotActive aper.Enumerated = 1
 )
-
-type UEActivity struct {
-	Value aper.Enumerated
-}

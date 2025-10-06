@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// M6reportInterval From: 9_4_5_Information_Element_Definitions.txt:1363
-// ASN.1 Data Type: ENUMERATED
+// M6reportInterval is a generated ENUMERATED type.
+type M6reportInterval struct {
+	Value aper.Enumerated
+}
+
 const (
 	M6reportIntervalMs120   aper.Enumerated = 0
 	M6reportIntervalMs240   aper.Enumerated = 1
@@ -22,7 +25,3 @@ const (
 	M6reportIntervalMin12   aper.Enumerated = 12
 	M6reportIntervalMin30   aper.Enumerated = 13
 )
-
-type M6reportInterval struct {
-	Value aper.Enumerated
-}

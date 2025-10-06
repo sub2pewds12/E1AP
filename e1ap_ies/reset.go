@@ -1,11 +1,27 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"fmt"
+	"io"
 
-// Reset From: 9_4_4_PDU_Definitions.txt:249
-// ASN.1 Data Type: SEQUENCE
+	"github.com/lvdund/ngap/aper"
+)
+
+// Reset is a generated SEQUENCE type.
 type Reset struct {
-	TransactionID aper.Integer `aper:"mandatory,reject,ext"`
+	TransactionID aper.Integer `aper:"lb:0,ub:255,mandatory,reject,ext"`
 	Cause         Cause        `aper:"mandatory,ignore,ext"`
 	ResetType     ResetType    `aper:"mandatory,reject,ext"`
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *Reset) Encode(w io.Writer) error {
+	_ = w // Placeholder to prevent unused import warning
+	return fmt.Errorf("Encode not implemented for Reset")
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *Reset) Decode(r io.Reader) error {
+	_ = r // Placeholder to prevent unused import warning
+	return fmt.Errorf("Decode not implemented for Reset")
 }

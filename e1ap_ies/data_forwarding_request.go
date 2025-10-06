@@ -4,14 +4,13 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// DataForwardingRequest From: 9_4_5_Information_Element_Definitions.txt:339
-// ASN.1 Data Type: ENUMERATED
+// DataForwardingRequest is a generated ENUMERATED type.
+type DataForwardingRequest struct {
+	Value aper.Enumerated
+}
+
 const (
 	DataForwardingRequestUL   aper.Enumerated = 0
 	DataForwardingRequestDL   aper.Enumerated = 1
 	DataForwardingRequestBoth aper.Enumerated = 2
 )
-
-type DataForwardingRequest struct {
-	Value aper.Enumerated
-}

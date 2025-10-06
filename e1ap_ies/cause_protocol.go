@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// CauseProtocol From: 9_4_5_Information_Element_Definitions.txt:162
-// ASN.1 Data Type: ENUMERATED
+// CauseProtocol is a generated ENUMERATED type.
+type CauseProtocol struct {
+	Value aper.Enumerated
+}
+
 const (
 	CauseProtocolTransferSyntaxError                          aper.Enumerated = 0
 	CauseProtocolAbstractSyntaxErrorReject                    aper.Enumerated = 1
@@ -15,7 +18,3 @@ const (
 	CauseProtocolAbstractSyntaxErrorFalselyConstructedMessage aper.Enumerated = 5
 	CauseProtocolUnspecified                                  aper.Enumerated = 6
 )
-
-type CauseProtocol struct {
-	Value aper.Enumerated
-}

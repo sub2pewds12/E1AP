@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// RATType From: 9_4_5_Information_Element_Definitions.txt:2059
-// ASN.1 Data Type: ENUMERATED
+// RATType is a generated ENUMERATED type.
+type RATType struct {
+	Value aper.Enumerated
+}
+
 const (
 	RATTypeEUTRA aper.Enumerated = 0
 	RATTypeNR    aper.Enumerated = 1
 )
-
-type RATType struct {
-	Value aper.Enumerated
-}

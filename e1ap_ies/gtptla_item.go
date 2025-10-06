@@ -1,9 +1,25 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"fmt"
+	"io"
 
-// GTPTLAItem From: 9_4_5_Information_Element_Definitions.txt:1198
-// ASN.1 Data Type: SEQUENCE
+	"github.com/lvdund/ngap/aper"
+)
+
+// GTPTLAItem is a generated SEQUENCE type.
 type GTPTLAItem struct {
-	GTPTransportLayerAddresses aper.BitString `aper:"mandatory,ignore,ext"`
+	GTPTransportLayerAddresses aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GTPTLAItem) Encode(w io.Writer) error {
+	_ = w // Placeholder to prevent unused import warning
+	return fmt.Errorf("Encode not implemented for GTPTLAItem")
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GTPTLAItem) Decode(r io.Reader) error {
+	_ = r // Placeholder to prevent unused import warning
+	return fmt.Errorf("Decode not implemented for GTPTLAItem")
 }

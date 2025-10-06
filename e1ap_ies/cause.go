@@ -1,15 +1,6 @@
 package e1ap_ies
 
-// Cause From: 9_4_5_Information_Element_Definitions.txt:141
-// ASN.1 Data Type: CHOICE
-const (
-	CausePresentNothing uint64 = iota
-	CausePresentRadioNetwork
-	CausePresentTransport
-	CausePresentProtocol
-	CausePresentMisc
-)
-
+// Cause is a generated CHOICE type.
 type Cause struct {
 	Choice       uint64
 	RadioNetwork *CauseRadioNetwork
@@ -17,3 +8,11 @@ type Cause struct {
 	Protocol     *CauseProtocol
 	Misc         *CauseMisc
 }
+
+const (
+	CausePresentNothing uint64 = iota
+	CausePresentRadioNetwork
+	CausePresentTransport
+	CausePresentProtocol
+	CausePresentMisc
+)

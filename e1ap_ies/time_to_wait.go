@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// TimeToWait From: 9_4_5_Information_Element_Definitions.txt:2224
-// ASN.1 Data Type: ENUMERATED
+// TimeToWait is a generated ENUMERATED type.
+type TimeToWait struct {
+	Value aper.Enumerated
+}
+
 const (
 	TimeToWaitV1s  aper.Enumerated = 0
 	TimeToWaitV2s  aper.Enumerated = 1
@@ -14,7 +17,3 @@ const (
 	TimeToWaitV20s aper.Enumerated = 4
 	TimeToWaitV60s aper.Enumerated = 5
 )
-
-type TimeToWait struct {
-	Value aper.Enumerated
-}

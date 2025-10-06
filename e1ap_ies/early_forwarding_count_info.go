@@ -1,17 +1,16 @@
 package e1ap_ies
 
-// EarlyForwardingCOUNTInfo From: 9_4_5_Information_Element_Definitions.txt:965
-// ASN.1 Data Type: CHOICE
-const (
-	EarlyForwardingCOUNTInfoPresentNothing uint64 = iota
-	EarlyForwardingCOUNTInfoPresentFirstDLCount
-	EarlyForwardingCOUNTInfoPresentDLDiscardingCount
-	EarlyForwardingCOUNTInfoPresentChoiceExtension
-)
-
+// EarlyForwardingCOUNTInfo is a generated CHOICE type.
 type EarlyForwardingCOUNTInfo struct {
 	Choice            uint64
 	FirstDLCount      *FirstDLCount
 	DLDiscardingCount *DLDiscarding
 	ChoiceExtension   *ProtocolIESingleContainer
 }
+
+const (
+	EarlyForwardingCOUNTInfoPresentNothing uint64 = iota
+	EarlyForwardingCOUNTInfoPresentFirstDLCount
+	EarlyForwardingCOUNTInfoPresentDLDiscardingCount
+	EarlyForwardingCOUNTInfoPresentChoiceExtension
+)

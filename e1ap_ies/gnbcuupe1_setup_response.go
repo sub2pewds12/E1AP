@@ -1,11 +1,27 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"fmt"
+	"io"
 
-// GNBCUUPE1SetupResponse From: 9_4_4_PDU_Definitions.txt:384
-// ASN.1 Data Type: SEQUENCE
+	"github.com/lvdund/ngap/aper"
+)
+
+// GNBCUUPE1SetupResponse is a generated SEQUENCE type.
 type GNBCUUPE1SetupResponse struct {
-	TransactionID             aper.Integer               `aper:"mandatory,reject,ext"`
+	TransactionID             aper.Integer               `aper:"lb:0,ub:255,mandatory,reject,ext"`
 	GNBCUCPName               *aper.OctetString          `aper:"optional,ignore,ext"`
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ignore,ext"`
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPE1SetupResponse) Encode(w io.Writer) error {
+	_ = w // Placeholder to prevent unused import warning
+	return fmt.Errorf("Encode not implemented for GNBCUUPE1SetupResponse")
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPE1SetupResponse) Decode(r io.Reader) error {
+	_ = r // Placeholder to prevent unused import warning
+	return fmt.Errorf("Decode not implemented for GNBCUUPE1SetupResponse")
 }

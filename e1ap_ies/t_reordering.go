@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// TReordering From: 9_4_5_Information_Element_Definitions.txt:2301
-// ASN.1 Data Type: ENUMERATED
+// TReordering is a generated ENUMERATED type.
+type TReordering struct {
+	Value aper.Enumerated
+}
+
 const (
 	TReorderingMs0    aper.Enumerated = 0
 	TReorderingMs1    aper.Enumerated = 1
@@ -44,7 +47,3 @@ const (
 	TReorderingMs2750 aper.Enumerated = 34
 	TReorderingMs3000 aper.Enumerated = 35
 )
-
-type TReordering struct {
-	Value aper.Enumerated
-}

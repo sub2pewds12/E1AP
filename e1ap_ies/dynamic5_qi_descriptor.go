@@ -2,14 +2,13 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// Dynamic5QIDescriptor From: 9_4_5_Information_Element_Definitions.txt:940
-// ASN.1 Data Type: SEQUENCE
+// Dynamic5QIDescriptor is a generated SEQUENCE type.
 type Dynamic5QIDescriptor struct {
-	QoSPriorityLevel   aper.Integer                       `aper:"mandatory,ext"`
-	PacketDelayBudget  aper.Integer                       `aper:"mandatory,ext"`
+	QoSPriorityLevel   aper.Integer                       `aper:"lb:0,ub:127,mandatory,ext"`
+	PacketDelayBudget  aper.Integer                       `aper:"lb:0,ub:1023,mandatory,ext"`
 	PacketErrorRate    PacketErrorRate                    `aper:"mandatory,ext"`
-	FiveQI             *aper.Integer                      `aper:"optional,ext"`
+	FiveQI             *aper.Integer                      `aper:"lb:0,ub:255,optional,ext"`
 	DelayCritical      *Dynamic5QIDescriptorDelayCritical `aper:"optional,ext"`
-	AveragingWindow    *aper.Integer                      `aper:"optional,ext"`
-	MaxDataBurstVolume *aper.Integer                      `aper:"optional,ext"`
+	AveragingWindow    *aper.Integer                      `aper:"lb:0,ub:4095,optional,ext"`
+	MaxDataBurstVolume *aper.Integer                      `aper:"lb:0,ub:4095,optional,ext"`
 }

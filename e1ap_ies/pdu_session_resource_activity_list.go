@@ -1,5 +1,4 @@
 package e1ap_ies
 
 // PDUSessionResourceActivityList From: 9_4_5_Information_Element_Definitions.txt:1653
-// ASN.1 Data Type: LIST
 type PDUSessionResourceActivityList []PDUSessionResourceActivityItem

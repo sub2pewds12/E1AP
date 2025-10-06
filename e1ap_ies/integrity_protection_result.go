@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// IntegrityProtectionResult From: 9_4_5_Information_Element_Definitions.txt:1258
-// ASN.1 Data Type: ENUMERATED
+// IntegrityProtectionResult is a generated ENUMERATED type.
+type IntegrityProtectionResult struct {
+	Value aper.Enumerated
+}
+
 const (
 	IntegrityProtectionResultPerformed    aper.Enumerated = 0
 	IntegrityProtectionResultNotPerformed aper.Enumerated = 1
 )
-
-type IntegrityProtectionResult struct {
-	Value aper.Enumerated
-}

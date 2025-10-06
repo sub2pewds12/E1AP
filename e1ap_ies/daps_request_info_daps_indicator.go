@@ -4,12 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// DAPSRequestInfoDapsIndicator From: 9_4_5_Information_Element_Definitions.txt:307
-// ASN.1 Data Type: ENUMERATED
-const (
-	DAPSRequestInfoDapsIndicatorDapsHORequired aper.Enumerated = 0
-)
-
+// DAPSRequestInfoDapsIndicator is a generated ENUMERATED type.
 type DAPSRequestInfoDapsIndicator struct {
 	Value aper.Enumerated
 }
+
+const (
+	DAPSRequestInfoDapsIndicatorDapsHORequired aper.Enumerated = 0
+)

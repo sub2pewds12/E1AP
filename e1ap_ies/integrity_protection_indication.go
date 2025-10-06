@@ -4,14 +4,13 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// IntegrityProtectionIndication From: 9_4_5_Information_Element_Definitions.txt:1241
-// ASN.1 Data Type: ENUMERATED
+// IntegrityProtectionIndication is a generated ENUMERATED type.
+type IntegrityProtectionIndication struct {
+	Value aper.Enumerated
+}
+
 const (
 	IntegrityProtectionIndicationRequired  aper.Enumerated = 0
 	IntegrityProtectionIndicationPreferred aper.Enumerated = 1
 	IntegrityProtectionIndicationNotNeeded aper.Enumerated = 2
 )
-
-type IntegrityProtectionIndication struct {
-	Value aper.Enumerated
-}

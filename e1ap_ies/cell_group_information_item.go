@@ -2,10 +2,9 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// CellGroupInformationItem From: 9_4_5_Information_Element_Definitions.txt:216
-// ASN.1 Data Type: SEQUENCE
+// CellGroupInformationItem is a generated SEQUENCE type.
 type CellGroupInformationItem struct {
-	CellGroupID     aper.Integer     `aper:"mandatory,ext"`
+	CellGroupID     aper.Integer     `aper:"lb:0,ub:3,mandatory,ext"`
 	ULConfiguration *ULConfiguration `aper:"optional,ext"`
 	DLTXStop        *DLTXStop        `aper:"optional,ext"`
 	RATType         *RATType         `aper:"optional,ext"`

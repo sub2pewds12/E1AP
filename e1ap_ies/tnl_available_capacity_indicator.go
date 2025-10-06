@@ -2,11 +2,10 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// TNLAvailableCapacityIndicator From: 9_4_5_Information_Element_Definitions.txt:2233
-// ASN.1 Data Type: SEQUENCE
+// TNLAvailableCapacityIndicator is a generated SEQUENCE type.
 type TNLAvailableCapacityIndicator struct {
-	DLTNLOfferedCapacity   aper.Integer `aper:"mandatory,ext"`
-	DLTNLAvailableCapacity aper.Integer `aper:"mandatory,ext"`
-	ULTNLOfferedCapacity   aper.Integer `aper:"mandatory,ext"`
-	ULTNLAvailableCapacity aper.Integer `aper:"mandatory,ext"`
+	DLTNLOfferedCapacity   aper.Integer `aper:"lb:0,ub:16777216,mandatory,ext"`
+	DLTNLAvailableCapacity aper.Integer `aper:"lb:0,ub:100,mandatory,ext"`
+	ULTNLOfferedCapacity   aper.Integer `aper:"lb:0,ub:16777216,mandatory,ext"`
+	ULTNLAvailableCapacity aper.Integer `aper:"lb:0,ub:100,mandatory,ext"`
 }

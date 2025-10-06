@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// DuplicationActivation From: 9_4_5_Information_Element_Definitions.txt:933
-// ASN.1 Data Type: ENUMERATED
+// DuplicationActivation is a generated ENUMERATED type.
+type DuplicationActivation struct {
+	Value aper.Enumerated
+}
+
 const (
 	DuplicationActivationActive   aper.Enumerated = 0
 	DuplicationActivationInactive aper.Enumerated = 1
 )
-
-type DuplicationActivation struct {
-	Value aper.Enumerated
-}

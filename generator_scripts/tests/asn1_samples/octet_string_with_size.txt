@@ -1,0 +1,1 @@
+TransportLayerAddress ::= OCTET STRING (SIZE(4))

@@ -2,10 +2,9 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// GNBCUUPCellGroupRelatedConfigurationItem From: 9_4_5_Information_Element_Definitions.txt:1088
-// ASN.1 Data Type: SEQUENCE
+// GNBCUUPCellGroupRelatedConfigurationItem is a generated SEQUENCE type.
 type GNBCUUPCellGroupRelatedConfigurationItem struct {
-	CellGroupID      aper.Integer     `aper:"mandatory"`
+	CellGroupID      aper.Integer     `aper:"lb:0,ub:3,mandatory"`
 	UPTNLInformation UPTNLInformation `aper:"mandatory"`
 	ULConfiguration  *ULConfiguration `aper:"optional"`
 }

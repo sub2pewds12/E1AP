@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// RLCMode From: 9_4_5_Information_Element_Definitions.txt:2095
-// ASN.1 Data Type: ENUMERATED
+// RLCMode is a generated ENUMERATED type.
+type RLCMode struct {
+	Value aper.Enumerated
+}
+
 const (
 	RLCModeRlcTm                 aper.Enumerated = 0
 	RLCModeRlcAm                 aper.Enumerated = 1
@@ -13,7 +16,3 @@ const (
 	RLCModeRlcUmUnidirectionalUl aper.Enumerated = 3
 	RLCModeRlcUmUnidirectionalDl aper.Enumerated = 4
 )
-
-type RLCMode struct {
-	Value aper.Enumerated
-}

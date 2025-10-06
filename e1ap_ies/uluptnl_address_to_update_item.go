@@ -1,10 +1,26 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"fmt"
+	"io"
 
-// ULUPTNLAddressToUpdateItem From: 9_4_5_Information_Element_Definitions.txt:2382
-// ASN.1 Data Type: SEQUENCE
+	"github.com/lvdund/ngap/aper"
+)
+
+// ULUPTNLAddressToUpdateItem is a generated SEQUENCE type.
 type ULUPTNLAddressToUpdateItem struct {
-	OldTNLAdress aper.BitString `aper:"mandatory,ignore,ext"`
-	NewTNLAdress aper.BitString `aper:"mandatory,ignore,ext"`
+	OldTNLAdress aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	NewTNLAdress aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *ULUPTNLAddressToUpdateItem) Encode(w io.Writer) error {
+	_ = w // Placeholder to prevent unused import warning
+	return fmt.Errorf("Encode not implemented for ULUPTNLAddressToUpdateItem")
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ULUPTNLAddressToUpdateItem) Decode(r io.Reader) error {
+	_ = r // Placeholder to prevent unused import warning
+	return fmt.Errorf("Decode not implemented for ULUPTNLAddressToUpdateItem")
 }

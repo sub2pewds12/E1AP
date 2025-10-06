@@ -1,10 +1,26 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"fmt"
+	"io"
 
-// EndpointIPAddressAndPort From: 9_4_5_Information_Element_Definitions.txt:1017
-// ASN.1 Data Type: SEQUENCE
+	"github.com/lvdund/ngap/aper"
+)
+
+// EndpointIPAddressAndPort is a generated SEQUENCE type.
 type EndpointIPAddressAndPort struct {
-	EndpointIPAddress aper.BitString `aper:"mandatory,ignore"`
+	EndpointIPAddress aper.BitString `aper:"lb:1,ub:160,mandatory,ignore"`
 	PortNumber        aper.BitString `aper:"lb:16,ub:16,mandatory"`
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *EndpointIPAddressAndPort) Encode(w io.Writer) error {
+	_ = w // Placeholder to prevent unused import warning
+	return fmt.Errorf("Encode not implemented for EndpointIPAddressAndPort")
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *EndpointIPAddressAndPort) Decode(r io.Reader) error {
+	_ = r // Placeholder to prevent unused import warning
+	return fmt.Errorf("Decode not implemented for EndpointIPAddressAndPort")
 }

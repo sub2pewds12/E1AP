@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// ULDataSplitThreshold From: 9_4_5_Information_Element_Definitions.txt:2393
-// ASN.1 Data Type: ENUMERATED
+// ULDataSplitThreshold is a generated ENUMERATED type.
+type ULDataSplitThreshold struct {
+	Value aper.Enumerated
+}
+
 const (
 	ULDataSplitThresholdB0       aper.Enumerated = 0
 	ULDataSplitThresholdB100     aper.Enumerated = 1
@@ -32,7 +35,3 @@ const (
 	ULDataSplitThresholdB6553600 aper.Enumerated = 22
 	ULDataSplitThresholdInfinity aper.Enumerated = 23
 )
-
-type ULDataSplitThreshold struct {
-	Value aper.Enumerated
-}

@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// MaxIPrate From: 9_4_5_Information_Element_Definitions.txt:1307
-// ASN.1 Data Type: ENUMERATED
+// MaxIPrate is a generated ENUMERATED type.
+type MaxIPrate struct {
+	Value aper.Enumerated
+}
+
 const (
 	MaxIPrateBitrate64kbs aper.Enumerated = 0
 	MaxIPrateMaxUErate    aper.Enumerated = 1
 )
-
-type MaxIPrate struct {
-	Value aper.Enumerated
-}

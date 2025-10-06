@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// CauseRadioNetwork From: 9_4_5_Information_Element_Definitions.txt:173
-// ASN.1 Data Type: ENUMERATED
+// CauseRadioNetwork is a generated ENUMERATED type.
+type CauseRadioNetwork struct {
+	Value aper.Enumerated
+}
+
 const (
 	CauseRadioNetworkUnspecified                               aper.Enumerated = 0
 	CauseRadioNetworkUnknownOrAlreadyAllocatedGNBCUCPUeE1APID  aper.Enumerated = 1
@@ -38,7 +41,3 @@ const (
 	CauseRadioNetworkRsnNotAvailableForTheUP                   aper.Enumerated = 28
 	CauseRadioNetworkNPNNotSupported                           aper.Enumerated = 29
 )
-
-type CauseRadioNetwork struct {
-	Value aper.Enumerated
-}

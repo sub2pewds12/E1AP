@@ -4,12 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// ResetAll From: 9_4_4_PDU_Definitions.txt:271
-// ASN.1 Data Type: ENUMERATED
-const (
-	ResetAllResetAll aper.Enumerated = 0
-)
-
+// ResetAll is a generated ENUMERATED type.
 type ResetAll struct {
 	Value aper.Enumerated
 }
+
+const (
+	ResetAllResetAll aper.Enumerated = 0
+)

@@ -1,0 +1,8 @@
+DRB-Removed-Item ::= SEQUENCE { 
+   dRB-ID                          DRB-ID, 
+   dRB-Released-In-Session             ENUMERATED {released-in-session, not-released-in-session, ...}   OPTIONAL, 
+   dRB-Accumulated-Session-Time         OCTET STRING (SIZE(5))                                OPTIONAL, 
+   qoS-Flow-Removed-List              SEQUENCE (SIZE(1..maxnoofQoSFlows)) OF QoS-Flow-Removed-Item   OPTIONAL, 
+   iE-Extensions                    ProtocolExtensionContainer { { DRB-Removed-Item-ExtIEs } }     OPTIONAL, 
+   ... 
+}

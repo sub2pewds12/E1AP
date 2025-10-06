@@ -2,10 +2,9 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// DRBsSubjectToCounterCheckItemEUTRAN From: 9_4_5_Information_Element_Definitions.txt:698
-// ASN.1 Data Type: SEQUENCE
+// DRBsSubjectToCounterCheckItemEUTRAN is a generated SEQUENCE type.
 type DRBsSubjectToCounterCheckItemEUTRAN struct {
-	DRBID       aper.Integer `aper:"mandatory,ext"`
+	DRBID       aper.Integer `aper:"lb:1,ub:32,mandatory,ext"`
 	PDCPULCount PDCPCount    `aper:"mandatory,ext"`
 	PDCPDLCount PDCPCount    `aper:"mandatory,ext"`
 }

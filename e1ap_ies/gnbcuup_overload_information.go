@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// GNBCUUPOverloadInformation From: 9_4_5_Information_Element_Definitions.txt:1219
-// ASN.1 Data Type: ENUMERATED
+// GNBCUUPOverloadInformation is a generated ENUMERATED type.
+type GNBCUUPOverloadInformation struct {
+	Value aper.Enumerated
+}
+
 const (
 	GNBCUUPOverloadInformationOverloaded    aper.Enumerated = 0
 	GNBCUUPOverloadInformationNotOverloaded aper.Enumerated = 1
 )
-
-type GNBCUUPOverloadInformation struct {
-	Value aper.Enumerated
-}

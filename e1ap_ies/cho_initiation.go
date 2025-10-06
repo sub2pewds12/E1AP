@@ -4,12 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// CHOInitiation From: 9_4_5_Information_Element_Definitions.txt:232
-// ASN.1 Data Type: ENUMERATED
-const (
-	CHOInitiationTrue aper.Enumerated = 0
-)
-
+// CHOInitiation is a generated ENUMERATED type.
 type CHOInitiation struct {
 	Value aper.Enumerated
 }
+
+const (
+	CHOInitiationTrue aper.Enumerated = 0
+)

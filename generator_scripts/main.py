@@ -9,13 +9,16 @@ from go_generator import GoCodeGenerator
 from asn1_patches import ASN1Patcher
 from common_types import ASN1Definition
 
+# python main.py --input-dir ../extracted_sections/ --output-dir ../e1ap_ies/
+
 logger = logging.getLogger(__name__)
 
 
 def setup_logging(level=logging.INFO):
-    logging.basicConfig(
-        level=level, format="[%(levelname)s] %(message)s", stream=sys.stdout
-    )
+    if not logging.getLogger().handlers:
+        logging.basicConfig(
+            level=level, format="[%(levelname)s] %(message)s", stream=sys.stdout
+        )
 
 
 def load_lines_with_context(directory: str) -> List[Tuple[str, str, int]]:
@@ -41,15 +44,31 @@ def load_lines_with_context(directory: str) -> List[Tuple[str, str, int]]:
 
 
 def main():
+
     parser = argparse.ArgumentParser(
         description="Parse 3GPP E1AP ASN.1 specs and generate Go code."
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true",
+        "-i",
+        "--input-dir",
+        required=True,
+        help="Path to the directory containing the extracted ASN.1 '.txt' files.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        required=True,
+        help="Path to the directory where the generated '.go' files will be written.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
         help="Enable detailed DEBUG logging for deep analysis.",
     )
     parser.add_argument(
-        "--diagnose", action="store_true",
+        "--diagnose",
+        action="store_true",
         help="Run a full diagnostic report on parsed and failed definitions instead of generating files.",
     )
     args = parser.parse_args()
@@ -57,24 +76,16 @@ def main():
     log_level = logging.DEBUG if args.verbose else logging.INFO
     setup_logging(log_level)
 
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    base_dir = os.path.dirname(script_dir)
-    input_dir = os.path.join(base_dir, "extracted_sections")
-    output_dir = os.path.join(base_dir, "e1ap_ies")
-
     logger.info("--- STAGE 1: LOADING FILES ---")
-    lines = load_lines_with_context(input_dir)
+
+    lines = load_lines_with_context(args.input_dir)
     if not lines:
         sys.exit(1)
 
     logger.info("--- STAGE 2: PARSING DEFINITIONS ---")
     asn1_parser = ASN1Parser(lines)
-    
-    # --- START: THE FIX ---
-    # Capture all four return values from the upgraded parse method.
     definitions, failures, procedures, message_map = asn1_parser.parse()
-    # --- END: THE FIX ---
-    
+
     logger.info(
         f"Parsing complete. Found {len(definitions)} definitions, {len(procedures)} procedures, and {len(failures)} failures."
     )
@@ -88,10 +99,9 @@ def main():
         f"Applied {len(hardcoded_defs)} hardcoded definitions. Total definitions now: {len(definitions)}."
     )
 
-    # --- START: THE FIX ---
-    # Pass all the required arguments to the GoCodeGenerator.
-    generator = GoCodeGenerator(definitions, failures, procedures, message_map, output_dir)
-    # --- END: THE FIX ---
+    generator = GoCodeGenerator(
+        definitions, failures, procedures, message_map, args.output_dir
+    )
 
     if args.diagnose:
         logger.info("--- STAGE 3: RUNNING DIAGNOSTIC REPORT ---")

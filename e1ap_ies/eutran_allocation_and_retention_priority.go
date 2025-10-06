@@ -2,10 +2,9 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// EUTRANAllocationAndRetentionPriority From: 9_4_5_Information_Element_Definitions.txt:1027
-// ASN.1 Data Type: SEQUENCE
+// EUTRANAllocationAndRetentionPriority is a generated SEQUENCE type.
 type EUTRANAllocationAndRetentionPriority struct {
-	PriorityLevel           aper.Integer            `aper:"mandatory,ext"`
+	PriorityLevel           aper.Integer            `aper:"lb:0,ub:0,mandatory,ext"`
 	PreEmptionCapability    PreEmptionCapability    `aper:"mandatory,ext"`
 	PreEmptionVulnerability PreEmptionVulnerability `aper:"mandatory,ext"`
 }

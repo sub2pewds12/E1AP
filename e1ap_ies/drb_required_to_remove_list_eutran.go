@@ -1,5 +1,4 @@
 package e1ap_ies
 
 // DRBRequiredToRemoveListEUTRAN From: 9_4_5_Information_Element_Definitions.txt:800
-// ASN.1 Data Type: LIST
 type DRBRequiredToRemoveListEUTRAN []DRBRequiredToRemoveItemEUTRAN

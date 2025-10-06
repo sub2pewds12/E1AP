@@ -4,14 +4,13 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// QosMonitoringRequest From: 9_4_5_Information_Element_Definitions.txt:2035
-// ASN.1 Data Type: ENUMERATED
+// QosMonitoringRequest is a generated ENUMERATED type.
+type QosMonitoringRequest struct {
+	Value aper.Enumerated
+}
+
 const (
 	QosMonitoringRequestUl   aper.Enumerated = 0
 	QosMonitoringRequestDl   aper.Enumerated = 1
 	QosMonitoringRequestBoth aper.Enumerated = 2
 )
-
-type QosMonitoringRequest struct {
-	Value aper.Enumerated
-}

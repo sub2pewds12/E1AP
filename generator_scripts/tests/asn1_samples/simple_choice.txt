@@ -1,0 +1,6 @@
+Cause ::= CHOICE {
+    radio-network        CauseRadioNetwork,
+    transport            CauseTransport,
+    protocol             CauseProtocol,
+    misc                 CauseMisc
+}

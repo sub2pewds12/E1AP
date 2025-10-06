@@ -146,6 +146,8 @@ const (
 	ProtocolIEID_TransportLayerAddressInfo                  ProtocolIEID = 86
 	ProtocolIEID_QoSMonitoringRequest                       ProtocolIEID = 87
 	ProtocolIEID_PDCPStatusReportIndication                 ProtocolIEID = 88
+	ProtocolIEID_GNBCUCPMeasurementID                       ProtocolIEID = 89
+	ProtocolIEID_GNBCUUPMeasurementID                       ProtocolIEID = 90
 	ProtocolIEID_RegistrationRequest                        ProtocolIEID = 91
 	ProtocolIEID_ReportCharacteristics                      ProtocolIEID = 92
 	ProtocolIEID_ReportingPeriodicity                       ProtocolIEID = 93

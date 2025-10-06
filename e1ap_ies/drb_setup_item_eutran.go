@@ -2,10 +2,9 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// DRBSetupItemEUTRAN From: 9_4_5_Information_Element_Definitions.txt:623
-// ASN.1 Data Type: SEQUENCE
+// DRBSetupItemEUTRAN is a generated SEQUENCE type.
 type DRBSetupItemEUTRAN struct {
-	DRBID                             aper.Integer                       `aper:"mandatory,ext"`
+	DRBID                             aper.Integer                       `aper:"lb:1,ub:32,mandatory,ext"`
 	S1DLUPTNLInformation              UPTNLInformation                   `aper:"mandatory,ext"`
 	DataForwardingInformationResponse *DataForwardingInformation         `aper:"optional,ext"`
 	ULUPTransportParameters           []UPParametersItem                 `aper:"mandatory,ext"`

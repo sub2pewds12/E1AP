@@ -1,0 +1,6 @@
+e1Setup E1AP-ELEMENTARY-PROCEDURE ::= {
+    INITIATING MESSAGE      E1SetupRequest
+    SUCCESSFUL OUTCOME      E1SetupResponse
+    UNSUCCESSFUL OUTCOME    E1SetupFailure
+    PROCEDURE CODE          id-e1Setup
+}

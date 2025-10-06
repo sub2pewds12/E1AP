@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// DiscardTimer From: 9_4_5_Information_Element_Definitions.txt:391
-// ASN.1 Data Type: ENUMERATED
+// DiscardTimer is a generated ENUMERATED type.
+type DiscardTimer struct {
+	Value aper.Enumerated
+}
+
 const (
 	DiscardTimerMs10     aper.Enumerated = 0
 	DiscardTimerMs20     aper.Enumerated = 1
@@ -24,7 +27,3 @@ const (
 	DiscardTimerMs1500   aper.Enumerated = 14
 	DiscardTimerInfinity aper.Enumerated = 15
 )
-
-type DiscardTimer struct {
-	Value aper.Enumerated
-}

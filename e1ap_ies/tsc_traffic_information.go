@@ -2,9 +2,8 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// TSCTrafficInformation From: 9_4_5_Information_Element_Definitions.txt:2256
-// ASN.1 Data Type: SEQUENCE
+// TSCTrafficInformation is a generated SEQUENCE type.
 type TSCTrafficInformation struct {
-	Periodicity      aper.Integer      `aper:"mandatory"`
+	Periodicity      aper.Integer      `aper:"lb:1,ub:640000,mandatory"`
 	BurstArrivalTime *aper.OctetString `aper:"optional"`
 }

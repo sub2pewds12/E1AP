@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// SDAPHeaderUL From: 9_4_5_Information_Element_Definitions.txt:2214
-// ASN.1 Data Type: ENUMERATED
+// SDAPHeaderUL is a generated ENUMERATED type.
+type SDAPHeaderUL struct {
+	Value aper.Enumerated
+}
+
 const (
 	SDAPHeaderULPresent aper.Enumerated = 0
 	SDAPHeaderULAbsent  aper.Enumerated = 1
 )
-
-type SDAPHeaderUL struct {
-	Value aper.Enumerated
-}

@@ -1,7 +1,6 @@
 package e1ap_ies
 
-// PDCPSNStatusInformation From: 9_4_5_Information_Element_Definitions.txt:1616
-// ASN.1 Data Type: SEQUENCE
+// PDCPSNStatusInformation is a generated SEQUENCE type.
 type PDCPSNStatusInformation struct {
 	PdcpStatusTransferUL DRBBStatusTransfer          `aper:"mandatory,ext"`
 	PdcpStatusTransferDL PDCPCount                   `aper:"mandatory,ext"`

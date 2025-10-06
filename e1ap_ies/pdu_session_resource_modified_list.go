@@ -1,5 +1,4 @@
 package e1ap_ies
 
 // PDUSessionResourceModifiedList From: 9_4_5_Information_Element_Definitions.txt:1719
-// ASN.1 Data Type: LIST
 type PDUSessionResourceModifiedList []PDUSessionResourceModifiedItem

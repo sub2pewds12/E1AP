@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// TraceDepth From: 9_4_5_Information_Element_Definitions.txt:2285
-// ASN.1 Data Type: ENUMERATED
+// TraceDepth is a generated ENUMERATED type.
+type TraceDepth struct {
+	Value aper.Enumerated
+}
+
 const (
 	TraceDepthMinimum                               aper.Enumerated = 0
 	TraceDepthMedium                                aper.Enumerated = 1
@@ -14,7 +17,3 @@ const (
 	TraceDepthMediumWithoutVendorSpecificExtension  aper.Enumerated = 4
 	TraceDepthMaximumWithoutVendorSpecificExtension aper.Enumerated = 5
 )
-
-type TraceDepth struct {
-	Value aper.Enumerated
-}

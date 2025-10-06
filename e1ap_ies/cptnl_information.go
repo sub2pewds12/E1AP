@@ -4,14 +4,13 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// CPTNLInformation From: 9_4_5_Information_Element_Definitions.txt:266
-// ASN.1 Data Type: CHOICE
-const (
-	CPTNLInformationPresentNothing uint64 = iota
-	CPTNLInformationPresentEndpointIPAddress
-)
-
+// CPTNLInformation is a generated CHOICE type.
 type CPTNLInformation struct {
 	Choice            uint64
 	EndpointIPAddress *aper.BitString
 }
+
+const (
+	CPTNLInformationPresentNothing uint64 = iota
+	CPTNLInformationPresentEndpointIPAddress
+)

@@ -4,17 +4,7 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// SystemBearerContextModificationRequest From: 9_4_4_PDU_Definitions.txt:815
-// ASN.1 Data Type: CHOICE
-const (
-	SystemBearerContextModificationRequestPresentNothing uint64 = iota
-	SystemBearerContextModificationRequestPresentDRBToSetupModListEUTRAN
-	SystemBearerContextModificationRequestPresentDRBToModifyListEUTRAN
-	SystemBearerContextModificationRequestPresentDRBToRemoveListEUTRAN
-	SystemBearerContextModificationRequestPresentSubscriberProfileIDforRFP
-	SystemBearerContextModificationRequestPresentAdditionalRRMPriorityIndex
-)
-
+// SystemBearerContextModificationRequest is a generated CHOICE type.
 type SystemBearerContextModificationRequest struct {
 	Choice                     uint64
 	DRBToSetupModListEUTRAN    []DRBToSetupModItemEUTRAN
@@ -23,3 +13,12 @@ type SystemBearerContextModificationRequest struct {
 	SubscriberProfileIDforRFP  *aper.Integer
 	AdditionalRRMPriorityIndex *aper.BitString
 }
+
+const (
+	SystemBearerContextModificationRequestPresentNothing uint64 = iota
+	SystemBearerContextModificationRequestPresentDRBToSetupModListEUTRAN
+	SystemBearerContextModificationRequestPresentDRBToModifyListEUTRAN
+	SystemBearerContextModificationRequestPresentDRBToRemoveListEUTRAN
+	SystemBearerContextModificationRequestPresentSubscriberProfileIDforRFP
+	SystemBearerContextModificationRequestPresentAdditionalRRMPriorityIndex
+)

@@ -1,0 +1,1 @@
+id-E1SetupRequest       ProtocolIE-ID ::= 1

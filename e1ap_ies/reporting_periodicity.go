@@ -4,8 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// ReportingPeriodicity From: 9_4_5_Information_Element_Definitions.txt:2090
-// ASN.1 Data Type: ENUMERATED
+// ReportingPeriodicity is a generated ENUMERATED type.
+type ReportingPeriodicity struct {
+	Value aper.Enumerated
+}
+
 const (
 	ReportingPeriodicityMs500    aper.Enumerated = 0
 	ReportingPeriodicityMs1000   aper.Enumerated = 1
@@ -24,7 +27,3 @@ const (
 	ReportingPeriodicityMs110000 aper.Enumerated = 14
 	ReportingPeriodicityMs120000 aper.Enumerated = 15
 )
-
-type ReportingPeriodicity struct {
-	Value aper.Enumerated
-}

@@ -1,15 +1,14 @@
 package e1ap_ies
 
-// ResetType From: 9_4_4_PDU_Definitions.txt:261
-// ASN.1 Data Type: CHOICE
-const (
-	ResetTypePresentNothing uint64 = iota
-	ResetTypePresentE1Interface
-	ResetTypePresentPartOfE1Interface
-)
-
+// ResetType is a generated CHOICE type.
 type ResetType struct {
 	Choice            uint64
 	E1Interface       *ResetAll
 	PartOfE1Interface []ProtocolIESingleContainer
 }
+
+const (
+	ResetTypePresentNothing uint64 = iota
+	ResetTypePresentE1Interface
+	ResetTypePresentPartOfE1Interface
+)

@@ -4,12 +4,11 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// EHCUplinkParametersDRBContinueEHCUL From: 9_4_5_Information_Element_Definitions.txt:995
-// ASN.1 Data Type: ENUMERATED
-const (
-	EHCUplinkParametersDRBContinueEHCULTrue aper.Enumerated = 0
-)
-
+// EHCUplinkParametersDRBContinueEHCUL is a generated ENUMERATED type.
 type EHCUplinkParametersDRBContinueEHCUL struct {
 	Value aper.Enumerated
 }
+
+const (
+	EHCUplinkParametersDRBContinueEHCULTrue aper.Enumerated = 0
+)

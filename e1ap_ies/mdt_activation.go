@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// MDTActivation From: 9_4_5_Information_Element_Definitions.txt:1378
-// ASN.1 Data Type: ENUMERATED
+// MDTActivation is a generated ENUMERATED type.
+type MDTActivation struct {
+	Value aper.Enumerated
+}
+
 const (
 	MDTActivationImmediateMDTOnly     aper.Enumerated = 0
 	MDTActivationImmediateMDTAndTrace aper.Enumerated = 1
 )
-
-type MDTActivation struct {
-	Value aper.Enumerated
-}

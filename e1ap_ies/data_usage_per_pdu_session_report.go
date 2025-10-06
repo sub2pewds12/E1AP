@@ -1,8 +1,7 @@
 package e1ap_ies
 
-// DataUsagePerPDUSessionReport From: 9_4_5_Information_Element_Definitions.txt:346
-// ASN.1 Data Type: SEQUENCE
+// DataUsagePerPDUSessionReport is a generated SEQUENCE type.
 type DataUsagePerPDUSessionReport struct {
 	SecondaryRATType          DataUsagePerPDUSessionReportSecondaryRATType `aper:"mandatory,ext"`
-	PDUSessionTimedReportList SEQUENCE                                     `aper:"mandatory,ext"`
+	PDUSessionTimedReportList []MRDCDataUsageReportItem                    `aper:"lb:1,ub:Maxnooftimeperiods,mandatory,ext"`
 }

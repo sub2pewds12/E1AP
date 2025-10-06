@@ -1,0 +1,7 @@
+CriticalityDiagnostics-IE-List ::= SEQUENCE (SIZE (1..maxnoofErrors)) OF 
+   SEQUENCE { 
+      iECriticality        Criticality, 
+      iE-ID              ProtocolIE-ID, 
+      typeOfError          TypeOfError, 
+      ... 
+}

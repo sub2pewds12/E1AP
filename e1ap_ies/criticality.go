@@ -4,14 +4,13 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// Criticality From: 9_4_6_Common_Definitions.txt:34
-// ASN.1 Data Type: ENUMERATED
+// Criticality is a generated ENUMERATED type.
+type Criticality struct {
+	Value aper.Enumerated
+}
+
 const (
 	CriticalityReject aper.Enumerated = 0
 	CriticalityIgnore aper.Enumerated = 1
 	CriticalityNotify aper.Enumerated = 2
 )
-
-type Criticality struct {
-	Value aper.Enumerated
-}

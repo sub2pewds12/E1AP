@@ -2,8 +2,7 @@ package e1ap_ies
 
 import "github.com/lvdund/ngap/aper"
 
-// PDUSessionResourceSetupModItem From: 9_4_5_Information_Element_Definitions.txt:1777
-// ASN.1 Data Type: SEQUENCE
+// PDUSessionResourceSetupModItem is a generated SEQUENCE type.
 type PDUSessionResourceSetupModItem struct {
 	PDUSessionID                                aper.Integer               `aper:"lb:0,ub:255,mandatory,ext"`
 	SecurityResult                              *SecurityResult            `aper:"optional,ext"`

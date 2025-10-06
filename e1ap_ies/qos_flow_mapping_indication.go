@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// QOSFlowMappingIndication From: 9_4_5_Information_Element_Definitions.txt:1987
-// ASN.1 Data Type: ENUMERATED
+// QOSFlowMappingIndication is a generated ENUMERATED type.
+type QOSFlowMappingIndication struct {
+	Value aper.Enumerated
+}
+
 const (
 	QOSFlowMappingIndicationUl aper.Enumerated = 0
 	QOSFlowMappingIndicationDl aper.Enumerated = 1
 )
-
-type QOSFlowMappingIndication struct {
-	Value aper.Enumerated
-}

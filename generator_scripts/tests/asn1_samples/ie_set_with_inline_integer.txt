@@ -1,0 +1,9 @@
+ResourceStatusRequestIEs E1AP-PROTOCOL-IES ::= { 
+      { ID id-TransactionID              CRITICALITY reject     TYPE TransactionID  PRESENCE mandatory}| 
+      { ID id-gNB-CU-CP-Measurement-ID      CRITICALITY reject     TYPE INTEGER (1..4095, ...)   PRESENCE mandatory}| 
+      { ID id-gNB-CU-UP-Measurement-ID      CRITICALITY ignore     TYPE INTEGER (1..4095, ...)   PRESENCE optional}| 
+      { ID id-RegistrationRequest          CRITICALITY reject     TYPE RegistrationRequest     PRESENCE mandatory}| 
+      { ID id-ReportCharacteristics        CRITICALITY reject     TYPE ReportCharacteristics    PRESENCE conditional}| 
+      { ID id-ReportingPeriodicity         CRITICALITY reject     TYPE ReportingPeriodicity     PRESENCE optional}, 
+   ... 
+} 

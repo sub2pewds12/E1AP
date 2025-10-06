@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// Dynamic5QIDescriptorDelayCritical From: 9_4_5_Information_Element_Definitions.txt:940
-// ASN.1 Data Type: ENUMERATED
+// Dynamic5QIDescriptorDelayCritical is a generated ENUMERATED type.
+type Dynamic5QIDescriptorDelayCritical struct {
+	Value aper.Enumerated
+}
+
 const (
 	Dynamic5QIDescriptorDelayCriticalDelayCritical    aper.Enumerated = 0
 	Dynamic5QIDescriptorDelayCriticalNonDelayCritical aper.Enumerated = 1
 )
-
-type Dynamic5QIDescriptorDelayCritical struct {
-	Value aper.Enumerated
-}

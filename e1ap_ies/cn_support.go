@@ -4,14 +4,13 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// CNSupport From: 9_4_5_Information_Element_Definitions.txt:242
-// ASN.1 Data Type: ENUMERATED
+// CNSupport is a generated ENUMERATED type.
+type CNSupport struct {
+	Value aper.Enumerated
+}
+
 const (
 	CNSupportCEpc aper.Enumerated = 0
 	CNSupportC5gc aper.Enumerated = 1
 	CNSupportBoth aper.Enumerated = 2
 )
-
-type CNSupport struct {
-	Value aper.Enumerated
-}

@@ -1,0 +1,1 @@
+DRB-List ::= SEQUENCE (SIZE(1..1024)) OF DRB-ID

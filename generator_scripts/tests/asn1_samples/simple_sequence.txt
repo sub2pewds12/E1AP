@@ -1,0 +1,4 @@
+MyMessage ::= SEQUENCE {
+    transactionID   INTEGER,
+    isOptional      BOOLEAN OPTIONAL
+}

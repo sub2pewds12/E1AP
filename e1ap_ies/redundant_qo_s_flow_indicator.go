@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// RedundantQoSFlowIndicator From: 9_4_5_Information_Element_Definitions.txt:2065
-// ASN.1 Data Type: ENUMERATED
+// RedundantQoSFlowIndicator is a generated ENUMERATED type.
+type RedundantQoSFlowIndicator struct {
+	Value aper.Enumerated
+}
+
 const (
 	RedundantQoSFlowIndicatorTrue  aper.Enumerated = 0
 	RedundantQoSFlowIndicatorFalse aper.Enumerated = 1
 )
-
-type RedundantQoSFlowIndicator struct {
-	Value aper.Enumerated
-}

@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// DRBActivity From: 9_4_5_Information_Element_Definitions.txt:419
-// ASN.1 Data Type: ENUMERATED
+// DRBActivity is a generated ENUMERATED type.
+type DRBActivity struct {
+	Value aper.Enumerated
+}
+
 const (
 	DRBActivityActive    aper.Enumerated = 0
 	DRBActivityNotActive aper.Enumerated = 1
 )
-
-type DRBActivity struct {
-	Value aper.Enumerated
-}

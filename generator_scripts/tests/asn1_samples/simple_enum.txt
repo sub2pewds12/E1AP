@@ -1,0 +1,5 @@
+MyEnum ::= ENUMERATED {
+    value1,
+    value2,
+    ...
+}

@@ -1,0 +1,7 @@
+Data-Usage-per-PDU-Session-Report ::= SEQUENCE {
+secondaryRATType         ENUMERATED {nR, e-UTRA, ...},
+pDU-session-Timed-Report-List        SEQUENCE (SIZE(1..maxnooftimeperiods)) OF MRDC-Data-Usage-Report-Item,
+iE-Extensions           ProtocolExtensionContainer { { Data-Usage-per-PDU-Session-Report-ExtIEs} } OPTIONAL,
+...
+}
+

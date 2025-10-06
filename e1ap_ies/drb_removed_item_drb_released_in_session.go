@@ -4,13 +4,12 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// DRBRemovedItemDRBReleasedInSession From: 9_4_5_Information_Element_Definitions.txt:577
-// ASN.1 Data Type: ENUMERATED
+// DRBRemovedItemDRBReleasedInSession is a generated ENUMERATED type.
+type DRBRemovedItemDRBReleasedInSession struct {
+	Value aper.Enumerated
+}
+
 const (
 	DRBRemovedItemDRBReleasedInSessionReleasedInSession    aper.Enumerated = 0
 	DRBRemovedItemDRBReleasedInSessionNotReleasedInSession aper.Enumerated = 1
 )
-
-type DRBRemovedItemDRBReleasedInSession struct {
-	Value aper.Enumerated
-}
