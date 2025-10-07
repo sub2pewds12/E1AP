@@ -9,8 +9,9 @@ import (
 
 // TransportUPLayerAddressesInfoToAddItem is a generated SEQUENCE type.
 type TransportUPLayerAddressesInfoToAddItem struct {
-	IPSecTransportLayerAddress      aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
-	GTPTransportLayerAddressesToAdd []GTPTLAItem   `aper:"optional,ext"`
+	IPSecTransportLayerAddress      aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	GTPTransportLayerAddressesToAdd []GTPTLAItem                `aper:"optional,ext"`
+	IEExtensions                    *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

@@ -8,9 +8,11 @@ import (
 type CPTNLInformation struct {
 	Choice            uint64
 	EndpointIPAddress *aper.BitString
+	ChoiceExtension   *ProtocolIESingleContainer
 }
 
 const (
 	CPTNLInformationPresentNothing uint64 = iota
 	CPTNLInformationPresentEndpointIPAddress
+	CPTNLInformationPresentChoiceExtension
 )

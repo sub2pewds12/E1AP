@@ -7,4 +7,5 @@ type EUTRANQOS struct {
 	QCI                                  aper.Integer                         `aper:"lb:0,ub:255,mandatory,ext"`
 	EUTRANallocationAndRetentionPriority EUTRANAllocationAndRetentionPriority `aper:"mandatory,ext"`
 	GbrQosInformation                    *GBRQosInformation                   `aper:"optional,ext"`
+	IEExtensions                         *ProtocolExtensionContainer          `aper:"optional,ext"`
 }

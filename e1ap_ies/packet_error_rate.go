@@ -4,6 +4,7 @@ import "github.com/lvdund/ngap/aper"
 
 // PacketErrorRate is a generated SEQUENCE type.
 type PacketErrorRate struct {
-	PERScalar   aper.Integer `aper:"lb:0,ub:9,mandatory,ext"`
-	PERExponent aper.Integer `aper:"lb:0,ub:9,mandatory,ext"`
+	PERScalar    aper.Integer                `aper:"lb:0,ub:9,mandatory,ext"`
+	PERExponent  aper.Integer                `aper:"lb:0,ub:9,mandatory,ext"`
+	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
 }

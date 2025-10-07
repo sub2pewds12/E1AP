@@ -9,8 +9,9 @@ import (
 
 // NRCGI is a generated SEQUENCE type.
 type NRCGI struct {
-	PLMNIdentity   aper.OctetString `aper:"lb:3,ub:3,mandatory,ignore"`
-	NRCellIdentity aper.BitString   `aper:"lb:36,ub:36,mandatory"`
+	PLMNIdentity   aper.OctetString            `aper:"lb:3,ub:3,mandatory,ignore"`
+	NRCellIdentity aper.BitString              `aper:"lb:36,ub:36,mandatory"`
+	IEExtensions   *ProtocolExtensionContainer `aper:"optional"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

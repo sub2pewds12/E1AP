@@ -4,4 +4,5 @@ package e1ap_ies
 type MRDCUsageInformation struct {
 	DataUsagePerPDUSessionReport *DataUsagePerPDUSessionReport `aper:"optional,ext"`
 	DataUsagePerQOSFlowList      []DataUsagePerQOSFlowItem     `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
+	IEExtensions                 *ProtocolExtensionContainer   `aper:"optional,ext"`
 }

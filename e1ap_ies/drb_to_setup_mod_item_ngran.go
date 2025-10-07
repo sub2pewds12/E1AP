@@ -12,4 +12,5 @@ type DRBToSetupModItemNGRAN struct {
 	DRBDataForwardingInformationRequest *DataForwardingInformationRequest `aper:"optional,ext"`
 	DRBInactivityTimer                  *aper.Integer                     `aper:"lb:1,ub:7200,optional,reject,ext"`
 	PDCPSNStatusInformation             *PDCPSNStatusInformation          `aper:"optional,ext"`
+	IEExtensions                        *ProtocolExtensionContainer       `aper:"optional,ext"`
 }

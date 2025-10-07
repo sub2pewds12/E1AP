@@ -12,4 +12,5 @@ type DRBToSetupModItemEUTRAN struct {
 	CellGroupInformation             []CellGroupInformationItem        `aper:"mandatory,ext"`
 	DLUPParameters                   []UPParametersItem                `aper:"optional,ext"`
 	DRBInactivityTimer               *aper.Integer                     `aper:"lb:1,ub:7200,optional,reject,ext"`
+	IEExtensions                     *ProtocolExtensionContainer       `aper:"optional,ext"`
 }

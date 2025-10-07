@@ -11,4 +11,5 @@ type Dynamic5QIDescriptor struct {
 	DelayCritical      *Dynamic5QIDescriptorDelayCritical `aper:"optional,ext"`
 	AveragingWindow    *aper.Integer                      `aper:"lb:0,ub:4095,optional,ext"`
 	MaxDataBurstVolume *aper.Integer                      `aper:"lb:0,ub:4095,optional,ext"`
+	IEExtensions       *ProtocolExtensionContainer        `aper:"optional,ext"`
 }

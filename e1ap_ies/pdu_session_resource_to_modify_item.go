@@ -15,4 +15,5 @@ type PDUSessionResourceToModifyItem struct {
 	DRBToSetupListNGRAN                        []DRBToSetupItemNGRAN             `aper:"optional,ext"`
 	DRBToModifyListNGRAN                       []DRBToModifyItemNGRAN            `aper:"optional,ext"`
 	DRBToRemoveListNGRAN                       []DRBToRemoveItemNGRAN            `aper:"optional,ext"`
+	IEExtensions                               *ProtocolExtensionContainer       `aper:"optional,ext"`
 }

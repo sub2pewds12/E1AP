@@ -11,4 +11,5 @@ type QoSFlowLevelQoSParameters struct {
 	AdditionalQOSInformation         *QoSFlowLevelQoSParametersAdditionalQOSInformation `aper:"optional,ext"`
 	PagingPolicyIndicator            *aper.Integer                                      `aper:"lb:1,ub:8,optional,ext"`
 	ReflectiveQOSIndicator           *QoSFlowLevelQoSParametersReflectiveQOSIndicator   `aper:"optional,ext"`
+	IEExtensions                     *ProtocolExtensionContainer                        `aper:"optional,ext"`
 }

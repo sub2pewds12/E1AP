@@ -9,7 +9,8 @@ import (
 
 // GTPTLAItem is a generated SEQUENCE type.
 type GTPTLAItem struct {
-	GTPTransportLayerAddresses aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	GTPTransportLayerAddresses aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	IEExtensions               *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

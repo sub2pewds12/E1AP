@@ -9,10 +9,11 @@ import (
 
 // TraceActivation is a generated SEQUENCE type.
 type TraceActivation struct {
-	TraceID                        aper.OctetString `aper:"lb:8,ub:8,mandatory,ignore,ext"`
-	InterfacesToTrace              aper.BitString   `aper:"lb:8,ub:8,mandatory,ext"`
-	TraceDepth                     TraceDepth       `aper:"mandatory,ext"`
-	TraceCollectionEntityIPAddress aper.BitString   `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	TraceID                        aper.OctetString            `aper:"lb:8,ub:8,mandatory,ignore,ext"`
+	InterfacesToTrace              aper.BitString              `aper:"lb:8,ub:8,mandatory,ext"`
+	TraceDepth                     TraceDepth                  `aper:"mandatory,ext"`
+	TraceCollectionEntityIPAddress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	IEExtensions                   *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

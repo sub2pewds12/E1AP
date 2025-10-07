@@ -11,4 +11,5 @@ type PDUSessionResourceSetupItem struct {
 	NGDLUPUnchanged                             *PDUSessionResourceSetupItemNGDLUPUnchanged `aper:"optional,ext"`
 	DRBSetupListNGRAN                           []DRBSetupItemNGRAN                         `aper:"mandatory,ext"`
 	DRBFailedListNGRAN                          []DRBFailedItemNGRAN                        `aper:"optional,ext"`
+	IEExtensions                                *ProtocolExtensionContainer                 `aper:"optional,ext"`
 }

@@ -9,8 +9,9 @@ import (
 
 // ULUPTNLAddressToUpdateItem is a generated SEQUENCE type.
 type ULUPTNLAddressToUpdateItem struct {
-	OldTNLAdress aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
-	NewTNLAdress aper.BitString `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	OldTNLAdress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	NewTNLAdress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

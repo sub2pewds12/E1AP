@@ -13,4 +13,5 @@ type DRBToSetupItemEUTRAN struct {
 	DLUPParameters                   []UPParametersItem                `aper:"optional,ext"`
 	DRBInactivityTimer               *aper.Integer                     `aper:"lb:1,ub:7200,optional,reject,ext"`
 	ExistingAllocatedS1DLUPTNLInfo   *UPTNLInformation                 `aper:"optional,ext"`
+	IEExtensions                     *ProtocolExtensionContainer       `aper:"optional,ext"`
 }

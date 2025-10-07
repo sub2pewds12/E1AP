@@ -8,4 +8,5 @@ type PDUSessionResourceRequiredToModifyItem struct {
 	NGDLUPTNLInformation         *UPTNLInformation              `aper:"optional,ext"`
 	DRBRequiredToModifyListNGRAN []DRBRequiredToModifyItemNGRAN `aper:"optional,ext"`
 	DRBRequiredToRemoveListNGRAN []DRBRequiredToRemoveItemNGRAN `aper:"optional,ext"`
+	IEExtensions                 *ProtocolExtensionContainer    `aper:"optional,ext"`
 }

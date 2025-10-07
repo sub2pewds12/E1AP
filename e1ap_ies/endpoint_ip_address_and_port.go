@@ -9,8 +9,9 @@ import (
 
 // EndpointIPAddressAndPort is a generated SEQUENCE type.
 type EndpointIPAddressAndPort struct {
-	EndpointIPAddress aper.BitString `aper:"lb:1,ub:160,mandatory,ignore"`
-	PortNumber        aper.BitString `aper:"lb:16,ub:16,mandatory"`
+	EndpointIPAddress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore"`
+	PortNumber        aper.BitString              `aper:"lb:16,ub:16,mandatory"`
+	IEExtensions      *ProtocolExtensionContainer `aper:"optional"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

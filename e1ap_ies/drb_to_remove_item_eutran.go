@@ -4,5 +4,6 @@ import "github.com/lvdund/ngap/aper"
 
 // DRBToRemoveItemEUTRAN is a generated SEQUENCE type.
 type DRBToRemoveItemEUTRAN struct {
-	DRBID aper.Integer `aper:"lb:1,ub:32,mandatory,ext"`
+	DRBID        aper.Integer                `aper:"lb:1,ub:32,mandatory,ext"`
+	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
 }

@@ -6,4 +6,5 @@ import "github.com/lvdund/ngap/aper"
 type PDUSessionResourceConfirmModifiedItem struct {
 	PDUSessionID                aper.Integer                  `aper:"lb:0,ub:255,mandatory,ext"`
 	DRBConfirmModifiedListNGRAN []DRBConfirmModifiedItemNGRAN `aper:"optional,ext"`
+	IEExtensions                *ProtocolExtensionContainer   `aper:"optional,ext"`
 }

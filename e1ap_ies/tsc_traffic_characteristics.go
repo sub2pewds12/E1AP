@@ -2,6 +2,7 @@ package e1ap_ies
 
 // TSCTrafficCharacteristics is a generated SEQUENCE type.
 type TSCTrafficCharacteristics struct {
-	TSCTrafficCharacteristicsUL *TSCTrafficInformation `aper:"optional"`
-	TSCTrafficCharacteristicsDL *TSCTrafficInformation `aper:"optional"`
+	TSCTrafficCharacteristicsUL *TSCTrafficInformation      `aper:"optional"`
+	TSCTrafficCharacteristicsDL *TSCTrafficInformation      `aper:"optional"`
+	IEExtensions                *ProtocolExtensionContainer `aper:"optional"`
 }

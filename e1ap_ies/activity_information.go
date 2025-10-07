@@ -6,6 +6,7 @@ type ActivityInformation struct {
 	DRBActivityList                []DRBActivityItem
 	PDUSessionResourceActivityList []PDUSessionResourceActivityItem
 	UEActivity                     *UEActivity
+	ChoiceExtension                *ProtocolIESingleContainer
 }
 
 const (
@@ -13,4 +14,5 @@ const (
 	ActivityInformationPresentDRBActivityList
 	ActivityInformationPresentPDUSessionResourceActivityList
 	ActivityInformationPresentUEActivity
+	ActivityInformationPresentChoiceExtension
 )

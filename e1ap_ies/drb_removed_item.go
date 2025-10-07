@@ -8,4 +8,5 @@ type DRBRemovedItem struct {
 	DRBReleasedInSession      *DRBRemovedItemDRBReleasedInSession `aper:"optional,ext"`
 	DRBAccumulatedSessionTime *aper.OctetString                   `aper:"lb:5,ub:5,optional,ext"`
 	QOSFlowRemovedList        []QOSFlowRemovedItem                `aper:"optional,ext"`
+	IEExtensions              *ProtocolExtensionContainer         `aper:"optional,ext"`
 }

@@ -9,4 +9,5 @@ type DRBSetupItemEUTRAN struct {
 	DataForwardingInformationResponse *DataForwardingInformation         `aper:"optional,ext"`
 	ULUPTransportParameters           []UPParametersItem                 `aper:"mandatory,ext"`
 	S1DLUPUnchanged                   *DRBSetupItemEUTRANS1DLUPUnchanged `aper:"optional,ext"`
+	IEExtensions                      *ProtocolExtensionContainer        `aper:"optional,ext"`
 }

@@ -8,4 +8,5 @@ type DRBRequiredToModifyItemEUTRAN struct {
 	S1DLUPTNLInformation                 *UPTNLInformation                          `aper:"optional,ext"`
 	GNBCUUPCellGroupRelatedConfiguration []GNBCUUPCellGroupRelatedConfigurationItem `aper:"optional,ext"`
 	Cause                                *Cause                                     `aper:"optional,ignore,ext"`
+	IEExtensions                         *ProtocolExtensionContainer                `aper:"optional,ext"`
 }

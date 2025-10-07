@@ -13,4 +13,5 @@ type PDUSessionResourceToSetupModItem struct {
 	PDUSessionDataForwardingInformationRequest *DataForwardingInformationRequest `aper:"optional,ext"`
 	PDUSessionInactivityTimer                  *aper.Integer                     `aper:"lb:1,ub:7200,optional,reject,ext"`
 	DRBToSetupModListNGRAN                     []DRBToSetupModItemNGRAN          `aper:"mandatory,ext"`
+	IEExtensions                               *ProtocolExtensionContainer       `aper:"optional,ext"`
 }

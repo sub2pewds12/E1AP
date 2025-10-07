@@ -4,4 +4,5 @@ package e1ap_ies
 type SecurityAlgorithm struct {
 	CipheringAlgorithm           CipheringAlgorithm            `aper:"mandatory,ext"`
 	IntegrityProtectionAlgorithm *IntegrityProtectionAlgorithm `aper:"optional,ext"`
+	IEExtensions                 *ProtocolExtensionContainer   `aper:"optional,ext"`
 }

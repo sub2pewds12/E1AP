@@ -12,4 +12,5 @@ type PDUSessionResourceModifiedItem struct {
 	DRBFailedListNGRAN                          []DRBFailedItemNGRAN         `aper:"optional,ext"`
 	DRBModifiedListNGRAN                        []DRBModifiedItemNGRAN       `aper:"optional,ext"`
 	DRBFailedToModifyListNGRAN                  []DRBFailedToModifyItemNGRAN `aper:"optional,ext"`
+	IEExtensions                                *ProtocolExtensionContainer  `aper:"optional,ext"`
 }

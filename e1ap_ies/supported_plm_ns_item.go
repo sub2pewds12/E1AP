@@ -9,10 +9,11 @@ import (
 
 // SupportedPLMNsItem is a generated SEQUENCE type.
 type SupportedPLMNsItem struct {
-	PLMNIdentity             aper.OctetString          `aper:"lb:3,ub:3,mandatory,ignore,ext"`
-	SliceSupportList         []SliceSupportItem        `aper:"optional,ext"`
-	NRCGISupportList         []NRCGISupportItem        `aper:"optional,ext"`
-	QOSParametersSupportList *QOSParametersSupportList `aper:"optional,ext"`
+	PLMNIdentity             aper.OctetString            `aper:"lb:3,ub:3,mandatory,ignore,ext"`
+	SliceSupportList         []SliceSupportItem          `aper:"optional,ext"`
+	NRCGISupportList         []NRCGISupportItem          `aper:"optional,ext"`
+	QOSParametersSupportList *QOSParametersSupportList   `aper:"optional,ext"`
+	IEExtensions             *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

@@ -9,10 +9,11 @@ import (
 
 // GBRQosInformation is a generated SEQUENCE type.
 type GBRQosInformation struct {
-	ERABMaximumBitrateDL    aper.Integer `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	ERABMaximumBitrateUL    aper.Integer `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	ERABGuaranteedBitrateDL aper.Integer `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	ERABGuaranteedBitrateUL aper.Integer `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	ERABMaximumBitrateDL    aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	ERABMaximumBitrateUL    aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	ERABGuaranteedBitrateDL aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	ERABGuaranteedBitrateUL aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	IEExtensions            *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

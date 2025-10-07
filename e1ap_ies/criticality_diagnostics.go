@@ -9,4 +9,5 @@ type CriticalityDiagnostics struct {
 	ProcedureCriticality      *Criticality                   `aper:"optional,ext"`
 	TransactionID             *aper.Integer                  `aper:"lb:0,ub:255,optional,reject,ext"`
 	IEsCriticalityDiagnostics []CriticalityDiagnosticsIEItem `aper:"optional,ext"`
+	IEExtensions              *ProtocolExtensionContainer    `aper:"optional,ext"`
 }

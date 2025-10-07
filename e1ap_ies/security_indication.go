@@ -5,4 +5,5 @@ type SecurityIndication struct {
 	IntegrityProtectionIndication       IntegrityProtectionIndication       `aper:"mandatory,ext"`
 	ConfidentialityProtectionIndication ConfidentialityProtectionIndication `aper:"mandatory,ext"`
 	MaximumIPdatarate                   *MaximumIPdatarate                  `aper:"optional,ext"`
+	IEExtensions                        *ProtocolExtensionContainer         `aper:"optional,ext"`
 }

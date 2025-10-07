@@ -9,12 +9,13 @@ import (
 
 // GBRQoSFlowInformation is a generated SEQUENCE type.
 type GBRQoSFlowInformation struct {
-	MaxFlowBitRateDownlink        aper.Integer  `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	MaxFlowBitRateUplink          aper.Integer  `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	GuaranteedFlowBitRateDownlink aper.Integer  `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	GuaranteedFlowBitRateUplink   aper.Integer  `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	MaxPacketLossRateDownlink     *aper.Integer `aper:"lb:0,ub:1000,optional,ext"`
-	MaxPacketLossRateUplink       *aper.Integer `aper:"lb:0,ub:1000,optional,ext"`
+	MaxFlowBitRateDownlink        aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	MaxFlowBitRateUplink          aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	GuaranteedFlowBitRateDownlink aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	GuaranteedFlowBitRateUplink   aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	MaxPacketLossRateDownlink     *aper.Integer               `aper:"lb:0,ub:1000,optional,ext"`
+	MaxPacketLossRateUplink       *aper.Integer               `aper:"lb:0,ub:1000,optional,ext"`
+	IEExtensions                  *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

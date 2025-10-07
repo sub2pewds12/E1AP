@@ -262,7 +262,7 @@ def test_parses_sequence_with_inline_enum():
     main_item = definitions["DRB-Removed-Item"]
     assert isinstance(main_item, SequenceDefinition)
 
-    assert len(main_item.ies) == 4
+    assert len(main_item.ies) == 5
 
     enum_member = main_item.ies[1]
     assert enum_member.ie == "dRB-Released-In-Session"
@@ -343,7 +343,6 @@ def test_parses_sequence_with_secondaryrat_inline_enum():
     assert synth_item.enum_values == ["nR", "e-UTRA"]
 
 
-@pytest.mark.xfail(reason="Parser cannot yet handle SEQUENCE OF an inline SEQUENCE.")
 def test_parses_list_with_inline_sequence():
     """
     Tests that the parser correctly handles a SEQUENCE OF an inline SEQUENCE,
@@ -379,3 +378,36 @@ def test_parses_list_with_inline_sequence():
     assert len(synth_item.ies) == 3
     assert synth_item.ies[0].ie == "iECriticality"
     assert synth_item.ies[0].type == "Criticality"
+
+def test_parses_ie_extensions_field():
+    """
+    Tests that the parser correctly parses the 'iE-Extensions' field
+    and identifies its type as 'ProtocolExtensionContainer'.
+    """
+    lines = load_test_file("sequence_with_inline_enum.txt")
+
+    dummy_defs = {
+        "DRB-ID": IntegerDefinition("DRB-ID", "dummy"),
+        "maxnoofQoSFlows": ConstantDefinition("INTEGER", "maxnoofQoSFlows", "dummy"),
+        "QoS-Flow-Removed-Item": SequenceDefinition("QoS-Flow-Removed-Item", "dummy"),
+    }
+    
+    parser = ASN1Parser(lines)
+    parser.definitions.update(dummy_defs)
+    definitions, failures, _, _ = parser.parse()
+
+    assert not failures
+
+    main_item = definitions["DRB-Removed-Item"]
+    assert isinstance(main_item, SequenceDefinition)
+    assert len(main_item.ies) == 5
+
+    extension_member = None
+    for ie in main_item.ies:
+        if ie.ie == "iE-Extensions":
+            extension_member = ie
+            break
+    
+    assert extension_member is not None
+    assert extension_member.presence == "optional"
+    assert extension_member.type == "ProtocolExtensionContainer"

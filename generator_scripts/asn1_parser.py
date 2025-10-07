@@ -294,11 +294,7 @@ class ASN1Parser:
             is_complex_list = (
                 "SEQUENCE" in def_part_stripped and " OF " in def_part_stripped
             )
-            is_simple_alias = (
-                base_type[0].isupper()
-                and "{" not in def_part_stripped
-                and not is_complex_list
-            )
+            is_simple_alias = base_type[0].isupper() and "{" not in def_part_stripped and "{" not in name and not is_complex_list
             if is_simple_alias:
                 item = AliasDefinition(
                     base_type, name, source_file, source_line, full_text
@@ -333,7 +329,6 @@ class ASN1Parser:
         )
         if container_match:
             ie_set_name = container_match.group(1)
-
             if ie_set_name in self.ie_sets:
                 for ie_data in self.ie_sets[ie_set_name]:
                     ie_name_to_add = ie_data["id"].replace("id-", "")
@@ -391,8 +386,6 @@ class ASN1Parser:
             if (
                 not clean_line
                 or clean_line.startswith("...")
-                or "iE-Extensions" in clean_line
-                or "choice-extension" in clean_line
             ):
                 continue
 
@@ -870,6 +863,14 @@ class ASN1Parser:
             line_text, source_file, source_line = self.lines[i]
             line = line_text.strip()
 
+            if "::=" in line and "{" in line.split("::=")[0]:
+                self.failures.append({
+                    "name": line.split("::=")[0].strip(), "text": line,
+                    "file": source_file, "line": source_line,
+                })
+                i += 1
+                continue
+
             if (
                 "::=" in line
                 and "{" in line.split("::=")[0]
@@ -904,16 +905,15 @@ class ASN1Parser:
                 if "E1AP-PROTOCOL-IES" in name_part:
                     i = end_index + 1
                     continue
+                is_class_def = def_part.strip().startswith("CLASS")
 
-                abstract_keywords = ["CLASS", "E1AP-PDU"]
-                name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
+                clean_name_part = name_part.split('{', 1)[0].strip()
+                name_words = clean_name_part.split()
 
-                if def_part.strip().startswith("CLASS"):
-                    i = end_index + 1
-                    continue
+                abstract_keywords = ["E1AP-PROTOCOL-EXTENSION", "E1AP-PRIVATE-IES", "E1AP-PDU"]
+                is_abstract_def = len(name_words) > 1 and name_words[-1] in abstract_keywords
 
-                abstract_keywords = ["E1AP-PDU"]
-                if any(keyword in name_part for keyword in abstract_keywords):
+                if is_class_def or is_abstract_def:
                     i = end_index + 1
                     continue
 

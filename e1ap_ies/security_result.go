@@ -4,4 +4,5 @@ package e1ap_ies
 type SecurityResult struct {
 	IntegrityProtectionResult       IntegrityProtectionResult       `aper:"mandatory,ext"`
 	ConfidentialityProtectionResult ConfidentialityProtectionResult `aper:"mandatory,ext"`
+	IEExtensions                    *ProtocolExtensionContainer     `aper:"optional,ext"`
 }

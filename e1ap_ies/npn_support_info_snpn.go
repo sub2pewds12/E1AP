@@ -4,5 +4,6 @@ import "github.com/lvdund/ngap/aper"
 
 // NPNSupportInfoSNPN is a generated SEQUENCE type.
 type NPNSupportInfoSNPN struct {
-	NID aper.BitString `aper:"lb:44,ub:44,mandatory"`
+	NID          aper.BitString              `aper:"lb:44,ub:44,mandatory"`
+	IEExtensions *ProtocolExtensionContainer `aper:"optional"`
 }

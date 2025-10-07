@@ -15,4 +15,5 @@ type PDUSessionResourceToSetupItem struct {
 	ExistingAllocatedNGDLUPTNLInfo             *UPTNLInformation                 `aper:"optional,ext"`
 	NetworkInstance                            *aper.Integer                     `aper:"lb:1,ub:256,optional,ext"`
 	DRBToSetupListNGRAN                        []DRBToSetupItemNGRAN             `aper:"mandatory,ext"`
+	IEExtensions                               *ProtocolExtensionContainer       `aper:"optional,ext"`
 }

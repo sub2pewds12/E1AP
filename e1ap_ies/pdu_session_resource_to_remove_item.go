@@ -4,5 +4,6 @@ import "github.com/lvdund/ngap/aper"
 
 // PDUSessionResourceToRemoveItem is a generated SEQUENCE type.
 type PDUSessionResourceToRemoveItem struct {
-	PDUSessionID aper.Integer `aper:"lb:0,ub:255,mandatory,ext"`
+	PDUSessionID aper.Integer                `aper:"lb:0,ub:255,mandatory,ext"`
+	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
 }

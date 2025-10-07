@@ -9,8 +9,9 @@ import (
 
 // UEAssociatedLogicalE1ConnectionItem is a generated SEQUENCE type.
 type UEAssociatedLogicalE1ConnectionItem struct {
-	GNBCUCPUEE1APID *aper.Integer `aper:"lb:0,ub:4294967295,optional,reject,ext"`
-	GNBCUUPUEE1APID *aper.Integer `aper:"lb:0,ub:4294967295,optional,reject,ext"`
+	GNBCUCPUEE1APID *aper.Integer               `aper:"lb:0,ub:4294967295,optional,reject,ext"`
+	GNBCUUPUEE1APID *aper.Integer               `aper:"lb:0,ub:4294967295,optional,reject,ext"`
+	IEExtensions    *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

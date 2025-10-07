@@ -7,4 +7,5 @@ type QOSFlowRemovedItem struct {
 	QOSFlowIdentifier             aper.Integer                                `aper:"lb:0,ub:63,mandatory,ext"`
 	QOSFlowReleasedInSession      *QOSFlowRemovedItemQOSFlowReleasedInSession `aper:"optional,ext"`
 	QOSFlowAccumulatedSessionTime *aper.OctetString                           `aper:"lb:5,ub:5,optional,ext"`
+	IEExtensions                  *ProtocolExtensionContainer                 `aper:"optional,ext"`
 }

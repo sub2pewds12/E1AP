@@ -9,8 +9,9 @@ import (
 
 // GTPTunnel is a generated SEQUENCE type.
 type GTPTunnel struct {
-	TransportLayerAddress aper.BitString   `aper:"lb:1,ub:160,mandatory,ignore,ext"`
-	GTPTEID               aper.OctetString `aper:"lb:4,ub:4,mandatory,ext"`
+	TransportLayerAddress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	GTPTEID               aper.OctetString            `aper:"lb:4,ub:4,mandatory,ext"`
+	IEExtensions          *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
