@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // BearerContextModificationFailure is a generated SEQUENCE type.
 type BearerContextModificationFailure struct {
-	GNBCUCPUEE1APID        aper.Integer            `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	GNBCUUPUEE1APID        aper.Integer            `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUCPUEE1APID        GNBCUCPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUUPUEE1APID        GNBCUUPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
 	Cause                  Cause                   `aper:"mandatory,ignore,ext"`
 	CriticalityDiagnostics *CriticalityDiagnostics `aper:"optional,ignore,ext"`
 }

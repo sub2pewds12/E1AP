@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// GNBCUCPTNLAToAddList From: 9_4_4_PDU_Definitions.txt:574
+// GNBCUCPTNLAToAddList From: manual_patch:-1
 type GNBCUCPTNLAToAddList []GNBCUCPTNLAToAddItem

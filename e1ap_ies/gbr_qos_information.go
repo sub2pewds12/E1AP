@@ -3,16 +3,14 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // GBRQosInformation is a generated SEQUENCE type.
 type GBRQosInformation struct {
-	ERABMaximumBitrateDL    aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	ERABMaximumBitrateUL    aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	ERABGuaranteedBitrateDL aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	ERABGuaranteedBitrateUL aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
+	ERABMaximumBitrateDL    *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	ERABMaximumBitrateUL    *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	ERABGuaranteedBitrateDL *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	ERABGuaranteedBitrateUL *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
 	IEExtensions            *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 

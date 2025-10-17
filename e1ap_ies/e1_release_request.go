@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // E1ReleaseRequest is a generated SEQUENCE type.
 type E1ReleaseRequest struct {
-	TransactionID aper.Integer `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	Cause         Cause        `aper:"mandatory,ignore,ext"`
+	TransactionID TransactionID `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	Cause         Cause         `aper:"mandatory,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

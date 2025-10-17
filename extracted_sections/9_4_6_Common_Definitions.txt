@@ -1,52 +1,52 @@
--- ASN1START 
--- ************************************************************** 
--- 
--- Common definitions 
--- 
--- ************************************************************** 
+-- ASN1START
+-- **************************************************************
+--
+-- Common definitions
+--
+-- **************************************************************
 
-E1AP-CommonDataTypes { 
-itu-t (0) identified-organization (4) etsi (0) mobileDomain (0) 
-ngran-access (22) modules (3) e1ap (5) version1 (1) e1ap-CommonDataTypes (3)} 
-
-
-DEFINITIONS AUTOMATIC TAGS ::=  
-
-BEGIN 
+E1AP-CommonDataTypes {
+itu-t (0) identified-organization (4) etsi (0) mobileDomain (0)
+ngran-access (22) modules (3) e1ap (5) version1 (1) e1ap-CommonDataTypes (3)}
 
 
--- ************************************************************** 
--- 
--- Extension constants 
--- 
--- ************************************************************** 
+DEFINITIONS AUTOMATIC TAGS ::= 
 
-maxPrivateIEs                           INTEGER ::= 65535 
-maxProtocolExtensions                     INTEGER ::= 65535 
-maxProtocolIEs                          INTEGER ::= 65535 
+BEGIN
 
--- ************************************************************** 
--- 
--- Common Data Types 
--- 
--- ************************************************************** 
 
-Criticality    ::=    ENUMERATED { reject, ignore, notify } 
+-- **************************************************************
+--
+-- Extension constants
+--
+-- **************************************************************
 
-Presence      ::= ENUMERATED { optional, conditional, mandatory } 
+maxPrivateIEs 									INTEGER ::= 65535
+maxProtocolExtensions 							INTEGER ::= 65535
+maxProtocolIEs									INTEGER ::= 65535
 
-PrivateIE-ID   ::= CHOICE { 
-   local           INTEGER (0.. maxPrivateIEs), 
-   global        OBJECT IDENTIFIER 
-} 
+-- **************************************************************
+--
+-- Common Data Types
+--
+-- **************************************************************
 
-ProcedureCode     ::= INTEGER (0..255) 
+Criticality		::= 	ENUMERATED { reject, ignore, notify }
 
-ProtocolExtensionID ::= INTEGER (0..maxProtocolExtensions) 
+Presence		::= ENUMERATED { optional, conditional, mandatory }
 
-ProtocolIE-ID     ::= INTEGER (0..maxProtocolIEs) 
+PrivateIE-ID	::= CHOICE {
+	local				INTEGER (0.. maxPrivateIEs),
+	global			OBJECT IDENTIFIER
+}
 
-TriggeringMessage  ::= ENUMERATED { initiating-message, successful-outcome, unsuccessful-outcome} 
+ProcedureCode		::= INTEGER (0..255)
 
-END 
--- ASN1STOP 
+ProtocolExtensionID	::= INTEGER (0..maxProtocolExtensions)
+
+ProtocolIE-ID		::= INTEGER (0..maxProtocolIEs)
+
+TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuccessful-outcome}
+
+END
+-- ASN1STOP

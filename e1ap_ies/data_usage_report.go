@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // DataUsageReport is a generated SEQUENCE type.
 type DataUsageReport struct {
-	GNBCUCPUEE1APID     aper.Integer          `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	GNBCUUPUEE1APID     aper.Integer          `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUCPUEE1APID     GNBCUCPUEE1APID       `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUUPUEE1APID     GNBCUUPUEE1APID       `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
 	DataUsageReportList []DataUsageReportItem `aper:"mandatory,ignore,ext"`
 }
 

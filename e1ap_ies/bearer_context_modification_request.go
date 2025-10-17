@@ -3,24 +3,22 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // BearerContextModificationRequest is a generated SEQUENCE type.
 type BearerContextModificationRequest struct {
-	GNBCUCPUEE1APID                        aper.Integer                            `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	GNBCUUPUEE1APID                        aper.Integer                            `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUCPUEE1APID                        GNBCUCPUEE1APID                         `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUUPUEE1APID                        GNBCUUPUEE1APID                         `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
 	SecurityInformation                    *SecurityInformation                    `aper:"optional,reject,ext"`
-	UEDLAggregateMaximumBitRate            *aper.Integer                           `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
-	UEDLMaximumIntegrityProtectedDataRate  *aper.Integer                           `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	UEDLAggregateMaximumBitRate            *BitRate                                `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	UEDLMaximumIntegrityProtectedDataRate  *BitRate                                `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
 	BearerContextStatusChange              *BearerContextStatusChange              `aper:"optional,reject,ext"`
 	NewULTNLInformationRequired            *NewULTNLInformationRequired            `aper:"optional,reject,ext"`
-	UEInactivityTimer                      *aper.Integer                           `aper:"lb:1,ub:7200,optional,reject,ext"`
+	UEInactivityTimer                      *InactivityTimer                        `aper:"lb:1,ub:7200,optional,reject,ext"`
 	DataDiscardRequired                    *DataDiscardRequired                    `aper:"optional,ignore,ext"`
 	SystemBearerContextModificationRequest *SystemBearerContextModificationRequest `aper:"optional,reject,ext"`
-	RANUEID                                *aper.OctetString                       `aper:"lb:8,ub:8,optional,ignore,ext"`
-	GNBDUID                                *aper.Integer                           `aper:"lb:0,ub:68719476735,optional,ignore,ext"`
+	RANUEID                                *RANUEID                                `aper:"lb:8,ub:8,optional,ignore,ext"`
+	GNBDUID                                *GNBDUID                                `aper:"lb:0,ub:68719476735,optional,ignore,ext"`
 	ActivityNotificationLevel              *ActivityNotificationLevel              `aper:"optional,ignore,ext"`
 }
 

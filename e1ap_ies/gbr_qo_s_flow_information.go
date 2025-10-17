@@ -3,18 +3,16 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // GBRQoSFlowInformation is a generated SEQUENCE type.
 type GBRQoSFlowInformation struct {
-	MaxFlowBitRateDownlink        aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	MaxFlowBitRateUplink          aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	GuaranteedFlowBitRateDownlink aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	GuaranteedFlowBitRateUplink   aper.Integer                `aper:"lb:0,ub:4000000000000,mandatory,reject,ext"`
-	MaxPacketLossRateDownlink     *aper.Integer               `aper:"lb:0,ub:1000,optional,ext"`
-	MaxPacketLossRateUplink       *aper.Integer               `aper:"lb:0,ub:1000,optional,ext"`
+	MaxFlowBitRateDownlink        *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	MaxFlowBitRateUplink          *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	GuaranteedFlowBitRateDownlink *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	GuaranteedFlowBitRateUplink   *BitRate                    `aper:"lb:0,ub:4000000000000,optional,reject,ext"`
+	MaxPacketLossRateDownlink     *MaxPacketLossRate          `aper:"lb:0,ub:1000,optional,ext"`
+	MaxPacketLossRateUplink       *MaxPacketLossRate          `aper:"lb:0,ub:1000,optional,ext"`
 	IEExtensions                  *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 

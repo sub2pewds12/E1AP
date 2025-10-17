@@ -4,7 +4,7 @@ package e1ap_ies
 type ResetType struct {
 	Choice            uint64
 	E1Interface       *ResetAll
-	PartOfE1Interface []ProtocolIESingleContainer
+	PartOfE1Interface *UEAssociatedLogicalE1ConnectionListRes
 	ChoiceExtension   *ProtocolIESingleContainer
 }
 

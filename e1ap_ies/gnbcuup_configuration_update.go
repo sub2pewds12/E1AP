@@ -9,13 +9,14 @@ import (
 
 // GNBCUUPConfigurationUpdate is a generated SEQUENCE type.
 type GNBCUUPConfigurationUpdate struct {
-	TransactionID             aper.Integer               `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	GNBCUUPID                 aper.Integer               `aper:"lb:0,ub:68719476735,mandatory,reject,ext"`
+	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	GNBCUUPID                 GNBCUUPID                  `aper:"lb:0,ub:68719476735,mandatory,reject,ext"`
 	GNBCUUPName               *aper.OctetString          `aper:"optional,ignore,ext"`
 	SupportedPLMNs            []SupportedPLMNsItem       `aper:"lb:1,ub:MaxnoofSPLMNs,optional,reject,ext"`
-	GNBCUUPCapacity           *aper.Integer              `aper:"lb:0,ub:255,optional,ignore,ext"`
-	GNBCUUPTNLAToRemoveList   []GNBCUUPTNLAToRemoveItem  `aper:"optional,reject,ext"`
+	GNBCUUPCapacity           *GNBCUUPCapacity           `aper:"lb:0,ub:255,optional,ignore,ext"`
+	GNBCUUPTNLAToRemoveList   []GNBCUUPTNLAToRemoveItem  `aper:"ub:MaxnoofTNLAssociations,optional,reject,ext"`
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ignore,ext"`
+	ExtendedGNBCUUPName       *ExtendedGNBCUUPName       `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

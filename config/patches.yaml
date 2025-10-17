@@ -1,0 +1,85 @@
+definitions:
+  # This patch creates a SEQUENCE by expanding an existing IE-Set.
+  - name: "UEAssociatedLogicalE1ConnectionItemRes"
+    type: "SEQUENCE"
+    from_ie_set: "UE-associatedLogicalE1-ConnectionItemRes"
+
+  # This patch creates a LIST that refers to the item we just defined.
+  - name: "UEAssociatedLogicalE1ConnectionListRes"
+    type: "LIST"
+    of_type: "UEAssociatedLogicalE1ConnectionItemRes"
+    max_val: "maxnoofIndividualE1ConnectionsToReset"
+
+  # --- Repeat for the ResAck types ---
+  - name: "UEAssociatedLogicalE1ConnectionItemResAck"
+    type: "SEQUENCE"
+    from_ie_set: "UE-associatedLogicalE1-ConnectionItemResAck"
+
+  - name: "UEAssociatedLogicalE1ConnectionListResAck"
+    type: "LIST"
+    of_type: "UEAssociatedLogicalE1ConnectionItemResAck"
+    max_val: "maxnoofIndividualE1ConnectionsToReset"
+
+  # This patch creates a SEQUENCE with explicitly defined members.
+  - name: "CriticalityDiagnostics-IE-Item"
+    type: "SEQUENCE"
+    members:
+      - { ie: "iECriticality", type: "Criticality", presence: "mandatory" }
+      - { ie: "iE-ID", type: "ProtocolIE-ID", presence: "mandatory" }
+      - { ie: "typeOfError", type: "TypeOfError", presence: "mandatory" }
+
+  - name: "CriticalityDiagnostics-IE-List"
+    type: "LIST"
+    of_type: "CriticalityDiagnostics-IE-Item"
+
+  - name: "GTPTLA-Item"
+    type: "SEQUENCE"
+    members:
+      - { ie: "gTPTransportLayerAddresses", type: "TransportLayerAddress", presence: "mandatory" }
+      - { ie: "iE-Extensions", type: "ProtocolExtensionContainer", presence: "optional" }
+
+  - name: "GTPTLAs"
+    type: "LIST"
+    of_type: "GTPTLA-Item"
+    max_val: "maxnoofGTPTLAs"
+
+  - name: "DLUPTNLAddressToUpdateList"
+    type: "LIST"
+    of_type: "DLUPTNLAddressToUpdateItem"
+    max_val: "maxnoofTNLAddresses"
+
+  - name: "UL-UP-TNL-Address-To-Update-List"
+    type: "LIST"
+    of_type: "UL-UP-TNL-Address-To-Update-Item"
+    max_val: "maxnoofTNLAddresses"
+
+  - name: "GNB-CU-UP-TNLA-To-Remove-List"
+    type: "LIST"
+    of_type: "GNB-CU-UP-TNLA-To-Remove-Item"
+    max_val: "maxnoofTNLAssociations"
+
+  - name: "GNB-CU-CP-TNLA-To-Add-List"
+    type: "LIST"
+    of_type: "GNB-CU-CP-TNLA-To-Add-Item"
+    max_val: "maxnoofTNLAssociations"
+
+  - name: "GNB-CU-CP-TNLA-To-Update-List"
+    type: "LIST"
+    of_type: "GNB-CU-CP-TNLA-To-Update-Item"
+    max_val: "maxnoofTNLAssociations"
+
+  - name: "GNB-CU-CP-TNLA-To-Remove-List"
+    type: "LIST"
+    of_type: "GNB-CU-CP-TNLA-To-Remove-Item"
+    max_val: "maxnoofTNLAssociations"
+
+  - name: "GNB-CU-CP-TNLA-Setup-List"
+    type: "LIST"
+    of_type: "GNB-CU-CP-TNLA-Setup-Item"
+    max_val: "maxnoofTNLAssociations"
+
+  # 2. Patch for the GNB-CU-CP TNLA Failed-To-Setup List
+  - name: "GNB-CU-CP-TNLA-Failed-To-Setup-List"
+    type: "LIST"
+    of_type: "GNB-CU-CP-TNLA-Failed-To-Setup-Item"
+    max_val: "maxnoofTNLAssociations"

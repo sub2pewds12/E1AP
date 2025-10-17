@@ -3,15 +3,14 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // DLDataNotification is a generated SEQUENCE type.
 type DLDataNotification struct {
-	GNBCUCPUEE1APID aper.Integer  `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	GNBCUUPUEE1APID aper.Integer  `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	PPI             *aper.Integer `aper:"lb:0,ub:7,optional,ignore,ext"`
+	GNBCUCPUEE1APID        GNBCUCPUEE1APID          `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUUPUEE1APID        GNBCUUPUEE1APID          `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	PPI                    *PPI                     `aper:"lb:0,ub:7,optional,ignore,ext"`
+	PDUSessionToNotifyList []PDUSessionToNotifyItem `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

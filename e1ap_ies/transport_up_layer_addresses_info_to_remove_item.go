@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // TransportUPLayerAddressesInfoToRemoveItem is a generated SEQUENCE type.
 type TransportUPLayerAddressesInfoToRemoveItem struct {
-	IPSecTransportLayerAddress         aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
-	GTPTransportLayerAddressesToRemove []GTPTLAItem                `aper:"optional,ext"`
+	IPSecTransportLayerAddress         TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	GTPTransportLayerAddressesToRemove []GTPTLAItem                `aper:"ub:MaxnoofGTPTLAs,optional,ext"`
 	IEExtensions                       *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 

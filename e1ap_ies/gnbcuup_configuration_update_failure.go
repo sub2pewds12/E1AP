@@ -3,13 +3,11 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // GNBCUUPConfigurationUpdateFailure is a generated SEQUENCE type.
 type GNBCUUPConfigurationUpdateFailure struct {
-	TransactionID          aper.Integer            `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	TransactionID          TransactionID           `aper:"lb:0,ub:255,mandatory,reject,ext"`
 	Cause                  Cause                   `aper:"mandatory,ignore,ext"`
 	TimeToWait             *TimeToWait             `aper:"optional,ignore,ext"`
 	CriticalityDiagnostics *CriticalityDiagnostics `aper:"optional,ignore,ext"`

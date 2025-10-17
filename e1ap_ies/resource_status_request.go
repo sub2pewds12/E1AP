@@ -3,18 +3,16 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // ResourceStatusRequest is a generated SEQUENCE type.
 type ResourceStatusRequest struct {
-	TransactionID         aper.Integer          `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	GNBCUCPMeasurementID  aper.Integer          `aper:"lb:1,ub:4095,mandatory,reject,ext"`
-	GNBCUUPMeasurementID  *aper.Integer         `aper:"lb:1,ub:4095,optional,ignore,ext"`
-	RegistrationRequest   RegistrationRequest   `aper:"mandatory,reject,ext"`
-	ReportCharacteristics *aper.BitString       `aper:"lb:36,ub:36,conditional,reject,ext"`
-	ReportingPeriodicity  *ReportingPeriodicity `aper:"optional,reject,ext"`
+	TransactionID         TransactionID                                   `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	GNBCUCPMeasurementID  ResourceStatusRequestIEsIDGNBCUCPMeasurementID  `aper:"lb:1,ub:4095,mandatory,reject,ext"`
+	GNBCUUPMeasurementID  *ResourceStatusRequestIEsIDGNBCUUPMeasurementID `aper:"lb:1,ub:4095,optional,ignore,ext"`
+	RegistrationRequest   RegistrationRequest                             `aper:"mandatory,reject,ext"`
+	ReportCharacteristics *ReportCharacteristics                          `aper:"lb:36,ub:36,conditional,reject,ext"`
+	ReportingPeriodicity  *ReportingPeriodicity                           `aper:"optional,reject,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

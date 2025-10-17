@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// DRBRequiredToRemoveListEUTRAN From: 9_4_5_Information_Element_Definitions.txt:800
+// DRBRequiredToRemoveListEUTRAN From: 9_4_5_Information_Element_Definitions.txt:857
 type DRBRequiredToRemoveListEUTRAN []DRBRequiredToRemoveItemEUTRAN

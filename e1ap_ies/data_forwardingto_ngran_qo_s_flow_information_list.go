@@ -1,0 +1,4 @@
+package e1ap_ies
+
+// DataForwardingtoNGRANQoSFlowInformationList From: 9_4_5_Information_Element_Definitions.txt:2186
+type DataForwardingtoNGRANQoSFlowInformationList []DataForwardingtoNGRANQoSFlowInformationListItem

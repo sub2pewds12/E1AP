@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// DRBsSubjectToEarlyForwardingList From: 9_4_5_Information_Element_Definitions.txt:725
+// DRBsSubjectToEarlyForwardingList From: 9_4_5_Information_Element_Definitions.txt:780
 type DRBsSubjectToEarlyForwardingList []DRBsSubjectToEarlyForwardingItem

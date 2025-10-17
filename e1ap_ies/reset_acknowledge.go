@@ -3,15 +3,13 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // ResetAcknowledge is a generated SEQUENCE type.
 type ResetAcknowledge struct {
-	TransactionID                             aper.Integer                `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	UEAssociatedLogicalE1ConnectionListResAck []ProtocolIESingleContainer `aper:"optional,ignore,ext"`
-	CriticalityDiagnostics                    *CriticalityDiagnostics     `aper:"optional,ignore,ext"`
+	TransactionID                             TransactionID                              `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	UEAssociatedLogicalE1ConnectionListResAck *UEAssociatedLogicalE1ConnectionListResAck `aper:"optional,ignore,ext"`
+	CriticalityDiagnostics                    *CriticalityDiagnostics                    `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

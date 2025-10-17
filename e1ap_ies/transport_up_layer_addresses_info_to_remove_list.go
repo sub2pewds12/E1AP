@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// TransportUPLayerAddressesInfoToRemoveList From: 9_4_5_Information_Element_Definitions.txt:2344
+// TransportUPLayerAddressesInfoToRemoveList From: 9_4_5_Information_Element_Definitions.txt:2486
 type TransportUPLayerAddressesInfoToRemoveList []TransportUPLayerAddressesInfoToRemoveItem

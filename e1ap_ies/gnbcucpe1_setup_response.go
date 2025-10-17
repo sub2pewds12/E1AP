@@ -9,13 +9,14 @@ import (
 
 // GNBCUCPE1SetupResponse is a generated SEQUENCE type.
 type GNBCUCPE1SetupResponse struct {
-	TransactionID             aper.Integer               `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	GNBCUUPID                 aper.Integer               `aper:"lb:0,ub:68719476735,mandatory,reject,ext"`
+	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	GNBCUUPID                 GNBCUUPID                  `aper:"lb:0,ub:68719476735,mandatory,reject,ext"`
 	GNBCUUPName               *aper.OctetString          `aper:"optional,ignore,ext"`
 	CNSupport                 CNSupport                  `aper:"mandatory,reject,ext"`
 	SupportedPLMNs            []SupportedPLMNsItem       `aper:"lb:1,ub:MaxnoofSPLMNs,mandatory,reject,ext"`
-	GNBCUUPCapacity           *aper.Integer              `aper:"lb:0,ub:255,optional,ignore,ext"`
+	GNBCUUPCapacity           *GNBCUUPCapacity           `aper:"lb:0,ub:255,optional,ignore,ext"`
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ignore,ext"`
+	ExtendedGNBCUUPName       *ExtendedGNBCUUPName       `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

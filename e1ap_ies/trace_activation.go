@@ -3,16 +3,14 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // TraceActivation is a generated SEQUENCE type.
 type TraceActivation struct {
-	TraceID                        aper.OctetString            `aper:"lb:8,ub:8,mandatory,ignore,ext"`
-	InterfacesToTrace              aper.BitString              `aper:"lb:8,ub:8,mandatory,ext"`
+	TraceID                        TraceID                     `aper:"lb:8,ub:8,mandatory,ignore,ext"`
+	InterfacesToTrace              InterfacesToTrace           `aper:"lb:8,ub:8,mandatory,ext"`
 	TraceDepth                     TraceDepth                  `aper:"mandatory,ext"`
-	TraceCollectionEntityIPAddress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	TraceCollectionEntityIPAddress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ignore,ext"`
 	IEExtensions                   *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 

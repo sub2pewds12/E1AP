@@ -9,9 +9,10 @@ import (
 
 // GNBCUCPE1SetupRequest is a generated SEQUENCE type.
 type GNBCUCPE1SetupRequest struct {
-	TransactionID             aper.Integer               `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,reject,ext"`
 	GNBCUCPName               *aper.OctetString          `aper:"optional,ignore,ext"`
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ignore,ext"`
+	ExtendedGNBCUCPName       *ExtendedGNBCUCPName       `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

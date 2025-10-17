@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // IABUPTNLAddressUpdate is a generated SEQUENCE type.
 type IABUPTNLAddressUpdate struct {
-	TransactionID              aper.Integer                 `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	DLUPTNLAddressToUpdateList []DLUPTNLAddressToUpdateItem `aper:"optional,ignore,ext"`
+	TransactionID              TransactionID                `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	DLUPTNLAddressToUpdateList []DLUPTNLAddressToUpdateItem `aper:"ub:MaxnoofTNLAddresses,optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

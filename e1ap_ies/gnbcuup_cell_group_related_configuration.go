@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// GNBCUUPCellGroupRelatedConfiguration From: 9_4_5_Information_Element_Definitions.txt:1086
+// GNBCUUPCellGroupRelatedConfiguration From: 9_4_5_Information_Element_Definitions.txt:1166
 type GNBCUUPCellGroupRelatedConfiguration []GNBCUUPCellGroupRelatedConfigurationItem

@@ -20,8 +20,14 @@ def setup_logging(level=logging.INFO):
             level=level, format="[%(levelname)s] %(message)s", stream=sys.stdout
         )
 
+def load_simple_list(filepath: str) -> List[str]:
+    """Loads a simple list from a text file, one item per line."""
+    if not os.path.exists(filepath):
+        return []
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return [line.strip() for line in f if line.strip()]
 
-def load_lines_with_context(directory: str) -> List[Tuple[str, str, int]]:
+def load_lines_with_context(directory: str, files_to_skip: List[str]) -> List[Tuple[str, str, int]]:
     if not os.path.exists(directory):
         logger.error(f"Input directory '{directory}' not found.")
         return None
@@ -33,7 +39,12 @@ def load_lines_with_context(directory: str) -> List[Tuple[str, str, int]]:
 
     all_lines = []
     logger.info(f"Found {len(section_files)} section files to load...")
+
     for filename in section_files:
+        if filename in set(files_to_skip):
+            logger.warning(f"Skipping file '{filename}' as it is handled by manual patches.")
+            continue # Skip to the next file
+
         filepath = os.path.join(directory, filename)
         with open(filepath, "r", encoding="utf-8") as f:
             for i, line_text in enumerate(f, 1):
@@ -42,9 +53,7 @@ def load_lines_with_context(directory: str) -> List[Tuple[str, str, int]]:
     logger.info(f"Successfully loaded and combined {len(all_lines)} total lines.")
     return all_lines
 
-
 def main():
-
     parser = argparse.ArgumentParser(
         description="Parse 3GPP E1AP ASN.1 specs and generate Go code."
     )
@@ -72,37 +81,58 @@ def main():
         help="Run a full diagnostic report on parsed and failed definitions instead of generating files.",
     )
     args = parser.parse_args()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_dir = os.path.join(script_dir, "..", "config")
+    skip_files_path = os.path.join(config_dir, "skip_files.txt")
+    acronyms_path = os.path.join(config_dir, "acronyms.txt")
 
     log_level = logging.DEBUG if args.verbose else logging.INFO
     setup_logging(log_level)
 
     logger.info("--- STAGE 1: LOADING FILES ---")
 
-    lines = load_lines_with_context(args.input_dir)
+    files_to_skip = load_simple_list(skip_files_path)
+    acronyms = load_simple_list(acronyms_path)
+    
+    lines = load_lines_with_context(args.input_dir, files_to_skip)
     if not lines:
         sys.exit(1)
 
     logger.info("--- STAGE 2: PARSING DEFINITIONS ---")
     asn1_parser = ASN1Parser(lines)
     definitions, failures, procedures, message_map = asn1_parser.parse()
-
     logger.info(
         f"Parsing complete. Found {len(definitions)} definitions, {len(procedures)} procedures, and {len(failures)} failures."
     )
 
+    if failures:
+        logger.warning("--- The following definitions failed to parse: ---")
+        for failure in sorted(failures, key=lambda x: x['name']):
+            # This will print the name of every failed definition
+            logger.warning(f"  - {failure['name']}")
+
     logger.info("--- STAGE 2.5: APPLYING MANUAL PATCHES ---")
-    patcher = ASN1Patcher()
-    hardcoded_defs = patcher.get_hardcoded_definitions()
-    for definition in hardcoded_defs:
-        definitions[definition.name] = definition
+    patcher = ASN1Patcher(config_dir)
+    hardcoded_defs = patcher.get_hardcoded_definitions(definitions)
+
+    output_dir = args.output_dir
+    definitions.update(hardcoded_defs)
+    
+    # The .update() method will add new definitions and overwrite any
+    # existing ones (like the junk from the parser) with the correct patched versions.
+    definitions.update(hardcoded_defs)
     logger.info(
         f"Applied {len(hardcoded_defs)} hardcoded definitions. Total definitions now: {len(definitions)}."
     )
+    if "ResetType" in definitions:
+        reset_type_def = definitions["ResetType"]
+        for ie in reset_type_def.ies:
+            if ie.ie == "partOfE1-Interface":
+                # The parser incorrectly found "...Lists". We know the correct type is "...ListRes".
+                logger.info("Applying post-processing fix for ResetType 'partOfE1-Interface' member.")
+                ie.type = "UE-associatedLogicalE1-ConnectionListRes"
 
-    generator = GoCodeGenerator(
-        definitions, failures, procedures, message_map, args.output_dir
-    )
-
+    generator = GoCodeGenerator(definitions, failures, procedures, message_map, output_dir, patcher, acronyms)
     if args.diagnose:
         logger.info("--- STAGE 3: RUNNING DIAGNOSTIC REPORT ---")
         generator.run_full_diagnostic()
@@ -110,7 +140,6 @@ def main():
         logger.info("--- STAGE 3: GENERATING GO CODE ---")
         generator.generate_files()
         logger.info("Code generation process complete.")
-
 
 if __name__ == "__main__":
     main()

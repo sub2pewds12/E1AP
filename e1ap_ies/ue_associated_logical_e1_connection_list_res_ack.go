@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// UEAssociatedLogicalE1ConnectionListResAck From: 9_4_4_PDU_Definitions.txt:304
-type UEAssociatedLogicalE1ConnectionListResAck []ProtocolIESingleContainer
+// UEAssociatedLogicalE1ConnectionListResAck is a manually patched LIST type.
+type UEAssociatedLogicalE1ConnectionListResAck []UEAssociatedLogicalE1ConnectionItemResAck

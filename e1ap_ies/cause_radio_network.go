@@ -32,12 +32,16 @@ const (
 	CauseRadioNetworkProcedureCancelled                        aper.Enumerated = 19
 	CauseRadioNetworkNormalRelease                             aper.Enumerated = 20
 	CauseRadioNetworkNoRadioResourcesAvailable                 aper.Enumerated = 21
-	CauseRadioNetworkActionEsirableForAdioEasons               aper.Enumerated = 22
-	CauseRadioNetworkDRRResourcesNotAvailableForTheSlice       aper.Enumerated = 23
+	CauseRadioNetworkActionDesirableForRadioReasons            aper.Enumerated = 22
+	CauseRadioNetworkResourcesNotAvailableForTheSlice          aper.Enumerated = 23
 	CauseRadioNetworkPDCPConfigurationNotSupported             aper.Enumerated = 24
 	CauseRadioNetworkUeDlMaxIPDataRateReason                   aper.Enumerated = 25
 	CauseRadioNetworkUPIntegrityProtectionFailure              aper.Enumerated = 26
 	CauseRadioNetworkReleaseDueToPreEmption                    aper.Enumerated = 27
 	CauseRadioNetworkRsnNotAvailableForTheUP                   aper.Enumerated = 28
 	CauseRadioNetworkNPNNotSupported                           aper.Enumerated = 29
+	CauseRadioNetworkReportCharacteristicEmpty                 aper.Enumerated = 30
+	CauseRadioNetworkExistingMeasurementID                     aper.Enumerated = 31
+	CauseRadioNetworkMeasurementTemporarilyNotAvailable        aper.Enumerated = 32
+	CauseRadioNetworkMeasurementNotSupportedForTheObject       aper.Enumerated = 33
 )

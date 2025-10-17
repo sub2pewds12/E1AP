@@ -9,12 +9,12 @@ import (
 
 // CellTrafficTrace is a generated SEQUENCE type.
 type CellTrafficTrace struct {
-	GNBCUCPUEE1APID                aper.Integer      `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	GNBCUUPUEE1APID                aper.Integer      `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	TraceID                        aper.OctetString  `aper:"lb:8,ub:8,mandatory,ignore,ext"`
-	TraceCollectionEntityIPAddress aper.BitString    `aper:"lb:1,ub:160,mandatory,ignore,ext"`
-	PrivacyIndicator               *PrivacyIndicator `aper:"optional,ignore,ext"`
-	URIaddress                     *aper.OctetString `aper:"optional,ignore,ext"`
+	GNBCUCPUEE1APID                GNBCUCPUEE1APID       `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUUPUEE1APID                GNBCUUPUEE1APID       `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	TraceID                        TraceID               `aper:"lb:8,ub:8,mandatory,ignore,ext"`
+	TraceCollectionEntityIPAddress TransportLayerAddress `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	PrivacyIndicator               *PrivacyIndicator     `aper:"optional,ignore,ext"`
+	URIaddress                     *aper.OctetString     `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

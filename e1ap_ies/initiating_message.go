@@ -4,7 +4,7 @@ import "github.com/lvdund/ngap/aper"
 
 // InitiatingMessage is a generated SEQUENCE type.
 type InitiatingMessage struct {
-	ProcedureCode aper.Integer     `aper:"lb:0,ub:255,mandatory"`
+	ProcedureCode ProcedureCode    `aper:"lb:0,ub:255,mandatory"`
 	Criticality   Criticality      `aper:"mandatory"`
 	Value         aper.OctetString `aper:"mandatory"`
 }

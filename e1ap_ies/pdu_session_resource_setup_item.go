@@ -1,10 +1,8 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
-
 // PDUSessionResourceSetupItem is a generated SEQUENCE type.
 type PDUSessionResourceSetupItem struct {
-	PDUSessionID                                aper.Integer                                `aper:"lb:0,ub:255,mandatory,ext"`
+	PDUSessionID                                PDUSessionID                                `aper:"lb:0,ub:255,mandatory,ext"`
 	SecurityResult                              *SecurityResult                             `aper:"optional,ext"`
 	NGDLUPTNLInformation                        UPTNLInformation                            `aper:"mandatory,ext"`
 	PDUSessionDataForwardingInformationResponse *DataForwardingInformation                  `aper:"optional,ext"`

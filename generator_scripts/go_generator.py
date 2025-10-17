@@ -2,6 +2,7 @@ import os
 import re
 import logging
 import shutil
+from asn1_patches import ASN1Patcher
 from typing import Dict, List, Any, Tuple, Optional
 from go_templates import render_enum, render_sequence, render_choice
 from common_types import (
@@ -28,18 +29,28 @@ class GoCodeGenerator:
         procedures: Dict[str, ASN1Procedure],
         message_to_procedure_map: Dict[str, str],
         output_dir: str,
+        patcher: "ASN1Patcher",
+        acronyms: List[str]
     ):
         self.definitions = definitions
         self.failures = failures
         self.procedures = procedures
         self.message_to_procedure_map = message_to_procedure_map
         self.output_dir = output_dir
+        self.patcher = patcher
+        self.acronyms = set(acronyms)
         self.generated_files = set()
+        self.name_overrides = {
+            "UE-associatedLogicalE1-ConnectionListResItem": "UEAssociatedLogicalE1ConnectionItemRes",
+            "UE-associatedLogicalE1-ConnectionListResAckItem": "UEAssociatedLogicalE1ConnectionItemResAck",
+        }
 
     def _standard_string(self, input_string: str) -> str:
         if not input_string:
             return ""
-
+        if input_string in self.name_overrides:
+            return self.name_overrides[input_string]
+        
         overrides = {
             "ProtocolIE-SingleContainer": "ProtocolIESingleContainer",
             "ProtocolIE-Container": "ProtocolIEContainer",
@@ -50,25 +61,6 @@ class GoCodeGenerator:
         if input_string in overrides:
             return overrides[input_string]
 
-        known_acronyms = {
-            "ID",
-            "IE",
-            "PDU",
-            "E1AP",
-            "GNB",
-            "CU",
-            "CP",
-            "UP",
-            "QOS",
-            "DRB",
-            "IP",
-            "ASN",
-            "TEID",
-            "URI",
-            "SCTP",
-            "GTP",
-        }
-
         s = re.sub(r"^(id-)", "", input_string)
         parts = re.split(r"[-_\s]", s)
 
@@ -76,12 +68,13 @@ class GoCodeGenerator:
         for part in parts:
             if not part:
                 continue
-            if part.upper() in known_acronyms:
+            if part.upper() in self.acronyms: 
                 processed_parts.append(part.upper())
             else:
                 processed_parts.append(part[0].upper() + part[1:])
 
         return "".join(processed_parts)
+
 
     def _format_go_value(self, value: str) -> str:
         if not value:
@@ -129,11 +122,9 @@ class GoCodeGenerator:
             "ProtocolExtensionField",
         ]
         if type_name in manual_types:
-
             return type_name, None
 
         if type_name == "ANY":
-
             return "aper.OctetString", self.definitions.get("OCTET STRING")
 
         container_mappings = {
@@ -150,6 +141,10 @@ class GoCodeGenerator:
         definition = self.definitions.get(type_name)
         if not definition:
             return self._standard_string(type_name), None
+        if isinstance(definition, (IntegerDefinition, StringDefinition)) and \
+            not isinstance(definition, BuiltinDefinition) and \
+            not isinstance(definition, ConstantDefinition):
+                return self._standard_string(definition.name), definition
 
         visited = {type_name}
 
@@ -220,7 +215,7 @@ class GoCodeGenerator:
         self._generate_constants_file(classified_defs["constant"])
         self._generate_common_types_file(classified_defs["simple"])
         self._generate_complex_type_files(classified_defs["complex"])
-
+        
         stale_files_found = 0
         for filename_on_disk in os.listdir(self.output_dir):
             if not filename_on_disk.endswith(".go"):
@@ -238,6 +233,7 @@ class GoCodeGenerator:
         if stale_files_found == 0:
             logger.info("No stale generated files to clean up.")
 
+        self.patcher.patch_generated_files(self.output_dir)
         self._format_generated_code()
 
     def _format_generated_code(self):

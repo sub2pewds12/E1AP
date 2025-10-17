@@ -3,15 +3,13 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // Reset is a generated SEQUENCE type.
 type Reset struct {
-	TransactionID aper.Integer `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	Cause         Cause        `aper:"mandatory,ignore,ext"`
-	ResetType     ResetType    `aper:"mandatory,reject,ext"`
+	TransactionID TransactionID `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	Cause         Cause         `aper:"mandatory,ignore,ext"`
+	ResetType     ResetType     `aper:"mandatory,reject,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

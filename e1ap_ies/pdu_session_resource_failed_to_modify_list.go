@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// PDUSessionResourceFailedToModifyList From: 9_4_5_Information_Element_Definitions.txt:1706
+// PDUSessionResourceFailedToModifyList From: 9_4_5_Information_Element_Definitions.txt:1819
 type PDUSessionResourceFailedToModifyList []PDUSessionResourceFailedToModifyItem

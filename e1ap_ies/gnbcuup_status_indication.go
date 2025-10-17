@@ -3,13 +3,11 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // GNBCUUPStatusIndication is a generated SEQUENCE type.
 type GNBCUUPStatusIndication struct {
-	TransactionID              aper.Integer               `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	TransactionID              TransactionID              `aper:"lb:0,ub:255,mandatory,reject,ext"`
 	GNBCUUPOverloadInformation GNBCUUPOverloadInformation `aper:"mandatory,reject,ext"`
 }
 

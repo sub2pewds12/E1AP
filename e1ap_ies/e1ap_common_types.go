@@ -6,7 +6,7 @@ import (
 	"github.com/lvdund/ngap/aper"
 )
 
-// AdditionalRRMPriorityIndex From: 9_4_5_Information_Element_Definitions.txt:109
+// AdditionalRRMPriorityIndex From: 9_4_5_Information_Element_Definitions.txt:126
 type AdditionalRRMPriorityIndex aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -17,7 +17,7 @@ func (v AdditionalRRMPriorityIndex) Validate() error {
 	return nil
 }
 
-// AlternativeQoSParaSetItemAlternativeQoSParameterIndex From: 9_4_5_Information_Element_Definitions.txt:115
+// AlternativeQoSParaSetItemAlternativeQoSParameterIndex From: 9_4_5_Information_Element_Definitions.txt:132
 type AlternativeQoSParaSetItemAlternativeQoSParameterIndex aper.Integer
 
 const (
@@ -33,7 +33,7 @@ func (v AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Validate() error 
 	return nil
 }
 
-// AveragingWindow From: 9_4_5_Information_Element_Definitions.txt:111
+// AveragingWindow From: 9_4_5_Information_Element_Definitions.txt:128
 type AveragingWindow aper.Integer
 
 const (
@@ -49,7 +49,7 @@ func (v AveragingWindow) Validate() error {
 	return nil
 }
 
-// BitRate From: 9_4_5_Information_Element_Definitions.txt:137
+// BitRate From: 9_4_5_Information_Element_Definitions.txt:154
 type BitRate aper.Integer
 
 const (
@@ -65,10 +65,10 @@ func (v BitRate) Validate() error {
 	return nil
 }
 
-// BurstArrivalTime From: 9_4_5_Information_Element_Definitions.txt:2268
+// BurstArrivalTime From: 9_4_5_Information_Element_Definitions.txt:2411
 type BurstArrivalTime aper.OctetString
 
-// CellGroupID From: 9_4_5_Information_Element_Definitions.txt:230
+// CellGroupID From: 9_4_5_Information_Element_Definitions.txt:252
 type CellGroupID aper.Integer
 
 const (
@@ -84,10 +84,10 @@ func (v CellGroupID) Validate() error {
 	return nil
 }
 
-// CommonNetworkInstance From: 9_4_5_Information_Element_Definitions.txt:249
+// CommonNetworkInstance From: 9_4_5_Information_Element_Definitions.txt:273
 type CommonNetworkInstance aper.OctetString
 
-// DRBBStatusTransferReceiveStatusofPDCPSDU From: 9_4_5_Information_Element_Definitions.txt:1634
+// DRBBStatusTransferReceiveStatusofPDCPSDU From: 9_4_5_Information_Element_Definitions.txt:1747
 type DRBBStatusTransferReceiveStatusofPDCPSDU aper.OctetString
 
 const (
@@ -103,7 +103,7 @@ func (v DRBBStatusTransferReceiveStatusofPDCPSDU) Validate() error {
 	return nil
 }
 
-// DRBID From: 9_4_5_Information_Element_Definitions.txt:542
+// DRBID From: 9_4_5_Information_Element_Definitions.txt:586
 type DRBID aper.Integer
 
 const (
@@ -119,18 +119,23 @@ func (v DRBID) Validate() error {
 	return nil
 }
 
-// DRBRemovedItemDRBAccumulatedSessionTime From: 9_4_5_Information_Element_Definitions.txt:577
-type DRBRemovedItemDRBAccumulatedSessionTime aper.OctetString
+// DRBMeasurementResultsInformationItemULD1Result From: 9_4_5_Information_Element_Definitions.txt:588
+type DRBMeasurementResultsInformationItemULD1Result aper.Integer
+
+const (
+	MinDRBMeasurementResultsInformationItemULD1Result DRBMeasurementResultsInformationItemULD1Result = 0
+	MaxDRBMeasurementResultsInformationItemULD1Result DRBMeasurementResultsInformationItemULD1Result = 10000
+)
 
 // Validate checks if the value is within the specified range.
-func (v DRBRemovedItemDRBAccumulatedSessionTime) Validate() error {
-	if len(v) < 5 || len(v) > 5 {
-		return fmt.Errorf("value for DRBRemovedItemDRBAccumulatedSessionTime is outside the valid length (5..5)")
+func (v DRBMeasurementResultsInformationItemULD1Result) Validate() error {
+	if v < MinDRBMeasurementResultsInformationItemULD1Result || v > MaxDRBMeasurementResultsInformationItemULD1Result {
+		return fmt.Errorf("value for DRBMeasurementResultsInformationItemULD1Result is outside the valid range (MinDRBMeasurementResultsInformationItemULD1Result..MaxDRBMeasurementResultsInformationItemULD1Result)")
 	}
 	return nil
 }
 
-// DRBUsageReportItemEndTimeStamp From: 9_4_5_Information_Element_Definitions.txt:920
+// DRBUsageReportItemEndTimeStamp From: 9_4_5_Information_Element_Definitions.txt:981
 type DRBUsageReportItemEndTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -141,7 +146,7 @@ func (v DRBUsageReportItemEndTimeStamp) Validate() error {
 	return nil
 }
 
-// DRBUsageReportItemStartTimeStamp From: 9_4_5_Information_Element_Definitions.txt:920
+// DRBUsageReportItemStartTimeStamp From: 9_4_5_Information_Element_Definitions.txt:981
 type DRBUsageReportItemStartTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -152,13 +157,13 @@ func (v DRBUsageReportItemStartTimeStamp) Validate() error {
 	return nil
 }
 
-// DRBUsageReportItemUsageCountDL From: 9_4_5_Information_Element_Definitions.txt:920
+// DRBUsageReportItemUsageCountDL From: 9_4_5_Information_Element_Definitions.txt:981
 type DRBUsageReportItemUsageCountDL aper.Integer
 
-// DRBUsageReportItemUsageCountUL From: 9_4_5_Information_Element_Definitions.txt:920
+// DRBUsageReportItemUsageCountUL From: 9_4_5_Information_Element_Definitions.txt:981
 type DRBUsageReportItemUsageCountUL aper.Integer
 
-// Dynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:940
+// Dynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1001
 type Dynamic5QIDescriptorFiveQI aper.Integer
 
 const (
@@ -174,10 +179,10 @@ func (v Dynamic5QIDescriptorFiveQI) Validate() error {
 	return nil
 }
 
-// EncryptionKey From: 9_4_5_Information_Element_Definitions.txt:1015
+// EncryptionKey From: 9_4_5_Information_Element_Definitions.txt:1079
 type EncryptionKey aper.OctetString
 
-// ExtendedPacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1035
+// ExtendedPacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1099
 type ExtendedPacketDelayBudget aper.Integer
 
 const (
@@ -193,10 +198,16 @@ func (v ExtendedPacketDelayBudget) Validate() error {
 	return nil
 }
 
-// GNBCUCPName From: 9_4_5_Information_Element_Definitions.txt:1080
+// GNBCUCPName From: 9_4_5_Information_Element_Definitions.txt:1144
 type GNBCUCPName aper.OctetString
 
-// GNBCUCPUEE1APID From: 9_4_5_Information_Element_Definitions.txt:1082
+// GNBCUCPNameUTF8String From: 9_4_5_Information_Element_Definitions.txt:1159
+type GNBCUCPNameUTF8String aper.OctetString
+
+// GNBCUCPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1157
+type GNBCUCPNameVisibleString aper.OctetString
+
+// GNBCUCPUEE1APID From: 9_4_5_Information_Element_Definitions.txt:1162
 type GNBCUCPUEE1APID aper.Integer
 
 const (
@@ -212,7 +223,7 @@ func (v GNBCUCPUEE1APID) Validate() error {
 	return nil
 }
 
-// GNBCUUPCapacity From: 9_4_5_Information_Element_Definitions.txt:1084
+// GNBCUUPCapacity From: 9_4_5_Information_Element_Definitions.txt:1164
 type GNBCUUPCapacity aper.Integer
 
 const (
@@ -228,7 +239,7 @@ func (v GNBCUUPCapacity) Validate() error {
 	return nil
 }
 
-// GNBCUUPID From: 9_4_5_Information_Element_Definitions.txt:1099
+// GNBCUUPID From: 9_4_5_Information_Element_Definitions.txt:1179
 type GNBCUUPID aper.Integer
 
 const (
@@ -244,10 +255,16 @@ func (v GNBCUUPID) Validate() error {
 	return nil
 }
 
-// GNBCUUPName From: 9_4_5_Information_Element_Definitions.txt:1101
+// GNBCUUPName From: 9_4_5_Information_Element_Definitions.txt:1181
 type GNBCUUPName aper.OctetString
 
-// GNBCUUPUEE1APID From: 9_4_5_Information_Element_Definitions.txt:1103
+// GNBCUUPNameUTF8String From: 9_4_5_Information_Element_Definitions.txt:1196
+type GNBCUUPNameUTF8String aper.OctetString
+
+// GNBCUUPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1194
+type GNBCUUPNameVisibleString aper.OctetString
+
+// GNBCUUPUEE1APID From: 9_4_5_Information_Element_Definitions.txt:1198
 type GNBCUUPUEE1APID aper.Integer
 
 const (
@@ -263,7 +280,7 @@ func (v GNBCUUPUEE1APID) Validate() error {
 	return nil
 }
 
-// GNBDUID From: 9_4_5_Information_Element_Definitions.txt:1221
+// GNBDUID From: 9_4_5_Information_Element_Definitions.txt:1316
 type GNBDUID aper.Integer
 
 const (
@@ -279,7 +296,7 @@ func (v GNBDUID) Validate() error {
 	return nil
 }
 
-// GTPTEID From: 9_4_5_Information_Element_Definitions.txt:1194
+// GTPTEID From: 9_4_5_Information_Element_Definitions.txt:1289
 type GTPTEID aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -290,7 +307,7 @@ func (v GTPTEID) Validate() error {
 	return nil
 }
 
-// HFN From: 9_4_5_Information_Element_Definitions.txt:1226
+// HFN From: 9_4_5_Information_Element_Definitions.txt:1321
 type HFN aper.Integer
 
 const (
@@ -306,7 +323,7 @@ func (v HFN) Validate() error {
 	return nil
 }
 
-// HWCapacityIndicatorAvailableThroughput From: 9_4_5_Information_Element_Definitions.txt:1228
+// HWCapacityIndicatorAvailableThroughput From: 9_4_5_Information_Element_Definitions.txt:1323
 type HWCapacityIndicatorAvailableThroughput aper.Integer
 
 const (
@@ -322,7 +339,7 @@ func (v HWCapacityIndicatorAvailableThroughput) Validate() error {
 	return nil
 }
 
-// HWCapacityIndicatorOfferedThroughput From: 9_4_5_Information_Element_Definitions.txt:1228
+// HWCapacityIndicatorOfferedThroughput From: 9_4_5_Information_Element_Definitions.txt:1323
 type HWCapacityIndicatorOfferedThroughput aper.Integer
 
 const (
@@ -338,7 +355,7 @@ func (v HWCapacityIndicatorOfferedThroughput) Validate() error {
 	return nil
 }
 
-// InactivityTimer From: 9_4_5_Information_Element_Definitions.txt:1264
+// InactivityTimer From: 9_4_5_Information_Element_Definitions.txt:1364
 type InactivityTimer aper.Integer
 
 const (
@@ -354,10 +371,10 @@ func (v InactivityTimer) Validate() error {
 	return nil
 }
 
-// IntegrityProtectionKey From: 9_4_5_Information_Element_Definitions.txt:1256
+// IntegrityProtectionKey From: 9_4_5_Information_Element_Definitions.txt:1356
 type IntegrityProtectionKey aper.OctetString
 
-// InterfacesToTrace From: 9_4_5_Information_Element_Definitions.txt:1266
+// InterfacesToTrace From: 9_4_5_Information_Element_Definitions.txt:1366
 type InterfacesToTrace aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -368,7 +385,7 @@ func (v InterfacesToTrace) Validate() error {
 	return nil
 }
 
-// M7period From: 9_4_5_Information_Element_Definitions.txt:1376
+// M7period From: 9_4_5_Information_Element_Definitions.txt:1478
 type M7period aper.Integer
 
 const (
@@ -384,7 +401,7 @@ func (v M7period) Validate() error {
 	return nil
 }
 
-// MRDCDataUsageReportItemEndTimeStamp From: 9_4_5_Information_Element_Definitions.txt:1315
+// MRDCDataUsageReportItemEndTimeStamp From: 9_4_5_Information_Element_Definitions.txt:1417
 type MRDCDataUsageReportItemEndTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -395,7 +412,7 @@ func (v MRDCDataUsageReportItemEndTimeStamp) Validate() error {
 	return nil
 }
 
-// MRDCDataUsageReportItemStartTimeStamp From: 9_4_5_Information_Element_Definitions.txt:1315
+// MRDCDataUsageReportItemStartTimeStamp From: 9_4_5_Information_Element_Definitions.txt:1417
 type MRDCDataUsageReportItemStartTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -406,13 +423,29 @@ func (v MRDCDataUsageReportItemStartTimeStamp) Validate() error {
 	return nil
 }
 
-// MRDCDataUsageReportItemUsageCountDL From: 9_4_5_Information_Element_Definitions.txt:1315
+// MRDCDataUsageReportItemUsageCountDL From: 9_4_5_Information_Element_Definitions.txt:1417
 type MRDCDataUsageReportItemUsageCountDL aper.Integer
 
-// MRDCDataUsageReportItemUsageCountUL From: 9_4_5_Information_Element_Definitions.txt:1315
+// MRDCDataUsageReportItemUsageCountUL From: 9_4_5_Information_Element_Definitions.txt:1417
 type MRDCDataUsageReportItemUsageCountUL aper.Integer
 
-// MaxDataBurstVolume From: 9_4_5_Information_Element_Definitions.txt:1295
+// MaxCIDEHCDL From: 9_4_5_Information_Element_Definitions.txt:1415
+type MaxCIDEHCDL aper.Integer
+
+const (
+	MinMaxCIDEHCDL MaxCIDEHCDL = 1
+	MaxMaxCIDEHCDL MaxCIDEHCDL = 32767
+)
+
+// Validate checks if the value is within the specified range.
+func (v MaxCIDEHCDL) Validate() error {
+	if v < MinMaxCIDEHCDL || v > MaxMaxCIDEHCDL {
+		return fmt.Errorf("value for MaxCIDEHCDL is outside the valid range (MinMaxCIDEHCDL..MaxMaxCIDEHCDL)")
+	}
+	return nil
+}
+
+// MaxDataBurstVolume From: 9_4_5_Information_Element_Definitions.txt:1395
 type MaxDataBurstVolume aper.Integer
 
 const (
@@ -428,7 +461,7 @@ func (v MaxDataBurstVolume) Validate() error {
 	return nil
 }
 
-// MaxPacketLossRate From: 9_4_5_Information_Element_Definitions.txt:1313
+// MaxPacketLossRate From: 9_4_5_Information_Element_Definitions.txt:1413
 type MaxPacketLossRate aper.Integer
 
 const (
@@ -444,7 +477,7 @@ func (v MaxPacketLossRate) Validate() error {
 	return nil
 }
 
-// MeasurementsToActivate From: 9_4_5_Information_Element_Definitions.txt:1403
+// MeasurementsToActivate From: 9_4_5_Information_Element_Definitions.txt:1505
 type MeasurementsToActivate aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -455,7 +488,7 @@ func (v MeasurementsToActivate) Validate() error {
 	return nil
 }
 
-// NID From: 9_4_5_Information_Element_Definitions.txt:1437
+// NID From: 9_4_5_Information_Element_Definitions.txt:1539
 type NID aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -466,7 +499,7 @@ func (v NID) Validate() error {
 	return nil
 }
 
-// NRCellIdentity From: 9_4_5_Information_Element_Definitions.txt:1490
+// NRCellIdentity From: 9_4_5_Information_Element_Definitions.txt:1592
 type NRCellIdentity aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -477,7 +510,7 @@ func (v NRCellIdentity) Validate() error {
 	return nil
 }
 
-// NetworkInstance From: 9_4_5_Information_Element_Definitions.txt:1409
+// NetworkInstance From: 9_4_5_Information_Element_Definitions.txt:1511
 type NetworkInstance aper.Integer
 
 const (
@@ -493,7 +526,7 @@ func (v NetworkInstance) Validate() error {
 	return nil
 }
 
-// NonDynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1439
+// NonDynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1541
 type NonDynamic5QIDescriptorFiveQI aper.Integer
 
 const (
@@ -509,7 +542,23 @@ func (v NonDynamic5QIDescriptorFiveQI) Validate() error {
 	return nil
 }
 
-// PDCPSN From: 9_4_5_Information_Element_Definitions.txt:1608
+// NumberOfTunnels From: 9_4_5_Information_Element_Definitions.txt:256
+type NumberOfTunnels aper.Integer
+
+const (
+	MinNumberOfTunnels NumberOfTunnels = 1
+	MaxNumberOfTunnels NumberOfTunnels = 4
+)
+
+// Validate checks if the value is within the specified range.
+func (v NumberOfTunnels) Validate() error {
+	if v < MinNumberOfTunnels || v > MaxNumberOfTunnels {
+		return fmt.Errorf("value for NumberOfTunnels is outside the valid range (MinNumberOfTunnels..MaxNumberOfTunnels)")
+	}
+	return nil
+}
+
+// PDCPSN From: 9_4_5_Information_Element_Definitions.txt:1721
 type PDCPSN aper.Integer
 
 const (
@@ -525,7 +574,7 @@ func (v PDCPSN) Validate() error {
 	return nil
 }
 
-// PDUSessionID From: 9_4_5_Information_Element_Definitions.txt:1645
+// PDUSessionID From: 9_4_5_Information_Element_Definitions.txt:1758
 type PDUSessionID aper.Integer
 
 const (
@@ -541,7 +590,7 @@ func (v PDUSessionID) Validate() error {
 	return nil
 }
 
-// PERExponent From: 9_4_5_Information_Element_Definitions.txt:1537
+// PERExponent From: 9_4_5_Information_Element_Definitions.txt:1650
 type PERExponent aper.Integer
 
 const (
@@ -557,7 +606,7 @@ func (v PERExponent) Validate() error {
 	return nil
 }
 
-// PERScalar From: 9_4_5_Information_Element_Definitions.txt:1536
+// PERScalar From: 9_4_5_Information_Element_Definitions.txt:1649
 type PERScalar aper.Integer
 
 const (
@@ -573,7 +622,7 @@ func (v PERScalar) Validate() error {
 	return nil
 }
 
-// PLMNIdentity From: 9_4_5_Information_Element_Definitions.txt:1908
+// PLMNIdentity From: 9_4_5_Information_Element_Definitions.txt:2018
 type PLMNIdentity aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -584,7 +633,7 @@ func (v PLMNIdentity) Validate() error {
 	return nil
 }
 
-// PPI From: 9_4_5_Information_Element_Definitions.txt:1912
+// PPI From: 9_4_5_Information_Element_Definitions.txt:2022
 type PPI aper.Integer
 
 const (
@@ -600,7 +649,7 @@ func (v PPI) Validate() error {
 	return nil
 }
 
-// PacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1523
+// PacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1636
 type PacketDelayBudget aper.Integer
 
 const (
@@ -616,7 +665,7 @@ func (v PacketDelayBudget) Validate() error {
 	return nil
 }
 
-// Periodicity From: 9_4_5_Information_Element_Definitions.txt:2266
+// Periodicity From: 9_4_5_Information_Element_Definitions.txt:2409
 type Periodicity aper.Integer
 
 const (
@@ -632,7 +681,7 @@ func (v Periodicity) Validate() error {
 	return nil
 }
 
-// PortNumber From: 9_4_5_Information_Element_Definitions.txt:1910
+// PortNumber From: 9_4_5_Information_Element_Definitions.txt:2020
 type PortNumber aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -643,7 +692,7 @@ func (v PortNumber) Validate() error {
 	return nil
 }
 
-// PriorityLevel From: 9_4_5_Information_Element_Definitions.txt:1914
+// PriorityLevel From: 9_4_5_Information_Element_Definitions.txt:2024
 type PriorityLevel aper.Integer
 
 // Validate checks if the value is within the specified range.
@@ -705,7 +754,7 @@ func (v ProtocolIEID) Validate() error {
 	return nil
 }
 
-// QCI From: 9_4_5_Information_Element_Definitions.txt:1934
+// QCI From: 9_4_5_Information_Element_Definitions.txt:2044
 type QCI aper.Integer
 
 const (
@@ -721,7 +770,7 @@ func (v QCI) Validate() error {
 	return nil
 }
 
-// QOSFlowIdentifier From: 9_4_5_Information_Element_Definitions.txt:1946
+// QOSFlowIdentifier From: 9_4_5_Information_Element_Definitions.txt:2056
 type QOSFlowIdentifier aper.Integer
 
 const (
@@ -737,7 +786,7 @@ func (v QOSFlowIdentifier) Validate() error {
 	return nil
 }
 
-// QOSFlowRemovedItemQOSFlowAccumulatedSessionTime From: 9_4_5_Information_Element_Definitions.txt:2037
+// QOSFlowRemovedItemQOSFlowAccumulatedSessionTime From: 9_4_5_Information_Element_Definitions.txt:2156
 type QOSFlowRemovedItemQOSFlowAccumulatedSessionTime aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -748,7 +797,7 @@ func (v QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Validate() error {
 	return nil
 }
 
-// QOSMappingInformationDscp From: 9_4_5_Information_Element_Definitions.txt:2049
+// QOSMappingInformationDscp From: 9_4_5_Information_Element_Definitions.txt:2180
 type QOSMappingInformationDscp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -759,7 +808,7 @@ func (v QOSMappingInformationDscp) Validate() error {
 	return nil
 }
 
-// QOSMappingInformationFlowLabel From: 9_4_5_Information_Element_Definitions.txt:2049
+// QOSMappingInformationFlowLabel From: 9_4_5_Information_Element_Definitions.txt:2180
 type QOSMappingInformationFlowLabel aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -770,7 +819,7 @@ func (v QOSMappingInformationFlowLabel) Validate() error {
 	return nil
 }
 
-// QoSFlowLevelQoSParametersPagingPolicyIndicator From: 9_4_5_Information_Element_Definitions.txt:2019
+// QoSFlowLevelQoSParametersPagingPolicyIndicator From: 9_4_5_Information_Element_Definitions.txt:2131
 type QoSFlowLevelQoSParametersPagingPolicyIndicator aper.Integer
 
 const (
@@ -786,7 +835,7 @@ func (v QoSFlowLevelQoSParametersPagingPolicyIndicator) Validate() error {
 	return nil
 }
 
-// QoSPriorityLevel From: 9_4_5_Information_Element_Definitions.txt:2000
+// QoSPriorityLevel From: 9_4_5_Information_Element_Definitions.txt:2112
 type QoSPriorityLevel aper.Integer
 
 const (
@@ -802,7 +851,23 @@ func (v QoSPriorityLevel) Validate() error {
 	return nil
 }
 
-// RANUEID From: 9_4_5_Information_Element_Definitions.txt:2057
+// QosMonitoringReportingFrequency From: 9_4_5_Information_Element_Definitions.txt:2152
+type QosMonitoringReportingFrequency aper.Integer
+
+const (
+	MinQosMonitoringReportingFrequency QosMonitoringReportingFrequency = 1
+	MaxQosMonitoringReportingFrequency QosMonitoringReportingFrequency = 1800
+)
+
+// Validate checks if the value is within the specified range.
+func (v QosMonitoringReportingFrequency) Validate() error {
+	if v < MinQosMonitoringReportingFrequency || v > MaxQosMonitoringReportingFrequency {
+		return fmt.Errorf("value for QosMonitoringReportingFrequency is outside the valid range (MinQosMonitoringReportingFrequency..MaxQosMonitoringReportingFrequency)")
+	}
+	return nil
+}
+
+// RANUEID From: 9_4_5_Information_Element_Definitions.txt:2200
 type RANUEID aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -813,7 +878,7 @@ func (v RANUEID) Validate() error {
 	return nil
 }
 
-// ROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2115
+// ROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2258
 type ROHCMaxCID aper.Integer
 
 const (
@@ -829,7 +894,7 @@ func (v ROHCMaxCID) Validate() error {
 	return nil
 }
 
-// ROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2115
+// ROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2258
 type ROHCROHCProfiles aper.Integer
 
 const (
@@ -845,7 +910,7 @@ func (v ROHCROHCProfiles) Validate() error {
 	return nil
 }
 
-// ReportCharacteristics From: 9_4_5_Information_Element_Definitions.txt:2088
+// ReportCharacteristics From: 9_4_5_Information_Element_Definitions.txt:2231
 type ReportCharacteristics aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -984,7 +1049,7 @@ func (v ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Validate() error {
 	return nil
 }
 
-// SNSSAISD From: 9_4_5_Information_Element_Definitions.txt:2185
+// SNSSAISD From: 9_4_5_Information_Element_Definitions.txt:2328
 type SNSSAISD aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -995,7 +1060,7 @@ func (v SNSSAISD) Validate() error {
 	return nil
 }
 
-// SNSSAISST From: 9_4_5_Information_Element_Definitions.txt:2185
+// SNSSAISST From: 9_4_5_Information_Element_Definitions.txt:2328
 type SNSSAISST aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -1006,7 +1071,7 @@ func (v SNSSAISST) Validate() error {
 	return nil
 }
 
-// SubscriberProfileIDforRFP From: 9_4_5_Information_Element_Definitions.txt:2220
+// SubscriberProfileIDforRFP From: 9_4_5_Information_Element_Definitions.txt:2363
 type SubscriberProfileIDforRFP aper.Integer
 
 const (
@@ -1022,7 +1087,7 @@ func (v SubscriberProfileIDforRFP) Validate() error {
 	return nil
 }
 
-// TNLAvailableCapacityIndicatorDLTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2233
+// TNLAvailableCapacityIndicatorDLTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorDLTNLAvailableCapacity aper.Integer
 
 const (
@@ -1038,7 +1103,7 @@ func (v TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Validate() error {
 	return nil
 }
 
-// TNLAvailableCapacityIndicatorDLTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2233
+// TNLAvailableCapacityIndicatorDLTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorDLTNLOfferedCapacity aper.Integer
 
 const (
@@ -1054,7 +1119,7 @@ func (v TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Validate() error {
 	return nil
 }
 
-// TNLAvailableCapacityIndicatorULTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2233
+// TNLAvailableCapacityIndicatorULTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorULTNLAvailableCapacity aper.Integer
 
 const (
@@ -1070,7 +1135,7 @@ func (v TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Validate() error {
 	return nil
 }
 
-// TNLAvailableCapacityIndicatorULTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2233
+// TNLAvailableCapacityIndicatorULTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorULTNLOfferedCapacity aper.Integer
 
 const (
@@ -1086,7 +1151,7 @@ func (v TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Validate() error {
 	return nil
 }
 
-// TraceID From: 9_4_5_Information_Element_Definitions.txt:2295
+// TraceID From: 9_4_5_Information_Element_Definitions.txt:2438
 type TraceID aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -1097,7 +1162,7 @@ func (v TraceID) Validate() error {
 	return nil
 }
 
-// TransactionID From: 9_4_5_Information_Element_Definitions.txt:2299
+// TransactionID From: 9_4_5_Information_Element_Definitions.txt:2442
 type TransactionID aper.Integer
 
 const (
@@ -1113,7 +1178,7 @@ func (v TransactionID) Validate() error {
 	return nil
 }
 
-// TransportLayerAddress From: 9_4_5_Information_Element_Definitions.txt:2297
+// TransportLayerAddress From: 9_4_5_Information_Element_Definitions.txt:2440
 type TransportLayerAddress aper.OctetString
 
 const (
@@ -1129,10 +1194,10 @@ func (v TransportLayerAddress) Validate() error {
 	return nil
 }
 
-// URIaddress From: 9_4_5_Information_Element_Definitions.txt:2441
+// URIaddress From: 9_4_5_Information_Element_Definitions.txt:2582
 type URIaddress aper.OctetString
 
-// UplinkOnlyROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2430
+// UplinkOnlyROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2571
 type UplinkOnlyROHCMaxCID aper.Integer
 
 const (
@@ -1148,7 +1213,7 @@ func (v UplinkOnlyROHCMaxCID) Validate() error {
 	return nil
 }
 
-// UplinkOnlyROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2430
+// UplinkOnlyROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2571
 type UplinkOnlyROHCROHCProfiles aper.Integer
 
 const (

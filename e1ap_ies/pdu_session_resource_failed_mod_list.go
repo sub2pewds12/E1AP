@@ -1,4 +1,4 @@
 package e1ap_ies
 
-// PDUSessionResourceFailedModList From: 9_4_5_Information_Element_Definitions.txt:1693
+// PDUSessionResourceFailedModList From: 9_4_5_Information_Element_Definitions.txt:1806
 type PDUSessionResourceFailedModList []PDUSessionResourceFailedModItem

@@ -1,0 +1,4 @@
+package e1ap_ies
+
+// DRBMeasurementResultsInformationList From: 9_4_5_Information_Element_Definitions.txt:587
+type DRBMeasurementResultsInformationList []DRBMeasurementResultsInformationItem

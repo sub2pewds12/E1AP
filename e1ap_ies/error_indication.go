@@ -3,15 +3,13 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // ErrorIndication is a generated SEQUENCE type.
 type ErrorIndication struct {
-	TransactionID          aper.Integer            `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	GNBCUCPUEE1APID        *aper.Integer           `aper:"lb:0,ub:4294967295,optional,ignore,ext"`
-	GNBCUUPUEE1APID        *aper.Integer           `aper:"lb:0,ub:4294967295,optional,ignore,ext"`
+	TransactionID          TransactionID           `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	GNBCUCPUEE1APID        *GNBCUCPUEE1APID        `aper:"lb:0,ub:4294967295,optional,ignore,ext"`
+	GNBCUUPUEE1APID        *GNBCUUPUEE1APID        `aper:"lb:0,ub:4294967295,optional,ignore,ext"`
 	Cause                  *Cause                  `aper:"optional,ignore,ext"`
 	CriticalityDiagnostics *CriticalityDiagnostics `aper:"optional,ignore,ext"`
 }

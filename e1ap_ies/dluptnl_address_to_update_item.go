@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // DLUPTNLAddressToUpdateItem is a generated SEQUENCE type.
 type DLUPTNLAddressToUpdateItem struct {
-	OldTNLAdress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
-	NewTNLAdress aper.BitString              `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	OldTNLAdress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ignore,ext"`
+	NewTNLAdress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ignore,ext"`
 	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 

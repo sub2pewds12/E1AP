@@ -198,8 +198,15 @@ class ASN1Parser:
 
             full_def_lines.append(cleaned_line)
             open_braces += cleaned_line.count("{") - cleaned_line.count("}")
+            
+            # --- THIS IS THE ONE-LINE FIX ---
+            # We must also count parentheses to correctly find the end of the definition.
+            open_braces += cleaned_line.count("(") - cleaned_line.count(")")
+            # --- END OF FIX ---
+
             has_started = True
 
+            # Your existing break logic now works correctly because open_braces is accurate.
             if (
                 open_braces == 0
                 and "{" not in "".join(full_def_lines)
@@ -231,6 +238,10 @@ class ASN1Parser:
         def_part_stripped = def_part.strip()
         name_parts = name.strip().split()
 
+        complex_keywords = ["SEQUENCE OF", "SEQUENCE {", "CHOICE {", "SEQUENCE ("]
+        if any(keyword in def_part for keyword in complex_keywords):
+            return None
+        
         if (
             len(name_parts) >= 2 or def_part_stripped.isdigit()
         ) and "{" not in def_part:
@@ -278,8 +289,9 @@ class ASN1Parser:
         if value_parts:
 
             base_type = value_parts[0].split("(")[0].strip()
-
             if not base_type:
+                return None
+            if base_type in ["SEQUENCE", "CHOICE"]:
                 return None
 
             is_container_alias = (
@@ -294,7 +306,12 @@ class ASN1Parser:
             is_complex_list = (
                 "SEQUENCE" in def_part_stripped and " OF " in def_part_stripped
             )
-            is_simple_alias = base_type[0].isupper() and "{" not in def_part_stripped and "{" not in name and not is_complex_list
+            is_simple_alias = (
+                base_type[0].isupper()
+                and "{" not in def_part_stripped
+                and "{" not in name
+                and not is_complex_list
+            )
             if is_simple_alias:
                 item = AliasDefinition(
                     base_type, name, source_file, source_line, full_text
@@ -383,48 +400,21 @@ class ASN1Parser:
 
         for member_line in member_lines:
             clean_line = member_line.strip()
-            if (
-                not clean_line
-                or clean_line.startswith("...")
-            ):
+            if not clean_line or clean_line.startswith("..."):
                 continue
 
             parts = clean_line.split(None, 1)
             if len(parts) < 2:
                 continue
+
             member_name, raw_type_str = parts[0], parts[1]
-            member_type_name_for_lookup = (
-                raw_type_str.split("{")[0]
-                .split("(")[0]
-                .replace("OPTIONAL", "")
-                .replace("CONDITIONAL", "")
-                .strip()
-            )
-            member_metadata = self.type_metadata.get(member_type_name_for_lookup)
+            ie_name_to_add = member_name
+            type_name_to_add = None
 
-            if member_metadata and "pres" in member_metadata:
-                presence = member_metadata["pres"]
-            else:
-                presence = self._parse_presence(raw_type_str)
+            is_inline_list = " OF " in raw_type_str
 
-            presence = self._parse_presence(raw_type_str)
-            inline_keywords = [
-                "INTEGER",
-                "ENUMERATED",
-                "BIT STRING",
-                "OCTET STRING",
-                "SEQUENCE",
-                "CHOICE",
-            ]
-            is_inline = any(
-                raw_type_str.strip().startswith(keyword) for keyword in inline_keywords
-            )
-
-            is_inline_enum = raw_type_str.strip().startswith("ENUMERATED")
-            if raw_type_str.strip().startswith("SEQUENCE (") and " OF " in raw_type_str:
-
+            if is_inline_list:
                 synthetic_type_name = f"{name}-{member_name}"
-
                 inline_def = self._parse_sequence_of(
                     synthetic_type_name,
                     raw_type_str,
@@ -432,151 +422,73 @@ class ASN1Parser:
                     source_line,
                     raw_type_str,
                 )
-
                 if inline_def:
                     inline_def.is_synthetic = True
                     if inline_def.name not in self.definitions:
                         self.definitions[inline_def.name] = inline_def
                     type_name_to_add = inline_def.name
-                else:
-                    logger.warning(
-                        f"Failed to parse inline SEQUENCE OF for member '{member_name}' in '{name}'"
-                    )
-                    type_name_to_add = "UNKNOWN_LIST"
-            is_inline_struct = any(
-                k in raw_type_str for k in ["SEQUENCE {", "CHOICE {"]
-            )
-            is_simple_inline = any(
-                raw_type_str.strip().startswith(k)
-                for k in ["INTEGER", "BIT STRING", "OCTET STRING"]
-            )
-            ie_name_to_add = member_name
-            type_name_to_add = ""
 
-            class_type_match = re.search(r"([\w-]+)\s*\.&([\w-]+)", raw_type_str)
-            if class_type_match:
-                class_name = class_type_match.group(1)
-                field_name = class_type_match.group(2).lower()
-
-                type_name_to_add = "ANY"
+            elif re.search(r"([\w-]+)\s*\.&([\w-]+)", raw_type_str):
+                class_match = re.search(r"([\w-]+)\s*\.&([\w-]+)", raw_type_str)
+                class_name = class_match.group(1)
+                field_name = class_match.group(2).lower()
                 class_def = self.classes.get(class_name)
-
-                if class_def:
-                    class_field = class_def.fields.get(field_name)
-                    if class_field:
-
-                        type_name_to_add = class_field.type
-                    else:
-                        logger.warning(
-                            f"Could not resolve field '&{field_name}' in known CLASS '{class_name}' for member '{member_name}'."
-                        )
+                if class_def and class_def.fields.get(field_name):
+                    type_name_to_add = class_def.fields.get(field_name).type
                 else:
-                    logger.warning(
-                        f"Could not find definition for CLASS '{class_name}' referenced by member '{member_name}'."
-                    )
+                    type_name_to_add = "ANY"
 
-            else:
-                is_inline_enum = raw_type_str.strip().startswith("ENUMERATED")
-                is_inline_struct = any(
-                    k in raw_type_str for k in ["SEQUENCE {", "CHOICE {"]
+            elif any(k in raw_type_str for k in ["SEQUENCE {", "CHOICE {"]):
+                synthetic_type_name = f"{name}-{member_name}"
+                inline_def = self._parse_block_definition(
+                    synthetic_type_name,
+                    raw_type_str,
+                    source_file,
+                    source_line,
+                    raw_type_str,
                 )
-                is_simple_inline = any(
-                    raw_type_str.strip().startswith(k)
-                    for k in ["INTEGER", "BIT STRING", "OCTET STRING"]
-                )
-                is_inline_list = (
-                    raw_type_str.strip().startswith("SEQUENCE (")
-                    and " OF " in raw_type_str
-                )
-
-                if is_inline_enum:
-                    synthetic_type_name = f"{name}-{member_name}"
-
-                    inline_def = EnumDefinition(
-                        synthetic_type_name, source_file, source_line, raw_type_str
-                    )
-                    inline_def.is_synthetic = True
-                    enum_match = re.search(
-                        r"ENUMERATED\s*\{([^}]+)\}", raw_type_str, re.DOTALL
-                    )
-                    if enum_match:
-                        content = enum_match.group(1).replace("...", "").strip()
-                        values = [v.strip() for v in content.split(",") if v.strip()]
-                        inline_def.enum_values = (
-                            values if values else ["inline-parse-failed"]
-                        )
-                    else:
-                        inline_def.enum_values = ["present"]
-
+                if inline_def:
                     if inline_def.name not in self.definitions:
                         self.definitions[inline_def.name] = inline_def
                     type_name_to_add = inline_def.name
 
-                elif is_inline_struct:
-                    synthetic_type_name = f"{name}-{member_name}"
-                    inline_def = self._parse_block_definition(
-                        synthetic_type_name,
-                        raw_type_str,
-                        source_file,
-                        source_line,
-                        raw_type_str,
-                    )
-                    if inline_def:
-                        if inline_def.name not in self.definitions:
-                            self.definitions[inline_def.name] = inline_def
-                        type_name_to_add = inline_def.name
+            elif any(
+                raw_type_str.strip().startswith(k)
+                for k in ["INTEGER", "ENUMERATED", "BIT STRING", "OCTET STRING"]
+            ):
+                synthetic_type_name = f"{name}-{member_name}"
+                inline_def = self._parse_simple_definition(
+                    synthetic_type_name,
+                    raw_type_str,
+                    source_file,
+                    source_line,
+                    raw_type_str,
+                )
+                if inline_def:
+                    inline_def.is_synthetic = True
+                    if inline_def.name not in self.definitions:
+                        self.definitions[inline_def.name] = inline_def
+                    type_name_to_add = inline_def.name
 
-                elif is_simple_inline:
-                    synthetic_type_name = f"{name}-{member_name}"
-                    inline_def = self._parse_simple_definition(
-                        synthetic_type_name,
-                        raw_type_str,
-                        source_file,
-                        source_line,
-                        raw_type_str,
-                    )
-                    if inline_def:
-                        if inline_def.name not in self.definitions:
-                            self.definitions[inline_def.name] = inline_def
-                        type_name_to_add = inline_def.name
-                elif is_inline_list:
-                    synthetic_type_name = f"{name}-{member_name}"
-                    inline_def = self._parse_sequence_of(
-                        synthetic_type_name,
-                        raw_type_str,
-                        source_file,
-                        source_line,
-                        raw_type_str,
-                    )
-                    if inline_def:
-                        inline_def.is_synthetic = True
-                        if inline_def.name not in self.definitions:
-                            self.definitions[inline_def.name] = inline_def
-                        type_name_to_add = inline_def.name
+            else:
+
+                match = re.match(r"^([\w-]+)", raw_type_str)
+                if match:
+                    type_name_to_add = match.group(1).strip()
                 else:
-                    base_type_name = (
-                        raw_type_str.split("{", 1)[0]
-                        .split("(", 1)[0]
-                        .replace("OPTIONAL", "")
-                        .replace("CONDITIONAL", "")
-                        .strip()
+                    logger.warning(
+                        f"Could not extract type name for member '{member_name}' in '{name}'"
                     )
-                    for keyword in [
-                        "ProtocolIE-SingleContainer",
-                        "ProtocolIE-Container",
-                        "PrivateIE-Container",
-                        "ProtocolExtensionContainer",
-                    ]:
-                        if keyword in base_type_name:
-                            base_type_name = keyword
-                            break
-                    type_parts = base_type_name.split()
-                    if not type_parts:
-                        continue
-                    type_name_to_add = " ".join(type_parts)
+                    continue
 
             if ie_name_to_add and type_name_to_add:
 
+                member_metadata = self.type_metadata.get(type_name_to_add)
+                presence = (
+                    member_metadata.get("pres")
+                    if member_metadata
+                    else self._parse_presence(raw_type_str)
+                )
                 crit = member_metadata.get("crit") if member_metadata else None
                 ie_id = member_metadata.get("id") if member_metadata else None
                 ie = InformationElement(
@@ -587,6 +499,7 @@ class ASN1Parser:
                     id=ie_id,
                 )
                 item.ies.append(ie)
+
         return item
 
     def _parse_procedure(self, name: str, def_part: str):
@@ -618,61 +531,58 @@ class ASN1Parser:
     def _parse_sequence_of(
         self, name_part, def_part, source_file, source_line, full_def_str
     ):
-        """Parses a SEQUENCE OF definition, now with self-contained inline SEQUENCE parsing."""
+        """
+        Parses a SEQUENCE OF definition.
+        """
         item = ListDefinition(name_part, source_file, source_line, full_def_str)
         constraints = self._parse_constraints(def_part)
         item.min_val, item.max_val = constraints["min_val"], constraints["max_val"]
 
         try:
-            of_part = def_part.split(" OF ", 1)[1].strip()
+
+            of_part = re.split(r"\sOF\s", def_part, 1)[1].strip()
         except IndexError:
             logger.warning(f"Could not determine the 'OF' type for LIST: {name_part}")
             return item
 
-        if of_part.startswith("SEQUENCE {"):
+        container_match = re.search(r"^([\w-]+)\s*\{", of_part)
+        if container_match and container_match.group(1) in [
+            "ProtocolIE-SingleContainer",
+            "ProtocolIE-Container",
+        ]:
+
+            item.of_type = container_match.group(1)
+
+            synthetic_item_name = (
+                name_part.replace("-List", "Item")
+                .replace("ResAck", "ResAckItem")
+                .replace("Res", "ResItem")
+            )
+
+            if synthetic_item_name not in self.definitions:
+                self.definitions[synthetic_item_name] = SequenceDefinition(
+                    synthetic_item_name, source_file, source_line
+                )
+
+            item.of_type = synthetic_item_name
+
+        elif of_part.startswith("SEQUENCE {"):
+
             synthetic_name = name_part.replace("-List", "-Item")
             if synthetic_name == name_part:
                 synthetic_name = name_part + "Item"
 
-            logger.info(
-                f"Detected inline SEQUENCE for LIST '{name_part}'. Creating synthetic type '{synthetic_name}'."
+            inline_def = self._parse_block_definition(
+                synthetic_name, of_part, source_file, source_line, of_part
             )
-
-            inline_def = SequenceDefinition(
-                synthetic_name, source_file, source_line, of_part
-            )
-            inline_def.is_synthetic = True
-
-            start_brace = of_part.find("{")
-            end_brace = of_part.rfind("}")
-            if start_brace != -1 and end_brace != -1:
-                block_content = of_part[start_brace + 1 : end_brace].strip()
-
-                member_lines = block_content.split(",")
-                for member_line in member_lines:
-                    clean_line = member_line.strip()
-                    if (
-                        not clean_line
-                        or clean_line.startswith("...")
-                        or "ProtocolExtensionContainer" in clean_line
-                    ):
-                        continue
-
-                    parts = clean_line.split(None, 1)
-                    if len(parts) == 2:
-                        ie_name, ie_type = parts[0].strip(), parts[1].strip()
-                        inline_def.ies.append(
-                            InformationElement(
-                                ie=ie_name, type=ie_type, presence="mandatory"
-                            )
-                        )
-
-            if inline_def.name not in self.definitions:
-                self.definitions[inline_def.name] = inline_def
-            item.of_type = inline_def.name
+            if inline_def:
+                inline_def.is_synthetic = True
+                if inline_def.name not in self.definitions:
+                    self.definitions[inline_def.name] = inline_def
+                item.of_type = inline_def.name
 
         else:
-            match = re.search(r"([\w-]+)", of_part)
+            match = re.search(r"^([\w-]+)", of_part)
             if match:
                 item.of_type = match.group(1)
 
@@ -696,24 +606,31 @@ class ASN1Parser:
     def _handle_multiline_def_state(self, line: str):
         """Handles a line when we are inside a multi-line definition block."""
         if "::=" in line:
-
+            # This part handles cases where a new definition starts before the old one ended.
             self._process_complete_definition(is_malformed=True)
-
+            # We then need to re-process the current line in the SEARCHING state.
             self._handle_searching_state(line, "unknown", -1)
             return
 
         self.current_def_lines.append(line)
+        
         self.open_braces += line.count("{") - line.count("}")
+        
+        # --- THIS IS THE ONE-LINE FIX ---
+        # We must also count parentheses to correctly find the end of the definition.
+        self.open_braces += line.count("(") - line.count(")")
+        # --- END OF FIX ---
 
         if self.open_braces <= 0:
             self._process_complete_definition()
+            # This ensures the state is clean for the next definition.
+            self._reset_state()
 
-            self.state = ParserState.SEARCHING
 
     def _process_complete_definition(self, is_malformed=False):
         """
         Takes the collected lines for a definition, joins them,
-        and calls the appropriate parsing logic.
+        and calls the appropriate parsing logic using a robust, ordered dispatcher.
         """
         full_def_str = " ".join(self.current_def_lines)
         source_file, source_line = self.current_def_start_context
@@ -724,12 +641,16 @@ class ASN1Parser:
 
         name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
 
-        if def_part.strip().startswith("CLASS"):
-            self._parse_class_definition(
-                name_part, def_part, source_file, source_line, full_def_str
-            )
+        if "{" in name_part and "}" in name_part:
+            self.failures.append({
+                "name": name_part, "text": full_def_str,
+                "file": source_file, "line": source_line,
+                "reason": "Skipping known abstract/parameterized definition"
+            })
             self._reset_state()
             return
+
+        item = None
 
         if "E1AP-PROTOCOL-IES" in name_part:
             sanitized_name = name_part.replace("E1AP-PROTOCOL-IES", "").strip()
@@ -737,50 +658,33 @@ class ASN1Parser:
             self._reset_state()
             return
 
-        proc_match = re.match(r"^([a-z][\w-]*)\s+E1AP-ELEMENTARY-PROCEDURE", name_part)
-        if proc_match:
-            self._parse_procedure(proc_match.group(1), def_part)
+        elif "E1AP-ELEMENTARY-PROCEDURE" in name_part:
+            proc_match = re.match(r"^([a-z][\w-]*)\s+E1AP-ELEMENTARY-PROCEDURE", name_part)
+            if proc_match:
+                self._parse_procedure(proc_match.group(1), def_part)
             self._reset_state()
             return
 
-        if "{" in name_part:
-            name_part = name_part.split("{", 1)[0].strip()
-
-        abstract_keywords_to_skip = ["CLASS", "E1AP-PDU"]
-        if name_part in abstract_keywords_to_skip:
+        elif def_part.strip().startswith("CLASS"):
+            self._parse_class_definition(name_part, def_part, source_file, source_line, full_def_str)
             self._reset_state()
             return
 
-        item = None
-
-        is_sequence_of = "SEQUENCE OF " in def_part or (
-            def_part.startswith("SEQUENCE (") and " OF " in def_part
-        )
-        if is_sequence_of:
+        elif "SEQUENCE" in def_part and " OF " in def_part:
             item = self._parse_sequence_of(
                 name_part, def_part, source_file, source_line, full_def_str
             )
         elif ("SEQUENCE" in def_part or "CHOICE" in def_part) and "{" in def_part:
-            item = self._parse_block_definition(
-                name_part, def_part, source_file, source_line, full_def_str
-            )
+            item = self._parse_block_definition(name_part, def_part, source_file, source_line, full_def_str)
         else:
-            item = self._parse_simple_definition(
-                name_part, def_part, source_file, source_line, full_def_str
-            )
+            item = self._parse_simple_definition(name_part, def_part, source_file, source_line, full_def_str)
 
         if item:
             if item.name not in self.definitions:
                 self.definitions[item.name] = item
-        elif "AUTOMATIC TAGS" not in full_def_str:
-            self.failures.append(
-                {
-                    "name": name_part,
-                    "text": full_def_str,
-                    "file": source_file,
-                    "line": source_line,
-                }
-            )
+        else:
+            self.failures.append({"name": name_part, "text": full_def_str, "file": source_file, "line": source_line})
+        self._reset_state()
 
     def _parse_class_definition(
         self,
@@ -829,7 +733,7 @@ class ASN1Parser:
         )
 
     def parse(self) -> Tuple[Dict[str, ASN1Definition], List[Dict[str, Any]]]:
-        failures = []
+        #failures = []
 
         logger.info("PASS 1: Scanning for and parsing all IE Set definitions...")
         for i in range(len(self.lines)):
@@ -839,6 +743,12 @@ class ASN1Parser:
             if "::=" in line and "E1AP-PROTOCOL-IES" in line:
                 full_def_str, _ = self._extract_full_definition(i)
                 name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
+
+                if "GTPTLAs" in name_part:
+                    print("\n\n" + "="*20 + " DEBUGGING GTPTLAs " + "="*20)
+                    print(f"FOUND DEFINITION: {name_part}")
+                    print(f"  >>> Full Text: {full_def_str}")
+                    print("="*60 + "\n\n")
 
                 if "E1AP-PROTOCOL-IES" in name_part:
                     ie_set_name = name_part.replace("E1AP-PROTOCOL-IES", "").strip()
@@ -859,160 +769,68 @@ class ASN1Parser:
 
         logger.info("PASS 2: Parsing all other ASN.1 definitions...")
         i = 0
-        while i < len(self.lines):
-            line_text, source_file, source_line = self.lines[i]
-            line = line_text.strip()
 
-            if "::=" in line and "{" in line.split("::=")[0]:
-                self.failures.append({
-                    "name": line.split("::=")[0].strip(), "text": line,
-                    "file": source_file, "line": source_line,
-                })
-                i += 1
+        patched_definitions_to_skip = {
+            "UE-associatedLogicalE1-ConnectionListRes",
+            "UE-associatedLogicalE1-ConnectionListResAck",
+        }
+        lines_to_skip = set()
+        for i in range(len(self.lines)):
+            line_text, _, _ = self.lines[i]
+            if "::=" in line_text:
+                name_part = line_text.split("::=", 1)[0].strip()
+                if name_part in patched_definitions_to_skip:
+                    _, end_index = self._extract_full_definition(i)
+                    # Add all line numbers belonging to this definition to our skip set.
+                    for skip_line_num in range(i, end_index + 1):
+                        lines_to_skip.add(skip_line_num)
+
+        # This loop now correctly drives the state machine for all definitions.
+        for i, (line_text, source_file, source_line) in enumerate(self.lines):
+            # Your skip logic is now here
+            if i in lines_to_skip:
                 continue
-
-            if (
-                "::=" in line
-                and "{" in line.split("::=")[0]
-                and "}" in line.split("::=")[0]
-            ):
-                failures.append(
-                    {
-                        "name": line.split("::=")[0].strip(),
-                        "text": line,
-                        "file": source_file,
-                        "line": source_line,
-                    }
-                )
-                i += 1
-                continue
-
-            if "::=" in line:
-                full_def_str, end_index = self._extract_full_definition(i)
-
-                name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
-                item = None
-
-                proc_match = re.match(
-                    r"^([a-z][\w-]*)\s+E1AP-ELEMENTARY-PROCEDURE", name_part
-                )
-                if proc_match:
-                    proc_name = proc_match.group(1)
-                    self._parse_procedure(proc_name, def_part)
-                    i = end_index + 1
-                    continue
-
-                if "E1AP-PROTOCOL-IES" in name_part:
-                    i = end_index + 1
-                    continue
-                is_class_def = def_part.strip().startswith("CLASS")
-
-                clean_name_part = name_part.split('{', 1)[0].strip()
-                name_words = clean_name_part.split()
-
-                abstract_keywords = ["E1AP-PROTOCOL-EXTENSION", "E1AP-PRIVATE-IES", "E1AP-PDU"]
-                is_abstract_def = len(name_words) > 1 and name_words[-1] in abstract_keywords
-
-                if is_class_def or is_abstract_def:
-                    i = end_index + 1
-                    continue
-
-                is_sequence_of = (
-                    "SEQUENCE OF " in def_part
-                    or def_part.startswith("SEQUENCE (")
-                    and " OF " in def_part
-                )
-                if is_sequence_of:
-
-                    item = ListDefinition(
-                        name_part, source_file, source_line, full_def_str
-                    )
-                    constraints = self._parse_constraints(def_part)
-                    item.min_val, item.max_val = (
-                        constraints["min_val"],
-                        constraints["max_val"],
-                    )
-                    split_parts = def_part.split(" OF ", 1)
-                    if len(split_parts) > 1:
-                        of_part = split_parts[1].strip()
-                    if of_part.startswith("SEQUENCE {"):
-                        synthetic_name = name_part.replace("-List", "-Item")
-                        if synthetic_name == name_part:
-                            synthetic_name = name_part + "Item"
-                        logger.info(
-                            f"Detected inline SEQUENCE for LIST '{name_part}'. Creating synthetic type '{synthetic_name}'."
-                        )
-                        inline_def = self._parse_block_definition(
-                            synthetic_name,
-                            of_part,
-                            source_file,
-                            source_line,
-                            full_def_str,
-                        )
-                        if inline_def:
-                            inline_def.is_synthetic = True
-                            if inline_def.name not in self.definitions:
-                                self.definitions[inline_def.name] = inline_def
-                            item.of_type = inline_def.name
-                        else:
-                            logger.warning(
-                                f"Failed to parse inline SEQUENCE for LIST: {name_part}"
-                            )
-                    else:
-                        match = re.search(r"([\w-]+)", of_part)
-                        if match:
-                            item.of_type = match.group(1)
-                        else:
-                            logger.warning(
-                                f"Could not determine the 'OF' type for LIST: {name_part}"
-                            )
-                elif (
-                    "SEQUENCE" in def_part or "CHOICE" in def_part
-                ) and "{" in def_part:
-
-                    item = self._parse_block_definition(
-                        name_part, def_part, source_file, source_line, full_def_str
-                    )
-                else:
-                    item = self._parse_simple_definition(
-                        name_part, def_part, source_file, source_line, full_def_str
-                    )
-
-                if item:
-                    if item.name not in self.definitions:
-                        self.definitions[item.name] = item
-                elif "AUTOMATIC TAGS" not in full_def_str and not any(
-                    keyword in full_def_str for keyword in abstract_keywords
-                ):
-                    if name_part not in [f["name"] for f in failures]:
-                        failures.append(
-                            {
-                                "name": name_part,
-                                "text": full_def_str,
-                                "file": source_file,
-                                "line": source_line,
-                            }
-                        )
-
-                i = end_index
-            i += 1
-        logger.info("PASS 2 COMPLETE.")
-        failures = []
-
-        for line_text, source_file, source_line in self.lines:
 
             cleaned_line = line_text.split("--", 1)[0].strip()
-
             if not cleaned_line:
                 continue
+            
+            # Your guards against malformed lines are preserved here
+            if "::=" in cleaned_line:
+                name_part = cleaned_line.split("::=", 1)[0].strip()
+                if "{" in name_part and "}" in name_part:
+                     self.failures.append(
+                        {
+                            "name": name_part,
+                            "text": cleaned_line,
+                            "file": source_file,
+                            "line": source_line,
+                        }
+                    )
+                     continue
 
+            # This is the correct state machine driver
             if self.state == ParserState.SEARCHING:
                 self._handle_searching_state(cleaned_line, source_file, source_line)
             elif self.state == ParserState.IN_MULTILINE_DEF:
                 self._handle_multiline_def_state(cleaned_line)
+
+        # Process any remaining definition at the end of the file.
+        if self.current_def_lines:
+            self._process_complete_definition()
+
+        logger.info("PASS 2 COMPLETE.")
+        failures = []
+
+        if self.current_def_lines:
+            self._process_complete_definition()
+
+        logger.info("PASS 2 COMPLETE.")
+
+        # The function now immediately returns the correct data.
         return (
             self.definitions,
-            self.failures,
+            self.failures, # This list is no longer being wiped out
             self.procedures,
             self.message_to_procedure_map,
         )

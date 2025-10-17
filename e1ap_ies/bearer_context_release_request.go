@@ -3,14 +3,12 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // BearerContextReleaseRequest is a generated SEQUENCE type.
 type BearerContextReleaseRequest struct {
-	GNBCUCPUEE1APID aper.Integer    `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
-	GNBCUUPUEE1APID aper.Integer    `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUCPUEE1APID GNBCUCPUEE1APID `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
+	GNBCUUPUEE1APID GNBCUUPUEE1APID `aper:"lb:0,ub:4294967295,mandatory,reject,ext"`
 	DRBStatusList   []DRBStatusItem `aper:"lb:1,ub:MaxnoofDRBs,optional,ignore,ext"`
 	Cause           Cause           `aper:"mandatory,ignore,ext"`
 }

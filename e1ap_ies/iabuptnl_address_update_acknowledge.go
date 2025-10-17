@@ -3,15 +3,13 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // IABUPTNLAddressUpdateAcknowledge is a generated SEQUENCE type.
 type IABUPTNLAddressUpdateAcknowledge struct {
-	TransactionID              aper.Integer                 `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	CriticalityDiagnostics     *CriticalityDiagnostics      `aper:"optional,ignore,ext"`
-	ULUPTNLAddressToUpdateList []ULUPTNLAddressToUpdateItem `aper:"optional,ignore,ext"`
+	TransactionID              TransactionID               `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	CriticalityDiagnostics     *CriticalityDiagnostics     `aper:"optional,ignore,ext"`
+	ULUPTNLAddressToUpdateList *ULUPTNLAddressToUpdateList `aper:"optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

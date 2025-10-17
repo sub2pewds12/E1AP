@@ -3,13 +3,11 @@ package e1ap_ies
 import (
 	"fmt"
 	"io"
-
-	"github.com/lvdund/ngap/aper"
 )
 
 // SupportedPLMNsItem is a generated SEQUENCE type.
 type SupportedPLMNsItem struct {
-	PLMNIdentity             aper.OctetString            `aper:"lb:3,ub:3,mandatory,ignore,ext"`
+	PLMNIdentity             PLMNIdentity                `aper:"lb:3,ub:3,mandatory,ignore,ext"`
 	SliceSupportList         []SliceSupportItem          `aper:"optional,ext"`
 	NRCGISupportList         []NRCGISupportItem          `aper:"optional,ext"`
 	QOSParametersSupportList *QOSParametersSupportList   `aper:"optional,ext"`
