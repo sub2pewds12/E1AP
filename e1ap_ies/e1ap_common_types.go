@@ -17,7 +17,7 @@ func (v AdditionalRRMPriorityIndex) Validate() error {
 	return nil
 }
 
-// AlternativeQoSParaSetItemAlternativeQoSParameterIndex From: 9_4_5_Information_Element_Definitions.txt:132
+// AlternativeQoSParaSetItemAlternativeQoSParameterIndex From: unknown:-1
 type AlternativeQoSParaSetItemAlternativeQoSParameterIndex aper.Integer
 
 const (
@@ -33,7 +33,7 @@ func (v AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Validate() error 
 	return nil
 }
 
-// AveragingWindow From: 9_4_5_Information_Element_Definitions.txt:128
+// AveragingWindow From: unknown:-1
 type AveragingWindow aper.Integer
 
 const (
@@ -65,7 +65,7 @@ func (v BitRate) Validate() error {
 	return nil
 }
 
-// BurstArrivalTime From: 9_4_5_Information_Element_Definitions.txt:2411
+// BurstArrivalTime From: unknown:-1
 type BurstArrivalTime aper.OctetString
 
 // CellGroupID From: 9_4_5_Information_Element_Definitions.txt:252
@@ -119,7 +119,7 @@ func (v DRBID) Validate() error {
 	return nil
 }
 
-// DRBMeasurementResultsInformationItemULD1Result From: 9_4_5_Information_Element_Definitions.txt:588
+// DRBMeasurementResultsInformationItemULD1Result From: unknown:-1
 type DRBMeasurementResultsInformationItemULD1Result aper.Integer
 
 const (
@@ -135,7 +135,7 @@ func (v DRBMeasurementResultsInformationItemULD1Result) Validate() error {
 	return nil
 }
 
-// DRBUsageReportItemEndTimeStamp From: 9_4_5_Information_Element_Definitions.txt:981
+// DRBUsageReportItemEndTimeStamp From: unknown:-1
 type DRBUsageReportItemEndTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -146,7 +146,7 @@ func (v DRBUsageReportItemEndTimeStamp) Validate() error {
 	return nil
 }
 
-// DRBUsageReportItemStartTimeStamp From: 9_4_5_Information_Element_Definitions.txt:981
+// DRBUsageReportItemStartTimeStamp From: unknown:-1
 type DRBUsageReportItemStartTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -157,10 +157,10 @@ func (v DRBUsageReportItemStartTimeStamp) Validate() error {
 	return nil
 }
 
-// DRBUsageReportItemUsageCountDL From: 9_4_5_Information_Element_Definitions.txt:981
+// DRBUsageReportItemUsageCountDL From: unknown:-1
 type DRBUsageReportItemUsageCountDL aper.Integer
 
-// DRBUsageReportItemUsageCountUL From: 9_4_5_Information_Element_Definitions.txt:981
+// DRBUsageReportItemUsageCountUL From: unknown:-1
 type DRBUsageReportItemUsageCountUL aper.Integer
 
 // Dynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1001
@@ -201,13 +201,13 @@ func (v ExtendedPacketDelayBudget) Validate() error {
 // GNBCUCPName From: 9_4_5_Information_Element_Definitions.txt:1144
 type GNBCUCPName aper.OctetString
 
-// GNBCUCPNameUTF8String From: 9_4_5_Information_Element_Definitions.txt:1159
+// GNBCUCPNameUTF8String From: unknown:-1
 type GNBCUCPNameUTF8String aper.OctetString
 
 // GNBCUCPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1157
 type GNBCUCPNameVisibleString aper.OctetString
 
-// GNBCUCPUEE1APID From: 9_4_5_Information_Element_Definitions.txt:1162
+// GNBCUCPUEE1APID From: unknown:-1
 type GNBCUCPUEE1APID aper.Integer
 
 const (
@@ -223,7 +223,7 @@ func (v GNBCUCPUEE1APID) Validate() error {
 	return nil
 }
 
-// GNBCUUPCapacity From: 9_4_5_Information_Element_Definitions.txt:1164
+// GNBCUUPCapacity From: unknown:-1
 type GNBCUUPCapacity aper.Integer
 
 const (
@@ -255,16 +255,16 @@ func (v GNBCUUPID) Validate() error {
 	return nil
 }
 
-// GNBCUUPName From: 9_4_5_Information_Element_Definitions.txt:1181
+// GNBCUUPName From: unknown:-1
 type GNBCUUPName aper.OctetString
 
-// GNBCUUPNameUTF8String From: 9_4_5_Information_Element_Definitions.txt:1196
+// GNBCUUPNameUTF8String From: unknown:-1
 type GNBCUUPNameUTF8String aper.OctetString
 
 // GNBCUUPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1194
 type GNBCUUPNameVisibleString aper.OctetString
 
-// GNBCUUPUEE1APID From: 9_4_5_Information_Element_Definitions.txt:1198
+// GNBCUUPUEE1APID From: unknown:-1
 type GNBCUUPUEE1APID aper.Integer
 
 const (
@@ -280,7 +280,7 @@ func (v GNBCUUPUEE1APID) Validate() error {
 	return nil
 }
 
-// GNBDUID From: 9_4_5_Information_Element_Definitions.txt:1316
+// GNBDUID From: unknown:-1
 type GNBDUID aper.Integer
 
 const (
@@ -307,7 +307,7 @@ func (v GTPTEID) Validate() error {
 	return nil
 }
 
-// HFN From: 9_4_5_Information_Element_Definitions.txt:1321
+// HFN From: unknown:-1
 type HFN aper.Integer
 
 const (
@@ -323,7 +323,7 @@ func (v HFN) Validate() error {
 	return nil
 }
 
-// HWCapacityIndicatorAvailableThroughput From: 9_4_5_Information_Element_Definitions.txt:1323
+// HWCapacityIndicatorAvailableThroughput From: unknown:-1
 type HWCapacityIndicatorAvailableThroughput aper.Integer
 
 const (
@@ -339,7 +339,7 @@ func (v HWCapacityIndicatorAvailableThroughput) Validate() error {
 	return nil
 }
 
-// HWCapacityIndicatorOfferedThroughput From: 9_4_5_Information_Element_Definitions.txt:1323
+// HWCapacityIndicatorOfferedThroughput From: unknown:-1
 type HWCapacityIndicatorOfferedThroughput aper.Integer
 
 const (
@@ -374,7 +374,7 @@ func (v InactivityTimer) Validate() error {
 // IntegrityProtectionKey From: 9_4_5_Information_Element_Definitions.txt:1356
 type IntegrityProtectionKey aper.OctetString
 
-// InterfacesToTrace From: 9_4_5_Information_Element_Definitions.txt:1366
+// InterfacesToTrace From: unknown:-1
 type InterfacesToTrace aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -401,7 +401,7 @@ func (v M7period) Validate() error {
 	return nil
 }
 
-// MRDCDataUsageReportItemEndTimeStamp From: 9_4_5_Information_Element_Definitions.txt:1417
+// MRDCDataUsageReportItemEndTimeStamp From: unknown:-1
 type MRDCDataUsageReportItemEndTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -412,7 +412,7 @@ func (v MRDCDataUsageReportItemEndTimeStamp) Validate() error {
 	return nil
 }
 
-// MRDCDataUsageReportItemStartTimeStamp From: 9_4_5_Information_Element_Definitions.txt:1417
+// MRDCDataUsageReportItemStartTimeStamp From: unknown:-1
 type MRDCDataUsageReportItemStartTimeStamp aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -423,13 +423,13 @@ func (v MRDCDataUsageReportItemStartTimeStamp) Validate() error {
 	return nil
 }
 
-// MRDCDataUsageReportItemUsageCountDL From: 9_4_5_Information_Element_Definitions.txt:1417
+// MRDCDataUsageReportItemUsageCountDL From: unknown:-1
 type MRDCDataUsageReportItemUsageCountDL aper.Integer
 
-// MRDCDataUsageReportItemUsageCountUL From: 9_4_5_Information_Element_Definitions.txt:1417
+// MRDCDataUsageReportItemUsageCountUL From: unknown:-1
 type MRDCDataUsageReportItemUsageCountUL aper.Integer
 
-// MaxCIDEHCDL From: 9_4_5_Information_Element_Definitions.txt:1415
+// MaxCIDEHCDL From: unknown:-1
 type MaxCIDEHCDL aper.Integer
 
 const (
@@ -510,7 +510,7 @@ func (v NRCellIdentity) Validate() error {
 	return nil
 }
 
-// NetworkInstance From: 9_4_5_Information_Element_Definitions.txt:1511
+// NetworkInstance From: unknown:-1
 type NetworkInstance aper.Integer
 
 const (
@@ -526,7 +526,7 @@ func (v NetworkInstance) Validate() error {
 	return nil
 }
 
-// NonDynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1541
+// NonDynamic5QIDescriptorFiveQI From: unknown:-1
 type NonDynamic5QIDescriptorFiveQI aper.Integer
 
 const (
@@ -542,7 +542,7 @@ func (v NonDynamic5QIDescriptorFiveQI) Validate() error {
 	return nil
 }
 
-// NumberOfTunnels From: 9_4_5_Information_Element_Definitions.txt:256
+// NumberOfTunnels From: unknown:-1
 type NumberOfTunnels aper.Integer
 
 const (
@@ -590,7 +590,7 @@ func (v PDUSessionID) Validate() error {
 	return nil
 }
 
-// PERExponent From: 9_4_5_Information_Element_Definitions.txt:1650
+// PERExponent From: unknown:-1
 type PERExponent aper.Integer
 
 const (
@@ -633,7 +633,7 @@ func (v PLMNIdentity) Validate() error {
 	return nil
 }
 
-// PPI From: 9_4_5_Information_Element_Definitions.txt:2022
+// PPI From: unknown:-1
 type PPI aper.Integer
 
 const (
@@ -681,7 +681,7 @@ func (v Periodicity) Validate() error {
 	return nil
 }
 
-// PortNumber From: 9_4_5_Information_Element_Definitions.txt:2020
+// PortNumber From: unknown:-1
 type PortNumber aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -692,7 +692,7 @@ func (v PortNumber) Validate() error {
 	return nil
 }
 
-// PriorityLevel From: 9_4_5_Information_Element_Definitions.txt:2024
+// PriorityLevel From: unknown:-1
 type PriorityLevel aper.Integer
 
 // Validate checks if the value is within the specified range.
@@ -703,8 +703,11 @@ func (v PriorityLevel) Validate() error {
 	return nil
 }
 
-// PrivateIEIDLocal From: 9_4_6_Common_Definitions.txt:38
+// PrivateIEIDLocal From: unknown:-1
 type PrivateIEIDLocal aper.Integer
+
+// PrivateMessageIEs From: manual_patch:-1
+type PrivateMessageIEs PrivateIEContainer
 
 // ProcedureCode From: 9_4_6_Common_Definitions.txt:43
 type ProcedureCode aper.Integer
@@ -722,7 +725,7 @@ func (v ProcedureCode) Validate() error {
 	return nil
 }
 
-// ProtocolExtensionID From: 9_4_6_Common_Definitions.txt:45
+// ProtocolExtensionID From: unknown:-1
 type ProtocolExtensionID aper.Integer
 
 const (
@@ -738,7 +741,7 @@ func (v ProtocolExtensionID) Validate() error {
 	return nil
 }
 
-// ProtocolIEID From: 9_4_6_Common_Definitions.txt:47
+// ProtocolIEID From: unknown:-1
 type ProtocolIEID aper.Integer
 
 const (
@@ -786,7 +789,7 @@ func (v QOSFlowIdentifier) Validate() error {
 	return nil
 }
 
-// QOSFlowRemovedItemQOSFlowAccumulatedSessionTime From: 9_4_5_Information_Element_Definitions.txt:2156
+// QOSFlowRemovedItemQOSFlowAccumulatedSessionTime From: unknown:-1
 type QOSFlowRemovedItemQOSFlowAccumulatedSessionTime aper.OctetString
 
 // Validate checks if the value is within the specified range.
@@ -851,7 +854,7 @@ func (v QoSPriorityLevel) Validate() error {
 	return nil
 }
 
-// QosMonitoringReportingFrequency From: 9_4_5_Information_Element_Definitions.txt:2152
+// QosMonitoringReportingFrequency From: unknown:-1
 type QosMonitoringReportingFrequency aper.Integer
 
 const (
@@ -1162,7 +1165,7 @@ func (v TraceID) Validate() error {
 	return nil
 }
 
-// TransactionID From: 9_4_5_Information_Element_Definitions.txt:2442
+// TransactionID From: unknown:-1
 type TransactionID aper.Integer
 
 const (
@@ -1178,7 +1181,7 @@ func (v TransactionID) Validate() error {
 	return nil
 }
 
-// TransportLayerAddress From: 9_4_5_Information_Element_Definitions.txt:2440
+// TransportLayerAddress From: unknown:-1
 type TransportLayerAddress aper.OctetString
 
 const (

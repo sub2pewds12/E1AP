@@ -15,4 +15,11 @@ type DRBToModifyItemNGRAN struct {
 	FlowMappingInformation       []QOSFlowQOSParameterItem   `aper:"optional,ext"`
 	DRBInactivityTimer           *InactivityTimer            `aper:"lb:1,ub:7200,optional,reject,ext"`
 	IEExtensions                 *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - QOSFlowList (ID: id-OldQoSFlowMap-ULendmarkerexpected)
+	// - QoSFlowLevelQoSParameters (ID: id-DRB-QoS)
+	// - EarlyForwardingCOUNTReq (ID: id-EarlyForwardingCOUNTReq)
+	// - EarlyForwardingCOUNTInfo (ID: id-EarlyForwardingCOUNTInfo)
+	// - DAPSRequestInfo (ID: id-DAPSRequestInfo)
+	// - EarlyDataForwardingIndicator (ID: id-EarlyDataForwardingIndicator)
 }

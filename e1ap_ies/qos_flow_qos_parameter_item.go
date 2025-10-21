@@ -6,4 +6,7 @@ type QOSFlowQOSParameterItem struct {
 	QoSFlowLevelQoSParameters QoSFlowLevelQoSParameters   `aper:"mandatory,ext"`
 	QoSFlowMappingIndication  *QOSFlowMappingIndication   `aper:"optional,ext"`
 	IEExtensions              *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - RedundantQoSFlowIndicator (ID: id-RedundantQosFlowIndicator)
+	// - TSCTrafficCharacteristics (ID: id-TSCTrafficCharacteristics)
 }

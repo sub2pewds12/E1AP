@@ -7,4 +7,7 @@ type NonDynamic5QIDescriptor struct {
 	AveragingWindow    *AveragingWindow              `aper:"lb:0,ub:4095,optional,ext"`
 	MaxDataBurstVolume *MaxDataBurstVolume           `aper:"lb:0,ub:4095,optional,ext"`
 	IEExtensions       *ProtocolExtensionContainer   `aper:"optional,ext"`
+	// Possible extensions:
+	// - ExtendedPacketDelayBudget (ID: id-CNPacketDelayBudgetDownlink)
+	// - ExtendedPacketDelayBudget (ID: id-CNPacketDelayBudgetUplink)
 }

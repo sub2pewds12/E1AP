@@ -1,16 +1,18 @@
 import os
 import yaml
 import logging
+from asn1_parser import ASN1Parser 
 from typing import Dict
 from common_types import (
-    SequenceDefinition, ListDefinition, InformationElement, ASN1Definition
+    SequenceDefinition, ListDefinition, InformationElement, ASN1Definition, ChoiceDefinition, AliasDefinition
 )
 
 logger = logging.getLogger(__name__)
 
 class ASN1Patcher:
-    def __init__(self, config_dir: str):
+    def __init__(self, config_dir: str, parser: "ASN1Parser"):
         self.config_dir = config_dir
+        self.parser = parser
         self.patch_definitions_path = os.path.join(config_dir, "patches.yaml")
         self.go_patches_dir = os.path.join(config_dir, "go_patches")
 
@@ -28,39 +30,47 @@ class ASN1Patcher:
             name = p_def["name"]
             def_type = p_def["type"]
 
+            item = None # Start with None
+
             if def_type == "SEQUENCE":
                 item = SequenceDefinition(name=name, source_file="manual_patch")
-                
-                # Logic to populate members from an IE-Set
                 if "from_ie_set" in p_def:
                     ie_set_name = p_def["from_ie_set"]
-                    ie_set = existing_definitions.get(ie_set_name)
+                    # The IE sets are stored in self.ie_sets by the parser, not existing_definitions
+                    ie_set = self.parser.ie_sets.get(ie_set_name) # Assuming you pass parser to patcher
                     if ie_set:
-                        # This part depends on how you store IE sets. Adjust if necessary.
-                        # Assuming ie_set is a SequenceDefinition whose IEs we can iterate.
-                        for ie_data in ie_set.ies:
-                            ie_name_to_add = ie_data.ie.replace("id-", "")
+                        for ie_data in ie_set:
+                            ie_name_to_add = ie_data['id'].replace("id-", "")
                             new_ie = InformationElement(
-                                ie=ie_name_to_add, type=ie_data.type, 
-                                presence=ie_data.presence, criticality=ie_data.criticality
+                                ie=ie_name_to_add, type=ie_data['type'], 
+                                presence=ie_data['pres'], criticality=ie_data['crit']
                             )
                             item.ies.append(new_ie)
                     else:
                         logger.error(f"Patcher could not find required IE-Set '{ie_set_name}' for patch '{name}'")
-
-                # Logic to populate members from an explicit list
                 if "members" in p_def:
                     for member in p_def["members"]:
                         item.ies.append(InformationElement(**member))
-                
-                definitions[name] = item
-
+            
             elif def_type == "LIST":
                 item = ListDefinition(name=name, source_file="manual_patch")
                 item.of_type = p_def.get("of_type")
                 item.max_val = p_def.get("max_val")
+
+            elif def_type == "CHOICE":
+                item = ChoiceDefinition(name=name, source_file="manual_patch")
+                if "members" in p_def:
+                    for member in p_def["members"]:
+                        item.ies.append(InformationElement(**member))
+
+            elif def_type == "ALIAS":
+                alias_of = p_def.get("alias_of")
+                if alias_of:
+                    item = AliasDefinition(alias_of=alias_of, name=name, source_file="manual_patch")
+            
+            if item:
                 definitions[name] = item
-        
+
         return definitions
 
     def patch_generated_files(self, output_dir: str):

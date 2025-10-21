@@ -10,4 +10,7 @@ type PDUSessionResourceSetupItem struct {
 	DRBSetupListNGRAN                           []DRBSetupItemNGRAN                         `aper:"mandatory,ext"`
 	DRBFailedListNGRAN                          []DRBFailedItemNGRAN                        `aper:"optional,ext"`
 	IEExtensions                                *ProtocolExtensionContainer                 `aper:"optional,ext"`
+	// Possible extensions:
+	// - UPTNLInformation (ID: id-redundant-nG-DL-UP-TNL-Information)
+	// - RedundantPDUSessionInformation (ID: id-RedundantPDUSessionInformation-used)
 }

@@ -14,4 +14,9 @@ type PDUSessionResourceToSetupItem struct {
 	NetworkInstance                            *NetworkInstance                  `aper:"lb:1,ub:256,optional,ext"`
 	DRBToSetupListNGRAN                        []DRBToSetupItemNGRAN             `aper:"mandatory,ext"`
 	IEExtensions                               *ProtocolExtensionContainer       `aper:"optional,ext"`
+	// Possible extensions:
+	// - CommonNetworkInstance (ID: id-CommonNetworkInstance)
+	// - UPTNLInformation (ID: id-redundant-nG-UL-UP-TNL-Information)
+	// - CommonNetworkInstance (ID: id-RedundantCommonNetworkInstance)
+	// - RedundantPDUSessionInformation (ID: id-RedundantPDUSessionInformation)
 }

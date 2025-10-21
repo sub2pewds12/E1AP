@@ -7,4 +7,6 @@ type CellGroupInformationItem struct {
 	DLTXStop        *DLTXStop                   `aper:"optional,ext"`
 	RATType         *RATType                    `aper:"optional,ext"`
 	IEExtensions    *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - NumberOfTunnels (ID: id-Number-of-tunnels)
 }

@@ -4,4 +4,6 @@ package e1ap_ies
 type QOSFlowItem struct {
 	QOSFlowIdentifier QOSFlowIdentifier           `aper:"lb:0,ub:63,mandatory,ext"`
 	IEExtensions      *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - QOSFlowMappingIndication (ID: id-QoSFlowMappingIndication)
 }

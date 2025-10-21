@@ -14,4 +14,10 @@ type PDUSessionResourceToModifyItem struct {
 	DRBToModifyListNGRAN                       []DRBToModifyItemNGRAN            `aper:"optional,ext"`
 	DRBToRemoveListNGRAN                       []DRBToRemoveItemNGRAN            `aper:"optional,ext"`
 	IEExtensions                               *ProtocolExtensionContainer       `aper:"optional,ext"`
+	// Possible extensions:
+	// - SNSSAI (ID: id-SNSSAI)
+	// - CommonNetworkInstance (ID: id-CommonNetworkInstance)
+	// - UPTNLInformation (ID: id-redundant-nG-UL-UP-TNL-Information)
+	// - CommonNetworkInstance (ID: id-RedundantCommonNetworkInstance)
+	// - DataForwardingtoEUTRANInformationList (ID: id-DataForwardingtoE-UTRANInformationList)
 }

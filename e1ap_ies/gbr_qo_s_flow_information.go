@@ -14,6 +14,8 @@ type GBRQoSFlowInformation struct {
 	MaxPacketLossRateDownlink     *MaxPacketLossRate          `aper:"lb:0,ub:1000,optional,ext"`
 	MaxPacketLossRateUplink       *MaxPacketLossRate          `aper:"lb:0,ub:1000,optional,ext"`
 	IEExtensions                  *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - AlternativeQoSParaSetList (ID: id-AlternativeQoSParaSetList)
 }
 
 // Encode implements the aper.AperMarshaller interface.

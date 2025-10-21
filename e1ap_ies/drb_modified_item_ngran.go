@@ -8,4 +8,7 @@ type DRBModifiedItemNGRAN struct {
 	FlowSetupList           []QOSFlowItem               `aper:"optional,ext"`
 	FlowFailedList          []QOSFlowFailedItem         `aper:"optional,ext"`
 	IEExtensions            *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - EarlyForwardingCOUNTInfo (ID: id-EarlyForwardingCOUNTInfo)
+	// - QOSFlowList (ID: id-OldQoSFlowMap-ULendmarkerexpected)
 }

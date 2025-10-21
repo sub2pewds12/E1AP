@@ -1,6 +1,8 @@
 package e1ap_ies
 
-import "github.com/lvdund/ngap/aper"
+import (
+	"github.com/lvdund/ngap/aper"
+)
 
 // ExtendedGNBCUUPName is a generated SEQUENCE type.
 type ExtendedGNBCUUPName struct {

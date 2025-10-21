@@ -1,16 +1,13 @@
 definitions:
-  # This patch creates a SEQUENCE by expanding an existing IE-Set.
   - name: "UEAssociatedLogicalE1ConnectionItemRes"
     type: "SEQUENCE"
     from_ie_set: "UE-associatedLogicalE1-ConnectionItemRes"
 
-  # This patch creates a LIST that refers to the item we just defined.
   - name: "UEAssociatedLogicalE1ConnectionListRes"
     type: "LIST"
     of_type: "UEAssociatedLogicalE1ConnectionItemRes"
     max_val: "maxnoofIndividualE1ConnectionsToReset"
 
-  # --- Repeat for the ResAck types ---
   - name: "UEAssociatedLogicalE1ConnectionItemResAck"
     type: "SEQUENCE"
     from_ie_set: "UE-associatedLogicalE1-ConnectionItemResAck"
@@ -78,8 +75,87 @@ definitions:
     of_type: "GNB-CU-CP-TNLA-Setup-Item"
     max_val: "maxnoofTNLAssociations"
 
-  # 2. Patch for the GNB-CU-CP TNLA Failed-To-Setup List
   - name: "GNB-CU-CP-TNLA-Failed-To-Setup-List"
     type: "LIST"
     of_type: "GNB-CU-CP-TNLA-Failed-To-Setup-Item"
     max_val: "maxnoofTNLAssociations"
+
+  - name: "PrivateIE-ID"
+    type: "CHOICE"
+    members:
+      - { ie: "local", type: "INTEGER", presence: "mandatory" }
+      - { ie: "global", type: "OBJECT IDENTIFIER", presence: "mandatory" }
+
+  - name: "ProtocolExtensionField"
+    type: "SEQUENCE"
+    members:
+      - { ie: "id", type: "ProtocolIE-ID", presence: "mandatory" }
+      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
+      - { ie: "extensionValue", type: "ANY", presence: "mandatory" }
+
+  - name: "PrivateIEField"
+    type: "SEQUENCE"
+    members:
+      - { ie: "id", type: "PrivateIE-ID", presence: "mandatory" }
+      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
+      - { ie: "value", type: "ANY", presence: "mandatory" }
+
+  - name: "ULUPTNLAddressToUpdateList"
+    type: "LIST"
+    of_type: "ULUPTNLAddressToUpdateItem"
+    max_val: "maxnoofTNLAddresses"
+
+  - name: "ProtocolIE-Field"
+    type: "SEQUENCE"
+    members:
+      - { ie: "id", type: "ProtocolIE-ID", presence: "mandatory" }
+      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
+      - { ie: "value", type: "ANY", presence: "mandatory" }
+
+  - name: "ProtocolExtensionField"
+    type: "SEQUENCE"
+    members:
+      - { ie: "id", type: "ProtocolIE-ID", presence: "mandatory" }
+      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
+      - { ie: "extensionValue", type: "ANY", presence: "mandatory" }
+
+  - name: "PrivateIE-Field"
+    type: "SEQUENCE"
+    members:
+      - { ie: "id", type: "PrivateIE-ID", presence: "mandatory" }
+      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
+      - { ie: "value", type: "ANY", presence: "mandatory" }
+
+  - name: "ProtocolIE-Container"
+    type: "LIST"
+    of_type: "ProtocolIE-Field"
+    max_val: "maxProtocolIEs"
+
+  - name: "ProtocolExtensionContainer"
+    type: "LIST"
+    of_type: "ProtocolExtensionField"
+    max_val: "maxProtocolExtensions"
+
+  - name: "PrivateIE-Container" # <-- THIS IS THE FIX
+    type: "LIST"
+    of_type: "PrivateIE-Field"
+    max_val: "maxPrivateIEs"
+
+  # 3. Define the remaining special-case abstract types.
+
+  # ProtocolIE-SingleContainer is a simple wrapper around one IE-Field.
+  - name: "ProtocolIE-SingleContainer"
+    type: "SEQUENCE"
+    members:
+      - { ie: "value", type: "ProtocolIE-Field", presence: "mandatory" }
+
+  # PrivateMessage-IEs is just another name for PrivateIEContainer.
+  - name: "PrivateMessage-IEs"
+    type: "ALIAS"
+    alias_of: "PrivateIEContainer"
+
+  # ProtocolIE-ContainerList is a meta-template we don't need to generate directly.
+  # We provide a placeholder to prevent "undefined" errors if it's ever referenced.
+  - name: "ProtocolIE-ContainerList"
+    type: "SEQUENCE"
+    members: [] # Empty sequence

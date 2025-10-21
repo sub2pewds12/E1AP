@@ -105,34 +105,42 @@ def main():
         f"Parsing complete. Found {len(definitions)} definitions, {len(procedures)} procedures, and {len(failures)} failures."
     )
 
-    if failures:
-        logger.warning("--- The following definitions failed to parse: ---")
-        for failure in sorted(failures, key=lambda x: x['name']):
-            # This will print the name of every failed definition
-            logger.warning(f"  - {failure['name']}")
-
     logger.info("--- STAGE 2.5: APPLYING MANUAL PATCHES ---")
-    patcher = ASN1Patcher(config_dir)
+    patcher = ASN1Patcher(config_dir, asn1_parser)
     hardcoded_defs = patcher.get_hardcoded_definitions(definitions)
 
     output_dir = args.output_dir
     definitions.update(hardcoded_defs)
     
-    # The .update() method will add new definitions and overwrite any
-    # existing ones (like the junk from the parser) with the correct patched versions.
     definitions.update(hardcoded_defs)
     logger.info(
         f"Applied {len(hardcoded_defs)} hardcoded definitions. Total definitions now: {len(definitions)}."
     )
+
+    if hardcoded_defs:
+        patched_names = set(hardcoded_defs.keys())
+        original_failure_count = len(failures)
+    
+        failures[:] = [f for f in failures if f['name'].split(' ')[0] not in patched_names]
+        
+        rescued_count = original_failure_count - len(failures)
+        if rescued_count > 0:
+            logger.info(f"Rescued {rescued_count} definitions from the failure list via manual patches.")
+
+    if failures:
+            # I've updated the message for clarity.
+            logger.warning("--- The following definitions remain unparsed (after patches): ---")
+            for failure in sorted(failures, key=lambda x: x['name']):
+                logger.warning(f"  - {failure['name']}")
+
     if "ResetType" in definitions:
         reset_type_def = definitions["ResetType"]
         for ie in reset_type_def.ies:
             if ie.ie == "partOfE1-Interface":
-                # The parser incorrectly found "...Lists". We know the correct type is "...ListRes".
                 logger.info("Applying post-processing fix for ResetType 'partOfE1-Interface' member.")
                 ie.type = "UE-associatedLogicalE1-ConnectionListRes"
 
-    generator = GoCodeGenerator(definitions, failures, procedures, message_map, output_dir, patcher, acronyms)
+    generator = GoCodeGenerator(definitions, failures, procedures, message_map, output_dir, patcher, acronyms, asn1_parser)
     if args.diagnose:
         logger.info("--- STAGE 3: RUNNING DIAGNOSTIC REPORT ---")
         generator.run_full_diagnostic()

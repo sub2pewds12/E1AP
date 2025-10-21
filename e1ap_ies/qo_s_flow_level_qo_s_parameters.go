@@ -10,4 +10,9 @@ type QoSFlowLevelQoSParameters struct {
 	PagingPolicyIndicator            *QoSFlowLevelQoSParametersPagingPolicyIndicator    `aper:"lb:1,ub:8,optional,ext"`
 	ReflectiveQOSIndicator           *QoSFlowLevelQoSParametersReflectiveQOSIndicator   `aper:"optional,ext"`
 	IEExtensions                     *ProtocolExtensionContainer                        `aper:"optional,ext"`
+	// Possible extensions:
+	// - QosMonitoringRequest (ID: id-QoSMonitoringRequest)
+	// - GBRQoSFlowInformation (ID: id-MCG-OfferedGBRQoSFlowInfo)
+	// - QosMonitoringReportingFrequency (ID: id-QosMonitoringReportingFrequency)
+	// - QosMonitoringDisabled (ID: id-QoSMonitoringDisabled)
 }

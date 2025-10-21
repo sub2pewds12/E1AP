@@ -44,6 +44,7 @@ class ASN1Parser:
         self.open_braces = 0
         self.failures: List[Dict[str, Any]] = []
         self.classes: Dict[str, ASN1Class] = {}
+        self.extension_sets: Dict[str, List[Dict[str, str]]] = {}
 
     def _prepopulate_builtin_types(self):
         """Creates ASN1Definition objects for built-in ASN.1 types."""
@@ -471,7 +472,6 @@ class ASN1Parser:
                     type_name_to_add = inline_def.name
 
             else:
-
                 match = re.match(r"^([\w-]+)", raw_type_str)
                 if match:
                     type_name_to_add = match.group(1).strip()
@@ -482,7 +482,6 @@ class ASN1Parser:
                     continue
 
             if ie_name_to_add and type_name_to_add:
-
                 member_metadata = self.type_metadata.get(type_name_to_add)
                 presence = (
                     member_metadata.get("pres")
@@ -498,8 +497,11 @@ class ASN1Parser:
                     criticality=crit,
                     id=ie_id,
                 )
+                if type_name_to_add == "ProtocolExtensionContainer":
+                    ext_set_match = re.search(r"\{\s*\{\s*([\w-]+)\s*\}\s*\}", raw_type_str)
+                    if ext_set_match:
+                        ie.extension_set_name = ext_set_match.group(1)
                 item.ies.append(ie)
-
         return item
 
     def _parse_procedure(self, name: str, def_part: str):
@@ -596,11 +598,12 @@ class ASN1Parser:
         self.current_def_lines = [line]
         self.current_def_start_context = (source_file, source_line)
         self.open_braces = line.count("{") - line.count("}")
+        self.open_braces += line.count("(") - line.count(")")
 
-        if self.open_braces == 0 or "{" not in line:
+        if self.open_braces == 0 and "{" not in line and "(" not in line:
             self._process_complete_definition()
+            self._reset_state() 
         else:
-
             self.state = ParserState.IN_MULTILINE_DEF
 
     def _handle_multiline_def_state(self, line: str):
@@ -640,8 +643,18 @@ class ASN1Parser:
             return
 
         name_part, def_part = [p.strip() for p in full_def_str.split("::=", 1)]
+        
+        item = None
+
+        # --- THIS IS THE FINAL, CORRECTED DISPATCHER ---
+
+        # Priority 1: Your proven guard for boilerplate and parameterized types.
+        if name_part == "DEFINITIONS AUTOMATIC TAGS":
+            self._reset_state()
+            return
 
         if "{" in name_part and "}" in name_part:
+            # As you requested, we log these as failures for now, to be handled by the patcher.
             self.failures.append({
                 "name": name_part, "text": full_def_str,
                 "file": source_file, "line": source_line,
@@ -650,9 +663,9 @@ class ASN1Parser:
             self._reset_state()
             return
 
-        item = None
-
-        if "E1AP-PROTOCOL-IES" in name_part:
+        # Priority 2: Handle special 3GPP constructs that don't return an 'item'.
+        # Each of these now has the critical return statement to fix the fall-through bug.
+        elif "E1AP-PROTOCOL-IES" in name_part:
             sanitized_name = name_part.replace("E1AP-PROTOCOL-IES", "").strip()
             self._parse_ie_set(sanitized_name, def_part)
             self._reset_state()
@@ -664,26 +677,38 @@ class ASN1Parser:
                 self._parse_procedure(proc_match.group(1), def_part)
             self._reset_state()
             return
+            
+        elif "E1AP-PROTOCOL-EXTENSION" in name_part:
+            ext_set_name = name_part.replace("E1AP-PROTOCOL-EXTENSION", "").strip()
+            self._parse_extension_set(ext_set_name, def_part)
+            self._reset_state()
+            return
 
         elif def_part.strip().startswith("CLASS"):
             self._parse_class_definition(name_part, def_part, source_file, source_line, full_def_str)
             self._reset_state()
             return
 
+        # Priority 3: Handle all concrete types that should produce an 'item'.
+        # This logic is correct and will now be reached with clean data.
         elif "SEQUENCE" in def_part and " OF " in def_part:
-            item = self._parse_sequence_of(
-                name_part, def_part, source_file, source_line, full_def_str
-            )
+            item = self._parse_sequence_of(name_part, def_part, source_file, source_line, full_def_str)
+        
         elif ("SEQUENCE" in def_part or "CHOICE" in def_part) and "{" in def_part:
             item = self._parse_block_definition(name_part, def_part, source_file, source_line, full_def_str)
+        
         else:
             item = self._parse_simple_definition(name_part, def_part, source_file, source_line, full_def_str)
+
+        # --- End of Dispatcher ---
 
         if item:
             if item.name not in self.definitions:
                 self.definitions[item.name] = item
         else:
+            # If item is still None after all checks, it's a genuine, UNEXPECTED failure.
             self.failures.append({"name": name_part, "text": full_def_str, "file": source_file, "line": source_line})
+
         self._reset_state()
 
     def _parse_class_definition(
@@ -731,6 +756,76 @@ class ASN1Parser:
         logger.info(
             f"Successfully parsed CLASS '{name}' with {len(class_def.fields)} fields."
         )
+
+    def _parse_extension_set(self, name: str, def_part: str):
+        """
+        Parses a ...-PROTOCOL-EXTENSION block into a structured list of metadata.
+        This logic is analogous to _parse_ie_set.
+        """
+        # The regex is the same as for IE Sets.
+        ie_pattern = re.compile(
+            r"\{\s*ID\s+(?P<id>[\w-]+)\s+CRITICALITY\s+(?P<crit>[\w-]+)\s+(?:TYPE|EXTENSION)\s+(?P<type>.+?)\s+PRESENCE\s+(?P<pres>[\w-]+)\s*\}"
+        )
+        matches = ie_pattern.finditer(def_part)
+        extension_list_for_set = []
+
+        for match in matches:
+            # We don't need to handle inline types here as extensions are always named.
+            type_name = match.group("type").strip().rstrip(",")
+            
+            ext_data = {
+                "id": match.group("id"),
+                "type": type_name,
+                "crit": match.group("crit").lower(),
+                "pres": match.group("pres").lower(),
+            }
+            extension_list_for_set.append(ext_data)
+
+        if extension_list_for_set:
+            # Store the result in our new dictionary.
+            self.extension_sets[name] = extension_list_for_set
+            logger.info(f"Successfully parsed Extension Set '{name}' with {len(extension_list_for_set)} extensions.")
+        else:
+            # If the set is empty (e.g., just "..."), we can log it differently.
+            logger.debug(f"Identified empty or abstract Extension Set: {name}")
+
+    def _parse_parameterized_field(self, name_part: str, def_part: str, source_file: str, source_line: int, full_text: str) -> Optional[ASN1Definition]:
+        """
+        Parses a parameterized ...-Field definition by resolving the CLASS.&field lookups.
+        e.g., ProtocolIE-Field { E1AP-PROTOCOL-IES : IEsSetParam }
+        """
+        # Extract the base name (e.g., "ProtocolIE-Field") and the CLASS name.
+        match = re.match(r"([\w-]+)\s*\{\s*([\w-]+)\s*:", name_part)
+        if not match: return None
+        
+        base_name, class_name = match.group(1), match.group(2)
+        
+        # We now create a concrete SEQUENCE definition for this field.
+        item = SequenceDefinition(base_name, source_file, source_line, full_text)
+
+        # Find all the CLASS.&field lookups in the definition body.
+        field_lookups = re.findall(r"([\w-]+)\s+([\w-]+)\.&([\w-]+)", def_part)
+        
+        for member_name, lookup_class_name, lookup_field_name in field_lookups:
+            if lookup_class_name != class_name: continue # Ensure it's referencing the correct class
+
+            # Find the parsed CLASS definition from our pre-scan pass.
+            class_def = self.classes.get(class_name)
+            if not class_def: continue
+
+            # Look up the type of the field (e.g., find the type of '&id' in 'E1AP-PROTOCOL-IES').
+            field_info = class_def.fields.get(lookup_field_name.lower())
+            if not field_info: continue
+            
+            # Add the resolved member to our new SEQUENCE definition.
+            new_ie = InformationElement(
+                ie=member_name,
+                type=field_info.type, # Use the type we found from the CLASS
+                presence="mandatory" # Field members are always mandatory
+            )
+            item.ies.append(new_ie)
+
+        return item
 
     def parse(self) -> Tuple[Dict[str, ASN1Definition], List[Dict[str, Any]]]:
         #failures = []
@@ -816,12 +911,6 @@ class ASN1Parser:
                 self._handle_multiline_def_state(cleaned_line)
 
         # Process any remaining definition at the end of the file.
-        if self.current_def_lines:
-            self._process_complete_definition()
-
-        logger.info("PASS 2 COMPLETE.")
-        failures = []
-
         if self.current_def_lines:
             self._process_complete_definition()
 

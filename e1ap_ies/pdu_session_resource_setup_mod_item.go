@@ -9,4 +9,6 @@ type PDUSessionResourceSetupModItem struct {
 	DRBSetupModListNGRAN                        []DRBSetupModItemNGRAN      `aper:"mandatory,ext"`
 	DRBFailedModListNGRAN                       []DRBFailedModItemNGRAN     `aper:"optional,ext"`
 	IEExtensions                                *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - UPTNLInformation (ID: id-redundant-nG-DL-UP-TNL-Information)
 }

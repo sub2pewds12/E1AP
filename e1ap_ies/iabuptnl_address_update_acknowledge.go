@@ -7,9 +7,9 @@ import (
 
 // IABUPTNLAddressUpdateAcknowledge is a generated SEQUENCE type.
 type IABUPTNLAddressUpdateAcknowledge struct {
-	TransactionID              TransactionID               `aper:"lb:0,ub:255,mandatory,reject,ext"`
-	CriticalityDiagnostics     *CriticalityDiagnostics     `aper:"optional,ignore,ext"`
-	ULUPTNLAddressToUpdateList *ULUPTNLAddressToUpdateList `aper:"optional,ignore,ext"`
+	TransactionID              TransactionID                `aper:"lb:0,ub:255,mandatory,reject,ext"`
+	CriticalityDiagnostics     *CriticalityDiagnostics      `aper:"optional,ignore,ext"`
+	ULUPTNLAddressToUpdateList []ULUPTNLAddressToUpdateItem `aper:"ub:MaxnoofTNLAddresses,optional,ignore,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.

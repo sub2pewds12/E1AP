@@ -11,4 +11,8 @@ type DRBToSetupModItemNGRAN struct {
 	DRBInactivityTimer                  *InactivityTimer                  `aper:"lb:1,ub:7200,optional,reject,ext"`
 	PDCPSNStatusInformation             *PDCPSNStatusInformation          `aper:"optional,ext"`
 	IEExtensions                        *ProtocolExtensionContainer       `aper:"optional,ext"`
+	// Possible extensions:
+	// - QoSFlowLevelQoSParameters (ID: id-DRB-QoS)
+	// - IgnoreMappingRuleIndication (ID: id-ignoreMappingRuleIndication)
+	// - DAPSRequestInfo (ID: id-DAPSRequestInfo)
 }

@@ -12,4 +12,9 @@ type PDUSessionResourceToSetupModItem struct {
 	PDUSessionInactivityTimer                  *InactivityTimer                  `aper:"lb:1,ub:7200,optional,reject,ext"`
 	DRBToSetupModListNGRAN                     []DRBToSetupModItemNGRAN          `aper:"mandatory,ext"`
 	IEExtensions                               *ProtocolExtensionContainer       `aper:"optional,ext"`
+	// Possible extensions:
+	// - NetworkInstance (ID: id-NetworkInstance)
+	// - CommonNetworkInstance (ID: id-CommonNetworkInstance)
+	// - UPTNLInformation (ID: id-redundant-nG-UL-UP-TNL-Information)
+	// - CommonNetworkInstance (ID: id-RedundantCommonNetworkInstance)
 }

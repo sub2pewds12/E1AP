@@ -15,4 +15,8 @@ type PDCPConfiguration struct {
 	DuplicationActivation *DuplicationActivation      `aper:"optional,ext"`
 	OutOfOrderDelivery    *OutOfOrderDelivery         `aper:"optional,ext"`
 	IEExtensions          *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - PDCPStatusReportIndication (ID: id-PDCP-StatusReportIndication)
+	// - AdditionalPDCPduplicationInformation (ID: id-AdditionalPDCPduplicationInformation)
+	// - EHCParameters (ID: id-EHC-Parameters)
 }

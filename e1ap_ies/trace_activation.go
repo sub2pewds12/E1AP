@@ -12,6 +12,9 @@ type TraceActivation struct {
 	TraceDepth                     TraceDepth                  `aper:"mandatory,ext"`
 	TraceCollectionEntityIPAddress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ignore,ext"`
 	IEExtensions                   *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - MDTConfiguration (ID: id-MDTConfiguration)
+	// - URIaddress (ID: id-TraceCollectionEntityURI)
 }
 
 // Encode implements the aper.AperMarshaller interface.

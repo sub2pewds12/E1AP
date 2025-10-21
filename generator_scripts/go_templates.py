@@ -34,6 +34,7 @@ def render_sequence(
     pascal_case_converter: callable,
     go_type_resolver: callable,
     go_value_formatter: callable,
+    extension_sets: dict,
 ) -> str:
     """
     Generates the Go code for a SEQUENCE type, including placeholder
@@ -44,6 +45,22 @@ def render_sequence(
     for member in item.ies:
         member_go_name = pascal_case_converter(member.ie)
         base_go_type, concrete_def = go_type_resolver(member.type)
+
+        final_go_type = ""
+        # Priority 1: Check if this is our special, type-safe extension member.
+        if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
+             extension_set = extension_sets.get(member.extension_set_name)
+             if extension_set: # Only use the special type if extensions are actually defined
+                 final_go_type = pascal_case_converter(item.name) + "Extensions"
+             else:
+                 final_go_type = base_go_type # Fallback if set is empty
+        # Priority 2: Check for a standard list/slice.
+        elif concrete_def and isinstance(concrete_def, ListDefinition):
+             of_type_go_name = pascal_case_converter(concrete_def.of_type)
+             final_go_type = f"[]{of_type_go_name}"
+        # Priority 3: Default to the base type.
+        else:
+             final_go_type = base_go_type
 
         final_go_type = base_go_type
         is_list = False
@@ -80,6 +97,16 @@ def render_sequence(
         field_lines.append(
             f"\t{member_go_name}\t{pointer}{final_go_type}\t{tag_string}"
         )
+
+        if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
+            extension_set_name = member.extension_set_name
+            # You'll need to pass self.extension_sets into the template from the generator
+            extension_set = extension_sets.get(extension_set_name)
+            if extension_set:
+                field_lines.append(f"\t// Possible extensions:")
+                for ext in extension_set:
+                    ext_type_name = pascal_case_converter(ext['type'])
+                    field_lines.append(f"\t// - {ext_type_name} (ID: {ext['id']})")
 
     struct_body = "\n".join(field_lines)
     struct_block = f"// {go_name} is a generated SEQUENCE type.\ntype {go_name} struct {{\n{struct_body}\n}}"
@@ -141,3 +168,41 @@ def render_choice(
     struct_block = f"// {go_name} is a generated CHOICE type.\ntype {go_name} struct {{\n{struct_body}\n}}"
 
     return f"{struct_block}\n\n{const_block}\n"
+
+# (This is a new function to add to the file)
+def render_extension_struct(
+    go_name: str,
+    extension_set: list,
+    pascal_case_converter: callable,
+) -> str:
+    """
+    Generates a dedicated, type-safe Go struct for a set of extensions.
+    """
+    field_lines = []
+    for ext in extension_set:
+        # Use the TYPE for the field name for better readability in Go.
+        # The ASN.1 type of the extension becomes the Go field name.
+        ext_field_name = pascal_case_converter(ext['id'])
+        ext_type_name = pascal_case_converter(ext['type'])
+        # Extensions are always optional, so they must be pointers.
+        field_lines.append(f"\t{ext_field_name}\t*{ext_type_name}")
+
+    struct_body = "\n".join(field_lines)
+    struct_block = f"// {go_name} is a generated type-safe wrapper for extensions.\ntype {go_name} struct {{\n{struct_body}\n}}"
+
+    # These custom structs will need their own Encode/Decode methods.
+    # For now, we'll add placeholders.
+    placeholder_methods = f"""
+// Encode implements the aper.AperMarshaller interface.
+func (s *{go_name}) Encode(w io.Writer) error {{
+	// TODO: Implement custom extension encoding
+	return fmt.Errorf("Encode not implemented for {go_name}")
+}}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *{go_name}) Decode(r io.Reader) error {{
+	// TODO: Implement custom extension decoding
+	return fmt.Errorf("Decode not implemented for {go_name}")
+}}
+"""
+    return f"{struct_block}\n{placeholder_methods}"

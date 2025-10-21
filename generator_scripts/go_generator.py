@@ -2,9 +2,10 @@ import os
 import re
 import logging
 import shutil
+from asn1_parser import ASN1Parser 
 from asn1_patches import ASN1Patcher
 from typing import Dict, List, Any, Tuple, Optional
-from go_templates import render_enum, render_sequence, render_choice
+from go_templates import render_enum, render_sequence, render_choice, render_extension_struct
 from common_types import (
     ASN1Procedure,
     EnumDefinition,
@@ -30,7 +31,8 @@ class GoCodeGenerator:
         message_to_procedure_map: Dict[str, str],
         output_dir: str,
         patcher: "ASN1Patcher",
-        acronyms: List[str]
+        acronyms: List[str],      # Correctly placed before parser
+        parser: "ASN1Parser"      # Correctly placed at the end
     ):
         self.definitions = definitions
         self.failures = failures
@@ -38,7 +40,8 @@ class GoCodeGenerator:
         self.message_to_procedure_map = message_to_procedure_map
         self.output_dir = output_dir
         self.patcher = patcher
-        self.acronyms = set(acronyms)
+        self.acronyms = set(acronyms) # This line will now work correctly
+        self.parser = parser         # This line will now work correctly
         self.generated_files = set()
         self.name_overrides = {
             "UE-associatedLogicalE1-ConnectionListResItem": "UEAssociatedLogicalE1ConnectionItemRes",
@@ -168,16 +171,18 @@ class GoCodeGenerator:
 
         if isinstance(definition, (IntegerDefinition, ConstantDefinition)):
             return "aper.Integer", definition
+        
         elif (
             isinstance(definition, StringDefinition)
             and definition.string_type == "BIT STRING"
         ):
             return "aper.BitString", definition
+        
         elif isinstance(definition, StringDefinition):
             return "aper.OctetString", definition
+        
         elif isinstance(definition, BuiltinDefinition):
             if definition.name in ["VisibleString", "PrintableString", "UTF8String"]:
-
                 return "aper.OctetString", self.definitions.get("OCTET STRING")
             if definition.name == "OBJECT IDENTIFIER":
                 return "string", definition
@@ -458,7 +463,37 @@ class GoCodeGenerator:
             "Complex types pass 1: Generating SEQUENCE, CHOICE, and ENUMERATED files..."
         )
         for item in complex_items:
+            # --- THIS IS THE NEW LOGIC BLOCK TO ADD ---
+            # Before generating the main sequence file, check if it needs a custom extensions struct.
+            if isinstance(item, SequenceDefinition):
+                for member in item.ies:
+                    if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
+                        extension_set_name = member.extension_set_name
+                        extension_set = self.parser.extension_sets.get(extension_set_name)
+                        
+                        if extension_set:
+                            # We found extensions! Generate a type-safe struct file for them.
+                            ext_go_name = self._standard_string(item.name) + "Extensions"
+                            ext_filename = self._go_name_to_snake_case(ext_go_name) + ".go"
+                            ext_filepath = os.path.join(self.output_dir, ext_filename)
 
+                            ext_code = render_extension_struct(
+                                go_name=ext_go_name,
+                                extension_set=extension_set,
+                                pascal_case_converter=self._standard_string,
+                            )
+                            
+                            # Add the necessary package and imports for the placeholder methods.
+                            file_content = "package e1ap_ies\n\nimport (\n\t\"fmt\"\n\t\"io\"\n)\n\n" + ext_code
+                            with open(ext_filepath, "w", encoding="utf-8") as f:
+                                f.write(file_content)
+                            self.generated_files.add(ext_filename)
+                            logger.info(f"SUCCESS: Wrote type-safe extensions struct to '{ext_filename}'.")
+                            # We only need one extension struct per sequence, so we can stop looking.
+                            break 
+            # --- END OF NEW LOGIC BLOCK ---
+
+            # The rest of your existing logic for generating the main file continues here.
             if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition)):
                 go_name = self._standard_string(item.name)
                 filename = self._go_name_to_snake_case(go_name) + ".go"
@@ -467,15 +502,13 @@ class GoCodeGenerator:
                 item_code = self._generate_code_for_item(item)
 
                 file_content = "package e1ap_ies\n\n"
-
                 imports = set()
                 if isinstance(item, (EnumDefinition, ChoiceDefinition)):
                     imports.add('"github.com/lvdund/ngap/aper"')
-
                 if (
                     isinstance(item, SequenceDefinition)
                     and item.ies
-                    and item.ies[0].id is not None
+                    and (item.ies[0].id is not None or any(hasattr(m, 'extension_set_name') for m in item.ies)) # Updated import logic
                 ):
                     imports.add('"fmt"')
                     imports.add('"io"')
@@ -495,7 +528,9 @@ class GoCodeGenerator:
                 item_type_str = type(item).__name__.replace("Definition", "").upper()
                 if item_type_str in type_counts:
                     type_counts[item_type_str] += 1
-
+        
+        # NOTE: Your original code had the 'pass 2' loop nested inside the 'pass 1' loop.
+        # I have moved it outside, which is the architecturally correct structure.
         logger.info("Complex types pass 2: Generating LIST files...")
         for item in complex_items:
             if isinstance(item, ListDefinition):
@@ -504,7 +539,6 @@ class GoCodeGenerator:
                         f"Skipping LIST {item.name} because its element type is unknown."
                     )
                     continue
-
                 go_name = self._standard_string(item.name)
                 filename = self._go_name_to_snake_case(go_name) + ".go"
                 file_path = os.path.join(self.output_dir, filename)
@@ -520,7 +554,7 @@ class GoCodeGenerator:
                 self.generated_files.add(filename)
                 type_counts["LIST"] += 1
 
-            total_complex_count = sum(type_counts.values())
+        total_complex_count = sum(type_counts.values())
         if total_complex_count > 0:
             for def_type, count in type_counts.items():
                 if count > 0:
@@ -548,6 +582,7 @@ class GoCodeGenerator:
                 pascal_case_converter=self._standard_string,
                 go_type_resolver=self._resolve_go_type,
                 go_value_formatter=self._format_go_value,
+                extension_sets=self.parser.extension_sets,
             )
         elif isinstance(item, ChoiceDefinition):
             item_code = render_choice(
@@ -557,6 +592,7 @@ class GoCodeGenerator:
                 go_type_resolver=self._resolve_go_type,
             )
         return item_code
+
 
     def run_full_diagnostic(self):
         print("\n" + "=" * 80)

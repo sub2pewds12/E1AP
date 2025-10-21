@@ -12,6 +12,10 @@ type SupportedPLMNsItem struct {
 	NRCGISupportList         []NRCGISupportItem          `aper:"optional,ext"`
 	QOSParametersSupportList *QOSParametersSupportList   `aper:"optional,ext"`
 	IEExtensions             *ProtocolExtensionContainer `aper:"optional,ext"`
+	// Possible extensions:
+	// - NPNSupportInfo (ID: id-NPNSupportInfo)
+	// - ExtendedSliceSupportList (ID: id-ExtendedSliceSupportList)
+	// - ExtendedNRCGISupportList (ID: id-Extended-NR-CGI-Support-List)
 }
 
 // Encode implements the aper.AperMarshaller interface.

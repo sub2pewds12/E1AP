@@ -7,4 +7,6 @@ type PDUSessionResourceRequiredToModifyItem struct {
 	DRBRequiredToModifyListNGRAN []DRBRequiredToModifyItemNGRAN `aper:"optional,ext"`
 	DRBRequiredToRemoveListNGRAN []DRBRequiredToRemoveItemNGRAN `aper:"optional,ext"`
 	IEExtensions                 *ProtocolExtensionContainer    `aper:"optional,ext"`
+	// Possible extensions:
+	// - UPTNLInformation (ID: id-redundant-nG-DL-UP-TNL-Information)
 }

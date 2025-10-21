@@ -4,7 +4,7 @@ package e1ap_ies
 type PrivateIEID struct {
 	Choice uint64
 	Local  *PrivateIEIDLocal
-	Global *OBJECT
+	Global *string
 }
 
 const (
