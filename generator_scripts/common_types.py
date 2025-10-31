@@ -31,6 +31,7 @@ class IntegerDefinition(ASN1Definition):
         super().__init__(*args, **kwargs)
         self.min_val: Optional[str] = None
         self.max_val: Optional[str] = None
+        self.is_extensible: bool = False
 
 
 class ConstantDefinition(IntegerDefinition):
@@ -44,6 +45,7 @@ class EnumDefinition(ASN1Definition):
         super().__init__(*args, **kwargs)
         self.enum_values: List[str] = []
         self.is_extensible: bool = False
+        
 
 
 class StringDefinition(ASN1Definition):
@@ -52,6 +54,7 @@ class StringDefinition(ASN1Definition):
         self.string_type: str = string_type
         self.min_val: Optional[str] = None
         self.max_val: Optional[str] = None
+        self.is_extensible: bool = False
 
 
 class SequenceDefinition(ASN1Definition):
@@ -74,6 +77,7 @@ class ListDefinition(ASN1Definition):
         self.of_type: Optional[str] = None
         self.min_val: Optional[str] = None
         self.max_val: Optional[str] = None
+        self.is_extensible: bool = False
 
 
 class AliasDefinition(ASN1Definition):

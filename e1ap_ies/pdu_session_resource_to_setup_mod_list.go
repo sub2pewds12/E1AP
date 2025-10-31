@@ -1,4 +1,0 @@
-package e1ap_ies
-
-// PDUSessionResourceToSetupModList From: 9_4_5_Information_Element_Definitions.txt:1972
-type PDUSessionResourceToSetupModList []PDUSessionResourceToSetupModItem

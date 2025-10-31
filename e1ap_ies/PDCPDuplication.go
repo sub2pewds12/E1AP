@@ -1,0 +1,26 @@
+package e1ap_ies
+
+import (
+	"fmt"
+
+	"github.com/lvdund/ngap/aper"
+)
+
+// PDCPDuplication is a generated ENUMERATED type.
+type PDCPDuplication struct {
+	Value aper.Enumerated
+}
+
+const (
+	PDCPDuplicationTrue aper.Enumerated = 0
+)
+
+func (e *PDCPDuplication) Encode(w *aper.AperWriter) error {
+	// Encode logic for enum PDCPDuplication to be generated here.
+	return fmt.Errorf("Encode not implemented for enum PDCPDuplication")
+}
+
+func (e *PDCPDuplication) Decode(r *aper.AperReader) error {
+	// Decode logic for enum PDCPDuplication to be generated here.
+	return fmt.Errorf("Decode not implemented for enum PDCPDuplication")
+}

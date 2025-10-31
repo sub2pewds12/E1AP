@@ -1,4 +1,0 @@
-package e1ap_ies
-
-// UEAssociatedLogicalE1ConnectionListRes is a manually patched LIST type.
-type UEAssociatedLogicalE1ConnectionListRes []UEAssociatedLogicalE1ConnectionItemRes

@@ -45,6 +45,9 @@ class ASN1Parser:
         self.failures: List[Dict[str, Any]] = []
         self.classes: Dict[str, ASN1Class] = {}
         self.extension_sets: Dict[str, List[Dict[str, str]]] = {}
+        self.aper_import_path = "github.com/lvdund/ngap/aper"
+        self.pascal_case_converter = None
+        self.go_type_resolver = None
 
     def _prepopulate_builtin_types(self):
         """Creates ASN1Definition objects for built-in ASN.1 types."""
@@ -259,18 +262,20 @@ class ASN1Parser:
             return item
 
         if def_part_stripped.startswith("INTEGER"):
-
             item = IntegerDefinition(name, source_file, source_line, full_text)
             constraints = self._parse_constraints(def_part)
             item.min_val, item.max_val = constraints["min_val"], constraints["max_val"]
+            item.is_extensible = "..." in def_part
             return item
 
         elif def_part_stripped.startswith("ENUMERATED"):
             item = EnumDefinition(name, source_file, source_line, full_text)
             match = re.search(r"ENUMERATED\s*\{([^}]+)\}", def_part, re.DOTALL)
             if match:
-                content = match.group(1).replace("...", "").strip()
-                item.enum_values = [v.strip() for v in content.split(",") if v.strip()]
+                content = match.group(1)
+                
+                item.is_extensible = "..." in content
+                item.enum_values = [v.strip() for v in content.replace("...", "").split(",") if v.strip()]
             else:
                 item.enum_values = ["present"]
             return item
@@ -288,7 +293,6 @@ class ASN1Parser:
 
         value_parts = def_part_stripped.split()
         if value_parts:
-
             base_type = value_parts[0].split("(")[0].strip()
             if not base_type:
                 return None
@@ -302,6 +306,7 @@ class ASN1Parser:
                 item = AliasDefinition(
                     base_type, name, source_file, source_line, full_text
                 )
+                item.is_extensible = "..." in def_part
                 return item
 
             is_complex_list = (
@@ -540,8 +545,8 @@ class ASN1Parser:
         constraints = self._parse_constraints(def_part)
         item.min_val, item.max_val = constraints["min_val"], constraints["max_val"]
 
+        item.is_extensible = "..." in def_part
         try:
-
             of_part = re.split(r"\sOF\s", def_part, 1)[1].strip()
         except IndexError:
             logger.warning(f"Could not determine the 'OF' type for LIST: {name_part}")
