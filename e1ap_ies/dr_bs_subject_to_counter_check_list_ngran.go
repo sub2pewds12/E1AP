@@ -1,4 +1,0 @@
-package e1ap_ies
-
-// DRBsSubjectToCounterCheckListNGRAN From: 9_4_5_Information_Element_Definitions.txt:765
-type DRBsSubjectToCounterCheckListNGRAN []DRBsSubjectToCounterCheckItemNGRAN

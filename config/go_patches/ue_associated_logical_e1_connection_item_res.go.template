@@ -1,6 +1,0 @@
-package e1ap_ies
-
-// UEAssociatedLogicalE1ConnectionItemRes is a manually patched SEQUENCE type.
-type UEAssociatedLogicalE1ConnectionItemRes struct {
-	Value UEAssociatedLogicalE1ConnectionItem
-}

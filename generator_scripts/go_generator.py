@@ -5,7 +5,8 @@ import shutil
 from asn1_parser import ASN1Parser 
 from asn1_patches import ASN1Patcher
 from typing import Dict, List, Any, Tuple, Optional
-from go_templates import render_enum, render_sequence, render_choice, render_extension_struct
+from go_templates import render_sequence_struct, render_choice_struct, render_enum_struct, render_extension_struct_only, render_list_struct
+from method_templates import render_pdu_methods, render_internal_struct_methods, render_enum_methods, render_list_methods
 from common_types import (
     ASN1Procedure,
     EnumDefinition,
@@ -47,6 +48,8 @@ class GoCodeGenerator:
             "UE-associatedLogicalE1-ConnectionListResItem": "UEAssociatedLogicalE1ConnectionItemRes",
             "UE-associatedLogicalE1-ConnectionListResAckItem": "UEAssociatedLogicalE1ConnectionItemResAck",
         }
+        self.parser.pascal_case_converter = self._standard_string
+        self.parser.go_type_resolver = self._resolve_go_type
 
     def _standard_string(self, input_string: str) -> str:
         if not input_string:
@@ -152,21 +155,23 @@ class GoCodeGenerator:
         visited = {type_name}
 
         while isinstance(definition, AliasDefinition):
-            next_alias = definition.alias_of
-            if next_alias in visited:
-                logger.warning(
-                    f"Circular alias dependency detected for '{type_name}' at '{next_alias}'."
-                )
-                break
-            visited.add(next_alias)
+            next_type_name = definition.alias_of
+            
+            # Infinite loop prevention
+            if next_type_name in visited:
+                logger.warning(f"Circular alias dependency detected for '{type_name}' at '{next_type_name}'. Breaking.")
+                # Fallback to just returning the last known type name
+                return self._standard_string(next_type_name), None
+            visited.add(next_type_name)
 
-            next_def = self.definitions.get(next_alias)
+            # Get the next definition in the chain
+            next_def = self.definitions.get(next_type_name)
             if not next_def:
-                logger.warning(
-                    f"Alias '{next_alias}' for type '{definition.name}' not found in definitions."
-                )
-
-                break
+                logger.warning(f"Alias '{next_type_name}' for type '{definition.name}' not found. Breaking chain.")
+                # Fallback to returning the last known type name
+                return self._standard_string(next_type_name), None
+            
+            # Update the definition for the next loop iteration
             definition = next_def
 
         if isinstance(definition, (IntegerDefinition, ConstantDefinition)):
@@ -266,15 +271,24 @@ class GoCodeGenerator:
         protocol_ie_id_type_name = self._standard_string("ProtocolIE-ID")
 
         for item in constant_items:
-
+            # Use the existing pascal-case converter
             base_name = self._standard_string(item.name)
+            
+            # Clean the "Id" prefix that comes from ASN.1 names like "id-e1Setup"
+            if base_name.startswith("Id"):
+                base_name = base_name[2:]
+
             value = self._format_go_value(item.min_val)
 
+            # Check the ASN.1 type of the constant to categorize it
             if item.const_type == "ProcedureCode":
-                proc_code_consts.append((f"ProcedureCode_{base_name}", value))
+                # This will generate names like: ProcedureCodeE1Setup
+                proc_code_consts.append((f"ProcedureCode{base_name}", value))
             elif item.const_type == "ProtocolIE-ID":
-                protocol_ie_consts.append((f"ProtocolIEID_{base_name}", value))
+                # This will generate names like: ProtocolIEIDGNBCUCPUEE1APID
+                protocol_ie_consts.append((f"ProtocolIEID{base_name}", value))
             else:
+                # For all other integer constants
                 integer_consts.append((base_name, value))
 
         sorter = lambda item: (
@@ -474,10 +488,10 @@ class GoCodeGenerator:
                         if extension_set:
                             # We found extensions! Generate a type-safe struct file for them.
                             ext_go_name = self._standard_string(item.name) + "Extensions"
-                            ext_filename = self._go_name_to_snake_case(ext_go_name) + ".go"
+                            ext_filename = ext_go_name + ".go"
                             ext_filepath = os.path.join(self.output_dir, ext_filename)
 
-                            ext_code = render_extension_struct(
+                            ext_code = render_extension_struct_only(
                                 go_name=ext_go_name,
                                 extension_set=extension_set,
                                 pascal_case_converter=self._standard_string,
@@ -491,69 +505,55 @@ class GoCodeGenerator:
                             logger.info(f"SUCCESS: Wrote type-safe extensions struct to '{ext_filename}'.")
                             # We only need one extension struct per sequence, so we can stop looking.
                             break 
-            # --- END OF NEW LOGIC BLOCK ---
 
-            # The rest of your existing logic for generating the main file continues here.
-            if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition)):
+            if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition, ListDefinition)):
                 go_name = self._standard_string(item.name)
-                filename = self._go_name_to_snake_case(go_name) + ".go"
+                filename = go_name + ".go"
                 file_path = os.path.join(self.output_dir, filename)
-
-                item_code = self._generate_code_for_item(item)
-
+                
+                # Step 1: Generate the struct (your _generate_struct_for_item helper
+                # must now be able to handle ListDefinition).
+                struct_code = self._generate_struct_for_item(item)
+                
+                # Step 2: Generate the methods
+                method_code, required_imports = "", set()
+                pdu_suffixes = [
+                    "Request", "Response", "Failure", "Command", "Complete", 
+                    "Indication", "Acknowledge", "Setup", "Transfer", "Notification",
+                    "PDU" # for E1APPDU itself
+                ]
+                is_pdu = isinstance(item, SequenceDefinition) and any(go_name.endswith(s) for s in pdu_suffixes)
+                
+                if is_pdu:
+                    method_code, pdu_imports = render_pdu_methods(go_name, item, self.parser, self.message_to_procedure_map, self.procedures)
+                    required_imports.update(pdu_imports)
+                elif isinstance(item, (SequenceDefinition, ChoiceDefinition)):
+                    method_code, internal_imports = render_internal_struct_methods(go_name, item, self.parser)
+                    required_imports.update(internal_imports)
+                elif isinstance(item, EnumDefinition):
+                    method_code, enum_imports = render_enum_methods(go_name, item)
+                    required_imports.update(enum_imports)
+                elif isinstance(item, ListDefinition): # <-- This new block handles lists
+                    method_code, list_imports = render_list_methods(go_name, item, self.parser)
+                    required_imports.update(list_imports)
+                
+                # Step 3: Assemble and write
                 file_content = "package e1ap_ies\n\n"
-                imports = set()
-                if isinstance(item, (EnumDefinition, ChoiceDefinition)):
-                    imports.add('"github.com/lvdund/ngap/aper"')
-                if (
-                    isinstance(item, SequenceDefinition)
-                    and item.ies
-                    and (item.ies[0].id is not None or any(hasattr(m, 'extension_set_name') for m in item.ies)) # Updated import logic
-                ):
-                    imports.add('"fmt"')
-                    imports.add('"io"')
-                    imports.add('"github.com/lvdund/ngap/aper"')
-
-                if imports:
+                if required_imports:
                     file_content += "import (\n"
-                    for imp in sorted(list(imports)):
-                        file_content += f"\t{imp}\n"
+                    for imp in sorted(list(required_imports)):
+                        file_content += f'\t"{imp}"\n'
                     file_content += ")\n\n"
-
-                file_content += item_code
+                file_content += f"{struct_code}\n\n{method_code}"
+                
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(file_content)
+                
                 self.generated_files.add(filename)
-
                 item_type_str = type(item).__name__.replace("Definition", "").upper()
                 if item_type_str in type_counts:
                     type_counts[item_type_str] += 1
-        
-        # NOTE: Your original code had the 'pass 2' loop nested inside the 'pass 1' loop.
-        # I have moved it outside, which is the architecturally correct structure.
-        logger.info("Complex types pass 2: Generating LIST files...")
-        for item in complex_items:
-            if isinstance(item, ListDefinition):
-                if not item.of_type:
-                    logger.warning(
-                        f"Skipping LIST {item.name} because its element type is unknown."
-                    )
-                    continue
-                go_name = self._standard_string(item.name)
-                filename = self._go_name_to_snake_case(go_name) + ".go"
-                file_path = os.path.join(self.output_dir, filename)
-
-                of_type_go_name = self._standard_string(item.of_type)
-
-                item_code = self._generate_header_comment(item, go_name)
-                item_code += f"type {go_name} []{of_type_go_name}\n"
-
-                file_content = f"package e1ap_ies\n\n{item_code}"
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(file_content)
-                self.generated_files.add(filename)
-                type_counts["LIST"] += 1
-
+            
         total_complex_count = sum(type_counts.values())
         if total_complex_count > 0:
             for def_type, count in type_counts.items():
@@ -562,36 +562,18 @@ class GoCodeGenerator:
                         f"SUCCESS: Wrote {count} {def_type} definitions to individual files."
                     )
 
-    def _generate_code_for_item(self, item: Any) -> str:
-        """Generates the Go code string for a single complex ASN.1 definition,
-        with minimalist placeholder Encode/Decode methods for PDUs."""
+    def _generate_struct_for_item(self, item: Any) -> str:
         go_name = self._standard_string(item.name)
-        item_code = ""
-
+        if isinstance(item, SequenceDefinition):
+            return render_sequence_struct(go_name, item, self._standard_string, self._resolve_go_type, self._format_go_value, self.parser.extension_sets)
+        if isinstance(item, ChoiceDefinition):
+            return render_choice_struct(go_name, item, self._standard_string, self._resolve_go_type)
         if isinstance(item, EnumDefinition):
-
-            item_code = render_enum(
-                go_name=go_name,
-                enum_values=item.enum_values,
-                pascal_case_converter=self._standard_string,
-            )
-        elif isinstance(item, SequenceDefinition):
-            item_code = render_sequence(
-                go_name=go_name,
-                item=item,
-                pascal_case_converter=self._standard_string,
-                go_type_resolver=self._resolve_go_type,
-                go_value_formatter=self._format_go_value,
-                extension_sets=self.parser.extension_sets,
-            )
-        elif isinstance(item, ChoiceDefinition):
-            item_code = render_choice(
-                go_name=go_name,
-                item=item,
-                pascal_case_converter=self._standard_string,
-                go_type_resolver=self._resolve_go_type,
-            )
-        return item_code
+            return render_enum_struct(go_name, item.enum_values, self._standard_string)
+        if isinstance(item, ListDefinition):
+            # This is the new part for the helper, make sure it's here.
+            return render_list_struct(go_name, item, self._standard_string)
+        return ""
 
 
     def run_full_diagnostic(self):

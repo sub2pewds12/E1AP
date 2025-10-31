@@ -1,4 +1,0 @@
-package e1ap_ies
-
-// DataForwardingtoEUTRANInformationList From: 9_4_5_Information_Element_Definitions.txt:371
-type DataForwardingtoEUTRANInformationList []DataForwardingtoEUTRANInformationListItem
