@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -17,12 +15,18 @@ const (
 	TriggeringMessageUnsuccessfulOutcome aper.Enumerated = 2
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *TriggeringMessage) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum TriggeringMessage to be generated here.
-	return fmt.Errorf("Encode not implemented for enum TriggeringMessage")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, false)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *TriggeringMessage) Decode(r *aper.AperReader) error {
-	// Decode logic for enum TriggeringMessage to be generated here.
-	return fmt.Errorf("Decode not implemented for enum TriggeringMessage")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -38,12 +36,18 @@ const (
 	ULDataSplitThresholdInfinity aper.Enumerated = 23
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *ULDataSplitThreshold) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum ULDataSplitThreshold to be generated here.
-	return fmt.Errorf("Encode not implemented for enum ULDataSplitThreshold")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 23}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *ULDataSplitThreshold) Decode(r *aper.AperReader) error {
-	// Decode logic for enum ULDataSplitThreshold to be generated here.
-	return fmt.Errorf("Decode not implemented for enum ULDataSplitThreshold")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 23}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

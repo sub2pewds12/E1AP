@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -15,12 +13,18 @@ const (
 	DataDiscardRequiredRequired aper.Enumerated = 0
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *DataDiscardRequired) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum DataDiscardRequired to be generated here.
-	return fmt.Errorf("Encode not implemented for enum DataDiscardRequired")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 0}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *DataDiscardRequired) Decode(r *aper.AperReader) error {
-	// Decode logic for enum DataDiscardRequired to be generated here.
-	return fmt.Errorf("Decode not implemented for enum DataDiscardRequired")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

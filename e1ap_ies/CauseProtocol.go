@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -21,12 +19,18 @@ const (
 	CauseProtocolUnspecified                                  aper.Enumerated = 6
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *CauseProtocol) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum CauseProtocol to be generated here.
-	return fmt.Errorf("Encode not implemented for enum CauseProtocol")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 6}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *CauseProtocol) Decode(r *aper.AperReader) error {
-	// Decode logic for enum CauseProtocol to be generated here.
-	return fmt.Errorf("Decode not implemented for enum CauseProtocol")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 6}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

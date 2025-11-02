@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -17,12 +15,18 @@ const (
 	LinksToLogBothUplinkAndDownlink aper.Enumerated = 2
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *LinksToLog) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum LinksToLog to be generated here.
-	return fmt.Errorf("Encode not implemented for enum LinksToLog")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *LinksToLog) Decode(r *aper.AperReader) error {
-	// Decode logic for enum LinksToLog to be generated here.
-	return fmt.Errorf("Decode not implemented for enum LinksToLog")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

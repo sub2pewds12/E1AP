@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -16,12 +14,18 @@ const (
 	DuplicationActivationInactive aper.Enumerated = 1
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *DuplicationActivation) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum DuplicationActivation to be generated here.
-	return fmt.Errorf("Encode not implemented for enum DuplicationActivation")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *DuplicationActivation) Decode(r *aper.AperReader) error {
-	// Decode logic for enum DuplicationActivation to be generated here.
-	return fmt.Errorf("Decode not implemented for enum DuplicationActivation")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

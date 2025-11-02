@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -16,12 +14,18 @@ const (
 	Dynamic5QIDescriptorDelayCriticalNonDelayCritical aper.Enumerated = 1
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *Dynamic5QIDescriptorDelayCritical) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum Dynamic5QIDescriptorDelayCritical to be generated here.
-	return fmt.Errorf("Encode not implemented for enum Dynamic5QIDescriptorDelayCritical")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, false)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *Dynamic5QIDescriptorDelayCritical) Decode(r *aper.AperReader) error {
-	// Decode logic for enum Dynamic5QIDescriptorDelayCritical to be generated here.
-	return fmt.Errorf("Decode not implemented for enum Dynamic5QIDescriptorDelayCritical")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, false)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -16,12 +14,18 @@ const (
 	EarlyForwardingCOUNTReqDlDiscarding aper.Enumerated = 1
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *EarlyForwardingCOUNTReq) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum EarlyForwardingCOUNTReq to be generated here.
-	return fmt.Errorf("Encode not implemented for enum EarlyForwardingCOUNTReq")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *EarlyForwardingCOUNTReq) Decode(r *aper.AperReader) error {
-	// Decode logic for enum EarlyForwardingCOUNTReq to be generated here.
-	return fmt.Errorf("Decode not implemented for enum EarlyForwardingCOUNTReq")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

@@ -1,6 +1,9 @@
 package e1ap_ies
 
 import (
+	"bytes"
+	"fmt"
+
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -65,8 +68,124 @@ func (msg *IABUPTNLAddressUpdateFailure) toIes() ([]E1APMessageIE, error) {
 	return ies, nil
 }
 
-// Encode function for IABUPTNLAddressUpdateFailure to be generated here.
+// Encode for IABUPTNLAddressUpdateFailure: Could not find associated procedure.
 
-// Decode function for IABUPTNLAddressUpdateFailure to be generated here.
+// Decode implements the aper.AperUnmarshaller interface for IABUPTNLAddressUpdateFailure.
+func (msg *IABUPTNLAddressUpdateFailure) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("IABUPTNLAddressUpdateFailure: %w", err)
+		}
+	}()
 
-// Decoder helper for IABUPTNLAddressUpdateFailure to be generated here.
+	r := aper.NewReader(bytes.NewReader(buf))
+
+	decoder := IABUPTNLAddressUpdateFailureDecoder{
+		msg:  msg,
+		list: make(map[aper.Integer]*E1APMessageIE),
+	}
+
+	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
+	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return
+	}
+
+	// After decoding all present IEs, validate that mandatory ones were found.
+
+	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+		err = fmt.Errorf("mandatory field TransactionID is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
+			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+
+	if _, ok := decoder.list[ProtocolIEIDCause]; !ok {
+		err = fmt.Errorf("mandatory field Cause is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
+			IEID:          ProtocolIEID{Value: ProtocolIEIDCause},
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+type IABUPTNLAddressUpdateFailureDecoder struct {
+	msg      *IABUPTNLAddressUpdateFailure
+	diagList []CriticalityDiagnosticsIEItem
+	list     map[aper.Integer]*E1APMessageIE
+}
+
+func (decoder *IABUPTNLAddressUpdateFailureDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
+	var id int64
+	var c uint64
+	var buf []byte
+	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return
+	}
+	msgIe = new(E1APMessageIE)
+	msgIe.Id.Value = aper.Integer(id)
+
+	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		return
+	}
+	msgIe.Criticality.Value = aper.Enumerated(c)
+
+	if buf, err = r.ReadOpenType(); err != nil {
+		return
+	}
+
+	ieId := msgIe.Id.Value
+	if _, ok := decoder.list[ieId]; ok {
+		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return
+	}
+	decoder.list[ieId] = msgIe
+
+	ieR := aper.NewReader(bytes.NewReader(buf))
+	msg := decoder.msg
+
+	switch msgIe.Id.Value {
+
+	case ProtocolIEIDTransactionID:
+
+		{
+			var val int64
+			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return fmt.Errorf("Decode TransactionID failed: %w", err)
+			}
+			s.TransactionID = TransactionID(val)
+		}
+
+	case ProtocolIEIDCause:
+		if err = s.Cause.Decode(r); err != nil {
+			return fmt.Errorf("Decode Cause failed: %w", err)
+		}
+
+	case ProtocolIEIDTimeToWait:
+		s.TimeToWait = new(TimeToWait)
+
+		{
+			var val uint64
+			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 5}, true); err != nil {
+				return fmt.Errorf("Decode TimeToWait failed: %w", err)
+			}
+			s.TimeToWait.Value = aper.Enumerated(val)
+		}
+
+	case ProtocolIEIDCriticalityDiagnostics:
+		s.CriticalityDiagnostics = new(CriticalityDiagnostics)
+		if err = s.CriticalityDiagnostics.Decode(r); err != nil {
+			return fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
+		}
+	default:
+		// Handle unknown IEs based on criticality here, if needed.
+	}
+	return
+}

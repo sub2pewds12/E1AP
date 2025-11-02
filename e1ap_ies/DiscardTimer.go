@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -30,12 +28,18 @@ const (
 	DiscardTimerInfinity aper.Enumerated = 15
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *DiscardTimer) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum DiscardTimer to be generated here.
-	return fmt.Errorf("Encode not implemented for enum DiscardTimer")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 15}, false)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *DiscardTimer) Decode(r *aper.AperReader) error {
-	// Decode logic for enum DiscardTimer to be generated here.
-	return fmt.Errorf("Decode not implemented for enum DiscardTimer")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 15}, false)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

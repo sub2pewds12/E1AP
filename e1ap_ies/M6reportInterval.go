@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -28,12 +26,18 @@ const (
 	M6reportIntervalMin30   aper.Enumerated = 13
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *M6reportInterval) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum M6reportInterval to be generated here.
-	return fmt.Errorf("Encode not implemented for enum M6reportInterval")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 13}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *M6reportInterval) Decode(r *aper.AperReader) error {
-	// Decode logic for enum M6reportInterval to be generated here.
-	return fmt.Errorf("Decode not implemented for enum M6reportInterval")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 13}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

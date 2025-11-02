@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -15,12 +13,18 @@ const (
 	ResetAllResetAll aper.Enumerated = 0
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *ResetAll) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum ResetAll to be generated here.
-	return fmt.Errorf("Encode not implemented for enum ResetAll")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 0}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *ResetAll) Decode(r *aper.AperReader) error {
-	// Decode logic for enum ResetAll to be generated here.
-	return fmt.Errorf("Decode not implemented for enum ResetAll")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

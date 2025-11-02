@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -19,12 +17,18 @@ const (
 	M4periodMin1    aper.Enumerated = 4
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *M4period) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum M4period to be generated here.
-	return fmt.Errorf("Encode not implemented for enum M4period")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 4}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *M4period) Decode(r *aper.AperReader) error {
-	// Decode logic for enum M4period to be generated here.
-	return fmt.Errorf("Decode not implemented for enum M4period")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 4}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

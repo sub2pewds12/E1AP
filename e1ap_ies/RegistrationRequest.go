@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -16,12 +14,18 @@ const (
 	RegistrationRequestStop  aper.Enumerated = 1
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *RegistrationRequest) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum RegistrationRequest to be generated here.
-	return fmt.Errorf("Encode not implemented for enum RegistrationRequest")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *RegistrationRequest) Decode(r *aper.AperReader) error {
-	// Decode logic for enum RegistrationRequest to be generated here.
-	return fmt.Errorf("Decode not implemented for enum RegistrationRequest")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

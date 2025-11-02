@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -17,12 +15,18 @@ const (
 	TNLAssociationUsageBoth  aper.Enumerated = 2
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *TNLAssociationUsage) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum TNLAssociationUsage to be generated here.
-	return fmt.Errorf("Encode not implemented for enum TNLAssociationUsage")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *TNLAssociationUsage) Decode(r *aper.AperReader) error {
-	// Decode logic for enum TNLAssociationUsage to be generated here.
-	return fmt.Errorf("Decode not implemented for enum TNLAssociationUsage")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

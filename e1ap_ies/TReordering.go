@@ -1,8 +1,6 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -50,12 +48,18 @@ const (
 	TReorderingMs3000 aper.Enumerated = 35
 )
 
+// Encode implements the aper.AperMarshaller interface.
 func (e *TReordering) Encode(w *aper.AperWriter) error {
-	// Encode logic for enum TReordering to be generated here.
-	return fmt.Errorf("Encode not implemented for enum TReordering")
+	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 35}, true)
 }
 
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *TReordering) Decode(r *aper.AperReader) error {
-	// Decode logic for enum TReordering to be generated here.
-	return fmt.Errorf("Decode not implemented for enum TReordering")
+
+	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 35}, true)
+	if err != nil {
+		return err
+	}
+	e.Value = aper.Enumerated(val)
+	return nil
 }

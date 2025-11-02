@@ -25,10 +25,8 @@ def render_pdu_methods(
     required_imports = {"io", "fmt", "bytes", parser.aper_import_path}
 
     to_ies_code = _generate_to_ies(go_name, item, parser)
-    encode_code = _generate_pdu_encode(
-        go_name, item, message_to_procedure_map, procedures
-    )
-    decode_code, decode_imports = _generate_pdu_decode(go_name, item)
+    encode_code = _generate_pdu_encode(go_name, item, message_to_procedure_map, procedures, parser)
+    decode_code, decode_imports = _generate_pdu_decode(go_name, item, parser)
     decoder_helper_code, helper_imports = _generate_decoder_helper(
         go_name, item, parser
     )
@@ -258,23 +256,38 @@ def render_enum_methods(go_name: str, item: EnumDefinition) -> Tuple[str, Set[st
     """
     Generates Encode and Decode methods for an ENUMERATED type.
     """
-    required_imports = {"io", "fmt", "github.com/lvdund/ngap/aper"}
+    required_imports = {"fmt", "github.com/lvdund/ngap/aper"} # Use your aper import path
 
-    print(f"// TODO: Generating enum methods for {go_name}")
+    # Determine the constraints for the enumeration
+    num_enums = len(item.enum_values)
+    upper_bound = num_enums - 1 if num_enums > 0 else 0
+    is_extensible = str(item.is_extensible).lower()
 
-    encode_code = f"""
+    # --- Generate the Encode method ---
+    encode_body = f'return w.WriteEnumerate(uint64(e.Value), aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {is_extensible})'
+
+    encode_func = f"""
+// Encode implements the aper.AperMarshaller interface.
 func (e *{go_name}) Encode(w *aper.AperWriter) error {{
-    // Encode logic for enum {go_name} to be generated here.
-    return fmt.Errorf("Encode not implemented for enum {go_name}")
-}}
-"""
-    decode_code = f"""
+    {encode_body}
+}}"""
+
+    # --- Generate the Decode method ---
+    decode_body = f"""
+    val, err := r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {is_extensible})
+	if err != nil {{
+		return err
+	}}
+	e.Value = aper.Enumerated(val)
+	return nil"""
+
+    decode_func = f"""
+// Decode implements the aper.AperUnmarshaller interface.
 func (e *{go_name}) Decode(r *aper.AperReader) error {{
-    // Decode logic for enum {go_name} to be generated here.
-    return fmt.Errorf("Decode not implemented for enum {go_name}")
-}}
-"""
-    return f"{encode_code}\n{decode_code}", required_imports
+    {decode_body}
+}}"""
+
+    return f"{encode_func}\n\n{decode_func}", required_imports
 
 
 def render_extension_methods(go_name: str) -> Tuple[str, Set[str]]:
@@ -782,3 +795,195 @@ def _generate_direct_decode_call(field_name, go_type, ie, asn1_def, parser):
         if is_optional:
              return f's.{field_name} = new({go_type})\n\t\t{decode_statement}'
         return decode_statement
+
+def _generate_pdu_encode(go_name: str, item: SequenceDefinition, message_to_procedure_map: dict, procedures: dict, parser: ASN1Parser) -> str:
+    """Generates the Encode() dispatcher method for a PDU."""
+    
+    # Find the procedure for this message to get the ProcedureCode
+    proc_name = next((proc.name for proc in procedures.values() if go_name in [proc.initiating_message, proc.successful_outcome, proc.unsuccessful_outcome]), None)
+    if not proc_name or proc_name not in procedures:
+        return f'// Encode for {go_name}: Could not find associated procedure.'
+
+    procedure = procedures[proc_name]
+    proc_code_const_base = parser.pascal_case_converter(procedure.procedure_code)
+    if proc_code_const_base.startswith("Id"):
+        proc_code_const_base = proc_code_const_base[2:]
+    proc_code_const = f"ProcedureCode{proc_code_const_base}"
+
+    # Determine the message type and the master encoder function to call
+    message_type = message_to_procedure_map.get(go_name)
+    master_encoder_func = ""
+    if message_type == "InitiatingMessage":
+        master_encoder_func = "EncodeInitiatingMessage"
+    elif message_type == "SuccessfulOutcome":
+        master_encoder_func = "EncodeSuccessfulOutcome"
+    elif message_type == "UnsuccessfulOutcome":
+        master_encoder_func = "EncodeUnsuccessfulOutcome"
+    else:
+        return f'// Encode for {go_name}: Could not determine message type for master encoder.'
+
+    pdu_crit = "CriticalityReject" if message_type == "InitiatingMessage" else "CriticalityIgnore"
+
+    return f"""
+// Encode implements the aper.AperMarshaller interface for {go_name}.
+func (msg *{go_name}) Encode(w io.Writer) error {{
+	ies, err := msg.toIes()
+	if err != nil {{
+		return fmt.Errorf("could not convert {go_name} to IEs: %w", err)
+	}}
+
+	return {master_encoder_func}(w, {proc_code_const}, Criticality{{Value: {pdu_crit}}}, ies)
+}}"""
+
+
+def _generate_pdu_decode(go_name: str, item: SequenceDefinition, parser: ASN1Parser) -> Tuple[str, Set[str]]:
+    """Generates the Decode() setup and validation method for a PDU."""
+    pascal_case_converter = parser.pascal_case_converter
+    
+    validation_parts = []
+    for ie in item.ies:
+        if ie.presence == "mandatory":
+            ie_id_const_base = pascal_case_converter(ie.id)
+            if ie_id_const_base.startswith("Id"):
+                ie_id_const_base = ie_id_const_base[2:]
+            ie_id_const = f"ProtocolIEID{ie_id_const_base}"
+            field_name = pascal_case_converter(ie.ie)
+            validation_parts.append(f"""
+    if _, ok := decoder.list[{ie_id_const}]; !ok {{
+		err = fmt.Errorf("mandatory field {field_name} is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{{
+			IECriticality: Criticality{{Value: CriticalityReject}}, // Or from IE spec
+			IEID:          ProtocolIEID{{Value: {ie_id_const}}},
+			TypeOfError:   TypeOfError{{Value: TypeOfErrorMissing}},
+		}})
+	}}""")
+    
+    # Add a final return if any mandatory field was missing.
+    if validation_parts:
+        validation_parts.append("if err != nil { return }")
+
+    validation_block = "\n".join(validation_parts)
+    decoder_name = f"{go_name}Decoder"
+    
+    return f"""
+// Decode implements the aper.AperUnmarshaller interface for {go_name}.
+func (msg *{go_name}) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {{
+	defer func() {{
+		if err != nil {{
+			err = fmt.Errorf("{go_name}: %w", err)
+		}}
+	}}()
+
+	r := aper.NewReader(bytes.NewReader(buf))
+	
+	decoder := {decoder_name}{{
+		msg:  msg,
+		list: make(map[aper.Integer]*E1APMessageIE),
+	}}
+	
+	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
+	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{{Lb: 0, Ub: 65535}}, false); err != nil {{
+		return
+	}}
+
+    // After decoding all present IEs, validate that mandatory ones were found.
+    {validation_block}
+
+	return
+}}""", set()
+
+def _generate_decoder_helper(go_name: str, item: SequenceDefinition, parser: ASN1Parser) -> Tuple[str, Set[str]]:
+    """Generates the Decoder helper struct and its decodeIE() method with the switch statement."""
+    
+    decoder_name = f"{go_name}Decoder"
+    pascal_case_converter = parser.pascal_case_converter
+    
+    case_blocks = []
+    for ie in item.ies:
+        ie_id_const_base = pascal_case_converter(ie.id)
+        if ie_id_const_base.startswith("Id"):
+            ie_id_const_base = ie_id_const_base[2:]
+        ie_id_const = f"ProtocolIEID{ie_id_const_base}"
+        
+        field_name = pascal_case_converter(ie.ie)
+        go_type, asn1_def = parser.go_type_resolver(ie.type)
+        
+        decode_logic = _generate_direct_decode_call(field_name, go_type, ie, asn1_def, parser)
+
+        case_blocks.append(f"""
+    case {ie_id_const}:
+        {decode_logic}""")
+
+    switch_body = "\n".join(case_blocks)
+
+    return f"""
+type {decoder_name} struct {{
+	msg      *{go_name}
+	diagList []CriticalityDiagnosticsIEItem
+	list     map[aper.Integer]*E1APMessageIE
+}}
+
+func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {{
+	var id int64
+	var c uint64
+	var buf []byte
+	if id, err = r.ReadInteger(&aper.Constraint{{Lb: 0, Ub: 65535}}, false); err != nil {{
+		return
+	}}
+	msgIe = new(E1APMessageIE)
+	msgIe.Id.Value = aper.Integer(id)
+
+	if c, err = r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: 2}}, false); err != nil {{
+		return
+	}}
+	msgIe.Criticality.Value = aper.Enumerated(c)
+
+	if buf, err = r.ReadOpenType(); err != nil {{
+		return
+	}}
+
+	ieId := msgIe.Id.Value
+	if _, ok := decoder.list[ieId]; ok {{
+		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return
+	}}
+	decoder.list[ieId] = msgIe
+
+	ieR := aper.NewReader(bytes.NewReader(buf))
+	msg := decoder.msg
+
+	switch msgIe.Id.Value {{
+    {switch_body}
+	default:
+		// Handle unknown IEs based on criticality here, if needed.
+	}}
+	return
+}}""", {"bytes"}
+
+# ==============================================================================
+# == CATEGORY 4: EXTENSION STRUCT METHODS (Special Case)
+# ==============================================================================
+
+def render_extension_methods(go_name: str) -> Tuple[str, Set[str]]:
+    """
+    Generates placeholder Encode and Decode methods for a type-safe extension struct.
+    """
+    required_imports = {"fmt", "io"} # Aper import not strictly needed for placeholders
+
+    encode_code = f"""
+// Encode implements the aper.AperMarshaller interface.
+func (s *{go_name}) Encode(w *aper.AperWriter) error {{
+	// TODO: Implement the complex APER extension container encoding logic.
+	// This involves creating a bitmap of present extensions and encoding each one as an open type.
+	return fmt.Errorf("Encode not yet implemented for {go_name}")
+}}
+"""
+    decode_code = f"""
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *{go_name}) Decode(r *aper.AperReader) error {{
+	// TODO: Implement the complex APER extension container decoding logic.
+	// This involves reading a bitmap and then decoding each present extension as an open type.
+	return fmt.Errorf("Decode not yet implemented for {go_name}")
+}}
+"""
+    return f"{encode_code}\n{decode_code}", required_imports

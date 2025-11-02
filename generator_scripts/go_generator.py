@@ -6,7 +6,7 @@ from asn1_parser import ASN1Parser
 from asn1_patches import ASN1Patcher
 from typing import Dict, List, Any, Tuple, Optional
 from go_templates import render_sequence_struct, render_choice_struct, render_enum_struct, render_extension_struct_only, render_list_struct
-from method_templates import render_pdu_methods, render_internal_struct_methods, render_enum_methods, render_list_methods
+from method_templates import render_pdu_methods, render_internal_struct_methods, render_enum_methods, render_list_methods, render_extension_methods
 from common_types import (
     ASN1Procedure,
     EnumDefinition,
@@ -466,101 +466,117 @@ class GoCodeGenerator:
             logger.info("No simple type aliases needed to be generated.")
 
     def _generate_complex_type_files(self, complex_items: List[Any]):
-        """Generates a dedicated file for each complex type using a robust two-pass strategy."""
-        if not complex_items:
-            logger.info("No complex types found to generate individual files for.")
-            return
+       """Generates a dedicated file for each complex type using a robust two-pass strategy."""
+       if not complex_items:
+           logger.info("No complex types found to generate individual files for.")
+           return
 
-        type_counts = {"SEQUENCE": 0, "CHOICE": 0, "ENUMERATED": 0, "LIST": 0}
 
-        logger.info(
-            "Complex types pass 1: Generating SEQUENCE, CHOICE, and ENUMERATED files..."
-        )
-        for item in complex_items:
-            # --- THIS IS THE NEW LOGIC BLOCK TO ADD ---
-            # Before generating the main sequence file, check if it needs a custom extensions struct.
-            if isinstance(item, SequenceDefinition):
+       type_counts = {"SEQUENCE": 0, "CHOICE": 0, "ENUMERATED": 0, "LIST": 0}
+        
+       files_to_write = {}
+
+       logger.info(
+           "Complex types pass 1: Generating SEQUENCE, CHOICE, and ENUMERATED files..."
+       )
+       for item in complex_items:
+           if isinstance(item, SequenceDefinition):
                 for member in item.ies:
                     if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
                         extension_set_name = member.extension_set_name
                         extension_set = self.parser.extension_sets.get(extension_set_name)
                         
                         if extension_set:
-                            # We found extensions! Generate a type-safe struct file for them.
+                            # 1. Determine names
                             ext_go_name = self._standard_string(item.name) + "Extensions"
                             ext_filename = ext_go_name + ".go"
                             ext_filepath = os.path.join(self.output_dir, ext_filename)
 
-                            ext_code = render_extension_struct_only(
+                            # 2. Generate the struct code
+                            ext_struct_code = render_extension_struct_only(
                                 go_name=ext_go_name,
                                 extension_set=extension_set,
                                 pascal_case_converter=self._standard_string,
                             )
                             
-                            # Add the necessary package and imports for the placeholder methods.
-                            file_content = "package e1ap_ies\n\nimport (\n\t\"fmt\"\n\t\"io\"\n)\n\n" + ext_code
-                            with open(ext_filepath, "w", encoding="utf-8") as f:
-                                f.write(file_content)
-                            self.generated_files.add(ext_filename)
-                            logger.info(f"SUCCESS: Wrote type-safe extensions struct to '{ext_filename}'.")
-                            # We only need one extension struct per sequence, so we can stop looking.
-                            break 
+                            # 3. Generate the method code using the template
+                            ext_method_code, ext_imports = render_extension_methods(ext_go_name)
+                            
+                            # 4. Assemble the full file content, including imports, struct, and methods
+                            ext_file_content = "package e1ap_ies\n\n"
+                            if ext_imports:
+                                ext_file_content += "import (\n"
+                                for imp in sorted(list(ext_imports)):
+                                    ext_file_content += f'\t"{imp}"\n'
+                                ext_file_content += ")\n\n"
+                            ext_file_content += f"{ext_struct_code}\n\n{ext_method_code}"
 
-            if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition, ListDefinition)):
-                go_name = self._standard_string(item.name)
-                filename = go_name + ".go"
-                file_path = os.path.join(self.output_dir, filename)
-                
-                # Step 1: Generate the struct (your _generate_struct_for_item helper
-                # must now be able to handle ListDefinition).
-                struct_code = self._generate_struct_for_item(item)
-                
-                # Step 2: Generate the methods
-                method_code, required_imports = "", set()
-                pdu_suffixes = [
-                    "Request", "Response", "Failure", "Command", "Complete", 
-                    "Indication", "Acknowledge", "Setup", "Transfer", "Notification",
-                    "PDU" # for E1APPDU itself
-                ]
-                is_pdu = isinstance(item, SequenceDefinition) and any(go_name.endswith(s) for s in pdu_suffixes)
-                
-                if is_pdu:
-                    method_code, pdu_imports = render_pdu_methods(go_name, item, self.parser, self.message_to_procedure_map, self.procedures)
-                    required_imports.update(pdu_imports)
-                elif isinstance(item, (SequenceDefinition, ChoiceDefinition)):
-                    method_code, internal_imports = render_internal_struct_methods(go_name, item, self.parser)
-                    required_imports.update(internal_imports)
-                elif isinstance(item, EnumDefinition):
-                    method_code, enum_imports = render_enum_methods(go_name, item)
-                    required_imports.update(enum_imports)
-                elif isinstance(item, ListDefinition): # <-- This new block handles lists
-                    method_code, list_imports = render_list_methods(go_name, item, self.parser)
-                    required_imports.update(list_imports)
-                
-                # Step 3: Assemble and write
-                file_content = "package e1ap_ies\n\n"
-                if required_imports:
-                    file_content += "import (\n"
-                    for imp in sorted(list(required_imports)):
-                        file_content += f'\t"{imp}"\n'
-                    file_content += ")\n\n"
-                file_content += f"{struct_code}\n\n{method_code}"
-                
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(file_content)
-                
-                self.generated_files.add(filename)
-                item_type_str = type(item).__name__.replace("Definition", "").upper()
-                if item_type_str in type_counts:
-                    type_counts[item_type_str] += 1
-            
-        total_complex_count = sum(type_counts.values())
-        if total_complex_count > 0:
-            for def_type, count in type_counts.items():
-                if count > 0:
-                    logger.info(
-                        f"SUCCESS: Wrote {count} {def_type} definitions to individual files."
-                    )
+                            # 5. Write the complete file directly to disk
+                            with open(ext_filepath, "w", encoding="utf-8") as f:
+                                f.write(ext_file_content)
+
+                            self.generated_files.add(ext_filename)
+                            logger.info(f"SUCCESS: Wrote type-safe extensions file to '{ext_filename}'.")
+                            
+                            # We only need one extension struct per sequence, so we can stop looking.
+                            break
+
+
+           if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition, ListDefinition)):
+               go_name = self._standard_string(item.name)
+               filename = go_name + ".go"
+               file_path = os.path.join(self.output_dir, filename)
+              
+               # Step 1: Generate the struct (your _generate_struct_for_item helper
+               # must now be able to handle ListDefinition).
+               struct_code = self._generate_struct_for_item(item)
+              
+               # Step 2: Generate the methods
+               method_code, required_imports = "", set()
+               pdu_suffixes = [
+                   "Request", "Response", "Failure", "Command", "Complete",
+                   "Indication", "Acknowledge", "Setup", "Transfer", "Notification",
+                   "PDU" # for E1APPDU itself
+               ]
+               is_pdu = isinstance(item, SequenceDefinition) and any(go_name.endswith(s) for s in pdu_suffixes)
+              
+               if is_pdu:
+                   method_code, pdu_imports = render_pdu_methods(go_name, item, self.parser, self.message_to_procedure_map, self.procedures)
+                   required_imports.update(pdu_imports)
+               elif isinstance(item, (SequenceDefinition, ChoiceDefinition)):
+                   method_code, internal_imports = render_internal_struct_methods(go_name, item, self.parser)
+                   required_imports.update(internal_imports)
+               elif isinstance(item, EnumDefinition):
+                   method_code, enum_imports = render_enum_methods(go_name, item)
+                   required_imports.update(enum_imports)
+               elif isinstance(item, ListDefinition): # <-- This new block handles lists
+                   method_code, list_imports = render_list_methods(go_name, item, self.parser)
+                   required_imports.update(list_imports)
+              
+               # Step 3: Assemble and write
+               file_content = "package e1ap_ies\n\n"
+               if required_imports:
+                   file_content += "import (\n"
+                   for imp in sorted(list(required_imports)):
+                       file_content += f'\t"{imp}"\n'
+                   file_content += ")\n\n"
+               file_content += f"{struct_code}\n\n{method_code}"
+              
+               with open(file_path, "w", encoding="utf-8") as f:
+                   f.write(file_content)
+              
+               self.generated_files.add(filename)
+               item_type_str = type(item).__name__.replace("Definition", "").upper()
+               if item_type_str in type_counts:
+                   type_counts[item_type_str] += 1
+          
+       total_complex_count = sum(type_counts.values())
+       if total_complex_count > 0:
+           for def_type, count in type_counts.items():
+               if count > 0:
+                   logger.info(
+                       f"SUCCESS: Wrote {count} {def_type} definitions to individual files."
+                   )
 
     def _generate_struct_for_item(self, item: Any) -> str:
         go_name = self._standard_string(item.name)
