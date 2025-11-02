@@ -64,7 +64,7 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 	if err = w.WriteBitString(optionalityBitmap[:], uint(11), &aper.Constraint{Lb: 11, Ub: 11}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PDUSessionID), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
 	if s.SecurityIndication != nil {
@@ -73,7 +73,7 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 		}
 	}
 	if s.PDUSessionResourceDLAMBR != nil {
-		if err = w.WriteInteger(int64((*s.PDUSessionResourceDLAMBR)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.PDUSessionResourceDLAMBR.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionResourceDLAMBR failed: %w", err)
 		}
 	}
@@ -93,12 +93,12 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 		}
 	}
 	if s.PDUSessionInactivityTimer != nil {
-		if err = w.WriteInteger(int64((*s.PDUSessionInactivityTimer)), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64(s.PDUSessionInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
 	if s.NetworkInstance != nil {
-		if err = w.WriteInteger(int64((*s.NetworkInstance)), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
+		if err = w.WriteInteger(int64(s.NetworkInstance.Value), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
 			return fmt.Errorf("Encode NetworkInstance failed: %w", err)
 		}
 	}
@@ -141,9 +141,8 @@ func (s *PDUSessionResourceToModifyItem) Decode(r *aper.AperReader) (err error) 
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Decode PDUSessionID failed: %w", err)
 		}
-		s.PDUSessionID = PDUSessionID(val)
+		s.PDUSessionID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.SecurityIndication = new(SecurityIndication)
 		if err = s.SecurityIndication.Decode(r); err != nil {
@@ -157,10 +156,9 @@ func (s *PDUSessionResourceToModifyItem) Decode(r *aper.AperReader) (err error) 
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode PDUSessionResourceDLAMBR failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.PDUSessionResourceDLAMBR = &tmp
+			s.PDUSessionResourceDLAMBR = new(BitRate)
+			s.PDUSessionResourceDLAMBR.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.NGULUPTNLInformation = new(UPTNLInformation)
@@ -187,10 +185,9 @@ func (s *PDUSessionResourceToModifyItem) Decode(r *aper.AperReader) (err error) 
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 				return fmt.Errorf("Decode PDUSessionInactivityTimer failed: %w", err)
 			}
-			tmp := InactivityTimer(val)
-			s.PDUSessionInactivityTimer = &tmp
+			s.PDUSessionInactivityTimer = new(InactivityTimer)
+			s.PDUSessionInactivityTimer.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {
 
@@ -199,10 +196,9 @@ func (s *PDUSessionResourceToModifyItem) Decode(r *aper.AperReader) (err error) 
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
 				return fmt.Errorf("Decode NetworkInstance failed: %w", err)
 			}
-			tmp := NetworkInstance(val)
-			s.NetworkInstance = &tmp
+			s.NetworkInstance = new(NetworkInstance)
+			s.NetworkInstance.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<0) > 0 {
 		s.DRBToSetupListNGRAN = new(DRBToSetupListNGRAN)

@@ -29,7 +29,7 @@ func (s *EUTRANQOS) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.QCI), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+	if err = w.WriteInteger(int64(s.QCI.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode QCI failed: %w", err)
 	}
 	if err = s.EUTRANallocationAndRetentionPriority.Encode(w); err != nil {
@@ -64,9 +64,8 @@ func (s *EUTRANQOS) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Decode QCI failed: %w", err)
 		}
-		s.QCI = QCI(val)
+		s.QCI.Value = aper.Integer(val)
 	}
-
 	if err = s.EUTRANallocationAndRetentionPriority.Decode(r); err != nil {
 		return fmt.Errorf("Decode EUTRANallocationAndRetentionPriority failed: %w", err)
 	}

@@ -17,74 +17,63 @@ type ErrorIndication struct {
 	CriticalityDiagnostics *CriticalityDiagnostics `aper:"optional,ext"`
 }
 
+// toIes transforms the ErrorIndication struct into a slice of E1APMessageIEs.
 func (msg *ErrorIndication) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDTransactionID,
+			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 255},
 				ext:   true,
-				Value: aper.Integer(msg.TransactionID),
+				Value: msg.TransactionID.Value,
 			},
 		})
 	}
 	if msg.GNBCUCPUEE1APID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDGNBCUCPUEE1APID,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: aper.Integer((*msg.GNBCUCPUEE1APID)),
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+				ext:   false,
+				Value: msg.GNBCUCPUEE1APID.Value,
+			},
+		})
 	}
 	if msg.GNBCUUPUEE1APID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDGNBCUUPUEE1APID,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: aper.Integer((*msg.GNBCUUPUEE1APID)),
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+				ext:   false,
+				Value: msg.GNBCUUPUEE1APID.Value,
+			},
+		})
 	}
 	if msg.Cause != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDCause,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.Cause,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDCause),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.Cause,
+		})
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDCriticalityDiagnostics,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.CriticalityDiagnostics,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.CriticalityDiagnostics,
+		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode implements the aper.AperMarshaller interface for ErrorIndication.
@@ -94,7 +83,7 @@ func (msg *ErrorIndication) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert ErrorIndication to IEs: %w", err)
 	}
 
-	return EncodeInitiatingMessage(w, ProcedureCodeErrorIndication, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeErrorIndication, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for ErrorIndication.
@@ -109,7 +98,7 @@ func (msg *ErrorIndication) Decode(buf []byte) (err error, diagList []Criticalit
 
 	decoder := ErrorIndicationDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -122,8 +111,8 @@ func (msg *ErrorIndication) Decode(buf []byte) (err error, diagList []Criticalit
 	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -137,7 +126,7 @@ func (msg *ErrorIndication) Decode(buf []byte) (err error, diagList []Criticalit
 type ErrorIndicationDecoder struct {
 	msg      *ErrorIndication
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *ErrorIndicationDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -145,77 +134,73 @@ func (decoder *ErrorIndicationDecoder) decodeIE(r *aper.AperReader) (msgIe *E1AP
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return fmt.Errorf("Decode TransactionID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.TransactionID = TransactionID(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 			}
-			tmp := GNBCUCPUEE1APID(val)
-			s.GNBCUCPUEE1APID = &tmp
+			msg.GNBCUCPUEE1APID = new(GNBCUCPUEE1APID)
+			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 			}
-			tmp := GNBCUUPUEE1APID(val)
-			s.GNBCUUPUEE1APID = &tmp
+			msg.GNBCUUPUEE1APID = new(GNBCUUPUEE1APID)
+			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDCause:
-		s.Cause = new(Cause)
-		if err = s.Cause.Decode(r); err != nil {
-			return fmt.Errorf("Decode Cause failed: %w", err)
+		msg.Cause = new(Cause)
+		if err = msg.Cause.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode Cause failed: %w", err)
 		}
-
 	case ProtocolIEIDCriticalityDiagnostics:
-		s.CriticalityDiagnostics = new(CriticalityDiagnostics)
-		if err = s.CriticalityDiagnostics.Decode(r); err != nil {
-			return fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
+		msg.CriticalityDiagnostics = new(CriticalityDiagnostics)
+		if err = msg.CriticalityDiagnostics.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

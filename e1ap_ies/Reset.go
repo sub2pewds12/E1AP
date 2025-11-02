@@ -18,7 +18,7 @@ func (s *Reset) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
 		return fmt.Errorf("Encode extensibility bool failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.TransactionID), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
 	if err = s.Cause.Encode(w); err != nil {
@@ -42,9 +42,8 @@ func (s *Reset) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Decode TransactionID failed: %w", err)
 		}
-		s.TransactionID = TransactionID(val)
+		s.TransactionID.Value = aper.Integer(val)
 	}
-
 	if err = s.Cause.Decode(r); err != nil {
 		return fmt.Errorf("Decode Cause failed: %w", err)
 	}

@@ -18,10 +18,10 @@ func (s *TraceStart) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
 		return fmt.Errorf("Encode extensibility bool failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUCPUEE1APID), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUCPUEE1APID.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUCPUEE1APID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUUPUEE1APID), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUUPUEE1APID.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUUPUEE1APID failed: %w", err)
 	}
 	if err = s.TraceActivation.Encode(w); err != nil {
@@ -42,7 +42,7 @@ func (s *TraceStart) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 		}
-		s.GNBCUCPUEE1APID = GNBCUCPUEE1APID(val)
+		s.GNBCUCPUEE1APID.Value = aper.Integer(val)
 	}
 
 	{
@@ -50,9 +50,8 @@ func (s *TraceStart) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 		}
-		s.GNBCUUPUEE1APID = GNBCUUPUEE1APID(val)
+		s.GNBCUUPUEE1APID.Value = aper.Integer(val)
 	}
-
 	if err = s.TraceActivation.Decode(r); err != nil {
 		return fmt.Errorf("Decode TraceActivation failed: %w", err)
 	}

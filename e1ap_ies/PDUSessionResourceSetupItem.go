@@ -42,7 +42,7 @@ func (s *PDUSessionResourceSetupItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(5), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PDUSessionID), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
 	if s.SecurityResult != nil {
@@ -59,7 +59,7 @@ func (s *PDUSessionResourceSetupItem) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.NGDLUPUnchanged != nil {
-		if err = w.WriteEnumerate(uint64((*s.NGDLUPUnchanged).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.NGDLUPUnchanged.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode NGDLUPUnchanged failed: %w", err)
 		}
 	}
@@ -95,9 +95,8 @@ func (s *PDUSessionResourceSetupItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Decode PDUSessionID failed: %w", err)
 		}
-		s.PDUSessionID = PDUSessionID(val)
+		s.PDUSessionID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.SecurityResult = new(SecurityResult)
 		if err = s.SecurityResult.Decode(r); err != nil {

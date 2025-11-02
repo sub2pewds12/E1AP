@@ -34,7 +34,7 @@ func (s *DRBSetupItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DRBID), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if err = s.S1DLUPTNLInformation.Encode(w); err != nil {
@@ -49,7 +49,7 @@ func (s *DRBSetupItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
 	}
 	if s.S1DLUPUnchanged != nil {
-		if err = w.WriteEnumerate(uint64((*s.S1DLUPUnchanged).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.S1DLUPUnchanged.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode S1DLUPUnchanged failed: %w", err)
 		}
 	}
@@ -77,9 +77,8 @@ func (s *DRBSetupItemEUTRAN) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 			return fmt.Errorf("Decode DRBID failed: %w", err)
 		}
-		s.DRBID = DRBID(val)
+		s.DRBID.Value = aper.Integer(val)
 	}
-
 	if err = s.S1DLUPTNLInformation.Decode(r); err != nil {
 		return fmt.Errorf("Decode S1DLUPTNLInformation failed: %w", err)
 	}

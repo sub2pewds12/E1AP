@@ -25,7 +25,7 @@ func (s *M7Configuration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.M7period), &aper.Constraint{Lb: 1, Ub: 60}, true); err != nil {
+	if err = w.WriteInteger(int64(s.M7period.Value), &aper.Constraint{Lb: 1, Ub: 60}, true); err != nil {
 		return fmt.Errorf("Encode M7period failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.M7LinksToLog.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
@@ -55,7 +55,7 @@ func (s *M7Configuration) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 60}, true); err != nil {
 			return fmt.Errorf("Decode M7period failed: %w", err)
 		}
-		s.M7period = M7period(val)
+		s.M7period.Value = aper.Integer(val)
 	}
 
 	{

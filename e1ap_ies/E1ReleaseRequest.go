@@ -14,31 +14,31 @@ type E1ReleaseRequest struct {
 	Cause         Cause         `aper:"mandatory,ext"`
 }
 
+// toIes transforms the E1ReleaseRequest struct into a slice of E1APMessageIEs.
 func (msg *E1ReleaseRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDTransactionID,
+			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 255},
 				ext:   true,
-				Value: aper.Integer(msg.TransactionID),
+				Value: msg.TransactionID.Value,
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDCause,
+			Id:          ProtocolIEID(ProtocolIEIDCause),
 			Criticality: Criticality{Value: CriticalityIgnore},
 			Value:       &msg.Cause,
 		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode implements the aper.AperMarshaller interface for E1ReleaseRequest.
@@ -48,7 +48,7 @@ func (msg *E1ReleaseRequest) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert E1ReleaseRequest to IEs: %w", err)
 	}
 
-	return EncodeInitiatingMessage(w, ProcedureCodeE1Release, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeE1Release, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for E1ReleaseRequest.
@@ -63,7 +63,7 @@ func (msg *E1ReleaseRequest) Decode(buf []byte) (err error, diagList []Criticali
 
 	decoder := E1ReleaseRequestDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -76,8 +76,8 @@ func (msg *E1ReleaseRequest) Decode(buf []byte) (err error, diagList []Criticali
 	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -85,8 +85,8 @@ func (msg *E1ReleaseRequest) Decode(buf []byte) (err error, diagList []Criticali
 	if _, ok := decoder.list[ProtocolIEIDCause]; !ok {
 		err = fmt.Errorf("mandatory field Cause is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDCause},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDCause,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -100,7 +100,7 @@ func (msg *E1ReleaseRequest) Decode(buf []byte) (err error, diagList []Criticali
 type E1ReleaseRequestDecoder struct {
 	msg      *E1ReleaseRequest
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *E1ReleaseRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -108,48 +108,47 @@ func (decoder *E1ReleaseRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1A
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return fmt.Errorf("Decode TransactionID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.TransactionID = TransactionID(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDCause:
-		if err = s.Cause.Decode(r); err != nil {
-			return fmt.Errorf("Decode Cause failed: %w", err)
+		if err = msg.Cause.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode Cause failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

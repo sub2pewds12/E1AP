@@ -25,10 +25,10 @@ func (s *NRCGI) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.PLMNIdentity), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
+	if err = s.PLMNIdentity.Encode(w); err != nil {
 		return fmt.Errorf("Encode PLMNIdentity failed: %w", err)
 	}
-	if err = w.WriteBitString(s.NRCellIdentity.Bytes, uint(s.NRCellIdentity.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false); err != nil {
+	if err = s.NRCellIdentity.Encode(w); err != nil {
 		return fmt.Errorf("Encode NRCellIdentity failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -49,23 +49,12 @@ func (s *NRCGI) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-			return fmt.Errorf("Decode PLMNIdentity failed: %w", err)
-		}
-		s.PLMNIdentity = PLMNIdentity(val)
+	if err = s.PLMNIdentity.Decode(r); err != nil {
+		return fmt.Errorf("Decode PLMNIdentity failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 36, Ub: 36}, false); err != nil {
-			return fmt.Errorf("Decode NRCellIdentity failed: %w", err)
-		}
-		s.NRCellIdentity = NRCellIdentity(val)
+	if err = s.NRCellIdentity.Decode(r); err != nil {
+		return fmt.Errorf("Decode NRCellIdentity failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {

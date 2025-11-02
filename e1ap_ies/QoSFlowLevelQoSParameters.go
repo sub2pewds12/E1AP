@@ -57,22 +57,22 @@ func (s *QoSFlowLevelQoSParameters) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.ReflectiveQOSAttribute != nil {
-		if err = w.WriteEnumerate(uint64((*s.ReflectiveQOSAttribute).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.ReflectiveQOSAttribute.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode ReflectiveQOSAttribute failed: %w", err)
 		}
 	}
 	if s.AdditionalQOSInformation != nil {
-		if err = w.WriteEnumerate(uint64((*s.AdditionalQOSInformation).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.AdditionalQOSInformation.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode AdditionalQOSInformation failed: %w", err)
 		}
 	}
 	if s.PagingPolicyIndicator != nil {
-		if err = w.WriteInteger(int64((*s.PagingPolicyIndicator)), &aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
+		if err = w.WriteInteger(int64(s.PagingPolicyIndicator.Value), &aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
 			return fmt.Errorf("Encode PagingPolicyIndicator failed: %w", err)
 		}
 	}
 	if s.ReflectiveQOSIndicator != nil {
-		if err = w.WriteEnumerate(uint64((*s.ReflectiveQOSIndicator).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.ReflectiveQOSIndicator.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode ReflectiveQOSIndicator failed: %w", err)
 		}
 	}
@@ -135,10 +135,9 @@ func (s *QoSFlowLevelQoSParameters) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
 				return fmt.Errorf("Decode PagingPolicyIndicator failed: %w", err)
 			}
-			tmp := QoSFlowLevelQoSParametersPagingPolicyIndicator(val)
-			s.PagingPolicyIndicator = &tmp
+			s.PagingPolicyIndicator = new(QoSFlowLevelQoSParametersPagingPolicyIndicator)
+			s.PagingPolicyIndicator.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
 		s.ReflectiveQOSIndicator = new(QoSFlowLevelQoSParametersReflectiveQOSIndicator)

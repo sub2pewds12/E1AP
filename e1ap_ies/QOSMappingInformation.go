@@ -28,12 +28,12 @@ func (s *QOSMappingInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.Dscp != nil {
-		if err = w.WriteBitString((*s.Dscp).Bytes, uint((*s.Dscp).NumBits), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
+		if err = s.Dscp.Encode(w); err != nil {
 			return fmt.Errorf("Encode Dscp failed: %w", err)
 		}
 	}
 	if s.FlowLabel != nil {
-		if err = w.WriteBitString((*s.FlowLabel).Bytes, uint((*s.FlowLabel).NumBits), &aper.Constraint{Lb: 20, Ub: 20}, false); err != nil {
+		if err = s.FlowLabel.Encode(w); err != nil {
 			return fmt.Errorf("Encode FlowLabel failed: %w", err)
 		}
 	}
@@ -51,28 +51,16 @@ func (s *QOSMappingInformation) Decode(r *aper.AperReader) (err error) {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
-				return fmt.Errorf("Decode Dscp failed: %w", err)
-			}
-			tmp := QOSMappingInformationDscp(val)
-			s.Dscp = &tmp
+		s.Dscp = new(QOSMappingInformationDscp)
+		if err = s.Dscp.Decode(r); err != nil {
+			return fmt.Errorf("Decode Dscp failed: %w", err)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 20, Ub: 20}, false); err != nil {
-				return fmt.Errorf("Decode FlowLabel failed: %w", err)
-			}
-			tmp := QOSMappingInformationFlowLabel(val)
-			s.FlowLabel = &tmp
+		s.FlowLabel = new(QOSMappingInformationFlowLabel)
+		if err = s.FlowLabel.Decode(r); err != nil {
+			return fmt.Errorf("Decode FlowLabel failed: %w", err)
 		}
-
 	}
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for QOSMappingInformation")

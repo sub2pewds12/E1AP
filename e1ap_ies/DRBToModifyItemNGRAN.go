@@ -68,7 +68,7 @@ func (s *DRBToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(12), &aper.Constraint{Lb: 12, Ub: 12}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DRBID), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if s.SDAPConfiguration != nil {
@@ -87,7 +87,7 @@ func (s *DRBToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.PDCPSNStatusRequest != nil {
-		if err = w.WriteEnumerate(uint64((*s.PDCPSNStatusRequest).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.PDCPSNStatusRequest.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode PDCPSNStatusRequest failed: %w", err)
 		}
 	}
@@ -122,7 +122,7 @@ func (s *DRBToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DRBInactivityTimer != nil {
-		if err = w.WriteInteger(int64((*s.DRBInactivityTimer)), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64(s.DRBInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode DRBInactivityTimer failed: %w", err)
 		}
 	}
@@ -150,9 +150,8 @@ func (s *DRBToModifyItemNGRAN) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 			return fmt.Errorf("Decode DRBID failed: %w", err)
 		}
-		s.DRBID = DRBID(val)
+		s.DRBID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.SDAPConfiguration = new(SDAPConfiguration)
 		if err = s.SDAPConfiguration.Decode(r); err != nil {
@@ -225,10 +224,9 @@ func (s *DRBToModifyItemNGRAN) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 				return fmt.Errorf("Decode DRBInactivityTimer failed: %w", err)
 			}
-			tmp := InactivityTimer(val)
-			s.DRBInactivityTimer = &tmp
+			s.DRBInactivityTimer = new(InactivityTimer)
+			s.DRBInactivityTimer.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<4) > 0 {
 		s.IEExtensions = new(DRBToModifyItemNGRANExtensions)

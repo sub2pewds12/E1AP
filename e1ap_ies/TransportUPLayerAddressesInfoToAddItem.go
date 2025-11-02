@@ -28,7 +28,7 @@ func (s *TransportUPLayerAddressesInfoToAddItem) Encode(w *aper.AperWriter) (err
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteBitString(s.IPSecTransportLayerAddress.Bytes, uint(s.IPSecTransportLayerAddress.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = s.IPSecTransportLayerAddress.Encode(w); err != nil {
 		return fmt.Errorf("Encode IPSecTransportLayerAddress failed: %w", err)
 	}
 	if s.GTPTransportLayerAddressesToAdd != nil {
@@ -54,15 +54,9 @@ func (s *TransportUPLayerAddressesInfoToAddItem) Decode(r *aper.AperReader) (err
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
-			return fmt.Errorf("Decode IPSecTransportLayerAddress failed: %w", err)
-		}
-		s.IPSecTransportLayerAddress = TransportLayerAddress(val)
+	if err = s.IPSecTransportLayerAddress.Decode(r); err != nil {
+		return fmt.Errorf("Decode IPSecTransportLayerAddress failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.GTPTransportLayerAddressesToAdd = new(GTPTLAs)
 		if err = s.GTPTransportLayerAddressesToAdd.Decode(r); err != nil {

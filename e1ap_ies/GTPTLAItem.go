@@ -24,7 +24,7 @@ func (s *GTPTLAItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteBitString(s.GTPTransportLayerAddresses.Bytes, uint(s.GTPTransportLayerAddresses.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = s.GTPTransportLayerAddresses.Encode(w); err != nil {
 		return fmt.Errorf("Encode GTPTransportLayerAddresses failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -45,15 +45,9 @@ func (s *GTPTLAItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
-			return fmt.Errorf("Decode GTPTransportLayerAddresses failed: %w", err)
-		}
-		s.GTPTransportLayerAddresses = TransportLayerAddress(val)
+	if err = s.GTPTransportLayerAddresses.Decode(r); err != nil {
+		return fmt.Errorf("Decode GTPTransportLayerAddresses failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {

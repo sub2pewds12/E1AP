@@ -21,7 +21,7 @@ func (s *CriticalityDiagnosticsIEItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteEnumerate(uint64(s.IECriticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode IECriticality failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.IEID), &aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false); err != nil {
+	if err = w.WriteInteger(int64(s.IEID.Value), &aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false); err != nil {
 		return fmt.Errorf("Encode IEID failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.TypeOfError.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
@@ -50,7 +50,7 @@ func (s *CriticalityDiagnosticsIEItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false); err != nil {
 			return fmt.Errorf("Decode IEID failed: %w", err)
 		}
-		s.IEID = ProtocolIEID(val)
+		s.IEID.Value = aper.Integer(val)
 	}
 
 	{

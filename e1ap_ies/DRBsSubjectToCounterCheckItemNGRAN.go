@@ -27,10 +27,10 @@ func (s *DRBsSubjectToCounterCheckItemNGRAN) Encode(w *aper.AperWriter) (err err
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PDUSessionID), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DRBID), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if err = s.PDCPULCount.Encode(w); err != nil {
@@ -63,7 +63,7 @@ func (s *DRBsSubjectToCounterCheckItemNGRAN) Decode(r *aper.AperReader) (err err
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Decode PDUSessionID failed: %w", err)
 		}
-		s.PDUSessionID = PDUSessionID(val)
+		s.PDUSessionID.Value = aper.Integer(val)
 	}
 
 	{
@@ -71,9 +71,8 @@ func (s *DRBsSubjectToCounterCheckItemNGRAN) Decode(r *aper.AperReader) (err err
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 			return fmt.Errorf("Decode DRBID failed: %w", err)
 		}
-		s.DRBID = DRBID(val)
+		s.DRBID.Value = aper.Integer(val)
 	}
-
 	if err = s.PDCPULCount.Decode(r); err != nil {
 		return fmt.Errorf("Decode PDCPULCount failed: %w", err)
 	}

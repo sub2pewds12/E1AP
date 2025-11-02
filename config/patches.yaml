@@ -86,12 +86,6 @@ definitions:
       - { ie: "local", type: "INTEGER", presence: "mandatory" }
       - { ie: "global", type: "OBJECT IDENTIFIER", presence: "mandatory" }
 
-  - name: "ProtocolExtensionField"
-    type: "SEQUENCE"
-    members:
-      - { ie: "id", type: "ProtocolIE-ID", presence: "mandatory" }
-      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
-      - { ie: "extensionValue", type: "ANY", presence: "mandatory" }
 
   - name: "PrivateIEField"
     type: "SEQUENCE"
@@ -112,12 +106,6 @@ definitions:
       - { ie: "criticality", type: "Criticality", presence: "mandatory" }
       - { ie: "value", type: "ANY", presence: "mandatory" }
 
-  - name: "ProtocolExtensionField"
-    type: "SEQUENCE"
-    members:
-      - { ie: "id", type: "ProtocolIE-ID", presence: "mandatory" }
-      - { ie: "criticality", type: "Criticality", presence: "mandatory" }
-      - { ie: "extensionValue", type: "ANY", presence: "mandatory" }
 
   - name: "PrivateIE-Field"
     type: "SEQUENCE"
@@ -131,12 +119,7 @@ definitions:
     of_type: "ProtocolIE-Field"
     max_val: "maxProtocolIEs"
 
-  - name: "ProtocolExtensionContainer"
-    type: "LIST"
-    of_type: "ProtocolExtensionField"
-    max_val: "maxProtocolExtensions"
-
-  - name: "PrivateIE-Container" # <-- THIS IS THE FIX
+  - name: "PrivateIE-Container"
     type: "LIST"
     of_type: "PrivateIE-Field"
     max_val: "maxPrivateIEs"

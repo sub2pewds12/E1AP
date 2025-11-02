@@ -36,21 +36,21 @@ func (s *NonDynamic5QIDescriptor) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.FiveQI), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+	if err = w.WriteInteger(int64(s.FiveQI.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 		return fmt.Errorf("Encode FiveQI failed: %w", err)
 	}
 	if s.QoSPriorityLevel != nil {
-		if err = w.WriteInteger(int64((*s.QoSPriorityLevel)), &aper.Constraint{Lb: 0, Ub: 127}, true); err != nil {
+		if err = w.WriteInteger(int64(s.QoSPriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 127}, true); err != nil {
 			return fmt.Errorf("Encode QoSPriorityLevel failed: %w", err)
 		}
 	}
 	if s.AveragingWindow != nil {
-		if err = w.WriteInteger(int64((*s.AveragingWindow)), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
+		if err = w.WriteInteger(int64(s.AveragingWindow.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
 			return fmt.Errorf("Encode AveragingWindow failed: %w", err)
 		}
 	}
 	if s.MaxDataBurstVolume != nil {
-		if err = w.WriteInteger(int64((*s.MaxDataBurstVolume)), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
+		if err = w.WriteInteger(int64(s.MaxDataBurstVolume.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
 			return fmt.Errorf("Encode MaxDataBurstVolume failed: %w", err)
 		}
 	}
@@ -78,9 +78,8 @@ func (s *NonDynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Decode FiveQI failed: %w", err)
 		}
-		s.FiveQI = NonDynamic5QIDescriptorFiveQI(val)
+		s.FiveQI.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 
 		{
@@ -88,10 +87,9 @@ func (s *NonDynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 127}, true); err != nil {
 				return fmt.Errorf("Decode QoSPriorityLevel failed: %w", err)
 			}
-			tmp := QoSPriorityLevel(val)
-			s.QoSPriorityLevel = &tmp
+			s.QoSPriorityLevel = new(QoSPriorityLevel)
+			s.QoSPriorityLevel.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 
@@ -100,10 +98,9 @@ func (s *NonDynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
 				return fmt.Errorf("Decode AveragingWindow failed: %w", err)
 			}
-			tmp := AveragingWindow(val)
-			s.AveragingWindow = &tmp
+			s.AveragingWindow = new(AveragingWindow)
+			s.AveragingWindow.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 
@@ -112,10 +109,9 @@ func (s *NonDynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
 				return fmt.Errorf("Decode MaxDataBurstVolume failed: %w", err)
 			}
-			tmp := MaxDataBurstVolume(val)
-			s.MaxDataBurstVolume = &tmp
+			s.MaxDataBurstVolume = new(MaxDataBurstVolume)
+			s.MaxDataBurstVolume.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.IEExtensions = new(NonDynamic5QIDescriptorExtensions)

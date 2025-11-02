@@ -29,14 +29,14 @@ func (s *GNBCUUPCellGroupRelatedConfigurationItem) Encode(w *aper.AperWriter) (e
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.CellGroupID), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+	if err = w.WriteInteger(int64(s.CellGroupID.Value), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 		return fmt.Errorf("Encode CellGroupID failed: %w", err)
 	}
 	if err = s.UPTNLInformation.Encode(w); err != nil {
 		return fmt.Errorf("Encode UPTNLInformation failed: %w", err)
 	}
 	if s.ULConfiguration != nil {
-		if err = w.WriteEnumerate(uint64((*s.ULConfiguration).Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.ULConfiguration.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
 			return fmt.Errorf("Encode ULConfiguration failed: %w", err)
 		}
 	}
@@ -64,9 +64,8 @@ func (s *GNBCUUPCellGroupRelatedConfigurationItem) Decode(r *aper.AperReader) (e
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 			return fmt.Errorf("Decode CellGroupID failed: %w", err)
 		}
-		s.CellGroupID = CellGroupID(val)
+		s.CellGroupID.Value = aper.Integer(val)
 	}
-
 	if err = s.UPTNLInformation.Decode(r); err != nil {
 		return fmt.Errorf("Decode UPTNLInformation failed: %w", err)
 	}

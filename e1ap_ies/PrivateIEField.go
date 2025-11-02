@@ -24,7 +24,7 @@ func (s *PrivateIEField) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteEnumerate(uint64(s.Criticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode Criticality failed: %w", err)
 	}
-	if err = s.Value.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.Value.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 		return fmt.Errorf("Encode Value failed: %w", err)
 	}
 	return nil
@@ -53,9 +53,8 @@ func (s *PrivateIEField) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Decode Value failed: %w", err)
 		}
-		s.Value = aper.OctetString(val)
+		s.Value.Value = aper.OctetString(val)
 	}
-
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for PrivateIEField")
 	}

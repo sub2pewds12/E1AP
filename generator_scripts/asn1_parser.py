@@ -345,11 +345,15 @@ class ASN1Parser:
             if def_type == "SEQUENCE"
             else ChoiceDefinition(name, source_file, source_line, full_text)
         )
-        item.is_extensible = "..." in def_part
 
+        item.is_extensible = "..." in def_part
+        def_part_for_container_search = def_part.replace(", ...", "")
+        
         container_match = re.search(
-            r"ProtocolIE-Container\s*\{\s*\{\s*([\w-]+)\s*\}\s*\}", def_part
+            r"ProtocolIE-Container\s*\{\s*\{\s*([\w-]+)\s*\}\s*\}",
+            def_part_for_container_search # Search in the cleaned string
         )
+        
         if container_match:
             ie_set_name = container_match.group(1)
             if ie_set_name in self.ie_sets:

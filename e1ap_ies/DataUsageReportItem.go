@@ -26,7 +26,7 @@ func (s *DataUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DRBID), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.RATType.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
@@ -59,7 +59,7 @@ func (s *DataUsageReportItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 			return fmt.Errorf("Decode DRBID failed: %w", err)
 		}
-		s.DRBID = DRBID(val)
+		s.DRBID.Value = aper.Integer(val)
 	}
 
 	{

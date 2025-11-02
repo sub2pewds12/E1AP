@@ -18,54 +18,49 @@ type ResourceStatusRequest struct {
 	ReportingPeriodicity  *ReportingPeriodicity                           `aper:"optional,ext"`
 }
 
+// toIes transforms the ResourceStatusRequest struct into a slice of E1APMessageIEs.
 func (msg *ResourceStatusRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDTransactionID,
+			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 255},
 				ext:   true,
-				Value: aper.Integer(msg.TransactionID),
+				Value: msg.TransactionID.Value,
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUCPMeasurementID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPMeasurementID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 1, Ub: 4095},
 				ext:   true,
-				Value: aper.Integer(msg.GNBCUCPMeasurementID),
+				Value: msg.GNBCUCPMeasurementID.Value,
 			},
 		})
 	}
 	if msg.GNBCUUPMeasurementID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDGNBCUUPMeasurementID,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 1, Ub: 4095},
-					ext:   true,
-					Value: aper.Integer((*msg.GNBCUUPMeasurementID)),
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPMeasurementID),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 1, Ub: 4095},
+				ext:   true,
+				Value: msg.GNBCUUPMeasurementID.Value,
+			},
+		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDRegistrationRequest,
+			Id:          ProtocolIEID(ProtocolIEIDRegistrationRequest),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &ENUMERATED{
 				c:     aper.Constraint{Lb: 0, Ub: 1},
@@ -76,35 +71,30 @@ func (msg *ResourceStatusRequest) toIes() ([]E1APMessageIE, error) {
 	}
 	if msg.ReportCharacteristics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDReportCharacteristics,
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 36, Ub: 36},
-					ext:   false,
-					Value: aper.OctetString((*msg.ReportCharacteristics)),
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDReportCharacteristics),
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &OCTETSTRING{
+				c:     aper.Constraint{Lb: 36, Ub: 36},
+				ext:   false,
+				Value: msg.ReportCharacteristics.Value,
+			},
+		})
 	}
 	if msg.ReportingPeriodicity != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDReportingPeriodicity,
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 15},
-					ext:   true,
-					Value: (*msg.ReportingPeriodicity).Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDReportingPeriodicity),
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 15},
+				ext:   true,
+				Value: msg.ReportingPeriodicity.Value,
+			},
+		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode implements the aper.AperMarshaller interface for ResourceStatusRequest.
@@ -114,7 +104,7 @@ func (msg *ResourceStatusRequest) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert ResourceStatusRequest to IEs: %w", err)
 	}
 
-	return EncodeInitiatingMessage(w, ProcedureCodeResourceStatusReportingInitiation, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeResourceStatusReportingInitiation, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for ResourceStatusRequest.
@@ -129,7 +119,7 @@ func (msg *ResourceStatusRequest) Decode(buf []byte) (err error, diagList []Crit
 
 	decoder := ResourceStatusRequestDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -142,8 +132,8 @@ func (msg *ResourceStatusRequest) Decode(buf []byte) (err error, diagList []Crit
 	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -151,8 +141,8 @@ func (msg *ResourceStatusRequest) Decode(buf []byte) (err error, diagList []Crit
 	if _, ok := decoder.list[ProtocolIEIDGNBCUCPMeasurementID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPMeasurementID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUCPMeasurementID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -160,8 +150,8 @@ func (msg *ResourceStatusRequest) Decode(buf []byte) (err error, diagList []Crit
 	if _, ok := decoder.list[ProtocolIEIDRegistrationRequest]; !ok {
 		err = fmt.Errorf("mandatory field RegistrationRequest is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDRegistrationRequest},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDRegistrationRequest,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -175,7 +165,7 @@ func (msg *ResourceStatusRequest) Decode(buf []byte) (err error, diagList []Crit
 type ResourceStatusRequestDecoder struct {
 	msg      *ResourceStatusRequest
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *ResourceStatusRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -183,96 +173,86 @@ func (decoder *ResourceStatusRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return fmt.Errorf("Decode TransactionID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.TransactionID = TransactionID(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUCPMeasurementID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
-				return fmt.Errorf("Decode GNBCUCPMeasurementID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUCPMeasurementID failed: %w", err)
 			}
-			s.GNBCUCPMeasurementID = ResourceStatusRequestIEsIDGNBCUCPMeasurementID(val)
+			msg.GNBCUCPMeasurementID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUUPMeasurementID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
-				return fmt.Errorf("Decode GNBCUUPMeasurementID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPMeasurementID failed: %w", err)
 			}
-			tmp := ResourceStatusRequestIEsIDGNBCUUPMeasurementID(val)
-			s.GNBCUUPMeasurementID = &tmp
+			msg.GNBCUUPMeasurementID = new(ResourceStatusRequestIEsIDGNBCUUPMeasurementID)
+			msg.GNBCUUPMeasurementID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDRegistrationRequest:
 
 		{
 			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-				return fmt.Errorf("Decode RegistrationRequest failed: %w", err)
+			if val, err = ieR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+				return nil, fmt.Errorf("Decode RegistrationRequest failed: %w", err)
 			}
-			s.RegistrationRequest.Value = aper.Enumerated(val)
+			msg.RegistrationRequest.Value = aper.Enumerated(val)
 		}
-
 	case ProtocolIEIDReportCharacteristics:
-
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 36, Ub: 36}, false); err != nil {
-				return fmt.Errorf("Decode ReportCharacteristics failed: %w", err)
-			}
-			tmp := ReportCharacteristics(val)
-			s.ReportCharacteristics = &tmp
+		msg.ReportCharacteristics = new(ReportCharacteristics)
+		if err = msg.ReportCharacteristics.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode ReportCharacteristics failed: %w", err)
 		}
-
 	case ProtocolIEIDReportingPeriodicity:
-		s.ReportingPeriodicity = new(ReportingPeriodicity)
+		msg.ReportingPeriodicity = new(ReportingPeriodicity)
 
 		{
 			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 15}, true); err != nil {
-				return fmt.Errorf("Decode ReportingPeriodicity failed: %w", err)
+			if val, err = ieR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 15}, true); err != nil {
+				return nil, fmt.Errorf("Decode ReportingPeriodicity failed: %w", err)
 			}
-			s.ReportingPeriodicity.Value = aper.Enumerated(val)
+			msg.ReportingPeriodicity.Value = aper.Enumerated(val)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

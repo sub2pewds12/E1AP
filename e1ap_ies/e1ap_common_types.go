@@ -1,1233 +1,1884 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
 	"github.com/lvdund/ngap/aper"
 )
 
 // AdditionalRRMPriorityIndex From: 9_4_5_Information_Element_Definitions.txt:126
-type AdditionalRRMPriorityIndex aper.OctetString
+type AdditionalRRMPriorityIndex struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v AdditionalRRMPriorityIndex) Validate() error {
-	if len(v) < 32 || len(v) > 32 {
-		return fmt.Errorf("value for AdditionalRRMPriorityIndex is outside the valid length (32..32)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *AdditionalRRMPriorityIndex) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 32, Ub: 32}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *AdditionalRRMPriorityIndex) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 32, Ub: 32}, false)
+	return err
 }
 
 // AlternativeQoSParaSetItemAlternativeQoSParameterIndex From: unknown:-1
-type AlternativeQoSParaSetItemAlternativeQoSParameterIndex aper.Integer
+type AlternativeQoSParaSetItemAlternativeQoSParameterIndex struct {
+	Value aper.Integer
+}
 
-const (
-	MinAlternativeQoSParaSetItemAlternativeQoSParameterIndex AlternativeQoSParaSetItemAlternativeQoSParameterIndex = 1
-	MaxAlternativeQoSParaSetItemAlternativeQoSParameterIndex AlternativeQoSParaSetItemAlternativeQoSParameterIndex = 8
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 8}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Validate() error {
-	if v < MinAlternativeQoSParaSetItemAlternativeQoSParameterIndex || v > MaxAlternativeQoSParaSetItemAlternativeQoSParameterIndex {
-		return fmt.Errorf("value for AlternativeQoSParaSetItemAlternativeQoSParameterIndex is outside the valid range (MinAlternativeQoSParaSetItemAlternativeQoSParameterIndex..MaxAlternativeQoSParaSetItemAlternativeQoSParameterIndex)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // AveragingWindow From: unknown:-1
-type AveragingWindow aper.Integer
+type AveragingWindow struct {
+	Value aper.Integer
+}
 
-const (
-	MinAveragingWindow AveragingWindow = 0
-	MaxAveragingWindow AveragingWindow = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *AveragingWindow) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v AveragingWindow) Validate() error {
-	if v < MinAveragingWindow || v > MaxAveragingWindow {
-		return fmt.Errorf("value for AveragingWindow is outside the valid range (MinAveragingWindow..MaxAveragingWindow)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *AveragingWindow) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // BitRate From: 9_4_5_Information_Element_Definitions.txt:154
-type BitRate aper.Integer
+type BitRate struct {
+	Value aper.Integer
+}
 
-const (
-	MinBitRate BitRate = 0
-	MaxBitRate BitRate = 4000000000000
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *BitRate) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v BitRate) Validate() error {
-	if v < MinBitRate || v > MaxBitRate {
-		return fmt.Errorf("value for BitRate is outside the valid range (MinBitRate..MaxBitRate)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *BitRate) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // BurstArrivalTime From: unknown:-1
-type BurstArrivalTime aper.OctetString
+type BurstArrivalTime struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *BurstArrivalTime) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *BurstArrivalTime) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	return err
+}
 
 // CellGroupID From: 9_4_5_Information_Element_Definitions.txt:252
-type CellGroupID aper.Integer
+type CellGroupID struct {
+	Value aper.Integer
+}
 
-const (
-	MinCellGroupID CellGroupID = 0
-	MaxCellGroupID CellGroupID = 3
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *CellGroupID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 3}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v CellGroupID) Validate() error {
-	if v < MinCellGroupID || v > MaxCellGroupID {
-		return fmt.Errorf("value for CellGroupID is outside the valid range (MinCellGroupID..MaxCellGroupID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *CellGroupID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 3}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // CommonNetworkInstance From: 9_4_5_Information_Element_Definitions.txt:273
-type CommonNetworkInstance aper.OctetString
+type CommonNetworkInstance struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *CommonNetworkInstance) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *CommonNetworkInstance) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	return err
+}
 
 // DRBBStatusTransferReceiveStatusofPDCPSDU From: 9_4_5_Information_Element_Definitions.txt:1747
-type DRBBStatusTransferReceiveStatusofPDCPSDU aper.OctetString
+type DRBBStatusTransferReceiveStatusofPDCPSDU struct {
+	Value aper.BitString
+}
 
-const (
-	MinDRBBStatusTransferReceiveStatusofPDCPSDU int = 1
-	MaxDRBBStatusTransferReceiveStatusofPDCPSDU int = 131072
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 131072}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v DRBBStatusTransferReceiveStatusofPDCPSDU) Validate() error {
-	if len(v) < MinDRBBStatusTransferReceiveStatusofPDCPSDU || len(v) > MaxDRBBStatusTransferReceiveStatusofPDCPSDU {
-		return fmt.Errorf("value for DRBBStatusTransferReceiveStatusofPDCPSDU is outside the valid length (MinDRBBStatusTransferReceiveStatusofPDCPSDU..MaxDRBBStatusTransferReceiveStatusofPDCPSDU)")
-	}
-	return nil
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 131072}, false)
+	return err
 }
 
 // DRBID From: 9_4_5_Information_Element_Definitions.txt:586
-type DRBID aper.Integer
+type DRBID struct {
+	Value aper.Integer
+}
 
-const (
-	MinDRBID DRBID = 1
-	MaxDRBID DRBID = 32
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 32}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v DRBID) Validate() error {
-	if v < MinDRBID || v > MaxDRBID {
-		return fmt.Errorf("value for DRBID is outside the valid range (MinDRBID..MaxDRBID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // DRBMeasurementResultsInformationItemULD1Result From: unknown:-1
-type DRBMeasurementResultsInformationItemULD1Result aper.Integer
+type DRBMeasurementResultsInformationItemULD1Result struct {
+	Value aper.Integer
+}
 
-const (
-	MinDRBMeasurementResultsInformationItemULD1Result DRBMeasurementResultsInformationItemULD1Result = 0
-	MaxDRBMeasurementResultsInformationItemULD1Result DRBMeasurementResultsInformationItemULD1Result = 10000
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBMeasurementResultsInformationItemULD1Result) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 10000}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v DRBMeasurementResultsInformationItemULD1Result) Validate() error {
-	if v < MinDRBMeasurementResultsInformationItemULD1Result || v > MaxDRBMeasurementResultsInformationItemULD1Result {
-		return fmt.Errorf("value for DRBMeasurementResultsInformationItemULD1Result is outside the valid range (MinDRBMeasurementResultsInformationItemULD1Result..MaxDRBMeasurementResultsInformationItemULD1Result)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBMeasurementResultsInformationItemULD1Result) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 10000}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // DRBUsageReportItemEndTimeStamp From: unknown:-1
-type DRBUsageReportItemEndTimeStamp aper.OctetString
+type DRBUsageReportItemEndTimeStamp struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v DRBUsageReportItemEndTimeStamp) Validate() error {
-	if len(v) < 4 || len(v) > 4 {
-		return fmt.Errorf("value for DRBUsageReportItemEndTimeStamp is outside the valid length (4..4)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBUsageReportItemEndTimeStamp) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBUsageReportItemEndTimeStamp) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	return err
 }
 
 // DRBUsageReportItemStartTimeStamp From: unknown:-1
-type DRBUsageReportItemStartTimeStamp aper.OctetString
+type DRBUsageReportItemStartTimeStamp struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v DRBUsageReportItemStartTimeStamp) Validate() error {
-	if len(v) < 4 || len(v) > 4 {
-		return fmt.Errorf("value for DRBUsageReportItemStartTimeStamp is outside the valid length (4..4)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBUsageReportItemStartTimeStamp) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBUsageReportItemStartTimeStamp) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	return err
 }
 
 // DRBUsageReportItemUsageCountDL From: unknown:-1
-type DRBUsageReportItemUsageCountDL aper.Integer
+type DRBUsageReportItemUsageCountDL struct {
+	Value aper.Integer
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBUsageReportItemUsageCountDL) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBUsageReportItemUsageCountDL) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
 
 // DRBUsageReportItemUsageCountUL From: unknown:-1
-type DRBUsageReportItemUsageCountUL aper.Integer
+type DRBUsageReportItemUsageCountUL struct {
+	Value aper.Integer
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *DRBUsageReportItemUsageCountUL) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *DRBUsageReportItemUsageCountUL) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
 
 // Dynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1001
-type Dynamic5QIDescriptorFiveQI aper.Integer
+type Dynamic5QIDescriptorFiveQI struct {
+	Value aper.Integer
+}
 
-const (
-	MinDynamic5QIDescriptorFiveQI Dynamic5QIDescriptorFiveQI = 0
-	MaxDynamic5QIDescriptorFiveQI Dynamic5QIDescriptorFiveQI = 255
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *Dynamic5QIDescriptorFiveQI) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v Dynamic5QIDescriptorFiveQI) Validate() error {
-	if v < MinDynamic5QIDescriptorFiveQI || v > MaxDynamic5QIDescriptorFiveQI {
-		return fmt.Errorf("value for Dynamic5QIDescriptorFiveQI is outside the valid range (MinDynamic5QIDescriptorFiveQI..MaxDynamic5QIDescriptorFiveQI)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *Dynamic5QIDescriptorFiveQI) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // EncryptionKey From: 9_4_5_Information_Element_Definitions.txt:1079
-type EncryptionKey aper.OctetString
+type EncryptionKey struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *EncryptionKey) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *EncryptionKey) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	return err
+}
 
 // ExtendedPacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1099
-type ExtendedPacketDelayBudget aper.Integer
+type ExtendedPacketDelayBudget struct {
+	Value aper.Integer
+}
 
-const (
-	MinExtendedPacketDelayBudget ExtendedPacketDelayBudget = 1
-	MaxExtendedPacketDelayBudget ExtendedPacketDelayBudget = 65535
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ExtendedPacketDelayBudget) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 65535}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ExtendedPacketDelayBudget) Validate() error {
-	if v < MinExtendedPacketDelayBudget || v > MaxExtendedPacketDelayBudget {
-		return fmt.Errorf("value for ExtendedPacketDelayBudget is outside the valid range (MinExtendedPacketDelayBudget..MaxExtendedPacketDelayBudget)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ExtendedPacketDelayBudget) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 65535}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // GNBCUCPName From: 9_4_5_Information_Element_Definitions.txt:1144
-type GNBCUCPName aper.OctetString
+type GNBCUCPName struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUCPName) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUCPName) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	return err
+}
 
 // GNBCUCPNameUTF8String From: unknown:-1
-type GNBCUCPNameUTF8String aper.OctetString
+type GNBCUCPNameUTF8String struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUCPNameUTF8String) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUCPNameUTF8String) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	return err
+}
 
 // GNBCUCPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1157
-type GNBCUCPNameVisibleString aper.OctetString
+type GNBCUCPNameVisibleString struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUCPNameVisibleString) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUCPNameVisibleString) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	return err
+}
 
 // GNBCUCPUEE1APID From: unknown:-1
-type GNBCUCPUEE1APID aper.Integer
+type GNBCUCPUEE1APID struct {
+	Value aper.Integer
+}
 
-const (
-	MinGNBCUCPUEE1APID GNBCUCPUEE1APID = 0
-	MaxGNBCUCPUEE1APID GNBCUCPUEE1APID = 4294967295
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUCPUEE1APID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v GNBCUCPUEE1APID) Validate() error {
-	if v < MinGNBCUCPUEE1APID || v > MaxGNBCUCPUEE1APID {
-		return fmt.Errorf("value for GNBCUCPUEE1APID is outside the valid range (MinGNBCUCPUEE1APID..MaxGNBCUCPUEE1APID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUCPUEE1APID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // GNBCUUPCapacity From: unknown:-1
-type GNBCUUPCapacity aper.Integer
+type GNBCUUPCapacity struct {
+	Value aper.Integer
+}
 
-const (
-	MinGNBCUUPCapacity GNBCUUPCapacity = 0
-	MaxGNBCUUPCapacity GNBCUUPCapacity = 255
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPCapacity) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v GNBCUUPCapacity) Validate() error {
-	if v < MinGNBCUUPCapacity || v > MaxGNBCUUPCapacity {
-		return fmt.Errorf("value for GNBCUUPCapacity is outside the valid range (MinGNBCUUPCapacity..MaxGNBCUUPCapacity)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPCapacity) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // GNBCUUPID From: 9_4_5_Information_Element_Definitions.txt:1179
-type GNBCUUPID aper.Integer
+type GNBCUUPID struct {
+	Value aper.Integer
+}
 
-const (
-	MinGNBCUUPID GNBCUUPID = 0
-	MaxGNBCUUPID GNBCUUPID = 68719476735
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v GNBCUUPID) Validate() error {
-	if v < MinGNBCUUPID || v > MaxGNBCUUPID {
-		return fmt.Errorf("value for GNBCUUPID is outside the valid range (MinGNBCUUPID..MaxGNBCUUPID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // GNBCUUPName From: unknown:-1
-type GNBCUUPName aper.OctetString
+type GNBCUUPName struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPName) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPName) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	return err
+}
 
 // GNBCUUPNameUTF8String From: unknown:-1
-type GNBCUUPNameUTF8String aper.OctetString
+type GNBCUUPNameUTF8String struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPNameUTF8String) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPNameUTF8String) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	return err
+}
 
 // GNBCUUPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1194
-type GNBCUUPNameVisibleString aper.OctetString
+type GNBCUUPNameVisibleString struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPNameVisibleString) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPNameVisibleString) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	return err
+}
 
 // GNBCUUPUEE1APID From: unknown:-1
-type GNBCUUPUEE1APID aper.Integer
+type GNBCUUPUEE1APID struct {
+	Value aper.Integer
+}
 
-const (
-	MinGNBCUUPUEE1APID GNBCUUPUEE1APID = 0
-	MaxGNBCUUPUEE1APID GNBCUUPUEE1APID = 4294967295
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBCUUPUEE1APID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v GNBCUUPUEE1APID) Validate() error {
-	if v < MinGNBCUUPUEE1APID || v > MaxGNBCUUPUEE1APID {
-		return fmt.Errorf("value for GNBCUUPUEE1APID is outside the valid range (MinGNBCUUPUEE1APID..MaxGNBCUUPUEE1APID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBCUUPUEE1APID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // GNBDUID From: unknown:-1
-type GNBDUID aper.Integer
+type GNBDUID struct {
+	Value aper.Integer
+}
 
-const (
-	MinGNBDUID GNBDUID = 0
-	MaxGNBDUID GNBDUID = 68719476735
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *GNBDUID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v GNBDUID) Validate() error {
-	if v < MinGNBDUID || v > MaxGNBDUID {
-		return fmt.Errorf("value for GNBDUID is outside the valid range (MinGNBDUID..MaxGNBDUID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GNBDUID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // GTPTEID From: 9_4_5_Information_Element_Definitions.txt:1289
-type GTPTEID aper.OctetString
+type GTPTEID struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v GTPTEID) Validate() error {
-	if len(v) < 4 || len(v) > 4 {
-		return fmt.Errorf("value for GTPTEID is outside the valid length (4..4)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *GTPTEID) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *GTPTEID) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	return err
 }
 
 // HFN From: unknown:-1
-type HFN aper.Integer
+type HFN struct {
+	Value aper.Integer
+}
 
-const (
-	MinHFN HFN = 0
-	MaxHFN HFN = 4294967295
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *HFN) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v HFN) Validate() error {
-	if v < MinHFN || v > MaxHFN {
-		return fmt.Errorf("value for HFN is outside the valid range (MinHFN..MaxHFN)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *HFN) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // HWCapacityIndicatorAvailableThroughput From: unknown:-1
-type HWCapacityIndicatorAvailableThroughput aper.Integer
+type HWCapacityIndicatorAvailableThroughput struct {
+	Value aper.Integer
+}
 
-const (
-	MinHWCapacityIndicatorAvailableThroughput HWCapacityIndicatorAvailableThroughput = 0
-	MaxHWCapacityIndicatorAvailableThroughput HWCapacityIndicatorAvailableThroughput = 100
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *HWCapacityIndicatorAvailableThroughput) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 100}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v HWCapacityIndicatorAvailableThroughput) Validate() error {
-	if v < MinHWCapacityIndicatorAvailableThroughput || v > MaxHWCapacityIndicatorAvailableThroughput {
-		return fmt.Errorf("value for HWCapacityIndicatorAvailableThroughput is outside the valid range (MinHWCapacityIndicatorAvailableThroughput..MaxHWCapacityIndicatorAvailableThroughput)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *HWCapacityIndicatorAvailableThroughput) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // HWCapacityIndicatorOfferedThroughput From: unknown:-1
-type HWCapacityIndicatorOfferedThroughput aper.Integer
+type HWCapacityIndicatorOfferedThroughput struct {
+	Value aper.Integer
+}
 
-const (
-	MinHWCapacityIndicatorOfferedThroughput HWCapacityIndicatorOfferedThroughput = 1
-	MaxHWCapacityIndicatorOfferedThroughput HWCapacityIndicatorOfferedThroughput = 16777216
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *HWCapacityIndicatorOfferedThroughput) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 16777216}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v HWCapacityIndicatorOfferedThroughput) Validate() error {
-	if v < MinHWCapacityIndicatorOfferedThroughput || v > MaxHWCapacityIndicatorOfferedThroughput {
-		return fmt.Errorf("value for HWCapacityIndicatorOfferedThroughput is outside the valid range (MinHWCapacityIndicatorOfferedThroughput..MaxHWCapacityIndicatorOfferedThroughput)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *HWCapacityIndicatorOfferedThroughput) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 16777216}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // InactivityTimer From: 9_4_5_Information_Element_Definitions.txt:1364
-type InactivityTimer aper.Integer
+type InactivityTimer struct {
+	Value aper.Integer
+}
 
-const (
-	MinInactivityTimer InactivityTimer = 1
-	MaxInactivityTimer InactivityTimer = 7200
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *InactivityTimer) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v InactivityTimer) Validate() error {
-	if v < MinInactivityTimer || v > MaxInactivityTimer {
-		return fmt.Errorf("value for InactivityTimer is outside the valid range (MinInactivityTimer..MaxInactivityTimer)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *InactivityTimer) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 7200}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // IntegrityProtectionKey From: 9_4_5_Information_Element_Definitions.txt:1356
-type IntegrityProtectionKey aper.OctetString
+type IntegrityProtectionKey struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *IntegrityProtectionKey) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *IntegrityProtectionKey) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	return err
+}
 
 // InterfacesToTrace From: unknown:-1
-type InterfacesToTrace aper.OctetString
+type InterfacesToTrace struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v InterfacesToTrace) Validate() error {
-	if len(v) < 8 || len(v) > 8 {
-		return fmt.Errorf("value for InterfacesToTrace is outside the valid length (8..8)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *InterfacesToTrace) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *InterfacesToTrace) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	return err
 }
 
 // M7period From: 9_4_5_Information_Element_Definitions.txt:1478
-type M7period aper.Integer
+type M7period struct {
+	Value aper.Integer
+}
 
-const (
-	MinM7period M7period = 1
-	MaxM7period M7period = 60
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *M7period) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 60}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v M7period) Validate() error {
-	if v < MinM7period || v > MaxM7period {
-		return fmt.Errorf("value for M7period is outside the valid range (MinM7period..MaxM7period)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *M7period) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 60}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // MRDCDataUsageReportItemEndTimeStamp From: unknown:-1
-type MRDCDataUsageReportItemEndTimeStamp aper.OctetString
+type MRDCDataUsageReportItemEndTimeStamp struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v MRDCDataUsageReportItemEndTimeStamp) Validate() error {
-	if len(v) < 4 || len(v) > 4 {
-		return fmt.Errorf("value for MRDCDataUsageReportItemEndTimeStamp is outside the valid length (4..4)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *MRDCDataUsageReportItemEndTimeStamp) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MRDCDataUsageReportItemEndTimeStamp) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	return err
 }
 
 // MRDCDataUsageReportItemStartTimeStamp From: unknown:-1
-type MRDCDataUsageReportItemStartTimeStamp aper.OctetString
+type MRDCDataUsageReportItemStartTimeStamp struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v MRDCDataUsageReportItemStartTimeStamp) Validate() error {
-	if len(v) < 4 || len(v) > 4 {
-		return fmt.Errorf("value for MRDCDataUsageReportItemStartTimeStamp is outside the valid length (4..4)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *MRDCDataUsageReportItemStartTimeStamp) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MRDCDataUsageReportItemStartTimeStamp) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	return err
 }
 
 // MRDCDataUsageReportItemUsageCountDL From: unknown:-1
-type MRDCDataUsageReportItemUsageCountDL aper.Integer
+type MRDCDataUsageReportItemUsageCountDL struct {
+	Value aper.Integer
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *MRDCDataUsageReportItemUsageCountDL) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MRDCDataUsageReportItemUsageCountDL) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
 
 // MRDCDataUsageReportItemUsageCountUL From: unknown:-1
-type MRDCDataUsageReportItemUsageCountUL aper.Integer
+type MRDCDataUsageReportItemUsageCountUL struct {
+	Value aper.Integer
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *MRDCDataUsageReportItemUsageCountUL) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MRDCDataUsageReportItemUsageCountUL) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
 
 // MaxCIDEHCDL From: unknown:-1
-type MaxCIDEHCDL aper.Integer
+type MaxCIDEHCDL struct {
+	Value aper.Integer
+}
 
-const (
-	MinMaxCIDEHCDL MaxCIDEHCDL = 1
-	MaxMaxCIDEHCDL MaxCIDEHCDL = 32767
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *MaxCIDEHCDL) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 32767}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v MaxCIDEHCDL) Validate() error {
-	if v < MinMaxCIDEHCDL || v > MaxMaxCIDEHCDL {
-		return fmt.Errorf("value for MaxCIDEHCDL is outside the valid range (MinMaxCIDEHCDL..MaxMaxCIDEHCDL)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MaxCIDEHCDL) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32767}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // MaxDataBurstVolume From: 9_4_5_Information_Element_Definitions.txt:1395
-type MaxDataBurstVolume aper.Integer
+type MaxDataBurstVolume struct {
+	Value aper.Integer
+}
 
-const (
-	MinMaxDataBurstVolume MaxDataBurstVolume = 0
-	MaxMaxDataBurstVolume MaxDataBurstVolume = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *MaxDataBurstVolume) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v MaxDataBurstVolume) Validate() error {
-	if v < MinMaxDataBurstVolume || v > MaxMaxDataBurstVolume {
-		return fmt.Errorf("value for MaxDataBurstVolume is outside the valid range (MinMaxDataBurstVolume..MaxMaxDataBurstVolume)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MaxDataBurstVolume) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // MaxPacketLossRate From: 9_4_5_Information_Element_Definitions.txt:1413
-type MaxPacketLossRate aper.Integer
+type MaxPacketLossRate struct {
+	Value aper.Integer
+}
 
-const (
-	MinMaxPacketLossRate MaxPacketLossRate = 0
-	MaxMaxPacketLossRate MaxPacketLossRate = 1000
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *MaxPacketLossRate) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 1000}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v MaxPacketLossRate) Validate() error {
-	if v < MinMaxPacketLossRate || v > MaxMaxPacketLossRate {
-		return fmt.Errorf("value for MaxPacketLossRate is outside the valid range (MinMaxPacketLossRate..MaxMaxPacketLossRate)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MaxPacketLossRate) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1000}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // MeasurementsToActivate From: 9_4_5_Information_Element_Definitions.txt:1505
-type MeasurementsToActivate aper.OctetString
+type MeasurementsToActivate struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v MeasurementsToActivate) Validate() error {
-	if len(v) < 8 || len(v) > 8 {
-		return fmt.Errorf("value for MeasurementsToActivate is outside the valid length (8..8)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *MeasurementsToActivate) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *MeasurementsToActivate) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	return err
 }
 
 // NID From: 9_4_5_Information_Element_Definitions.txt:1539
-type NID aper.OctetString
+type NID struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v NID) Validate() error {
-	if len(v) < 44 || len(v) > 44 {
-		return fmt.Errorf("value for NID is outside the valid length (44..44)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *NID) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 44, Ub: 44}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *NID) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 44, Ub: 44}, false)
+	return err
 }
 
 // NRCellIdentity From: 9_4_5_Information_Element_Definitions.txt:1592
-type NRCellIdentity aper.OctetString
+type NRCellIdentity struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v NRCellIdentity) Validate() error {
-	if len(v) < 36 || len(v) > 36 {
-		return fmt.Errorf("value for NRCellIdentity is outside the valid length (36..36)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *NRCellIdentity) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *NRCellIdentity) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
+	return err
 }
 
 // NetworkInstance From: unknown:-1
-type NetworkInstance aper.Integer
+type NetworkInstance struct {
+	Value aper.Integer
+}
 
-const (
-	MinNetworkInstance NetworkInstance = 1
-	MaxNetworkInstance NetworkInstance = 256
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *NetworkInstance) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 256}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v NetworkInstance) Validate() error {
-	if v < MinNetworkInstance || v > MaxNetworkInstance {
-		return fmt.Errorf("value for NetworkInstance is outside the valid range (MinNetworkInstance..MaxNetworkInstance)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *NetworkInstance) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // NonDynamic5QIDescriptorFiveQI From: unknown:-1
-type NonDynamic5QIDescriptorFiveQI aper.Integer
+type NonDynamic5QIDescriptorFiveQI struct {
+	Value aper.Integer
+}
 
-const (
-	MinNonDynamic5QIDescriptorFiveQI NonDynamic5QIDescriptorFiveQI = 0
-	MaxNonDynamic5QIDescriptorFiveQI NonDynamic5QIDescriptorFiveQI = 255
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *NonDynamic5QIDescriptorFiveQI) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v NonDynamic5QIDescriptorFiveQI) Validate() error {
-	if v < MinNonDynamic5QIDescriptorFiveQI || v > MaxNonDynamic5QIDescriptorFiveQI {
-		return fmt.Errorf("value for NonDynamic5QIDescriptorFiveQI is outside the valid range (MinNonDynamic5QIDescriptorFiveQI..MaxNonDynamic5QIDescriptorFiveQI)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *NonDynamic5QIDescriptorFiveQI) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // NumberOfTunnels From: unknown:-1
-type NumberOfTunnels aper.Integer
+type NumberOfTunnels struct {
+	Value aper.Integer
+}
 
-const (
-	MinNumberOfTunnels NumberOfTunnels = 1
-	MaxNumberOfTunnels NumberOfTunnels = 4
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *NumberOfTunnels) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v NumberOfTunnels) Validate() error {
-	if v < MinNumberOfTunnels || v > MaxNumberOfTunnels {
-		return fmt.Errorf("value for NumberOfTunnels is outside the valid range (MinNumberOfTunnels..MaxNumberOfTunnels)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *NumberOfTunnels) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PDCPSN From: 9_4_5_Information_Element_Definitions.txt:1721
-type PDCPSN aper.Integer
+type PDCPSN struct {
+	Value aper.Integer
+}
 
-const (
-	MinPDCPSN PDCPSN = 0
-	MaxPDCPSN PDCPSN = 262143
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *PDCPSN) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 262143}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v PDCPSN) Validate() error {
-	if v < MinPDCPSN || v > MaxPDCPSN {
-		return fmt.Errorf("value for PDCPSN is outside the valid range (MinPDCPSN..MaxPDCPSN)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PDCPSN) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 262143}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PDUSessionID From: 9_4_5_Information_Element_Definitions.txt:1758
-type PDUSessionID aper.Integer
+type PDUSessionID struct {
+	Value aper.Integer
+}
 
-const (
-	MinPDUSessionID PDUSessionID = 0
-	MaxPDUSessionID PDUSessionID = 255
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *PDUSessionID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v PDUSessionID) Validate() error {
-	if v < MinPDUSessionID || v > MaxPDUSessionID {
-		return fmt.Errorf("value for PDUSessionID is outside the valid range (MinPDUSessionID..MaxPDUSessionID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PDUSessionID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PERExponent From: unknown:-1
-type PERExponent aper.Integer
+type PERExponent struct {
+	Value aper.Integer
+}
 
-const (
-	MinPERExponent PERExponent = 0
-	MaxPERExponent PERExponent = 9
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *PERExponent) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 9}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v PERExponent) Validate() error {
-	if v < MinPERExponent || v > MaxPERExponent {
-		return fmt.Errorf("value for PERExponent is outside the valid range (MinPERExponent..MaxPERExponent)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PERExponent) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 9}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PERScalar From: 9_4_5_Information_Element_Definitions.txt:1649
-type PERScalar aper.Integer
+type PERScalar struct {
+	Value aper.Integer
+}
 
-const (
-	MinPERScalar PERScalar = 0
-	MaxPERScalar PERScalar = 9
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *PERScalar) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 9}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v PERScalar) Validate() error {
-	if v < MinPERScalar || v > MaxPERScalar {
-		return fmt.Errorf("value for PERScalar is outside the valid range (MinPERScalar..MaxPERScalar)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PERScalar) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 9}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PLMNIdentity From: 9_4_5_Information_Element_Definitions.txt:2018
-type PLMNIdentity aper.OctetString
+type PLMNIdentity struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v PLMNIdentity) Validate() error {
-	if len(v) < 3 || len(v) > 3 {
-		return fmt.Errorf("value for PLMNIdentity is outside the valid length (3..3)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *PLMNIdentity) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 3, Ub: 3}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PLMNIdentity) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false)
+	return err
 }
 
 // PPI From: unknown:-1
-type PPI aper.Integer
+type PPI struct {
+	Value aper.Integer
+}
 
-const (
-	MinPPI PPI = 0
-	MaxPPI PPI = 7
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *PPI) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 7}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v PPI) Validate() error {
-	if v < MinPPI || v > MaxPPI {
-		return fmt.Errorf("value for PPI is outside the valid range (MinPPI..MaxPPI)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PPI) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 7}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1636
-type PacketDelayBudget aper.Integer
+type PacketDelayBudget struct {
+	Value aper.Integer
+}
 
-const (
-	MinPacketDelayBudget PacketDelayBudget = 0
-	MaxPacketDelayBudget PacketDelayBudget = 1023
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *PacketDelayBudget) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 1023}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v PacketDelayBudget) Validate() error {
-	if v < MinPacketDelayBudget || v > MaxPacketDelayBudget {
-		return fmt.Errorf("value for PacketDelayBudget is outside the valid range (MinPacketDelayBudget..MaxPacketDelayBudget)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PacketDelayBudget) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1023}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // Periodicity From: 9_4_5_Information_Element_Definitions.txt:2409
-type Periodicity aper.Integer
+type Periodicity struct {
+	Value aper.Integer
+}
 
-const (
-	MinPeriodicity Periodicity = 1
-	MaxPeriodicity Periodicity = 640000
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *Periodicity) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 640000}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v Periodicity) Validate() error {
-	if v < MinPeriodicity || v > MaxPeriodicity {
-		return fmt.Errorf("value for Periodicity is outside the valid range (MinPeriodicity..MaxPeriodicity)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *Periodicity) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 640000}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PortNumber From: unknown:-1
-type PortNumber aper.OctetString
+type PortNumber struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v PortNumber) Validate() error {
-	if len(v) < 16 || len(v) > 16 {
-		return fmt.Errorf("value for PortNumber is outside the valid length (16..16)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *PortNumber) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 16, Ub: 16}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PortNumber) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 16, Ub: 16}, false)
+	return err
 }
 
 // PriorityLevel From: unknown:-1
-type PriorityLevel aper.Integer
+type PriorityLevel struct {
+	Value aper.Integer
+}
 
-// Validate checks if the value is within the specified range.
-func (v PriorityLevel) Validate() error {
-	if v < 0 || v > 0 {
-		return fmt.Errorf("value for PriorityLevel is outside the valid range (0..0)")
+// Encode implements the aper.AperMarshaller interface.
+func (s *PriorityLevel) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PriorityLevel) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // PrivateIEIDLocal From: unknown:-1
-type PrivateIEIDLocal aper.Integer
+type PrivateIEIDLocal struct {
+	Value aper.Integer
+}
 
-// PrivateMessageIEs From: manual_patch:-1
-type PrivateMessageIEs PrivateIEContainer
+// Encode implements the aper.AperMarshaller interface.
+func (s *PrivateIEIDLocal) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
 
-// ProcedureCode From: 9_4_6_Common_Definitions.txt:43
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *PrivateIEIDLocal) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
+
 type ProcedureCode aper.Integer
 
-const (
-	MinProcedureCode ProcedureCode = 0
-	MaxProcedureCode ProcedureCode = 255
-)
-
-// Validate checks if the value is within the specified range.
-func (v ProcedureCode) Validate() error {
-	if v < MinProcedureCode || v > MaxProcedureCode {
-		return fmt.Errorf("value for ProcedureCode is outside the valid range (MinProcedureCode..MaxProcedureCode)")
-	}
-	return nil
-}
-
 // ProtocolExtensionID From: unknown:-1
-type ProtocolExtensionID aper.Integer
+type ProtocolExtensionID struct {
+	Value aper.Integer
+}
 
-const (
-	MinProtocolExtensionID ProtocolExtensionID = 0
-	MaxProtocolExtensionID ProtocolExtensionID = ProtocolExtensionID(MaxProtocolExtensions)
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ProtocolExtensionID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: maxProtocolExtensions}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ProtocolExtensionID) Validate() error {
-	if v < MinProtocolExtensionID || v > MaxProtocolExtensionID {
-		return fmt.Errorf("value for ProtocolExtensionID is outside the valid range (MinProtocolExtensionID..MaxProtocolExtensionID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ProtocolExtensionID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: maxProtocolExtensions}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
-// ProtocolIEID From: unknown:-1
 type ProtocolIEID aper.Integer
 
-const (
-	MinProtocolIEID ProtocolIEID = 0
-	MaxProtocolIEID ProtocolIEID = ProtocolIEID(MaxProtocolIEs)
-)
-
-// Validate checks if the value is within the specified range.
-func (v ProtocolIEID) Validate() error {
-	if v < MinProtocolIEID || v > MaxProtocolIEID {
-		return fmt.Errorf("value for ProtocolIEID is outside the valid range (MinProtocolIEID..MaxProtocolIEID)")
-	}
-	return nil
+// QCI From: 9_4_5_Information_Element_Definitions.txt:2044
+type QCI struct {
+	Value aper.Integer
 }
 
-// QCI From: 9_4_5_Information_Element_Definitions.txt:2044
-type QCI aper.Integer
+// Encode implements the aper.AperMarshaller interface.
+func (s *QCI) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+}
 
-const (
-	MinQCI QCI = 0
-	MaxQCI QCI = 255
-)
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QCI) Decode(r *aper.AperReader) error {
 
-// Validate checks if the value is within the specified range.
-func (v QCI) Validate() error {
-	if v < MinQCI || v > MaxQCI {
-		return fmt.Errorf("value for QCI is outside the valid range (MinQCI..MaxQCI)")
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // QOSFlowIdentifier From: 9_4_5_Information_Element_Definitions.txt:2056
-type QOSFlowIdentifier aper.Integer
+type QOSFlowIdentifier struct {
+	Value aper.Integer
+}
 
-const (
-	MinQOSFlowIdentifier QOSFlowIdentifier = 0
-	MaxQOSFlowIdentifier QOSFlowIdentifier = 63
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *QOSFlowIdentifier) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 63}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v QOSFlowIdentifier) Validate() error {
-	if v < MinQOSFlowIdentifier || v > MaxQOSFlowIdentifier {
-		return fmt.Errorf("value for QOSFlowIdentifier is outside the valid range (MinQOSFlowIdentifier..MaxQOSFlowIdentifier)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QOSFlowIdentifier) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 63}, false)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // QOSFlowRemovedItemQOSFlowAccumulatedSessionTime From: unknown:-1
-type QOSFlowRemovedItemQOSFlowAccumulatedSessionTime aper.OctetString
+type QOSFlowRemovedItemQOSFlowAccumulatedSessionTime struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Validate() error {
-	if len(v) < 5 || len(v) > 5 {
-		return fmt.Errorf("value for QOSFlowRemovedItemQOSFlowAccumulatedSessionTime is outside the valid length (5..5)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 5, Ub: 5}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 5, Ub: 5}, false)
+	return err
 }
 
 // QOSMappingInformationDscp From: 9_4_5_Information_Element_Definitions.txt:2180
-type QOSMappingInformationDscp aper.OctetString
+type QOSMappingInformationDscp struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v QOSMappingInformationDscp) Validate() error {
-	if len(v) < 6 || len(v) > 6 {
-		return fmt.Errorf("value for QOSMappingInformationDscp is outside the valid length (6..6)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *QOSMappingInformationDscp) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 6, Ub: 6}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QOSMappingInformationDscp) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false)
+	return err
 }
 
 // QOSMappingInformationFlowLabel From: 9_4_5_Information_Element_Definitions.txt:2180
-type QOSMappingInformationFlowLabel aper.OctetString
+type QOSMappingInformationFlowLabel struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v QOSMappingInformationFlowLabel) Validate() error {
-	if len(v) < 20 || len(v) > 20 {
-		return fmt.Errorf("value for QOSMappingInformationFlowLabel is outside the valid length (20..20)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *QOSMappingInformationFlowLabel) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 20, Ub: 20}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QOSMappingInformationFlowLabel) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 20, Ub: 20}, false)
+	return err
 }
 
 // QoSFlowLevelQoSParametersPagingPolicyIndicator From: 9_4_5_Information_Element_Definitions.txt:2131
-type QoSFlowLevelQoSParametersPagingPolicyIndicator aper.Integer
+type QoSFlowLevelQoSParametersPagingPolicyIndicator struct {
+	Value aper.Integer
+}
 
-const (
-	MinQoSFlowLevelQoSParametersPagingPolicyIndicator QoSFlowLevelQoSParametersPagingPolicyIndicator = 1
-	MaxQoSFlowLevelQoSParametersPagingPolicyIndicator QoSFlowLevelQoSParametersPagingPolicyIndicator = 8
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *QoSFlowLevelQoSParametersPagingPolicyIndicator) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 8}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v QoSFlowLevelQoSParametersPagingPolicyIndicator) Validate() error {
-	if v < MinQoSFlowLevelQoSParametersPagingPolicyIndicator || v > MaxQoSFlowLevelQoSParametersPagingPolicyIndicator {
-		return fmt.Errorf("value for QoSFlowLevelQoSParametersPagingPolicyIndicator is outside the valid range (MinQoSFlowLevelQoSParametersPagingPolicyIndicator..MaxQoSFlowLevelQoSParametersPagingPolicyIndicator)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QoSFlowLevelQoSParametersPagingPolicyIndicator) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // QoSPriorityLevel From: 9_4_5_Information_Element_Definitions.txt:2112
-type QoSPriorityLevel aper.Integer
+type QoSPriorityLevel struct {
+	Value aper.Integer
+}
 
-const (
-	MinQoSPriorityLevel QoSPriorityLevel = 0
-	MaxQoSPriorityLevel QoSPriorityLevel = 127
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *QoSPriorityLevel) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 127}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v QoSPriorityLevel) Validate() error {
-	if v < MinQoSPriorityLevel || v > MaxQoSPriorityLevel {
-		return fmt.Errorf("value for QoSPriorityLevel is outside the valid range (MinQoSPriorityLevel..MaxQoSPriorityLevel)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QoSPriorityLevel) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 127}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // QosMonitoringReportingFrequency From: unknown:-1
-type QosMonitoringReportingFrequency aper.Integer
+type QosMonitoringReportingFrequency struct {
+	Value aper.Integer
+}
 
-const (
-	MinQosMonitoringReportingFrequency QosMonitoringReportingFrequency = 1
-	MaxQosMonitoringReportingFrequency QosMonitoringReportingFrequency = 1800
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *QosMonitoringReportingFrequency) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 1800}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v QosMonitoringReportingFrequency) Validate() error {
-	if v < MinQosMonitoringReportingFrequency || v > MaxQosMonitoringReportingFrequency {
-		return fmt.Errorf("value for QosMonitoringReportingFrequency is outside the valid range (MinQosMonitoringReportingFrequency..MaxQosMonitoringReportingFrequency)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *QosMonitoringReportingFrequency) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 1800}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // RANUEID From: 9_4_5_Information_Element_Definitions.txt:2200
-type RANUEID aper.OctetString
+type RANUEID struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v RANUEID) Validate() error {
-	if len(v) < 8 || len(v) > 8 {
-		return fmt.Errorf("value for RANUEID is outside the valid length (8..8)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *RANUEID) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 8, Ub: 8}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *RANUEID) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	return err
 }
 
 // ROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2258
-type ROHCMaxCID aper.Integer
+type ROHCMaxCID struct {
+	Value aper.Integer
+}
 
-const (
-	MinROHCMaxCID ROHCMaxCID = 0
-	MaxROHCMaxCID ROHCMaxCID = 16383
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ROHCMaxCID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ROHCMaxCID) Validate() error {
-	if v < MinROHCMaxCID || v > MaxROHCMaxCID {
-		return fmt.Errorf("value for ROHCMaxCID is outside the valid range (MinROHCMaxCID..MaxROHCMaxCID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ROHCMaxCID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16383}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2258
-type ROHCROHCProfiles aper.Integer
+type ROHCROHCProfiles struct {
+	Value aper.Integer
+}
 
-const (
-	MinROHCROHCProfiles ROHCROHCProfiles = 0
-	MaxROHCROHCProfiles ROHCROHCProfiles = 511
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ROHCROHCProfiles) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 511}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ROHCROHCProfiles) Validate() error {
-	if v < MinROHCROHCProfiles || v > MaxROHCROHCProfiles {
-		return fmt.Errorf("value for ROHCROHCProfiles is outside the valid range (MinROHCROHCProfiles..MaxROHCROHCProfiles)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ROHCROHCProfiles) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 511}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ReportCharacteristics From: 9_4_5_Information_Element_Definitions.txt:2231
-type ReportCharacteristics aper.OctetString
+type ReportCharacteristics struct {
+	Value aper.BitString
+}
 
-// Validate checks if the value is within the specified range.
-func (v ReportCharacteristics) Validate() error {
-	if len(v) < 36 || len(v) > 36 {
-		return fmt.Errorf("value for ReportCharacteristics is outside the valid length (36..36)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *ReportCharacteristics) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ReportCharacteristics) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
+	return err
 }
 
 // ResourceStatusFailureIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusFailureIEsIDGNBCUCPMeasurementID aper.Integer
+type ResourceStatusFailureIEsIDGNBCUCPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusFailureIEsIDGNBCUCPMeasurementID ResourceStatusFailureIEsIDGNBCUCPMeasurementID = 1
-	MaxResourceStatusFailureIEsIDGNBCUCPMeasurementID ResourceStatusFailureIEsIDGNBCUCPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Validate() error {
-	if v < MinResourceStatusFailureIEsIDGNBCUCPMeasurementID || v > MaxResourceStatusFailureIEsIDGNBCUCPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusFailureIEsIDGNBCUCPMeasurementID is outside the valid range (MinResourceStatusFailureIEsIDGNBCUCPMeasurementID..MaxResourceStatusFailureIEsIDGNBCUCPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusFailureIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusFailureIEsIDGNBCUUPMeasurementID aper.Integer
+type ResourceStatusFailureIEsIDGNBCUUPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusFailureIEsIDGNBCUUPMeasurementID ResourceStatusFailureIEsIDGNBCUUPMeasurementID = 1
-	MaxResourceStatusFailureIEsIDGNBCUUPMeasurementID ResourceStatusFailureIEsIDGNBCUUPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Validate() error {
-	if v < MinResourceStatusFailureIEsIDGNBCUUPMeasurementID || v > MaxResourceStatusFailureIEsIDGNBCUUPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusFailureIEsIDGNBCUUPMeasurementID is outside the valid range (MinResourceStatusFailureIEsIDGNBCUUPMeasurementID..MaxResourceStatusFailureIEsIDGNBCUUPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusRequestIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusRequestIEsIDGNBCUCPMeasurementID aper.Integer
+type ResourceStatusRequestIEsIDGNBCUCPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusRequestIEsIDGNBCUCPMeasurementID ResourceStatusRequestIEsIDGNBCUCPMeasurementID = 1
-	MaxResourceStatusRequestIEsIDGNBCUCPMeasurementID ResourceStatusRequestIEsIDGNBCUCPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Validate() error {
-	if v < MinResourceStatusRequestIEsIDGNBCUCPMeasurementID || v > MaxResourceStatusRequestIEsIDGNBCUCPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusRequestIEsIDGNBCUCPMeasurementID is outside the valid range (MinResourceStatusRequestIEsIDGNBCUCPMeasurementID..MaxResourceStatusRequestIEsIDGNBCUCPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusRequestIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusRequestIEsIDGNBCUUPMeasurementID aper.Integer
+type ResourceStatusRequestIEsIDGNBCUUPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusRequestIEsIDGNBCUUPMeasurementID ResourceStatusRequestIEsIDGNBCUUPMeasurementID = 1
-	MaxResourceStatusRequestIEsIDGNBCUUPMeasurementID ResourceStatusRequestIEsIDGNBCUUPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Validate() error {
-	if v < MinResourceStatusRequestIEsIDGNBCUUPMeasurementID || v > MaxResourceStatusRequestIEsIDGNBCUUPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusRequestIEsIDGNBCUUPMeasurementID is outside the valid range (MinResourceStatusRequestIEsIDGNBCUUPMeasurementID..MaxResourceStatusRequestIEsIDGNBCUUPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusResponseIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusResponseIEsIDGNBCUCPMeasurementID aper.Integer
+type ResourceStatusResponseIEsIDGNBCUCPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusResponseIEsIDGNBCUCPMeasurementID ResourceStatusResponseIEsIDGNBCUCPMeasurementID = 1
-	MaxResourceStatusResponseIEsIDGNBCUCPMeasurementID ResourceStatusResponseIEsIDGNBCUCPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Validate() error {
-	if v < MinResourceStatusResponseIEsIDGNBCUCPMeasurementID || v > MaxResourceStatusResponseIEsIDGNBCUCPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusResponseIEsIDGNBCUCPMeasurementID is outside the valid range (MinResourceStatusResponseIEsIDGNBCUCPMeasurementID..MaxResourceStatusResponseIEsIDGNBCUCPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusResponseIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusResponseIEsIDGNBCUUPMeasurementID aper.Integer
+type ResourceStatusResponseIEsIDGNBCUUPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusResponseIEsIDGNBCUUPMeasurementID ResourceStatusResponseIEsIDGNBCUUPMeasurementID = 1
-	MaxResourceStatusResponseIEsIDGNBCUUPMeasurementID ResourceStatusResponseIEsIDGNBCUUPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Validate() error {
-	if v < MinResourceStatusResponseIEsIDGNBCUUPMeasurementID || v > MaxResourceStatusResponseIEsIDGNBCUUPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusResponseIEsIDGNBCUUPMeasurementID is outside the valid range (MinResourceStatusResponseIEsIDGNBCUUPMeasurementID..MaxResourceStatusResponseIEsIDGNBCUUPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusUpdateIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusUpdateIEsIDGNBCUCPMeasurementID aper.Integer
+type ResourceStatusUpdateIEsIDGNBCUCPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusUpdateIEsIDGNBCUCPMeasurementID ResourceStatusUpdateIEsIDGNBCUCPMeasurementID = 1
-	MaxResourceStatusUpdateIEsIDGNBCUCPMeasurementID ResourceStatusUpdateIEsIDGNBCUCPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Validate() error {
-	if v < MinResourceStatusUpdateIEsIDGNBCUCPMeasurementID || v > MaxResourceStatusUpdateIEsIDGNBCUCPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusUpdateIEsIDGNBCUCPMeasurementID is outside the valid range (MinResourceStatusUpdateIEsIDGNBCUCPMeasurementID..MaxResourceStatusUpdateIEsIDGNBCUCPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // ResourceStatusUpdateIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
-type ResourceStatusUpdateIEsIDGNBCUUPMeasurementID aper.Integer
+type ResourceStatusUpdateIEsIDGNBCUUPMeasurementID struct {
+	Value aper.Integer
+}
 
-const (
-	MinResourceStatusUpdateIEsIDGNBCUUPMeasurementID ResourceStatusUpdateIEsIDGNBCUUPMeasurementID = 1
-	MaxResourceStatusUpdateIEsIDGNBCUUPMeasurementID ResourceStatusUpdateIEsIDGNBCUUPMeasurementID = 4095
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Validate() error {
-	if v < MinResourceStatusUpdateIEsIDGNBCUUPMeasurementID || v > MaxResourceStatusUpdateIEsIDGNBCUUPMeasurementID {
-		return fmt.Errorf("value for ResourceStatusUpdateIEsIDGNBCUUPMeasurementID is outside the valid range (MinResourceStatusUpdateIEsIDGNBCUUPMeasurementID..MaxResourceStatusUpdateIEsIDGNBCUUPMeasurementID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // SNSSAISD From: 9_4_5_Information_Element_Definitions.txt:2328
-type SNSSAISD aper.OctetString
+type SNSSAISD struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v SNSSAISD) Validate() error {
-	if len(v) < 3 || len(v) > 3 {
-		return fmt.Errorf("value for SNSSAISD is outside the valid length (3..3)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *SNSSAISD) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 3, Ub: 3}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *SNSSAISD) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false)
+	return err
 }
 
 // SNSSAISST From: 9_4_5_Information_Element_Definitions.txt:2328
-type SNSSAISST aper.OctetString
+type SNSSAISST struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v SNSSAISST) Validate() error {
-	if len(v) < 1 || len(v) > 1 {
-		return fmt.Errorf("value for SNSSAISST is outside the valid length (1..1)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *SNSSAISST) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 1}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *SNSSAISST) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 1}, false)
+	return err
 }
 
 // SubscriberProfileIDforRFP From: 9_4_5_Information_Element_Definitions.txt:2363
-type SubscriberProfileIDforRFP aper.Integer
+type SubscriberProfileIDforRFP struct {
+	Value aper.Integer
+}
 
-const (
-	MinSubscriberProfileIDforRFP SubscriberProfileIDforRFP = 1
-	MaxSubscriberProfileIDforRFP SubscriberProfileIDforRFP = 256
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *SubscriberProfileIDforRFP) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 256}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v SubscriberProfileIDforRFP) Validate() error {
-	if v < MinSubscriberProfileIDforRFP || v > MaxSubscriberProfileIDforRFP {
-		return fmt.Errorf("value for SubscriberProfileIDforRFP is outside the valid range (MinSubscriberProfileIDforRFP..MaxSubscriberProfileIDforRFP)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *SubscriberProfileIDforRFP) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorDLTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
-type TNLAvailableCapacityIndicatorDLTNLAvailableCapacity aper.Integer
+type TNLAvailableCapacityIndicatorDLTNLAvailableCapacity struct {
+	Value aper.Integer
+}
 
-const (
-	MinTNLAvailableCapacityIndicatorDLTNLAvailableCapacity TNLAvailableCapacityIndicatorDLTNLAvailableCapacity = 0
-	MaxTNLAvailableCapacityIndicatorDLTNLAvailableCapacity TNLAvailableCapacityIndicatorDLTNLAvailableCapacity = 100
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 100}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Validate() error {
-	if v < MinTNLAvailableCapacityIndicatorDLTNLAvailableCapacity || v > MaxTNLAvailableCapacityIndicatorDLTNLAvailableCapacity {
-		return fmt.Errorf("value for TNLAvailableCapacityIndicatorDLTNLAvailableCapacity is outside the valid range (MinTNLAvailableCapacityIndicatorDLTNLAvailableCapacity..MaxTNLAvailableCapacityIndicatorDLTNLAvailableCapacity)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorDLTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
-type TNLAvailableCapacityIndicatorDLTNLOfferedCapacity aper.Integer
+type TNLAvailableCapacityIndicatorDLTNLOfferedCapacity struct {
+	Value aper.Integer
+}
 
-const (
-	MinTNLAvailableCapacityIndicatorDLTNLOfferedCapacity TNLAvailableCapacityIndicatorDLTNLOfferedCapacity = 0
-	MaxTNLAvailableCapacityIndicatorDLTNLOfferedCapacity TNLAvailableCapacityIndicatorDLTNLOfferedCapacity = 16777216
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16777216}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Validate() error {
-	if v < MinTNLAvailableCapacityIndicatorDLTNLOfferedCapacity || v > MaxTNLAvailableCapacityIndicatorDLTNLOfferedCapacity {
-		return fmt.Errorf("value for TNLAvailableCapacityIndicatorDLTNLOfferedCapacity is outside the valid range (MinTNLAvailableCapacityIndicatorDLTNLOfferedCapacity..MaxTNLAvailableCapacityIndicatorDLTNLOfferedCapacity)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16777216}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorULTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
-type TNLAvailableCapacityIndicatorULTNLAvailableCapacity aper.Integer
+type TNLAvailableCapacityIndicatorULTNLAvailableCapacity struct {
+	Value aper.Integer
+}
 
-const (
-	MinTNLAvailableCapacityIndicatorULTNLAvailableCapacity TNLAvailableCapacityIndicatorULTNLAvailableCapacity = 0
-	MaxTNLAvailableCapacityIndicatorULTNLAvailableCapacity TNLAvailableCapacityIndicatorULTNLAvailableCapacity = 100
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 100}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Validate() error {
-	if v < MinTNLAvailableCapacityIndicatorULTNLAvailableCapacity || v > MaxTNLAvailableCapacityIndicatorULTNLAvailableCapacity {
-		return fmt.Errorf("value for TNLAvailableCapacityIndicatorULTNLAvailableCapacity is outside the valid range (MinTNLAvailableCapacityIndicatorULTNLAvailableCapacity..MaxTNLAvailableCapacityIndicatorULTNLAvailableCapacity)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorULTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
-type TNLAvailableCapacityIndicatorULTNLOfferedCapacity aper.Integer
+type TNLAvailableCapacityIndicatorULTNLOfferedCapacity struct {
+	Value aper.Integer
+}
 
-const (
-	MinTNLAvailableCapacityIndicatorULTNLOfferedCapacity TNLAvailableCapacityIndicatorULTNLOfferedCapacity = 0
-	MaxTNLAvailableCapacityIndicatorULTNLOfferedCapacity TNLAvailableCapacityIndicatorULTNLOfferedCapacity = 16777216
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16777216}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Validate() error {
-	if v < MinTNLAvailableCapacityIndicatorULTNLOfferedCapacity || v > MaxTNLAvailableCapacityIndicatorULTNLOfferedCapacity {
-		return fmt.Errorf("value for TNLAvailableCapacityIndicatorULTNLOfferedCapacity is outside the valid range (MinTNLAvailableCapacityIndicatorULTNLOfferedCapacity..MaxTNLAvailableCapacityIndicatorULTNLOfferedCapacity)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16777216}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // TraceID From: 9_4_5_Information_Element_Definitions.txt:2438
-type TraceID aper.OctetString
+type TraceID struct {
+	Value aper.OctetString
+}
 
-// Validate checks if the value is within the specified range.
-func (v TraceID) Validate() error {
-	if len(v) < 8 || len(v) > 8 {
-		return fmt.Errorf("value for TraceID is outside the valid length (8..8)")
-	}
-	return nil
+// Encode implements the aper.AperMarshaller interface.
+func (s *TraceID) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 8, Ub: 8}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TraceID) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	return err
 }
 
 // TransactionID From: unknown:-1
-type TransactionID aper.Integer
+type TransactionID struct {
+	Value aper.Integer
+}
 
-const (
-	MinTransactionID TransactionID = 0
-	MaxTransactionID TransactionID = 255
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *TransactionID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v TransactionID) Validate() error {
-	if v < MinTransactionID || v > MaxTransactionID {
-		return fmt.Errorf("value for TransactionID is outside the valid range (MinTransactionID..MaxTransactionID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TransactionID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // TransportLayerAddress From: unknown:-1
-type TransportLayerAddress aper.OctetString
+type TransportLayerAddress struct {
+	Value aper.BitString
+}
 
-const (
-	MinTransportLayerAddress int = 1
-	MaxTransportLayerAddress int = 160
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *TransportLayerAddress) Encode(w *aper.AperWriter) error {
+	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false)
+}
 
-// Validate checks if the value is within the specified range.
-func (v TransportLayerAddress) Validate() error {
-	if len(v) < MinTransportLayerAddress || len(v) > MaxTransportLayerAddress {
-		return fmt.Errorf("value for TransportLayerAddress is outside the valid length (MinTransportLayerAddress..MaxTransportLayerAddress)")
-	}
-	return nil
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *TransportLayerAddress) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 160}, false)
+	return err
 }
 
 // URIaddress From: 9_4_5_Information_Element_Definitions.txt:2582
-type URIaddress aper.OctetString
+type URIaddress struct {
+	Value aper.OctetString
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *URIaddress) Encode(w *aper.AperWriter) error {
+	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *URIaddress) Decode(r *aper.AperReader) error {
+
+	var err error
+	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	return err
+}
 
 // UplinkOnlyROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2571
-type UplinkOnlyROHCMaxCID aper.Integer
+type UplinkOnlyROHCMaxCID struct {
+	Value aper.Integer
+}
 
-const (
-	MinUplinkOnlyROHCMaxCID UplinkOnlyROHCMaxCID = 0
-	MaxUplinkOnlyROHCMaxCID UplinkOnlyROHCMaxCID = 16383
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *UplinkOnlyROHCMaxCID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v UplinkOnlyROHCMaxCID) Validate() error {
-	if v < MinUplinkOnlyROHCMaxCID || v > MaxUplinkOnlyROHCMaxCID {
-		return fmt.Errorf("value for UplinkOnlyROHCMaxCID is outside the valid range (MinUplinkOnlyROHCMaxCID..MaxUplinkOnlyROHCMaxCID)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *UplinkOnlyROHCMaxCID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16383}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }
 
 // UplinkOnlyROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2571
-type UplinkOnlyROHCROHCProfiles aper.Integer
+type UplinkOnlyROHCROHCProfiles struct {
+	Value aper.Integer
+}
 
-const (
-	MinUplinkOnlyROHCROHCProfiles UplinkOnlyROHCROHCProfiles = 0
-	MaxUplinkOnlyROHCROHCProfiles UplinkOnlyROHCROHCProfiles = 511
-)
+// Encode implements the aper.AperMarshaller interface.
+func (s *UplinkOnlyROHCROHCProfiles) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 511}, true)
+}
 
-// Validate checks if the value is within the specified range.
-func (v UplinkOnlyROHCROHCProfiles) Validate() error {
-	if v < MinUplinkOnlyROHCROHCProfiles || v > MaxUplinkOnlyROHCROHCProfiles {
-		return fmt.Errorf("value for UplinkOnlyROHCROHCProfiles is outside the valid range (MinUplinkOnlyROHCROHCProfiles..MaxUplinkOnlyROHCROHCProfiles)")
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *UplinkOnlyROHCROHCProfiles) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 511}, true)
+	if err != nil {
+		return err
 	}
+	s.Value = aper.Integer(val)
 	return nil
 }

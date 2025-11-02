@@ -41,21 +41,21 @@ func (s *CriticalityDiagnostics) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.ProcedureCode != nil {
-		if err = w.WriteInteger(int64((*s.ProcedureCode)), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+		if err = w.WriteInteger(int64(s.ProcedureCode.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Encode ProcedureCode failed: %w", err)
 		}
 	}
 	if s.TriggeringMessage != nil {
-		if err = w.WriteEnumerate(uint64((*s.TriggeringMessage).Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		if err = w.WriteEnumerate(uint64(s.TriggeringMessage.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 			return fmt.Errorf("Encode TriggeringMessage failed: %w", err)
 		}
 	}
 	if s.ProcedureCriticality != nil {
-		if err = w.WriteEnumerate(uint64((*s.ProcedureCriticality).Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		if err = w.WriteEnumerate(uint64(s.ProcedureCriticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 			return fmt.Errorf("Encode ProcedureCriticality failed: %w", err)
 		}
 	}
-	if err = w.WriteInteger(int64(s.TransactionID), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
 	if s.IEsCriticalityDiagnostics != nil {
@@ -88,10 +88,9 @@ func (s *CriticalityDiagnostics) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 				return fmt.Errorf("Decode ProcedureCode failed: %w", err)
 			}
-			tmp := ProcedureCode(val)
-			s.ProcedureCode = &tmp
+			s.ProcedureCode = new(ProcedureCode)
+			s.ProcedureCode.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.TriggeringMessage = new(TriggeringMessage)
@@ -121,9 +120,8 @@ func (s *CriticalityDiagnostics) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Decode TransactionID failed: %w", err)
 		}
-		s.TransactionID = TransactionID(val)
+		s.TransactionID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.IEsCriticalityDiagnostics = new(CriticalityDiagnosticsIEList)
 		if err = s.IEsCriticalityDiagnostics.Decode(r); err != nil {

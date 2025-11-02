@@ -14,44 +14,43 @@ type GNBCUUPCounterCheckRequest struct {
 	SystemGNBCUUPCounterCheckRequest SystemGNBCUUPCounterCheckRequest `aper:"mandatory,ext"`
 }
 
+// toIes transforms the GNBCUUPCounterCheckRequest struct into a slice of E1APMessageIEs.
 func (msg *GNBCUUPCounterCheckRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUCPUEE1APID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
 				ext:   false,
-				Value: aper.Integer(msg.GNBCUCPUEE1APID),
+				Value: msg.GNBCUCPUEE1APID.Value,
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUUPUEE1APID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
 				ext:   false,
-				Value: aper.Integer(msg.GNBCUUPUEE1APID),
+				Value: msg.GNBCUUPUEE1APID.Value,
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDSystemGNBCUUPCounterCheckRequest,
+			Id:          ProtocolIEID(ProtocolIEIDSystemGNBCUUPCounterCheckRequest),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value:       &msg.SystemGNBCUUPCounterCheckRequest,
 		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode for GNBCUUPCounterCheckRequest: Could not find associated procedure.
@@ -68,7 +67,7 @@ func (msg *GNBCUUPCounterCheckRequest) Decode(buf []byte) (err error, diagList [
 
 	decoder := GNBCUUPCounterCheckRequestDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -81,8 +80,8 @@ func (msg *GNBCUUPCounterCheckRequest) Decode(buf []byte) (err error, diagList [
 	if _, ok := decoder.list[ProtocolIEIDGNBCUCPUEE1APID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUCPUEE1APID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -90,8 +89,8 @@ func (msg *GNBCUUPCounterCheckRequest) Decode(buf []byte) (err error, diagList [
 	if _, ok := decoder.list[ProtocolIEIDGNBCUUPUEE1APID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUUPUEE1APID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -99,8 +98,8 @@ func (msg *GNBCUUPCounterCheckRequest) Decode(buf []byte) (err error, diagList [
 	if _, ok := decoder.list[ProtocolIEIDSystemGNBCUUPCounterCheckRequest]; !ok {
 		err = fmt.Errorf("mandatory field SystemGNBCUUPCounterCheckRequest is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDSystemGNBCUUPCounterCheckRequest},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDSystemGNBCUUPCounterCheckRequest,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -114,7 +113,7 @@ func (msg *GNBCUUPCounterCheckRequest) Decode(buf []byte) (err error, diagList [
 type GNBCUUPCounterCheckRequestDecoder struct {
 	msg      *GNBCUUPCounterCheckRequest
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *GNBCUUPCounterCheckRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -122,58 +121,56 @@ func (decoder *GNBCUUPCounterCheckRequestDecoder) decodeIE(r *aper.AperReader) (
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 			}
-			s.GNBCUCPUEE1APID = GNBCUCPUEE1APID(val)
+			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 			}
-			s.GNBCUUPUEE1APID = GNBCUUPUEE1APID(val)
+			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDSystemGNBCUUPCounterCheckRequest:
-		if err = s.SystemGNBCUUPCounterCheckRequest.Decode(r); err != nil {
-			return fmt.Errorf("Decode SystemGNBCUUPCounterCheckRequest failed: %w", err)
+		if err = msg.SystemGNBCUUPCounterCheckRequest.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode SystemGNBCUUPCounterCheckRequest failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

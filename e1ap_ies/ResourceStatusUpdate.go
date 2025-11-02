@@ -30,14 +30,14 @@ func (s *ResourceStatusUpdate) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.TransactionID), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUCPMeasurementID), &aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUCPMeasurementID.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
 		return fmt.Errorf("Encode GNBCUCPMeasurementID failed: %w", err)
 	}
 	if s.GNBCUUPMeasurementID != nil {
-		if err = w.WriteInteger(int64((*s.GNBCUUPMeasurementID)), &aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
+		if err = w.WriteInteger(int64(s.GNBCUUPMeasurementID.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
 			return fmt.Errorf("Encode GNBCUUPMeasurementID failed: %w", err)
 		}
 	}
@@ -68,7 +68,7 @@ func (s *ResourceStatusUpdate) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Decode TransactionID failed: %w", err)
 		}
-		s.TransactionID = TransactionID(val)
+		s.TransactionID.Value = aper.Integer(val)
 	}
 
 	{
@@ -76,9 +76,8 @@ func (s *ResourceStatusUpdate) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
 			return fmt.Errorf("Decode GNBCUCPMeasurementID failed: %w", err)
 		}
-		s.GNBCUCPMeasurementID = ResourceStatusUpdateIEsIDGNBCUCPMeasurementID(val)
+		s.GNBCUCPMeasurementID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 
 		{
@@ -86,10 +85,9 @@ func (s *ResourceStatusUpdate) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
 				return fmt.Errorf("Decode GNBCUUPMeasurementID failed: %w", err)
 			}
-			tmp := ResourceStatusUpdateIEsIDGNBCUUPMeasurementID(val)
-			s.GNBCUUPMeasurementID = &tmp
+			s.GNBCUUPMeasurementID = new(ResourceStatusUpdateIEsIDGNBCUUPMeasurementID)
+			s.GNBCUUPMeasurementID.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.TNLAvailableCapacityIndicator = new(TNLAvailableCapacityIndicator)

@@ -45,14 +45,14 @@ func (s *GNBCUUPConfigurationUpdate) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(6), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.TransactionID), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUUPID), &aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUUPID.Value), &aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUUPID failed: %w", err)
 	}
 	if s.GNBCUUPName != nil {
-		if err = s.GNBCUUPName.Encode(w); err != nil {
+		if err = w.WriteOctetString([]byte(s.GNBCUUPName.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Encode GNBCUUPName failed: %w", err)
 		}
 	}
@@ -62,7 +62,7 @@ func (s *GNBCUUPConfigurationUpdate) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.GNBCUUPCapacity != nil {
-		if err = w.WriteInteger(int64((*s.GNBCUUPCapacity)), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+		if err = w.WriteInteger(int64(s.GNBCUUPCapacity.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Encode GNBCUUPCapacity failed: %w", err)
 		}
 	}
@@ -100,7 +100,7 @@ func (s *GNBCUUPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Decode TransactionID failed: %w", err)
 		}
-		s.TransactionID = TransactionID(val)
+		s.TransactionID.Value = aper.Integer(val)
 	}
 
 	{
@@ -108,9 +108,8 @@ func (s *GNBCUUPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUUPID failed: %w", err)
 		}
-		s.GNBCUUPID = GNBCUUPID(val)
+		s.GNBCUUPID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 
 		{
@@ -118,10 +117,9 @@ func (s *GNBCUUPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUUPName failed: %w", err)
 			}
-			tmp := aper.OctetString(val)
-			s.GNBCUUPName = &tmp
+			s.GNBCUUPName = new(aper.OctetString)
+			s.GNBCUUPName.Value = aper.OctetString(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.SupportedPLMNs = new(SupportedPLMNsList)
@@ -136,10 +134,9 @@ func (s *GNBCUUPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUUPCapacity failed: %w", err)
 			}
-			tmp := GNBCUUPCapacity(val)
-			s.GNBCUUPCapacity = &tmp
+			s.GNBCUUPCapacity = new(GNBCUUPCapacity)
+			s.GNBCUUPCapacity.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.GNBCUUPTNLAToRemoveList = new(GNBCUUPTNLAToRemoveList)

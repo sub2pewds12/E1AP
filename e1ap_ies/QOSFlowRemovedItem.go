@@ -32,16 +32,16 @@ func (s *QOSFlowRemovedItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.QOSFlowIdentifier), &aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
+	if err = w.WriteInteger(int64(s.QOSFlowIdentifier.Value), &aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
 		return fmt.Errorf("Encode QOSFlowIdentifier failed: %w", err)
 	}
 	if s.QOSFlowReleasedInSession != nil {
-		if err = w.WriteEnumerate(uint64((*s.QOSFlowReleasedInSession).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.QOSFlowReleasedInSession.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 			return fmt.Errorf("Encode QOSFlowReleasedInSession failed: %w", err)
 		}
 	}
 	if s.QOSFlowAccumulatedSessionTime != nil {
-		if err = w.WriteOctetString([]byte((*s.QOSFlowAccumulatedSessionTime)), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
+		if err = s.QOSFlowAccumulatedSessionTime.Encode(w); err != nil {
 			return fmt.Errorf("Encode QOSFlowAccumulatedSessionTime failed: %w", err)
 		}
 	}
@@ -69,9 +69,8 @@ func (s *QOSFlowRemovedItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
 			return fmt.Errorf("Decode QOSFlowIdentifier failed: %w", err)
 		}
-		s.QOSFlowIdentifier = QOSFlowIdentifier(val)
+		s.QOSFlowIdentifier.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.QOSFlowReleasedInSession = new(QOSFlowRemovedItemQOSFlowReleasedInSession)
 
@@ -84,16 +83,10 @@ func (s *QOSFlowRemovedItem) Decode(r *aper.AperReader) (err error) {
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
-				return fmt.Errorf("Decode QOSFlowAccumulatedSessionTime failed: %w", err)
-			}
-			tmp := QOSFlowRemovedItemQOSFlowAccumulatedSessionTime(val)
-			s.QOSFlowAccumulatedSessionTime = &tmp
+		s.QOSFlowAccumulatedSessionTime = new(QOSFlowRemovedItemQOSFlowAccumulatedSessionTime)
+		if err = s.QOSFlowAccumulatedSessionTime.Decode(r); err != nil {
+			return fmt.Errorf("Decode QOSFlowAccumulatedSessionTime failed: %w", err)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

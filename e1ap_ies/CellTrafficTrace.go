@@ -31,25 +31,25 @@ func (s *CellTrafficTrace) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUCPUEE1APID), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUCPUEE1APID.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUCPUEE1APID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUUPUEE1APID), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUUPUEE1APID.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUUPUEE1APID failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.TraceID), &aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
+	if err = s.TraceID.Encode(w); err != nil {
 		return fmt.Errorf("Encode TraceID failed: %w", err)
 	}
-	if err = w.WriteBitString(s.TraceCollectionEntityIPAddress.Bytes, uint(s.TraceCollectionEntityIPAddress.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = s.TraceCollectionEntityIPAddress.Encode(w); err != nil {
 		return fmt.Errorf("Encode TraceCollectionEntityIPAddress failed: %w", err)
 	}
 	if s.PrivacyIndicator != nil {
-		if err = w.WriteEnumerate(uint64((*s.PrivacyIndicator).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.PrivacyIndicator.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 			return fmt.Errorf("Encode PrivacyIndicator failed: %w", err)
 		}
 	}
 	if s.URIaddress != nil {
-		if err = s.URIaddress.Encode(w); err != nil {
+		if err = w.WriteOctetString([]byte(s.URIaddress.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Encode URIaddress failed: %w", err)
 		}
 	}
@@ -72,7 +72,7 @@ func (s *CellTrafficTrace) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 		}
-		s.GNBCUCPUEE1APID = GNBCUCPUEE1APID(val)
+		s.GNBCUCPUEE1APID.Value = aper.Integer(val)
 	}
 
 	{
@@ -80,25 +80,14 @@ func (s *CellTrafficTrace) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 		}
-		s.GNBCUUPUEE1APID = GNBCUUPUEE1APID(val)
+		s.GNBCUUPUEE1APID.Value = aper.Integer(val)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
-			return fmt.Errorf("Decode TraceID failed: %w", err)
-		}
-		s.TraceID = TraceID(val)
+	if err = s.TraceID.Decode(r); err != nil {
+		return fmt.Errorf("Decode TraceID failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
-			return fmt.Errorf("Decode TraceCollectionEntityIPAddress failed: %w", err)
-		}
-		s.TraceCollectionEntityIPAddress = TransportLayerAddress(val)
+	if err = s.TraceCollectionEntityIPAddress.Decode(r); err != nil {
+		return fmt.Errorf("Decode TraceCollectionEntityIPAddress failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.PrivacyIndicator = new(PrivacyIndicator)
 
@@ -117,10 +106,9 @@ func (s *CellTrafficTrace) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode URIaddress failed: %w", err)
 			}
-			tmp := aper.OctetString(val)
-			s.URIaddress = &tmp
+			s.URIaddress = new(aper.OctetString)
+			s.URIaddress.Value = aper.OctetString(val)
 		}
-
 	}
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for CellTrafficTrace")

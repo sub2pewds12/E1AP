@@ -15,13 +15,13 @@ type SecurityIndication struct {
 	IEExtensions                        *ProtocolExtensionContainer         `aper:"optional,ext"`
 }
 
+// toIes transforms the SecurityIndication struct into a slice of E1APMessageIEs.
 func (msg *SecurityIndication) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID,
+			Id:          ProtocolIEID(ProtocolIEID),
 			Criticality: Criticality{Value: Criticality},
 			Value: &ENUMERATED{
 				c:     aper.Constraint{Lb: 0, Ub: 2},
@@ -30,11 +30,10 @@ func (msg *SecurityIndication) toIes() ([]E1APMessageIE, error) {
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID,
+			Id:          ProtocolIEID(ProtocolIEID),
 			Criticality: Criticality{Value: Criticality},
 			Value: &ENUMERATED{
 				c:     aper.Constraint{Lb: 0, Ub: 2},
@@ -45,16 +44,14 @@ func (msg *SecurityIndication) toIes() ([]E1APMessageIE, error) {
 	}
 	if msg.MaximumIPdatarate != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID,
-				Criticality: Criticality{Value: Criticality},
-				Value:       msg.MaximumIPdatarate,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEID),
+			Criticality: Criticality{Value: Criticality},
+			Value:       msg.MaximumIPdatarate,
+		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode for SecurityIndication: Could not find associated procedure.
@@ -71,7 +68,7 @@ func (msg *SecurityIndication) Decode(buf []byte) (err error, diagList []Critica
 
 	decoder := SecurityIndicationDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -84,8 +81,8 @@ func (msg *SecurityIndication) Decode(buf []byte) (err error, diagList []Critica
 	if _, ok := decoder.list[ProtocolIEID]; !ok {
 		err = fmt.Errorf("mandatory field IntegrityProtectionIndication is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -93,8 +90,8 @@ func (msg *SecurityIndication) Decode(buf []byte) (err error, diagList []Critica
 	if _, ok := decoder.list[ProtocolIEID]; !ok {
 		err = fmt.Errorf("mandatory field ConfidentialityProtectionIndication is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -108,7 +105,7 @@ func (msg *SecurityIndication) Decode(buf []byte) (err error, diagList []Critica
 type SecurityIndicationDecoder struct {
 	msg      *SecurityIndication
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *SecurityIndicationDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -116,65 +113,62 @@ func (decoder *SecurityIndicationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEID:
 
 		{
 			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-				return fmt.Errorf("Decode IntegrityProtectionIndication failed: %w", err)
+			if val, err = ieR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+				return nil, fmt.Errorf("Decode IntegrityProtectionIndication failed: %w", err)
 			}
-			s.IntegrityProtectionIndication.Value = aper.Enumerated(val)
+			msg.IntegrityProtectionIndication.Value = aper.Enumerated(val)
 		}
-
 	case ProtocolIEID:
 
 		{
 			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-				return fmt.Errorf("Decode ConfidentialityProtectionIndication failed: %w", err)
+			if val, err = ieR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+				return nil, fmt.Errorf("Decode ConfidentialityProtectionIndication failed: %w", err)
 			}
-			s.ConfidentialityProtectionIndication.Value = aper.Enumerated(val)
+			msg.ConfidentialityProtectionIndication.Value = aper.Enumerated(val)
 		}
-
 	case ProtocolIEID:
-		s.MaximumIPdatarate = new(MaximumIPdatarate)
-		if err = s.MaximumIPdatarate.Decode(r); err != nil {
-			return fmt.Errorf("Decode MaximumIPdatarate failed: %w", err)
+		msg.MaximumIPdatarate = new(MaximumIPdatarate)
+		if err = msg.MaximumIPdatarate.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode MaximumIPdatarate failed: %w", err)
 		}
-
 	case ProtocolIEID:
-		s.IEExtensions = new(ProtocolExtensionContainer)
-		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		msg.IEExtensions = new(ProtocolExtensionContainer)
+		if err = msg.IEExtensions.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

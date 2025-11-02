@@ -26,7 +26,7 @@ func (s *EUTRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err e
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PriorityLevel), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 		return fmt.Errorf("Encode PriorityLevel failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.PreEmptionCapability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
@@ -59,7 +59,7 @@ func (s *EUTRANAllocationAndRetentionPriority) Decode(r *aper.AperReader) (err e
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Decode PriorityLevel failed: %w", err)
 		}
-		s.PriorityLevel = PriorityLevel(val)
+		s.PriorityLevel.Value = aper.Integer(val)
 	}
 
 	{

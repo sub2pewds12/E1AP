@@ -36,21 +36,21 @@ func (s *CellGroupInformationItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.CellGroupID), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+	if err = w.WriteInteger(int64(s.CellGroupID.Value), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 		return fmt.Errorf("Encode CellGroupID failed: %w", err)
 	}
 	if s.ULConfiguration != nil {
-		if err = w.WriteEnumerate(uint64((*s.ULConfiguration).Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.ULConfiguration.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
 			return fmt.Errorf("Encode ULConfiguration failed: %w", err)
 		}
 	}
 	if s.DLTXStop != nil {
-		if err = w.WriteEnumerate(uint64((*s.DLTXStop).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.DLTXStop.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 			return fmt.Errorf("Encode DLTXStop failed: %w", err)
 		}
 	}
 	if s.RATType != nil {
-		if err = w.WriteEnumerate(uint64((*s.RATType).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.RATType.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 			return fmt.Errorf("Encode RATType failed: %w", err)
 		}
 	}
@@ -78,9 +78,8 @@ func (s *CellGroupInformationItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 			return fmt.Errorf("Decode CellGroupID failed: %w", err)
 		}
-		s.CellGroupID = CellGroupID(val)
+		s.CellGroupID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.ULConfiguration = new(ULConfiguration)
 

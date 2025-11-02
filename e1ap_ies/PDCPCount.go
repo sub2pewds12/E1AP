@@ -25,10 +25,10 @@ func (s *PDCPCount) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PDCPSN), &aper.Constraint{Lb: 0, Ub: 262143}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PDCPSN.Value), &aper.Constraint{Lb: 0, Ub: 262143}, false); err != nil {
 		return fmt.Errorf("Encode PDCPSN failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.HFN), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.HFN.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode HFN failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -55,7 +55,7 @@ func (s *PDCPCount) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 262143}, false); err != nil {
 			return fmt.Errorf("Decode PDCPSN failed: %w", err)
 		}
-		s.PDCPSN = PDCPSN(val)
+		s.PDCPSN.Value = aper.Integer(val)
 	}
 
 	{
@@ -63,9 +63,8 @@ func (s *PDCPCount) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode HFN failed: %w", err)
 		}
-		s.HFN = HFN(val)
+		s.HFN.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {

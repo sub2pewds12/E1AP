@@ -44,11 +44,11 @@ func (s *GNBCUCPConfigurationUpdate) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(6), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.TransactionID), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
 	if s.GNBCUCPName != nil {
-		if err = s.GNBCUCPName.Encode(w); err != nil {
+		if err = w.WriteOctetString([]byte(s.GNBCUCPName.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Encode GNBCUCPName failed: %w", err)
 		}
 	}
@@ -96,9 +96,8 @@ func (s *GNBCUCPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Decode TransactionID failed: %w", err)
 		}
-		s.TransactionID = TransactionID(val)
+		s.TransactionID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 
 		{
@@ -106,10 +105,9 @@ func (s *GNBCUCPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUCPName failed: %w", err)
 			}
-			tmp := aper.OctetString(val)
-			s.GNBCUCPName = &tmp
+			s.GNBCUCPName = new(aper.OctetString)
+			s.GNBCUCPName.Value = aper.OctetString(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.GNBCUCPTNLAToAddList = new(GNBCUCPTNLAToAddList)

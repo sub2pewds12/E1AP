@@ -14,44 +14,39 @@ type GNBCUUPConfigurationUpdateAcknowledge struct {
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ext"`
 }
 
+// toIes transforms the GNBCUUPConfigurationUpdateAcknowledge struct into a slice of E1APMessageIEs.
 func (msg *GNBCUUPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDTransactionID,
+			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 255},
 				ext:   true,
-				Value: aper.Integer(msg.TransactionID),
+				Value: msg.TransactionID.Value,
 			},
 		})
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDCriticalityDiagnostics,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.CriticalityDiagnostics,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.CriticalityDiagnostics,
+		})
 	}
 	if msg.TransportLayerAddressInfo != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDTransportLayerAddressInfo,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.TransportLayerAddressInfo,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDTransportLayerAddressInfo),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.TransportLayerAddressInfo,
+		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode for GNBCUUPConfigurationUpdateAcknowledge: Could not find associated procedure.
@@ -68,7 +63,7 @@ func (msg *GNBCUUPConfigurationUpdateAcknowledge) Decode(buf []byte) (err error,
 
 	decoder := GNBCUUPConfigurationUpdateAcknowledgeDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -81,8 +76,8 @@ func (msg *GNBCUUPConfigurationUpdateAcknowledge) Decode(buf []byte) (err error,
 	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -96,7 +91,7 @@ func (msg *GNBCUUPConfigurationUpdateAcknowledge) Decode(buf []byte) (err error,
 type GNBCUUPConfigurationUpdateAcknowledgeDecoder struct {
 	msg      *GNBCUUPConfigurationUpdateAcknowledge
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *GNBCUUPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -104,55 +99,53 @@ func (decoder *GNBCUUPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.Ap
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return fmt.Errorf("Decode TransactionID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.TransactionID = TransactionID(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDCriticalityDiagnostics:
-		s.CriticalityDiagnostics = new(CriticalityDiagnostics)
-		if err = s.CriticalityDiagnostics.Decode(r); err != nil {
-			return fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
+		msg.CriticalityDiagnostics = new(CriticalityDiagnostics)
+		if err = msg.CriticalityDiagnostics.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
 		}
-
 	case ProtocolIEIDTransportLayerAddressInfo:
-		s.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
-		if err = s.TransportLayerAddressInfo.Decode(r); err != nil {
-			return fmt.Errorf("Decode TransportLayerAddressInfo failed: %w", err)
+		msg.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
+		if err = msg.TransportLayerAddressInfo.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode TransportLayerAddressInfo failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

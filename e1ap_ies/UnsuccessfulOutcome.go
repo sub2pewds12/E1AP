@@ -18,13 +18,13 @@ func (s *UnsuccessfulOutcome) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(false); err != nil {
 		return fmt.Errorf("Encode extensibility bool failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.ProcedureCode), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+	if err = w.WriteInteger(int64(s.ProcedureCode.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode ProcedureCode failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.Criticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode Criticality failed: %w", err)
 	}
-	if err = s.Value.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.Value.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 		return fmt.Errorf("Encode Value failed: %w", err)
 	}
 	return nil
@@ -42,7 +42,7 @@ func (s *UnsuccessfulOutcome) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Decode ProcedureCode failed: %w", err)
 		}
-		s.ProcedureCode = ProcedureCode(val)
+		s.ProcedureCode.Value = aper.Integer(val)
 	}
 
 	{
@@ -58,9 +58,8 @@ func (s *UnsuccessfulOutcome) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Decode Value failed: %w", err)
 		}
-		s.Value = aper.OctetString(val)
+		s.Value.Value = aper.OctetString(val)
 	}
-
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for UnsuccessfulOutcome")
 	}

@@ -25,7 +25,7 @@ func (s *QOSFlowFailedItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.QOSFlowIdentifier), &aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
+	if err = w.WriteInteger(int64(s.QOSFlowIdentifier.Value), &aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
 		return fmt.Errorf("Encode QOSFlowIdentifier failed: %w", err)
 	}
 	if err = s.Cause.Encode(w); err != nil {
@@ -55,9 +55,8 @@ func (s *QOSFlowFailedItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
 			return fmt.Errorf("Decode QOSFlowIdentifier failed: %w", err)
 		}
-		s.QOSFlowIdentifier = QOSFlowIdentifier(val)
+		s.QOSFlowIdentifier.Value = aper.Integer(val)
 	}
-
 	if err = s.Cause.Decode(r); err != nil {
 		return fmt.Errorf("Decode Cause failed: %w", err)
 	}

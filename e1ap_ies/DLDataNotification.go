@@ -16,68 +16,64 @@ type DLDataNotification struct {
 	PDUSessionToNotifyList []PDUSessionToNotifyItem `aper:"optional,ext"`
 }
 
+// toIes transforms the DLDataNotification struct into a slice of E1APMessageIEs.
 func (msg *DLDataNotification) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUCPUEE1APID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
 				ext:   false,
-				Value: aper.Integer(msg.GNBCUCPUEE1APID),
+				Value: msg.GNBCUCPUEE1APID.Value,
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUUPUEE1APID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
 				ext:   false,
-				Value: aper.Integer(msg.GNBCUUPUEE1APID),
+				Value: msg.GNBCUUPUEE1APID.Value,
 			},
 		})
 	}
 	if msg.PPI != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDPPI,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 7},
-					ext:   true,
-					Value: aper.Integer((*msg.PPI)),
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDPPI),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 7},
+				ext:   true,
+				Value: msg.PPI.Value,
+			},
+		})
 	}
 	if len(msg.PDUSessionToNotifyList) > 0 {
 
-		{
-
-			tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: 0},
-				ext: false,
-			}
-			for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
-				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
-			}
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDPDUSessionToNotifyList,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &tmp_PDUSessionToNotifyList,
-			})
+		tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
+			c:   aper.Constraint{Lb: 0, Ub: 0},
+			ext: false,
 		}
+
+		for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
+			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
+		}
+
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDPDUSessionToNotifyList),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       &tmp_PDUSessionToNotifyList,
+		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode implements the aper.AperMarshaller interface for DLDataNotification.
@@ -87,7 +83,7 @@ func (msg *DLDataNotification) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert DLDataNotification to IEs: %w", err)
 	}
 
-	return EncodeInitiatingMessage(w, ProcedureCodeDLDataNotification, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeDLDataNotification, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for DLDataNotification.
@@ -102,7 +98,7 @@ func (msg *DLDataNotification) Decode(buf []byte) (err error, diagList []Critica
 
 	decoder := DLDataNotificationDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -115,8 +111,8 @@ func (msg *DLDataNotification) Decode(buf []byte) (err error, diagList []Critica
 	if _, ok := decoder.list[ProtocolIEIDGNBCUCPUEE1APID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUCPUEE1APID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -124,8 +120,8 @@ func (msg *DLDataNotification) Decode(buf []byte) (err error, diagList []Critica
 	if _, ok := decoder.list[ProtocolIEIDGNBCUUPUEE1APID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUUPUEE1APID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -139,7 +135,7 @@ func (msg *DLDataNotification) Decode(buf []byte) (err error, diagList []Critica
 type DLDataNotificationDecoder struct {
 	msg      *DLDataNotification
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *DLDataNotificationDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -147,70 +143,79 @@ func (decoder *DLDataNotificationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 			}
-			s.GNBCUCPUEE1APID = GNBCUCPUEE1APID(val)
+			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 			}
-			s.GNBCUUPUEE1APID = GNBCUUPUEE1APID(val)
+			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDPPI:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 7}, true); err != nil {
-				return fmt.Errorf("Decode PPI failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 7}, true); err != nil {
+				return nil, fmt.Errorf("Decode PPI failed: %w", err)
 			}
-			tmp := PPI(val)
-			s.PPI = &tmp
+			msg.PPI = new(PPI)
+			msg.PPI.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDPDUSessionToNotifyList:
-		s.PDUSessionToNotifyList = new(PDUSessionToNotifyList)
-		if err = s.PDUSessionToNotifyList.Decode(r); err != nil {
-			return fmt.Errorf("Decode PDUSessionToNotifyList failed: %w", err)
+
+		{
+			itemDecoder := func(r *aper.AperReader) (*PDUSessionToNotifyItem, error) {
+
+				item := new(PDUSessionToNotifyItem)
+				if err := item.Decode(r); err != nil {
+					return nil, err
+				}
+				return item, nil
+			}
+			var decodedItems []PDUSessionToNotifyItem
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return nil, fmt.Errorf("Decode PDUSessionToNotifyList failed: %w", err)
+			}
+			msg.PDUSessionToNotifyList = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

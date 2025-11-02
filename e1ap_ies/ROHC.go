@@ -29,14 +29,14 @@ func (s *ROHC) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.MaxCID), &aper.Constraint{Lb: 0, Ub: 16383}, true); err != nil {
+	if err = w.WriteInteger(int64(s.MaxCID.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true); err != nil {
 		return fmt.Errorf("Encode MaxCID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.ROHCProfiles), &aper.Constraint{Lb: 0, Ub: 511}, true); err != nil {
+	if err = w.WriteInteger(int64(s.ROHCProfiles.Value), &aper.Constraint{Lb: 0, Ub: 511}, true); err != nil {
 		return fmt.Errorf("Encode ROHCProfiles failed: %w", err)
 	}
 	if s.ContinueROHC != nil {
-		if err = w.WriteEnumerate(uint64((*s.ContinueROHC).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.ContinueROHC.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode ContinueROHC failed: %w", err)
 		}
 	}
@@ -64,7 +64,7 @@ func (s *ROHC) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16383}, true); err != nil {
 			return fmt.Errorf("Decode MaxCID failed: %w", err)
 		}
-		s.MaxCID = ROHCMaxCID(val)
+		s.MaxCID.Value = aper.Integer(val)
 	}
 
 	{
@@ -72,9 +72,8 @@ func (s *ROHC) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 511}, true); err != nil {
 			return fmt.Errorf("Decode ROHCProfiles failed: %w", err)
 		}
-		s.ROHCProfiles = ROHCROHCProfiles(val)
+		s.ROHCProfiles.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.ContinueROHC = new(ROHCContinueROHC)
 

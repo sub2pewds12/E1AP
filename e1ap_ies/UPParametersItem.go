@@ -28,7 +28,7 @@ func (s *UPParametersItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.UPTNLInformation.Encode(w); err != nil {
 		return fmt.Errorf("Encode UPTNLInformation failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.CellGroupID), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+	if err = w.WriteInteger(int64(s.CellGroupID.Value), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 		return fmt.Errorf("Encode CellGroupID failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -58,9 +58,8 @@ func (s *UPParametersItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 			return fmt.Errorf("Decode CellGroupID failed: %w", err)
 		}
-		s.CellGroupID = CellGroupID(val)
+		s.CellGroupID.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(UPParametersItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {

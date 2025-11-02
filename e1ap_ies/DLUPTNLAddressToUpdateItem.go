@@ -25,10 +25,10 @@ func (s *DLUPTNLAddressToUpdateItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteBitString(s.OldTNLAdress.Bytes, uint(s.OldTNLAdress.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = s.OldTNLAdress.Encode(w); err != nil {
 		return fmt.Errorf("Encode OldTNLAdress failed: %w", err)
 	}
-	if err = w.WriteBitString(s.NewTNLAdress.Bytes, uint(s.NewTNLAdress.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = s.NewTNLAdress.Encode(w); err != nil {
 		return fmt.Errorf("Encode NewTNLAdress failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -49,23 +49,12 @@ func (s *DLUPTNLAddressToUpdateItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
-			return fmt.Errorf("Decode OldTNLAdress failed: %w", err)
-		}
-		s.OldTNLAdress = TransportLayerAddress(val)
+	if err = s.OldTNLAdress.Decode(r); err != nil {
+		return fmt.Errorf("Decode OldTNLAdress failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
-			return fmt.Errorf("Decode NewTNLAdress failed: %w", err)
-		}
-		s.NewTNLAdress = TransportLayerAddress(val)
+	if err = s.NewTNLAdress.Decode(r); err != nil {
+		return fmt.Errorf("Decode NewTNLAdress failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {

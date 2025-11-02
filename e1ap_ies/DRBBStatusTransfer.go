@@ -14,33 +14,31 @@ type DRBBStatusTransfer struct {
 	IEExtension            *ProtocolExtensionContainer               `aper:"optional,ext"`
 }
 
+// toIes transforms the DRBBStatusTransfer struct into a slice of E1APMessageIEs.
 func (msg *DRBBStatusTransfer) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	if msg.ReceiveStatusofPDCPSDU != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID,
-				Criticality: Criticality{Value: Criticality},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 1, Ub: 131072},
-					ext:   false,
-					Value: aper.OctetString((*msg.ReceiveStatusofPDCPSDU)),
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEID),
+			Criticality: Criticality{Value: Criticality},
+			Value: &OCTETSTRING{
+				c:     aper.Constraint{Lb: 1, Ub: 131072},
+				ext:   false,
+				Value: msg.ReceiveStatusofPDCPSDU.Value,
+			},
+		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID,
+			Id:          ProtocolIEID(ProtocolIEID),
 			Criticality: Criticality{Value: Criticality},
 			Value:       &msg.CountValue,
 		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode for DRBBStatusTransfer: Could not find associated procedure.
@@ -57,7 +55,7 @@ func (msg *DRBBStatusTransfer) Decode(buf []byte) (err error, diagList []Critica
 
 	decoder := DRBBStatusTransferDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -70,8 +68,8 @@ func (msg *DRBBStatusTransfer) Decode(buf []byte) (err error, diagList []Critica
 	if _, ok := decoder.list[ProtocolIEID]; !ok {
 		err = fmt.Errorf("mandatory field CountValue is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -85,7 +83,7 @@ func (msg *DRBBStatusTransfer) Decode(buf []byte) (err error, diagList []Critica
 type DRBBStatusTransferDecoder struct {
 	msg      *DRBBStatusTransfer
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *DRBBStatusTransferDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -93,55 +91,48 @@ func (decoder *DRBBStatusTransferDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEID:
-
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 131072}, false); err != nil {
-				return fmt.Errorf("Decode ReceiveStatusofPDCPSDU failed: %w", err)
-			}
-			tmp := DRBBStatusTransferReceiveStatusofPDCPSDU(val)
-			s.ReceiveStatusofPDCPSDU = &tmp
+		msg.ReceiveStatusofPDCPSDU = new(DRBBStatusTransferReceiveStatusofPDCPSDU)
+		if err = msg.ReceiveStatusofPDCPSDU.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode ReceiveStatusofPDCPSDU failed: %w", err)
 		}
-
 	case ProtocolIEID:
-		if err = s.CountValue.Decode(r); err != nil {
-			return fmt.Errorf("Decode CountValue failed: %w", err)
+		if err = msg.CountValue.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode CountValue failed: %w", err)
 		}
-
 	case ProtocolIEID:
-		s.IEExtension = new(ProtocolExtensionContainer)
-		if err = s.IEExtension.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtension failed: %w", err)
+		msg.IEExtension = new(ProtocolExtensionContainer)
+		if err = msg.IEExtension.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode IEExtension failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

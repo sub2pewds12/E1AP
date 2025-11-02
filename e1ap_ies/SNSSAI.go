@@ -28,11 +28,11 @@ func (s *SNSSAI) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.SST), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
+	if err = s.SST.Encode(w); err != nil {
 		return fmt.Errorf("Encode SST failed: %w", err)
 	}
 	if s.SD != nil {
-		if err = w.WriteOctetString([]byte((*s.SD)), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
+		if err = s.SD.Encode(w); err != nil {
 			return fmt.Errorf("Encode SD failed: %w", err)
 		}
 	}
@@ -54,26 +54,14 @@ func (s *SNSSAI) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-			return fmt.Errorf("Decode SST failed: %w", err)
-		}
-		s.SST = SNSSAISST(val)
+	if err = s.SST.Decode(r); err != nil {
+		return fmt.Errorf("Decode SST failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-				return fmt.Errorf("Decode SD failed: %w", err)
-			}
-			tmp := SNSSAISD(val)
-			s.SD = &tmp
+		s.SD = new(SNSSAISD)
+		if err = s.SD.Decode(r); err != nil {
+			return fmt.Errorf("Decode SD failed: %w", err)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

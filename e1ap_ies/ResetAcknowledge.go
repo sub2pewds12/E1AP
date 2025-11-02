@@ -15,33 +15,31 @@ type ResetAcknowledge struct {
 	CriticalityDiagnostics                    *CriticalityDiagnostics                    `aper:"optional,ext"`
 }
 
+// toIes transforms the ResetAcknowledge struct into a slice of E1APMessageIEs.
 func (msg *ResetAcknowledge) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDTransactionID,
+			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 255},
 				ext:   true,
-				Value: aper.Integer(msg.TransactionID),
+				Value: msg.TransactionID.Value,
 			},
 		})
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEIDCriticalityDiagnostics,
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.CriticalityDiagnostics,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.CriticalityDiagnostics,
+		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode implements the aper.AperMarshaller interface for ResetAcknowledge.
@@ -51,7 +49,7 @@ func (msg *ResetAcknowledge) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert ResetAcknowledge to IEs: %w", err)
 	}
 
-	return EncodeSuccessfulOutcome(w, ProcedureCodeReset, Criticality{Value: CriticalityIgnore}, ies)
+	return encodeMessage(w, E1apPduSuccessfulOutcome, ProcedureCodeReset, Criticality{Value: CriticalityIgnore}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for ResetAcknowledge.
@@ -66,7 +64,7 @@ func (msg *ResetAcknowledge) Decode(buf []byte) (err error, diagList []Criticali
 
 	decoder := ResetAcknowledgeDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -79,8 +77,8 @@ func (msg *ResetAcknowledge) Decode(buf []byte) (err error, diagList []Criticali
 	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -94,7 +92,7 @@ func (msg *ResetAcknowledge) Decode(buf []byte) (err error, diagList []Criticali
 type ResetAcknowledgeDecoder struct {
 	msg      *ResetAcknowledge
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *ResetAcknowledgeDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -102,55 +100,53 @@ func (decoder *ResetAcknowledgeDecoder) decodeIE(r *aper.AperReader) (msgIe *E1A
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return fmt.Errorf("Decode TransactionID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.TransactionID = TransactionID(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDUEAssociatedLogicalE1ConnectionListResAck:
-		s.UEAssociatedLogicalE1ConnectionListResAck = new(UEAssociatedLogicalE1ConnectionListResAck)
-		if err = s.UEAssociatedLogicalE1ConnectionListResAck.Decode(r); err != nil {
-			return fmt.Errorf("Decode UEAssociatedLogicalE1ConnectionListResAck failed: %w", err)
+		msg.UEAssociatedLogicalE1ConnectionListResAck = new(UEAssociatedLogicalE1ConnectionListResAck)
+		if err = msg.UEAssociatedLogicalE1ConnectionListResAck.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode UEAssociatedLogicalE1ConnectionListResAck failed: %w", err)
 		}
-
 	case ProtocolIEIDCriticalityDiagnostics:
-		s.CriticalityDiagnostics = new(CriticalityDiagnostics)
-		if err = s.CriticalityDiagnostics.Decode(r); err != nil {
-			return fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
+		msg.CriticalityDiagnostics = new(CriticalityDiagnostics)
+		if err = msg.CriticalityDiagnostics.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

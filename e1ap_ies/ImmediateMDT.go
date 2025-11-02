@@ -36,7 +36,7 @@ func (s *ImmediateMDT) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteBitString(s.MeasurementsToActivate.Bytes, uint(s.MeasurementsToActivate.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
+	if err = s.MeasurementsToActivate.Encode(w); err != nil {
 		return fmt.Errorf("Encode MeasurementsToActivate failed: %w", err)
 	}
 	if s.MeasurementFour != nil {
@@ -72,15 +72,9 @@ func (s *ImmediateMDT) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
-			return fmt.Errorf("Decode MeasurementsToActivate failed: %w", err)
-		}
-		s.MeasurementsToActivate = MeasurementsToActivate(val)
+	if err = s.MeasurementsToActivate.Decode(r); err != nil {
+		return fmt.Errorf("Decode MeasurementsToActivate failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.MeasurementFour = new(M4Configuration)
 		if err = s.MeasurementFour.Decode(r); err != nil {

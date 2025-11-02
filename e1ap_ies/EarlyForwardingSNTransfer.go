@@ -15,51 +15,52 @@ type EarlyForwardingSNTransfer struct {
 	DRBsSubjectToEarlyForwardingList []DRBsSubjectToEarlyForwardingItem `aper:"mandatory,ext"`
 }
 
+// toIes transforms the EarlyForwardingSNTransfer struct into a slice of E1APMessageIEs.
 func (msg *EarlyForwardingSNTransfer) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUCPUEE1APID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
 				ext:   false,
-				Value: aper.Integer(msg.GNBCUCPUEE1APID),
+				Value: msg.GNBCUCPUEE1APID.Value,
 			},
 		})
 	}
-
 	{
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDGNBCUUPUEE1APID,
+			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value: &INTEGER{
 				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
 				ext:   false,
-				Value: aper.Integer(msg.GNBCUUPUEE1APID),
+				Value: msg.GNBCUUPUEE1APID.Value,
 			},
 		})
 	}
-
 	{
 
 		tmp_DRBsSubjectToEarlyForwardingList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 0, Ub: 0},
 			ext: false,
 		}
+
 		for i := 0; i < len(msg.DRBsSubjectToEarlyForwardingList); i++ {
 			tmp_DRBsSubjectToEarlyForwardingList.Value = append(tmp_DRBsSubjectToEarlyForwardingList.Value, &msg.DRBsSubjectToEarlyForwardingList[i])
 		}
+
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEIDDRBsSubjectToEarlyForwardingList,
+			Id:          ProtocolIEID(ProtocolIEIDDRBsSubjectToEarlyForwardingList),
 			Criticality: Criticality{Value: CriticalityReject},
 			Value:       &tmp_DRBsSubjectToEarlyForwardingList,
 		})
 	}
-	return ies, nil
+	var err error
+	return ies, err
 }
 
 // Encode implements the aper.AperMarshaller interface for EarlyForwardingSNTransfer.
@@ -69,7 +70,7 @@ func (msg *EarlyForwardingSNTransfer) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert EarlyForwardingSNTransfer to IEs: %w", err)
 	}
 
-	return EncodeInitiatingMessage(w, ProcedureCodeEarlyForwardingSNTransfer, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeEarlyForwardingSNTransfer, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for EarlyForwardingSNTransfer.
@@ -84,7 +85,7 @@ func (msg *EarlyForwardingSNTransfer) Decode(buf []byte) (err error, diagList []
 
 	decoder := EarlyForwardingSNTransferDecoder{
 		msg:  msg,
-		list: make(map[aper.Integer]*E1APMessageIE),
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
@@ -97,8 +98,8 @@ func (msg *EarlyForwardingSNTransfer) Decode(buf []byte) (err error, diagList []
 	if _, ok := decoder.list[ProtocolIEIDGNBCUCPUEE1APID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUCPUEE1APID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -106,8 +107,8 @@ func (msg *EarlyForwardingSNTransfer) Decode(buf []byte) (err error, diagList []
 	if _, ok := decoder.list[ProtocolIEIDGNBCUUPUEE1APID]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUUPUEE1APID,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -115,8 +116,8 @@ func (msg *EarlyForwardingSNTransfer) Decode(buf []byte) (err error, diagList []
 	if _, ok := decoder.list[ProtocolIEIDDRBsSubjectToEarlyForwardingList]; !ok {
 		err = fmt.Errorf("mandatory field DRBsSubjectToEarlyForwardingList is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
-			IECriticality: Criticality{Value: CriticalityReject}, // Or from IE spec
-			IEID:          ProtocolIEID{Value: ProtocolIEIDDRBsSubjectToEarlyForwardingList},
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDDRBsSubjectToEarlyForwardingList,
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -130,7 +131,7 @@ func (msg *EarlyForwardingSNTransfer) Decode(buf []byte) (err error, diagList []
 type EarlyForwardingSNTransferDecoder struct {
 	msg      *EarlyForwardingSNTransfer
 	diagList []CriticalityDiagnosticsIEItem
-	list     map[aper.Integer]*E1APMessageIE
+	list     map[ProtocolIEID]*E1APMessageIE
 }
 
 func (decoder *EarlyForwardingSNTransferDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
@@ -138,58 +139,69 @@ func (decoder *EarlyForwardingSNTransferDecoder) decodeIE(r *aper.AperReader) (m
 	var c uint64
 	var buf []byte
 	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id.Value = aper.Integer(id)
+	msgIe.Id = ProtocolIEID(id)
 
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return
+		return nil, err
 	}
-	msgIe.Criticality.Value = aper.Enumerated(c)
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
 	if buf, err = r.ReadOpenType(); err != nil {
-		return
+		return nil, err
 	}
 
-	ieId := msgIe.Id.Value
+	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		err = fmt.Errorf("duplicated protocol IE ID %%d", ieId)
-		return
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
-
+	switch msgIe.Id {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 			}
-			s.GNBCUCPUEE1APID = GNBCUCPUEE1APID(val)
+			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 			}
-			s.GNBCUUPUEE1APID = GNBCUUPUEE1APID(val)
+			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
 		}
-
 	case ProtocolIEIDDRBsSubjectToEarlyForwardingList:
-		if err = s.DRBsSubjectToEarlyForwardingList.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBsSubjectToEarlyForwardingList failed: %w", err)
+
+		{
+			itemDecoder := func(r *aper.AperReader) (*DRBsSubjectToEarlyForwardingItem, error) {
+
+				item := new(DRBsSubjectToEarlyForwardingItem)
+				if err := item.Decode(r); err != nil {
+					return nil, err
+				}
+				return item, nil
+			}
+			var decodedItems []DRBsSubjectToEarlyForwardingItem
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return nil, fmt.Errorf("Decode DRBsSubjectToEarlyForwardingList failed: %w", err)
+			}
+			msg.DRBsSubjectToEarlyForwardingList = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	return
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

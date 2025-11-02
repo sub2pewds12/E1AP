@@ -40,22 +40,22 @@ func (s *GBRQosInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.ERABMaximumBitrateDL != nil {
-		if err = w.WriteInteger(int64((*s.ERABMaximumBitrateDL)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.ERABMaximumBitrateDL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABMaximumBitrateDL failed: %w", err)
 		}
 	}
 	if s.ERABMaximumBitrateUL != nil {
-		if err = w.WriteInteger(int64((*s.ERABMaximumBitrateUL)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.ERABMaximumBitrateUL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABMaximumBitrateUL failed: %w", err)
 		}
 	}
 	if s.ERABGuaranteedBitrateDL != nil {
-		if err = w.WriteInteger(int64((*s.ERABGuaranteedBitrateDL)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.ERABGuaranteedBitrateDL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABGuaranteedBitrateDL failed: %w", err)
 		}
 	}
 	if s.ERABGuaranteedBitrateUL != nil {
-		if err = w.WriteInteger(int64((*s.ERABGuaranteedBitrateUL)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.ERABGuaranteedBitrateUL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABGuaranteedBitrateUL failed: %w", err)
 		}
 	}
@@ -84,10 +84,9 @@ func (s *GBRQosInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode ERABMaximumBitrateDL failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.ERABMaximumBitrateDL = &tmp
+			s.ERABMaximumBitrateDL = new(BitRate)
+			s.ERABMaximumBitrateDL.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 
@@ -96,10 +95,9 @@ func (s *GBRQosInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode ERABMaximumBitrateUL failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.ERABMaximumBitrateUL = &tmp
+			s.ERABMaximumBitrateUL = new(BitRate)
+			s.ERABMaximumBitrateUL.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 
@@ -108,10 +106,9 @@ func (s *GBRQosInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode ERABGuaranteedBitrateDL failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.ERABGuaranteedBitrateDL = &tmp
+			s.ERABGuaranteedBitrateDL = new(BitRate)
+			s.ERABGuaranteedBitrateDL.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 
@@ -120,10 +117,9 @@ func (s *GBRQosInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode ERABGuaranteedBitrateUL failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.ERABGuaranteedBitrateUL = &tmp
+			s.ERABGuaranteedBitrateUL = new(BitRate)
+			s.ERABGuaranteedBitrateUL.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

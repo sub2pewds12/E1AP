@@ -25,10 +25,10 @@ func (s *EndpointIPAddressAndPort) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteBitString(s.EndpointIPAddress.Bytes, uint(s.EndpointIPAddress.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = s.EndpointIPAddress.Encode(w); err != nil {
 		return fmt.Errorf("Encode EndpointIPAddress failed: %w", err)
 	}
-	if err = w.WriteBitString(s.PortNumber.Bytes, uint(s.PortNumber.NumBits), &aper.Constraint{Lb: 16, Ub: 16}, false); err != nil {
+	if err = s.PortNumber.Encode(w); err != nil {
 		return fmt.Errorf("Encode PortNumber failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -49,23 +49,12 @@ func (s *EndpointIPAddressAndPort) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
-			return fmt.Errorf("Decode EndpointIPAddress failed: %w", err)
-		}
-		s.EndpointIPAddress = TransportLayerAddress(val)
+	if err = s.EndpointIPAddress.Decode(r); err != nil {
+		return fmt.Errorf("Decode EndpointIPAddress failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 16, Ub: 16}, false); err != nil {
-			return fmt.Errorf("Decode PortNumber failed: %w", err)
-		}
-		s.PortNumber = PortNumber(val)
+	if err = s.PortNumber.Decode(r); err != nil {
+		return fmt.Errorf("Decode PortNumber failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {

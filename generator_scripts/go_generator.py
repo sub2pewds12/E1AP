@@ -340,130 +340,97 @@ class GoCodeGenerator:
             logger.info("No constants found to generate.")
 
     def _generate_common_types_file(self, simple_items: List[Any]):
-        """Generates a single file for all simple, reusable type definitions with validation."""
+        """
+        Generates a single file for simple, reusable types as structs with Encode/Decode methods.
+        """
         if not simple_items:
             logger.info("No simple types found to generate in common file.")
             return
 
-        go_code = 'package e1ap_ies\n\nimport (\n\t"fmt"\n\t"github.com/lvdund/ngap/aper"\n)\n\n'
-
-        from collections import defaultdict
-
-        type_counts = defaultdict(int)
-        total_count = 0
-
-        processed_concrete_defs = set()
+        # Add 'io' to the imports for the Encode/Decode methods
+        go_code = 'package e1ap_ies\n\nimport (\n\t"fmt"\n\t"io"\n\t"github.com/lvdund/ngap/aper"\n)\n\n'
 
         sorted_items = sorted(simple_items, key=lambda x: self._standard_string(x.name))
+        total_count = 0
 
         for item in sorted_items:
             go_name = self._standard_string(item.name)
-
-            if isinstance(item, AliasDefinition):
-                go_base_type, _ = self._resolve_go_type(item.alias_of)
-            elif isinstance(item, IntegerDefinition):
-                go_base_type = "aper.Integer"
-            elif isinstance(item, StringDefinition):
-                go_base_type = "aper.OctetString"
-            else:
-
+            if go_name in ["ProtocolIEID", "ProcedureCode"]:
+                # These are special. Generate them as simple aliases.
+                go_code += f"type {go_name} aper.Integer\n\n"
                 continue
+            
+            underlying_type = ""
+            encode_logic = ""
+            decode_logic = ""
+            
+            # --- THIS IS THE NEW LOGIC TO DETERMINE THE TYPE AND METHODS ---
+            
+            if isinstance(item, IntegerDefinition) or (isinstance(item, AliasDefinition) and "INTEGER" in item.alias_of.upper()):
+                underlying_type = "aper.Integer"
+                min_val = getattr(item, 'min_val', 0) or 0
+                max_val = getattr(item, 'max_val', 0) or 0
+                is_extensible = str(getattr(item, 'is_extensible', False)).lower()
 
-            if go_name.lower() != go_base_type.lower().split(".")[-1]:
+                encode_logic = f"return w.WriteInteger(int64(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
+                decode_logic = f"""
+        val, err := r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        if err != nil {{
+            return err
+        }}
+        s.Value = aper.Integer(val)
+        return nil"""
 
-                go_code += self._generate_header_comment(item, go_name)
-                go_code += f"type {go_name} {go_base_type}\n\n"
+            elif isinstance(item, StringDefinition) or (isinstance(item, AliasDefinition) and "STRING" in item.alias_of.upper()):
+                min_val = getattr(item, 'min_val', 0) or 0
+                max_val = getattr(item, 'max_val', 0) or 0
+                is_extensible = str(getattr(item, 'is_extensible', False)).lower()
 
-                has_constraints = hasattr(item, "min_val") and item.min_val is not None
+                string_type_name = item.string_type if isinstance(item, StringDefinition) else item.alias_of
+                
+                if "BIT STRING" in string_type_name.upper():
+                    underlying_type = "aper.BitString"
+                    encode_logic = f"return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
+                    decode_logic = f"""
+        var err error
+        s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        return err"""
+                else: # OCTET STRING
+                    underlying_type = "aper.OctetString"
+                    encode_logic = f"return w.WriteOctetString([]byte(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
+                    decode_logic = f"""
+        var err error
+        s.Value, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        return err"""
 
-                is_validatable_integer = (
-                    isinstance(item, IntegerDefinition)
-                    and item.max_val != "18446744073709551615"
-                )
+            # --- END OF NEW LOGIC ---
 
-                is_validatable_string = isinstance(item, StringDefinition)
-
-                if has_constraints and (
-                    is_validatable_integer or is_validatable_string
-                ):
-
-                    min_val_unformatted = item.min_val
-                    max_val_unformatted = (
-                        item.max_val if item.max_val is not None else item.min_val
-                    )
-
-                    min_val_str = self._format_go_value(min_val_unformatted)
-                    max_val_str = self._format_go_value(max_val_unformatted)
-
-                    const_type = "int" if is_validatable_string else go_name
-
-                    if min_val_str != max_val_str:
-
-                        min_val_assign = min_val_str
-                        max_val_assign = max_val_str
-                        try:
-                            int(min_val_unformatted)
-                        except (ValueError, TypeError):
-                            min_val_assign = f"{const_type}({min_val_str})"
-                        try:
-                            int(max_val_unformatted)
-                        except (ValueError, TypeError):
-                            max_val_assign = f"{const_type}({max_val_str})"
-
-                        go_code += "const (\n"
-                        go_code += f"\tMin{go_name} {const_type} = {min_val_assign}\n"
-                        go_code += f"\tMax{go_name} {const_type} = {max_val_assign}\n"
-                        go_code += ")\n\n"
-
-                    go_code += f"// Validate checks if the value is within the specified range.\n"
-                    go_code += f"func (v {go_name}) Validate() error {{\n"
-
-                    min_check = (
-                        f"Min{go_name}"
-                        if min_val_str != max_val_str
-                        else self._format_go_value(item.min_val)
-                    )
-                    max_check = (
-                        f"Max{go_name}"
-                        if min_val_str != max_val_str
-                        else self._format_go_value(item.max_val)
-                    )
-
-                    check_logic = ""
-                    error_range_str = ""
-
-                    if is_validatable_string:
-                        check_logic = f"len(v) < {min_check} || len(v) > {max_check}"
-                        error_range_str = f"length ({min_check}..{max_check})"
-                    else:
-                        check_logic = f"v < {min_check} || v > {max_check}"
-                        error_range_str = f"range ({min_check}..{max_check})"
-
-                    go_code += f"\tif {check_logic} {{\n"
-                    go_code += f'\t\treturn fmt.Errorf("value for {go_name} is outside the valid {error_range_str}")\n'
-                    go_code += "\t}\n"
-                    go_code += "\treturn nil\n"
-                    go_code += "}\n\n"
-
+            if underlying_type:
                 total_count += 1
+                go_code += self._generate_header_comment(item, go_name)
+                
+                # Generate the struct
+                go_code += f"type {go_name} struct {{\n\tValue {underlying_type}\n}}\n\n"
+                
+                # Generate the Encode method
+                go_code += f"// Encode implements the aper.AperMarshaller interface.\n"
+                go_code += f"func (s *{go_name}) Encode(w *aper.AperWriter) error {{\n\t{encode_logic}\n}}\n\n"
+                
+                # Generate the Decode method
+                go_code += f"// Decode implements the aper.AperUnmarshaller interface.\n"
+                go_code += f"func (s *{go_name}) Decode(r *aper.AperReader) error {{\n\t{decode_logic}\n}}\n\n"
 
-                item_type_str = type(item).__name__.replace("Definition", "").upper()
-                type_counts[item_type_str] += 1
+                # Your existing validation logic can be preserved if you want, but it's less critical now.
+                # You would just need to change the receiver from `(v {go_name})` to `(s *{go_name})`
+                # and the check from `len(v)` to `len(s.Value)`.
+                
+        if total_count > 0:
+            file_path = os.path.join(self.output_dir, "e1ap_common_types.go")
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(go_code)
+            self.generated_files.add("e1ap_common_types.go")
 
-            if total_count > 0:
-                file_path = os.path.join(self.output_dir, "e1ap_common_types.go")
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(go_code)
-                self.generated_files.add("e1ap_common_types.go")
-
-        for def_type, count in sorted(type_counts.items()):
-            if count > 0:
-                plural = "s" if count > 1 else ""
-                logger.info(
-                    f"SUCCESS: Wrote {count} {def_type} type definition{plural} with validation to 'e1ap_common_types.go'."
-                )
-        else:
-            logger.info("No simple type aliases needed to be generated.")
+        logger.info(f"SUCCESS: Wrote {total_count} common type definitions to 'e1ap_common_types.go'.")
 
     def _generate_complex_type_files(self, complex_items: List[Any]):
        """Generates a dedicated file for each complex type using a robust two-pass strategy."""

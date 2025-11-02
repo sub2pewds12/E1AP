@@ -30,7 +30,7 @@ func (s *DRBSetupModItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DRBID), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if err = s.S1DLUPTNLInformation.Encode(w); err != nil {
@@ -68,9 +68,8 @@ func (s *DRBSetupModItemEUTRAN) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 			return fmt.Errorf("Decode DRBID failed: %w", err)
 		}
-		s.DRBID = DRBID(val)
+		s.DRBID.Value = aper.Integer(val)
 	}
-
 	if err = s.S1DLUPTNLInformation.Decode(r); err != nil {
 		return fmt.Errorf("Decode S1DLUPTNLInformation failed: %w", err)
 	}

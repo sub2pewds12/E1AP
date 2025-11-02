@@ -27,16 +27,16 @@ func (s *DRBUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.StartTimeStamp), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
+	if err = s.StartTimeStamp.Encode(w); err != nil {
 		return fmt.Errorf("Encode StartTimeStamp failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.EndTimeStamp), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
+	if err = s.EndTimeStamp.Encode(w); err != nil {
 		return fmt.Errorf("Encode EndTimeStamp failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.UsageCountUL), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
+	if err = w.WriteInteger(int64(s.UsageCountUL.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
 		return fmt.Errorf("Encode UsageCountUL failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.UsageCountDL), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
+	if err = w.WriteInteger(int64(s.UsageCountDL.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
 		return fmt.Errorf("Encode UsageCountDL failed: %w", err)
 	}
 	if s.IEExtensions != nil {
@@ -57,21 +57,11 @@ func (s *DRBUsageReportItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-			return fmt.Errorf("Decode StartTimeStamp failed: %w", err)
-		}
-		s.StartTimeStamp = DRBUsageReportItemStartTimeStamp(val)
+	if err = s.StartTimeStamp.Decode(r); err != nil {
+		return fmt.Errorf("Decode StartTimeStamp failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-			return fmt.Errorf("Decode EndTimeStamp failed: %w", err)
-		}
-		s.EndTimeStamp = DRBUsageReportItemEndTimeStamp(val)
+	if err = s.EndTimeStamp.Decode(r); err != nil {
+		return fmt.Errorf("Decode EndTimeStamp failed: %w", err)
 	}
 
 	{
@@ -79,7 +69,7 @@ func (s *DRBUsageReportItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
 			return fmt.Errorf("Decode UsageCountUL failed: %w", err)
 		}
-		s.UsageCountUL = DRBUsageReportItemUsageCountUL(val)
+		s.UsageCountUL.Value = aper.Integer(val)
 	}
 
 	{
@@ -87,9 +77,8 @@ func (s *DRBUsageReportItem) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
 			return fmt.Errorf("Decode UsageCountDL failed: %w", err)
 		}
-		s.UsageCountDL = DRBUsageReportItemUsageCountDL(val)
+		s.UsageCountDL.Value = aper.Integer(val)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {

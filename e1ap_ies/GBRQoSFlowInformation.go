@@ -48,32 +48,32 @@ func (s *GBRQoSFlowInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.MaxFlowBitRateDownlink != nil {
-		if err = w.WriteInteger(int64((*s.MaxFlowBitRateDownlink)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.MaxFlowBitRateDownlink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode MaxFlowBitRateDownlink failed: %w", err)
 		}
 	}
 	if s.MaxFlowBitRateUplink != nil {
-		if err = w.WriteInteger(int64((*s.MaxFlowBitRateUplink)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.MaxFlowBitRateUplink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode MaxFlowBitRateUplink failed: %w", err)
 		}
 	}
 	if s.GuaranteedFlowBitRateDownlink != nil {
-		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateDownlink)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.GuaranteedFlowBitRateDownlink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode GuaranteedFlowBitRateDownlink failed: %w", err)
 		}
 	}
 	if s.GuaranteedFlowBitRateUplink != nil {
-		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateUplink)), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.GuaranteedFlowBitRateUplink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode GuaranteedFlowBitRateUplink failed: %w", err)
 		}
 	}
 	if s.MaxPacketLossRateDownlink != nil {
-		if err = w.WriteInteger(int64((*s.MaxPacketLossRateDownlink)), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.MaxPacketLossRateDownlink.Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
 			return fmt.Errorf("Encode MaxPacketLossRateDownlink failed: %w", err)
 		}
 	}
 	if s.MaxPacketLossRateUplink != nil {
-		if err = w.WriteInteger(int64((*s.MaxPacketLossRateUplink)), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
+		if err = w.WriteInteger(int64(s.MaxPacketLossRateUplink.Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
 			return fmt.Errorf("Encode MaxPacketLossRateUplink failed: %w", err)
 		}
 	}
@@ -102,10 +102,9 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode MaxFlowBitRateDownlink failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.MaxFlowBitRateDownlink = &tmp
+			s.MaxFlowBitRateDownlink = new(BitRate)
+			s.MaxFlowBitRateDownlink.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 
@@ -114,10 +113,9 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode MaxFlowBitRateUplink failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.MaxFlowBitRateUplink = &tmp
+			s.MaxFlowBitRateUplink = new(BitRate)
+			s.MaxFlowBitRateUplink.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 
@@ -126,10 +124,9 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode GuaranteedFlowBitRateDownlink failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.GuaranteedFlowBitRateDownlink = &tmp
+			s.GuaranteedFlowBitRateDownlink = new(BitRate)
+			s.GuaranteedFlowBitRateDownlink.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 
@@ -138,10 +135,9 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 				return fmt.Errorf("Decode GuaranteedFlowBitRateUplink failed: %w", err)
 			}
-			tmp := BitRate(val)
-			s.GuaranteedFlowBitRateUplink = &tmp
+			s.GuaranteedFlowBitRateUplink = new(BitRate)
+			s.GuaranteedFlowBitRateUplink.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
 
@@ -150,10 +146,9 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
 				return fmt.Errorf("Decode MaxPacketLossRateDownlink failed: %w", err)
 			}
-			tmp := MaxPacketLossRate(val)
-			s.MaxPacketLossRateDownlink = &tmp
+			s.MaxPacketLossRateDownlink = new(MaxPacketLossRate)
+			s.MaxPacketLossRateDownlink.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
 
@@ -162,10 +157,9 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
 				return fmt.Errorf("Decode MaxPacketLossRateUplink failed: %w", err)
 			}
-			tmp := MaxPacketLossRate(val)
-			s.MaxPacketLossRateUplink = &tmp
+			s.MaxPacketLossRateUplink = new(MaxPacketLossRate)
+			s.MaxPacketLossRateUplink.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {
 		s.IEExtensions = new(GBRQoSFlowInformationExtensions)

@@ -18,10 +18,10 @@ func (s *HWCapacityIndicator) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
 		return fmt.Errorf("Encode extensibility bool failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.OfferedThroughput), &aper.Constraint{Lb: 1, Ub: 16777216}, true); err != nil {
+	if err = w.WriteInteger(int64(s.OfferedThroughput.Value), &aper.Constraint{Lb: 1, Ub: 16777216}, true); err != nil {
 		return fmt.Errorf("Encode OfferedThroughput failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.AvailableThroughput), &aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
+	if err = w.WriteInteger(int64(s.AvailableThroughput.Value), &aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
 		return fmt.Errorf("Encode AvailableThroughput failed: %w", err)
 	}
 	if err = s.IEExtensions.Encode(w); err != nil {
@@ -42,7 +42,7 @@ func (s *HWCapacityIndicator) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 16777216}, true); err != nil {
 			return fmt.Errorf("Decode OfferedThroughput failed: %w", err)
 		}
-		s.OfferedThroughput = HWCapacityIndicatorOfferedThroughput(val)
+		s.OfferedThroughput.Value = aper.Integer(val)
 	}
 
 	{
@@ -50,9 +50,8 @@ func (s *HWCapacityIndicator) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
 			return fmt.Errorf("Decode AvailableThroughput failed: %w", err)
 		}
-		s.AvailableThroughput = HWCapacityIndicatorAvailableThroughput(val)
+		s.AvailableThroughput.Value = aper.Integer(val)
 	}
-
 	if err = s.IEExtensions.Decode(r); err != nil {
 		return fmt.Errorf("Decode IEExtensions failed: %w", err)
 	}

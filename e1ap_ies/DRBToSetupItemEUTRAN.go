@@ -44,7 +44,7 @@ func (s *DRBToSetupItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(5), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DRBID), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if err = s.PDCPConfiguration.Encode(w); err != nil {
@@ -70,7 +70,7 @@ func (s *DRBToSetupItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DRBInactivityTimer != nil {
-		if err = w.WriteInteger(int64((*s.DRBInactivityTimer)), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64(s.DRBInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode DRBInactivityTimer failed: %w", err)
 		}
 	}
@@ -103,9 +103,8 @@ func (s *DRBToSetupItemEUTRAN) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 			return fmt.Errorf("Decode DRBID failed: %w", err)
 		}
-		s.DRBID = DRBID(val)
+		s.DRBID.Value = aper.Integer(val)
 	}
-
 	if err = s.PDCPConfiguration.Decode(r); err != nil {
 		return fmt.Errorf("Decode PDCPConfiguration failed: %w", err)
 	}
@@ -137,10 +136,9 @@ func (s *DRBToSetupItemEUTRAN) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 				return fmt.Errorf("Decode DRBInactivityTimer failed: %w", err)
 			}
-			tmp := InactivityTimer(val)
-			s.DRBInactivityTimer = &tmp
+			s.DRBInactivityTimer = new(InactivityTimer)
+			s.DRBInactivityTimer.Value = aper.Integer(val)
 		}
-
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.ExistingAllocatedS1DLUPTNLInfo = new(UPTNLInformation)

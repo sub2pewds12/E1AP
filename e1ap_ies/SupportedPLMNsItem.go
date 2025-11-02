@@ -36,7 +36,7 @@ func (s *SupportedPLMNsItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.PLMNIdentity), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
+	if err = s.PLMNIdentity.Encode(w); err != nil {
 		return fmt.Errorf("Encode PLMNIdentity failed: %w", err)
 	}
 	if s.SliceSupportList != nil {
@@ -72,15 +72,9 @@ func (s *SupportedPLMNsItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-			return fmt.Errorf("Decode PLMNIdentity failed: %w", err)
-		}
-		s.PLMNIdentity = PLMNIdentity(val)
+	if err = s.PLMNIdentity.Decode(r); err != nil {
+		return fmt.Errorf("Decode PLMNIdentity failed: %w", err)
 	}
-
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.SliceSupportList = new(SliceSupportList)
 		if err = s.SliceSupportList.Decode(r); err != nil {

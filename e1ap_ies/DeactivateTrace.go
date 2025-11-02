@@ -18,13 +18,13 @@ func (s *DeactivateTrace) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
 		return fmt.Errorf("Encode extensibility bool failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUCPUEE1APID), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUCPUEE1APID.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUCPUEE1APID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.GNBCUUPUEE1APID), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
+	if err = w.WriteInteger(int64(s.GNBCUUPUEE1APID.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode GNBCUUPUEE1APID failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.TraceID), &aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
+	if err = s.TraceID.Encode(w); err != nil {
 		return fmt.Errorf("Encode TraceID failed: %w", err)
 	}
 	return nil
@@ -42,7 +42,7 @@ func (s *DeactivateTrace) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 		}
-		s.GNBCUCPUEE1APID = GNBCUCPUEE1APID(val)
+		s.GNBCUCPUEE1APID.Value = aper.Integer(val)
 	}
 
 	{
@@ -50,17 +50,11 @@ func (s *DeactivateTrace) Decode(r *aper.AperReader) (err error) {
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 			return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 		}
-		s.GNBCUUPUEE1APID = GNBCUUPUEE1APID(val)
+		s.GNBCUUPUEE1APID.Value = aper.Integer(val)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
-			return fmt.Errorf("Decode TraceID failed: %w", err)
-		}
-		s.TraceID = TraceID(val)
+	if err = s.TraceID.Decode(r); err != nil {
+		return fmt.Errorf("Decode TraceID failed: %w", err)
 	}
-
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for DeactivateTrace")
 	}

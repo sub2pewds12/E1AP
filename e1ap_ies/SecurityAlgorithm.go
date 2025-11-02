@@ -32,7 +32,7 @@ func (s *SecurityAlgorithm) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode CipheringAlgorithm failed: %w", err)
 	}
 	if s.IntegrityProtectionAlgorithm != nil {
-		if err = w.WriteEnumerate(uint64((*s.IntegrityProtectionAlgorithm).Value), aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+		if err = w.WriteEnumerate(uint64(s.IntegrityProtectionAlgorithm.Value), aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
 			return fmt.Errorf("Encode IntegrityProtectionAlgorithm failed: %w", err)
 		}
 	}
