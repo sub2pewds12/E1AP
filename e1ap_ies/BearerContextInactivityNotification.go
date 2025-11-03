@@ -20,35 +20,44 @@ func (msg *BearerContextInactivityNotification) toIes() ([]E1APMessageIE, error)
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-				ext:   false,
-				Value: msg.GNBCUCPUEE1APID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+					ext:   false,
+					Value: msg.GNBCUCPUEE1APID.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-				ext:   false,
-				Value: msg.GNBCUUPUEE1APID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+					ext:   false,
+					Value: msg.GNBCUUPUEE1APID.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDActivityInformation),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value:       &msg.ActivityInformation,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDActivityInformation},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value:       &msg.ActivityInformation,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -133,8 +142,7 @@ func (decoder *BearerContextInactivityNotificationDecoder) decodeIE(r *aper.Aper
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

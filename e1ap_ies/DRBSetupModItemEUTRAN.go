@@ -44,11 +44,6 @@ func (s *DRBSetupModItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = s.ULUPTransportParameters.Encode(w); err != nil {
 		return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

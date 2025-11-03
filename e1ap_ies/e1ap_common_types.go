@@ -1195,7 +1195,26 @@ func (s *PrivateIEIDLocal) Decode(r *aper.AperReader) error {
 	return nil
 }
 
-type ProcedureCode aper.Integer
+// ProcedureCode From: 9_4_6_Common_Definitions.txt:43
+type ProcedureCode struct {
+	Value aper.Integer
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *ProcedureCode) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ProcedureCode) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
 
 // ProtocolExtensionID From: unknown:-1
 type ProtocolExtensionID struct {
@@ -1218,7 +1237,26 @@ func (s *ProtocolExtensionID) Decode(r *aper.AperReader) error {
 	return nil
 }
 
-type ProtocolIEID aper.Integer
+// ProtocolIEID From: unknown:-1
+type ProtocolIEID struct {
+	Value aper.Integer
+}
+
+// Encode implements the aper.AperMarshaller interface.
+func (s *ProtocolIEID) Encode(w *aper.AperWriter) error {
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false)
+}
+
+// Decode implements the aper.AperUnmarshaller interface.
+func (s *ProtocolIEID) Decode(r *aper.AperReader) error {
+
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false)
+	if err != nil {
+		return err
+	}
+	s.Value = aper.Integer(val)
+	return nil
+}
 
 // QCI From: 9_4_5_Information_Element_Definitions.txt:2044
 type QCI struct {

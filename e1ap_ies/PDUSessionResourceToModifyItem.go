@@ -117,11 +117,6 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 			return fmt.Errorf("Encode DRBToRemoveListNGRAN failed: %w", err)
 		}
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

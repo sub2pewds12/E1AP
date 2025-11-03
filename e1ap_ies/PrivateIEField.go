@@ -1,6 +1,7 @@
 package e1ap_ies
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/lvdund/ngap/aper"
@@ -8,9 +9,9 @@ import (
 
 // PrivateIEField is a generated SEQUENCE type.
 type PrivateIEField struct {
-	ID          PrivateIEID      `aper:"mandatory"`
-	Criticality Criticality      `aper:"mandatory"`
-	Value       aper.OctetString `aper:"mandatory"`
+	ID          PrivateIEID `aper:"mandatory"`
+	Criticality Criticality `aper:"mandatory"`
+	Value       aper.IE     `aper:"mandatory"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -24,8 +25,15 @@ func (s *PrivateIEField) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteEnumerate(uint64(s.Criticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode Criticality failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.Value.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-		return fmt.Errorf("Encode Value failed: %w", err)
+
+	{
+		var buf bytes.Buffer
+		if err = s.Value.Encode(aper.NewWriter(&buf)); err != nil {
+			return fmt.Errorf("Encode Value (OpenType) failed: %w", err)
+		}
+		if err = w.WriteOpenType(buf.Bytes()); err != nil {
+			return fmt.Errorf("Encode Value as OpenType failed: %w", err)
+		}
 	}
 	return nil
 }

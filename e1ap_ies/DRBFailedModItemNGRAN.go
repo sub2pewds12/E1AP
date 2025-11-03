@@ -31,11 +31,6 @@ func (s *DRBFailedModItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = s.Cause.Encode(w); err != nil {
 		return fmt.Errorf("Encode Cause failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

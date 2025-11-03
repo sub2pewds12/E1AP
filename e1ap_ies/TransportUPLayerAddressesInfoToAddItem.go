@@ -36,11 +36,6 @@ func (s *TransportUPLayerAddressesInfoToAddItem) Encode(w *aper.AperWriter) (err
 			return fmt.Errorf("Encode GTPTransportLayerAddressesToAdd failed: %w", err)
 		}
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

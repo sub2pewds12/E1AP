@@ -173,15 +173,18 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
         crit_const = f"Criticality{pascal_case_converter(ie.criticality)}"
 
         # Assemble the core statement
-        core_append_statement = f"""
+        full_ie_append_code = f"""
+        {{
+            {pre_append_code}
             ies = append(ies, E1APMessageIE{{
-			    Id:          ProtocolIEID({ie_id_const}),
+			    Id:          ProtocolIEID{{Value: {ie_id_const}}},
 			    Criticality: Criticality{{Value: {crit_const}}},
 			    Value:       {value_code},
-		    }})"""
+		    }})
+        }}"""
         
         # Prepend setup code
-        full_logic_block = f"{pre_append_code}\n{core_append_statement}"
+        full_logic_block = f"{pre_append_code}\n{full_ie_append_code}"
 
         # Wrap in optionality check
         final_block = f"{{\n{full_logic_block}\n}}" # Wrap mandatory in braces for scope
@@ -492,26 +495,33 @@ def _generate_sequence_encode_body(item: SequenceDefinition, parser: ASN1Parser)
 
     for ie in item.ies:
         field_name = pascal_case_converter(ie.ie)
+        
+        # --- THIS IS THE FIX ---
         _, asn1_def = parser.go_type_resolver(ie.type)
+        if not asn1_def:
+            print(f"WARNING: Could not resolve type '{ie.type}' for field '{ie.ie}' in SEQUENCE '{item.name}'. Skipping field.")
+            continue # Skip to the next field in the loop
+        # --- END OF FIX ---
+            
         is_optional = ie.presence in ["optional", "conditional"]
-
+        
         encode_call = _generate_direct_encode_call(field_name, ie, asn1_def, parser)
-
+        
         if is_optional:
-            encode_parts.append(f"if s.{field_name} != nil {{ {encode_call} }}")
+            encode_parts.append(f'if s.{field_name} != nil {{ {encode_call} }}')
         else:
             encode_parts.append(encode_call)
 
     return "\n\t".join(encode_parts)
 
 
+
 def _generate_sequence_decode_body(
     go_name: str, item: SequenceDefinition, parser: ASN1Parser
-) -> str:
+    ) -> str:
     """Generates the Go code for the body of a SEQUENCE Decode method."""
     pascal_case_converter = parser.pascal_case_converter
     decode_parts = []
-
     decode_parts.append(
         'var isExtensible bool\n\tif isExtensible, err = r.ReadBool(); err != nil { return fmt.Errorf("Read extensibility bool failed: %w", err) }'
     )
@@ -530,9 +540,15 @@ def _generate_sequence_decode_body(
     for ie in item.ies:
         field_name = pascal_case_converter(ie.ie)
         go_type, asn1_def = parser.go_type_resolver(ie.type)
-        is_optional = ie.presence in ["optional", "conditional"]
+        _, asn1_def = parser.go_type_resolver(ie.type)
+        
+        # Get the correct SEMANTIC type name for use in `new()` calls.
+        semantic_go_type = pascal_case_converter(ie.type)
+        
+        # Pass the correct SEMANTIC type name to the helper.
+        decode_call = _generate_internal_decode_call(field_name, semantic_go_type, ie, asn1_def, parser)
 
-        decode_call = _generate_internal_decode_call(field_name, go_type, ie, asn1_def, parser)
+        is_optional = ie.presence in ["optional", "conditional"]
 
         if go_type == "ProtocolExtensionContainer" and hasattr(
             ie, "extension_set_name"
@@ -702,12 +718,24 @@ def _generate_direct_encode_call(field_name, ie, asn1_def, parser):
     Helper to generate the Go code line for encoding a single field.
     This version correctly accesses the .Value field of primitive structs.
     """
+    
     is_optional = ie.presence in ["optional", "conditional"]
     is_extensible = getattr(asn1_def, 'is_extensible', False)
     
     value_accessor = f"s.{field_name}.Value"
 
-    if isinstance(asn1_def, IntegerDefinition):
+    if ie.type == "ANY":
+        return f"""
+        {{
+            var buf bytes.Buffer
+            if err = s.{field_name}.Encode(aper.NewWriter(&buf)); err != nil {{
+                return fmt.Errorf("Encode {field_name} (OpenType) failed: %w", err)
+            }}
+            if err = w.WriteOpenType(buf.Bytes()); err != nil {{
+                return fmt.Errorf("Encode {field_name} as OpenType failed: %w", err)
+            }}
+        }}"""
+    elif isinstance(asn1_def, IntegerDefinition):
         return f'if err = w.WriteInteger(int64({value_accessor}), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
 
     elif isinstance(asn1_def, EnumDefinition):
@@ -1026,8 +1054,7 @@ func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageI
 		return nil, err
 	}}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{{Value: aper.Integer(id)}}
 	if c, err = r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: 2}}, false); err != nil {{
 		return nil, err
 	}}

@@ -35,11 +35,6 @@ func (s *NGRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err er
 	if err = w.WriteEnumerate(uint64(s.PreEmptionVulnerability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode PreEmptionVulnerability failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

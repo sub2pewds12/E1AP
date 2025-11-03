@@ -35,11 +35,6 @@ func (s *DataUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.DRBUsageReportList.Encode(w); err != nil {
 		return fmt.Errorf("Encode DRBUsageReportList failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

@@ -10,7 +10,7 @@ import (
 type GNBCUUPConfigurationUpdate struct {
 	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,ext"`
 	GNBCUUPID                 GNBCUUPID                  `aper:"lb:0,ub:68719476735,mandatory,ext"`
-	GNBCUUPName               *aper.OctetString          `aper:"optional,ext"`
+	GNBCUUPName               *GNBCUUPName               `aper:"optional,ext"`
 	SupportedPLMNs            []SupportedPLMNsItem       `aper:"lb:1,ub:MaxnoofSPLMNs,optional,ext"`
 	GNBCUUPCapacity           *GNBCUUPCapacity           `aper:"lb:0,ub:255,optional,ext"`
 	GNBCUUPTNLAToRemoveList   []GNBCUUPTNLAToRemoveItem  `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
@@ -117,7 +117,7 @@ func (s *GNBCUUPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUUPName failed: %w", err)
 			}
-			s.GNBCUUPName = new(aper.OctetString)
+			s.GNBCUUPName = new(GNBCUUPName)
 			s.GNBCUUPName.Value = aper.OctetString(val)
 		}
 	}

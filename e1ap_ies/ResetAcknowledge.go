@@ -20,23 +20,29 @@ func (msg *ResetAcknowledge) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 255},
-				ext:   true,
-				Value: msg.TransactionID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
+		}
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       msg.CriticalityDiagnostics,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.CriticalityDiagnostics,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -103,8 +109,7 @@ func (decoder *ResetAcknowledgeDecoder) decodeIE(r *aper.AperReader) (msgIe *E1A
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

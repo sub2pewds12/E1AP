@@ -10,7 +10,7 @@ import (
 type PrivateIEID struct {
 	Choice uint64 `json:"-"`
 	Local  *INTEGER
-	Global *string
+	Global *ObjectIdentifier
 }
 
 const (

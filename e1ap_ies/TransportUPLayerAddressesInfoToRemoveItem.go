@@ -36,11 +36,6 @@ func (s *TransportUPLayerAddressesInfoToRemoveItem) Encode(w *aper.AperWriter) (
 			return fmt.Errorf("Encode GTPTransportLayerAddressesToRemove failed: %w", err)
 		}
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

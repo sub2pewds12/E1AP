@@ -39,11 +39,6 @@ func (s *MRDCDataUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.UsageCountDL.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
 		return fmt.Errorf("Encode UsageCountDL failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

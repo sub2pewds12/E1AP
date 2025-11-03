@@ -21,23 +21,29 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 255},
-				ext:   true,
-				Value: msg.TransactionID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
+		}
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       msg.CriticalityDiagnostics,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.CriticalityDiagnostics,
+			})
+		}
 	}
 	if len(msg.GNBCUCPTNLASetupList) > 0 {
 
@@ -50,11 +56,23 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 			tmp_GNBCUCPTNLASetupList.Value = append(tmp_GNBCUCPTNLASetupList.Value, &msg.GNBCUCPTNLASetupList[i])
 		}
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPTNLASetupList),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       &tmp_GNBCUCPTNLASetupList,
-		})
+		{
+
+			tmp_GNBCUCPTNLASetupList := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.GNBCUCPTNLASetupList); i++ {
+				tmp_GNBCUCPTNLASetupList.Value = append(tmp_GNBCUCPTNLASetupList.Value, &msg.GNBCUCPTNLASetupList[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPTNLASetupList},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       &tmp_GNBCUCPTNLASetupList,
+			})
+		}
 	}
 	if len(msg.GNBCUCPTNLAFailedToSetupList) > 0 {
 
@@ -67,19 +85,34 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 			tmp_GNBCUCPTNLAFailedToSetupList.Value = append(tmp_GNBCUCPTNLAFailedToSetupList.Value, &msg.GNBCUCPTNLAFailedToSetupList[i])
 		}
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPTNLAFailedToSetupList),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       &tmp_GNBCUCPTNLAFailedToSetupList,
-		})
+		{
+
+			tmp_GNBCUCPTNLAFailedToSetupList := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.GNBCUCPTNLAFailedToSetupList); i++ {
+				tmp_GNBCUCPTNLAFailedToSetupList.Value = append(tmp_GNBCUCPTNLAFailedToSetupList.Value, &msg.GNBCUCPTNLAFailedToSetupList[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPTNLAFailedToSetupList},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       &tmp_GNBCUCPTNLAFailedToSetupList,
+			})
+		}
 	}
 	if msg.TransportLayerAddressInfo != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDTransportLayerAddressInfo),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       msg.TransportLayerAddressInfo,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.TransportLayerAddressInfo,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -138,8 +171,7 @@ func (decoder *GNBCUCPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.Ap
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

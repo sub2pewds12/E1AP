@@ -31,11 +31,6 @@ func (s *PDCPSNStatusInformation) Encode(w *aper.AperWriter) (err error) {
 	if err = s.PdcpStatusTransferDL.Encode(w); err != nil {
 		return fmt.Errorf("Encode PdcpStatusTransferDL failed: %w", err)
 	}
-	if s.IEExtension != nil {
-		if err = s.IEExtension.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtension failed: %w", err)
-		}
-	}
 	return nil
 }
 

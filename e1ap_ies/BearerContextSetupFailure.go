@@ -21,43 +21,55 @@ func (msg *BearerContextSetupFailure) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-				ext:   false,
-				Value: msg.GNBCUCPUEE1APID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+					ext:   false,
+					Value: msg.GNBCUCPUEE1APID.Value,
+				},
+			})
+		}
 	}
 	if msg.GNBCUUPUEE1APID != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-				ext:   false,
-				Value: msg.GNBCUUPUEE1APID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+					ext:   false,
+					Value: msg.GNBCUUPUEE1APID.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDCause),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       &msg.Cause,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDCause},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       &msg.Cause,
+			})
+		}
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       msg.CriticalityDiagnostics,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.CriticalityDiagnostics,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -133,8 +145,7 @@ func (decoder *BearerContextSetupFailureDecoder) decodeIE(r *aper.AperReader) (m
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

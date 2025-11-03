@@ -19,15 +19,18 @@ func (msg *DataForwardingInformationRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 2},
-				ext:   true,
-				Value: msg.DataForwardingRequest.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value: &ENUMERATED{
+					c:     aper.Constraint{Lb: 0, Ub: 2},
+					ext:   true,
+					Value: msg.DataForwardingRequest.Value,
+				},
+			})
+		}
 	}
 	if len(msg.QOSFlowsForwardedOnFwdTunnels) > 0 {
 
@@ -40,11 +43,23 @@ func (msg *DataForwardingInformationRequest) toIes() ([]E1APMessageIE, error) {
 			tmp_QOSFlowsForwardedOnFwdTunnels.Value = append(tmp_QOSFlowsForwardedOnFwdTunnels.Value, &msg.QOSFlowsForwardedOnFwdTunnels[i])
 		}
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value:       &tmp_QOSFlowsForwardedOnFwdTunnels,
-		})
+		{
+
+			tmp_QOSFlowsForwardedOnFwdTunnels := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: 0},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.QOSFlowsForwardedOnFwdTunnels); i++ {
+				tmp_QOSFlowsForwardedOnFwdTunnels.Value = append(tmp_QOSFlowsForwardedOnFwdTunnels.Value, &msg.QOSFlowsForwardedOnFwdTunnels[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value:       &tmp_QOSFlowsForwardedOnFwdTunnels,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -103,8 +118,7 @@ func (decoder *DataForwardingInformationRequestDecoder) decodeIE(r *aper.AperRea
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

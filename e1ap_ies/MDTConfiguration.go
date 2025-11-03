@@ -31,11 +31,6 @@ func (s *MDTConfiguration) Encode(w *aper.AperWriter) (err error) {
 	if err = s.MDTMode.Encode(w); err != nil {
 		return fmt.Errorf("Encode MDTMode failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

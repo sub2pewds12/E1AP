@@ -19,23 +19,29 @@ func (msg *DRBBStatusTransfer) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	if msg.ReceiveStatusofPDCPSDU != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value: &OCTETSTRING{
-				c:     aper.Constraint{Lb: 1, Ub: 131072},
-				ext:   false,
-				Value: msg.ReceiveStatusofPDCPSDU.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value: &OCTETSTRING{
+					c:     aper.Constraint{Lb: 1, Ub: 131072},
+					ext:   false,
+					Value: msg.ReceiveStatusofPDCPSDU.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value:       &msg.CountValue,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value:       &msg.CountValue,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -94,8 +100,7 @@ func (decoder *DRBBStatusTransferDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

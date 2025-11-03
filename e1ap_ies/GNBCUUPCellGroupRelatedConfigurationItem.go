@@ -40,11 +40,6 @@ func (s *GNBCUUPCellGroupRelatedConfigurationItem) Encode(w *aper.AperWriter) (e
 			return fmt.Errorf("Encode ULConfiguration failed: %w", err)
 		}
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

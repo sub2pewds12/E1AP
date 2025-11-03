@@ -20,35 +20,44 @@ func (msg *SecurityIndication) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 2},
-				ext:   true,
-				Value: msg.IntegrityProtectionIndication.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value: &ENUMERATED{
+					c:     aper.Constraint{Lb: 0, Ub: 2},
+					ext:   true,
+					Value: msg.IntegrityProtectionIndication.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 2},
-				ext:   true,
-				Value: msg.ConfidentialityProtectionIndication.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value: &ENUMERATED{
+					c:     aper.Constraint{Lb: 0, Ub: 2},
+					ext:   true,
+					Value: msg.ConfidentialityProtectionIndication.Value,
+				},
+			})
+		}
 	}
 	if msg.MaximumIPdatarate != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEID),
-			Criticality: Criticality{Value: Criticality},
-			Value:       msg.MaximumIPdatarate,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEID},
+				Criticality: Criticality{Value: Criticality},
+				Value:       msg.MaximumIPdatarate,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -116,8 +125,7 @@ func (decoder *SecurityIndicationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

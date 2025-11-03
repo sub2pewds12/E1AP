@@ -18,27 +18,33 @@ func (msg *GNBCUUPStatusIndication) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 255},
-				ext:   true,
-				Value: msg.TransactionID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPOverloadInformation),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 1},
-				ext:   false,
-				Value: msg.GNBCUUPOverloadInformation.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPOverloadInformation},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &ENUMERATED{
+					c:     aper.Constraint{Lb: 0, Ub: 1},
+					ext:   false,
+					Value: msg.GNBCUUPOverloadInformation.Value,
+				},
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -106,8 +112,7 @@ func (decoder *GNBCUUPStatusIndicationDecoder) decodeIE(r *aper.AperReader) (msg
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

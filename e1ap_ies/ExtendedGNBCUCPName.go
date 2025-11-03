@@ -8,8 +8,8 @@ import (
 
 // ExtendedGNBCUCPName is a generated SEQUENCE type.
 type ExtendedGNBCUCPName struct {
-	GNBCUCPNameVisibleString *aper.OctetString           `aper:"optional,ext"`
-	GNBCUCPNameUTF8String    *aper.OctetString           `aper:"optional,ext"`
+	GNBCUCPNameVisibleString *GNBCUCPNameVisibleString   `aper:"optional,ext"`
+	GNBCUCPNameUTF8String    *GNBCUCPNameUTF8String      `aper:"optional,ext"`
 	IEExtensions             *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -41,11 +41,6 @@ func (s *ExtendedGNBCUCPName) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode GNBCUCPNameUTF8String failed: %w", err)
 		}
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 
@@ -66,7 +61,7 @@ func (s *ExtendedGNBCUCPName) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUCPNameVisibleString failed: %w", err)
 			}
-			s.GNBCUCPNameVisibleString = new(aper.OctetString)
+			s.GNBCUCPNameVisibleString = new(GNBCUCPNameVisibleString)
 			s.GNBCUCPNameVisibleString.Value = aper.OctetString(val)
 		}
 	}
@@ -77,7 +72,7 @@ func (s *ExtendedGNBCUCPName) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUCPNameUTF8String failed: %w", err)
 			}
-			s.GNBCUCPNameUTF8String = new(aper.OctetString)
+			s.GNBCUCPNameUTF8String = new(GNBCUCPNameUTF8String)
 			s.GNBCUCPNameUTF8String.Value = aper.OctetString(val)
 		}
 	}

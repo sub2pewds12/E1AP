@@ -27,11 +27,6 @@ func (s *NGRANQOSSupportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.NonDynamic5QIDescriptor.Encode(w); err != nil {
 		return fmt.Errorf("Encode NonDynamic5QIDescriptor failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

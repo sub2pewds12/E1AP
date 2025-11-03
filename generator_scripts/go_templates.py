@@ -52,7 +52,9 @@ def render_sequence_struct(
              of_type_go_name = pascal_case_converter(concrete_def.of_type)
              final_go_type = f"[]{of_type_go_name}"
         else:
-             final_go_type = base_go_type
+             final_go_type = pascal_case_converter(member.type)
+        if final_go_type == "ANY":
+            final_go_type = "aper.IE"
         
         is_list = isinstance(concrete_def, ListDefinition)
         is_optional = member.presence in ["optional", "conditional"]
@@ -101,7 +103,7 @@ def render_choice_struct(
              of_type_go_name = pascal_case_converter(concrete_def.of_type)
              final_go_type = f"[]{of_type_go_name}"
         else:
-             final_go_type = base_go_type
+             final_go_type = pascal_case_converter(member.type)
         field_lines.append(f"\t{member_go_name}\t*{final_go_type}")
 
     struct_body = "\n".join(field_lines)

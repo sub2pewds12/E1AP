@@ -27,11 +27,6 @@ func (s *NRCGISupportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.NRCGI.Encode(w); err != nil {
 		return fmt.Errorf("Encode NRCGI failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

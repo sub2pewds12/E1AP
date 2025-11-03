@@ -13,7 +13,7 @@ type CellTrafficTrace struct {
 	TraceID                        TraceID               `aper:"lb:8,ub:8,mandatory,ext"`
 	TraceCollectionEntityIPAddress TransportLayerAddress `aper:"lb:1,ub:160,mandatory,ext"`
 	PrivacyIndicator               *PrivacyIndicator     `aper:"optional,ext"`
-	URIaddress                     *aper.OctetString     `aper:"optional,ext"`
+	URIaddress                     *URIaddress           `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -106,7 +106,7 @@ func (s *CellTrafficTrace) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode URIaddress failed: %w", err)
 			}
-			s.URIaddress = new(aper.OctetString)
+			s.URIaddress = new(URIaddress)
 			s.URIaddress.Value = aper.OctetString(val)
 		}
 	}

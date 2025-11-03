@@ -31,11 +31,6 @@ func (s *PDUSessionResourceDataUsageItem) Encode(w *aper.AperWriter) (err error)
 	if err = s.MRDCUsageInformation.Encode(w); err != nil {
 		return fmt.Errorf("Encode MRDCUsageInformation failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

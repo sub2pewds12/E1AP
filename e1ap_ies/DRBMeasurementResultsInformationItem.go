@@ -36,11 +36,6 @@ func (s *DRBMeasurementResultsInformationItem) Encode(w *aper.AperWriter) (err e
 			return fmt.Errorf("Encode ULD1Result failed: %w", err)
 		}
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

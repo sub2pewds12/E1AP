@@ -9,7 +9,7 @@ import (
 // GNBCUCPConfigurationUpdate is a generated SEQUENCE type.
 type GNBCUCPConfigurationUpdate struct {
 	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,ext"`
-	GNBCUCPName               *aper.OctetString          `aper:"optional,ext"`
+	GNBCUCPName               *GNBCUCPName               `aper:"optional,ext"`
 	GNBCUCPTNLAToAddList      []GNBCUCPTNLAToAddItem     `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
 	GNBCUCPTNLAToRemoveList   []GNBCUCPTNLAToRemoveItem  `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
 	GNBCUCPTNLAToUpdateList   []GNBCUCPTNLAToUpdateItem  `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
@@ -105,7 +105,7 @@ func (s *GNBCUCPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
 			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return fmt.Errorf("Decode GNBCUCPName failed: %w", err)
 			}
-			s.GNBCUCPName = new(aper.OctetString)
+			s.GNBCUCPName = new(GNBCUCPName)
 			s.GNBCUCPName.Value = aper.OctetString(val)
 		}
 	}

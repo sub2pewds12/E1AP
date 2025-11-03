@@ -31,11 +31,6 @@ func (s *DLUPTNLAddressToUpdateItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.NewTNLAdress.Encode(w); err != nil {
 		return fmt.Errorf("Encode NewTNLAdress failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

@@ -20,27 +20,33 @@ func (msg *ULDataNotification) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUCPUEE1APID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-				ext:   false,
-				Value: msg.GNBCUCPUEE1APID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+					ext:   false,
+					Value: msg.GNBCUCPUEE1APID.Value,
+				},
+			})
+		}
 	}
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDGNBCUUPUEE1APID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-				ext:   false,
-				Value: msg.GNBCUUPUEE1APID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+					ext:   false,
+					Value: msg.GNBCUUPUEE1APID.Value,
+				},
+			})
+		}
 	}
 	{
 
@@ -53,11 +59,23 @@ func (msg *ULDataNotification) toIes() ([]E1APMessageIE, error) {
 			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
 		}
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDPDUSessionToNotifyList),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value:       &tmp_PDUSessionToNotifyList,
-		})
+		{
+
+			tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: 0},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
+				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDPDUSessionToNotifyList},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value:       &tmp_PDUSessionToNotifyList,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -142,8 +160,7 @@ func (decoder *ULDataNotificationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

@@ -27,11 +27,6 @@ func (s *MaximumIPdatarate) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteEnumerate(uint64(s.MaxIPrate.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 		return fmt.Errorf("Encode MaxIPrate failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

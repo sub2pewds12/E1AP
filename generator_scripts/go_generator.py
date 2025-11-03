@@ -355,10 +355,7 @@ class GoCodeGenerator:
 
         for item in sorted_items:
             go_name = self._standard_string(item.name)
-            if go_name in ["ProtocolIEID", "ProcedureCode"]:
-                # These are special. Generate them as simple aliases.
-                go_code += f"type {go_name} aper.Integer\n\n"
-                continue
+            
             
             underlying_type = ""
             encode_logic = ""
@@ -491,6 +488,9 @@ class GoCodeGenerator:
 
            if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition, ListDefinition)):
                go_name = self._standard_string(item.name)
+               if go_name in ["InitiatingMessage", "SuccessfulOutcome", "UnsuccessfulOutcome", "E1APPDU"]:
+                   logger.info(f"Skipping generation for abstract PDU wrapper: {go_name}")
+                   continue
                filename = go_name + ".go"
                file_path = os.path.join(self.output_dir, filename)
               

@@ -1,4 +1,4 @@
-module e1ap_ies
+module github.com/sub2pewds12/E1AP
 
 go 1.22.5
 

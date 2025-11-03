@@ -27,11 +27,6 @@ func (s *QOSFlowItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.QOSFlowIdentifier.Value), &aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
 		return fmt.Errorf("Encode QOSFlowIdentifier failed: %w", err)
 	}
-	if s.IEExtensions != nil {
-		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
-		}
-	}
 	return nil
 }
 

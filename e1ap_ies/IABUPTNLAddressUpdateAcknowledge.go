@@ -19,23 +19,29 @@ func (msg *IABUPTNLAddressUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 	{
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDTransactionID),
-			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 255},
-				ext:   true,
-				Value: msg.TransactionID.Value,
-			},
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
+		}
 	}
 	if msg.CriticalityDiagnostics != nil {
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDCriticalityDiagnostics),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       msg.CriticalityDiagnostics,
-		})
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.CriticalityDiagnostics,
+			})
+		}
 	}
 	if len(msg.ULUPTNLAddressToUpdateList) > 0 {
 
@@ -48,11 +54,23 @@ func (msg *IABUPTNLAddressUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 			tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList[i])
 		}
 
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID(ProtocolIEIDULUPTNLAddressToUpdateList),
-			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       &tmp_ULUPTNLAddressToUpdateList,
-		})
+		{
+
+			tmp_ULUPTNLAddressToUpdateList := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.ULUPTNLAddressToUpdateList); i++ {
+				tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDULUPTNLAddressToUpdateList},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       &tmp_ULUPTNLAddressToUpdateList,
+			})
+		}
 	}
 	var err error
 	return ies, err
@@ -111,8 +129,7 @@ func (decoder *IABUPTNLAddressUpdateAcknowledgeDecoder) decodeIE(r *aper.AperRea
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID(id)
-
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
 	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return nil, err
 	}

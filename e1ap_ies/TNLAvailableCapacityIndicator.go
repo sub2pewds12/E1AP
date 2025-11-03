@@ -32,9 +32,6 @@ func (s *TNLAvailableCapacityIndicator) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.ULTNLAvailableCapacity.Value), &aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
 		return fmt.Errorf("Encode ULTNLAvailableCapacity failed: %w", err)
 	}
-	if err = s.IEExtensions.Encode(w); err != nil {
-		return fmt.Errorf("Encode IEExtensions failed: %w", err)
-	}
 	return nil
 }
 
