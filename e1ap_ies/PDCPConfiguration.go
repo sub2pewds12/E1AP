@@ -62,13 +62,13 @@ func (s *PDCPConfiguration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(10), &aper.Constraint{Lb: 10, Ub: 10}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PDCPSNSizeUL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.PDCPSNSizeUL.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDCPSNSizeUL failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PDCPSNSizeDL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.PDCPSNSizeDL.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDCPSNSizeDL failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.RLCMode.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
+	if err = s.RLCMode.Encode(w); err != nil {
 		return fmt.Errorf("Encode RLCMode failed: %w", err)
 	}
 	if s.ROHCParameters != nil {
@@ -82,37 +82,37 @@ func (s *PDCPConfiguration) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DiscardTimer != nil {
-		if err = w.WriteEnumerate(uint64(s.DiscardTimer.Value), aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
+		if err = s.DiscardTimer.Encode(w); err != nil {
 			return fmt.Errorf("Encode DiscardTimer failed: %w", err)
 		}
 	}
 	if s.ULDataSplitThreshold != nil {
-		if err = w.WriteEnumerate(uint64(s.ULDataSplitThreshold.Value), aper.Constraint{Lb: 0, Ub: 23}, true); err != nil {
+		if err = s.ULDataSplitThreshold.Encode(w); err != nil {
 			return fmt.Errorf("Encode ULDataSplitThreshold failed: %w", err)
 		}
 	}
 	if s.PDCPDuplication != nil {
-		if err = w.WriteEnumerate(uint64(s.PDCPDuplication.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.PDCPDuplication.Encode(w); err != nil {
 			return fmt.Errorf("Encode PDCPDuplication failed: %w", err)
 		}
 	}
 	if s.PDCPReestablishment != nil {
-		if err = w.WriteEnumerate(uint64(s.PDCPReestablishment.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.PDCPReestablishment.Encode(w); err != nil {
 			return fmt.Errorf("Encode PDCPReestablishment failed: %w", err)
 		}
 	}
 	if s.PDCPDataRecovery != nil {
-		if err = w.WriteEnumerate(uint64(s.PDCPDataRecovery.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.PDCPDataRecovery.Encode(w); err != nil {
 			return fmt.Errorf("Encode PDCPDataRecovery failed: %w", err)
 		}
 	}
 	if s.DuplicationActivation != nil {
-		if err = w.WriteEnumerate(uint64(s.DuplicationActivation.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = s.DuplicationActivation.Encode(w); err != nil {
 			return fmt.Errorf("Encode DuplicationActivation failed: %w", err)
 		}
 	}
 	if s.OutOfOrderDelivery != nil {
-		if err = w.WriteEnumerate(uint64(s.OutOfOrderDelivery.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.OutOfOrderDelivery.Encode(w); err != nil {
 			return fmt.Errorf("Encode OutOfOrderDelivery failed: %w", err)
 		}
 	}

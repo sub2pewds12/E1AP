@@ -26,13 +26,13 @@ func (s *SDAPConfiguration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.DefaultDRB.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.DefaultDRB.Encode(w); err != nil {
 		return fmt.Errorf("Encode DefaultDRB failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.SDAPHeaderUL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.SDAPHeaderUL.Encode(w); err != nil {
 		return fmt.Errorf("Encode SDAPHeaderUL failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.SDAPHeaderDL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.SDAPHeaderDL.Encode(w); err != nil {
 		return fmt.Errorf("Encode SDAPHeaderDL failed: %w", err)
 	}
 	return nil

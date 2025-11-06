@@ -24,7 +24,7 @@ func (s *NPNContextInfoSNPN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.NID.Encode(w); err != nil {
+	if err = w.WriteBitString(s.NID.Value.Bytes, uint(s.NID.Value.NumBits), &aper.Constraint{Lb: 44, Ub: 44}, false); err != nil {
 		return fmt.Errorf("Encode NID failed: %w", err)
 	}
 	return nil

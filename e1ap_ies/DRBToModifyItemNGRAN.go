@@ -14,11 +14,11 @@ type DRBToModifyItemNGRAN struct {
 	DRBDataForwardingInformation *DataForwardingInformation      `aper:"optional,ext"`
 	PDCPSNStatusRequest          *PDCPSNStatusRequest            `aper:"optional,ext"`
 	PdcpSNStatusInformation      *PDCPSNStatusInformation        `aper:"optional,ext"`
-	DLUPParameters               []UPParametersItem              `aper:"optional,ext"`
-	CellGroupToAdd               []CellGroupInformationItem      `aper:"optional,ext"`
-	CellGroupToModify            []CellGroupInformationItem      `aper:"optional,ext"`
-	CellGroupToRemove            []CellGroupInformationItem      `aper:"optional,ext"`
-	FlowMappingInformation       []QOSFlowQOSParameterItem       `aper:"optional,ext"`
+	DLUPParameters               *UPParameters                   `aper:"optional,ext"`
+	CellGroupToAdd               *CellGroupInformation           `aper:"optional,ext"`
+	CellGroupToModify            *CellGroupInformation           `aper:"optional,ext"`
+	CellGroupToRemove            *CellGroupInformation           `aper:"optional,ext"`
+	FlowMappingInformation       *QOSFlowQOSParameterList        `aper:"optional,ext"`
 	DRBInactivityTimer           *InactivityTimer                `aper:"lb:1,ub:7200,optional,ext"`
 	IEExtensions                 *DRBToModifyItemNGRANExtensions `aper:"optional,ext"`
 }
@@ -87,7 +87,7 @@ func (s *DRBToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.PDCPSNStatusRequest != nil {
-		if err = w.WriteEnumerate(uint64(s.PDCPSNStatusRequest.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.PDCPSNStatusRequest.Encode(w); err != nil {
 			return fmt.Errorf("Encode PDCPSNStatusRequest failed: %w", err)
 		}
 	}
@@ -97,28 +97,58 @@ func (s *DRBToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DLUPParameters != nil {
-		if err = s.DLUPParameters.Encode(w); err != nil {
-			return fmt.Errorf("Encode DLUPParameters failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DLUPParameters.Value))
+			for i := 0; i < len(s.DLUPParameters.Value); i++ {
+				itemPointers[i] = &(s.DLUPParameters.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DLUPParameters failed: %w", err)
+			}
 		}
 	}
 	if s.CellGroupToAdd != nil {
-		if err = s.CellGroupToAdd.Encode(w); err != nil {
-			return fmt.Errorf("Encode CellGroupToAdd failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupToAdd.Value))
+			for i := 0; i < len(s.CellGroupToAdd.Value); i++ {
+				itemPointers[i] = &(s.CellGroupToAdd.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode CellGroupToAdd failed: %w", err)
+			}
 		}
 	}
 	if s.CellGroupToModify != nil {
-		if err = s.CellGroupToModify.Encode(w); err != nil {
-			return fmt.Errorf("Encode CellGroupToModify failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupToModify.Value))
+			for i := 0; i < len(s.CellGroupToModify.Value); i++ {
+				itemPointers[i] = &(s.CellGroupToModify.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode CellGroupToModify failed: %w", err)
+			}
 		}
 	}
 	if s.CellGroupToRemove != nil {
-		if err = s.CellGroupToRemove.Encode(w); err != nil {
-			return fmt.Errorf("Encode CellGroupToRemove failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupToRemove.Value))
+			for i := 0; i < len(s.CellGroupToRemove.Value); i++ {
+				itemPointers[i] = &(s.CellGroupToRemove.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode CellGroupToRemove failed: %w", err)
+			}
 		}
 	}
 	if s.FlowMappingInformation != nil {
-		if err = s.FlowMappingInformation.Encode(w); err != nil {
-			return fmt.Errorf("Encode FlowMappingInformation failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.FlowMappingInformation.Value))
+			for i := 0; i < len(s.FlowMappingInformation.Value); i++ {
+				itemPointers[i] = &(s.FlowMappingInformation.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode FlowMappingInformation failed: %w", err)
+			}
 		}
 	}
 	if s.DRBInactivityTimer != nil {

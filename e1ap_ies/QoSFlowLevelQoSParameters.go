@@ -57,12 +57,12 @@ func (s *QoSFlowLevelQoSParameters) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.ReflectiveQOSAttribute != nil {
-		if err = w.WriteEnumerate(uint64(s.ReflectiveQOSAttribute.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.ReflectiveQOSAttribute.Encode(w); err != nil {
 			return fmt.Errorf("Encode ReflectiveQOSAttribute failed: %w", err)
 		}
 	}
 	if s.AdditionalQOSInformation != nil {
-		if err = w.WriteEnumerate(uint64(s.AdditionalQOSInformation.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.AdditionalQOSInformation.Encode(w); err != nil {
 			return fmt.Errorf("Encode AdditionalQOSInformation failed: %w", err)
 		}
 	}
@@ -72,7 +72,7 @@ func (s *QoSFlowLevelQoSParameters) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.ReflectiveQOSIndicator != nil {
-		if err = w.WriteEnumerate(uint64(s.ReflectiveQOSIndicator.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.ReflectiveQOSIndicator.Encode(w); err != nil {
 			return fmt.Errorf("Encode ReflectiveQOSIndicator failed: %w", err)
 		}
 	}

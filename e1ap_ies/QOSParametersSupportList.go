@@ -8,8 +8,8 @@ import (
 
 // QOSParametersSupportList is a generated SEQUENCE type.
 type QOSParametersSupportList struct {
-	EUTRANQOSSupportList []EUTRANQOSSupportItem      `aper:"optional,ext"`
-	NGRANQOSSupportList  []NGRANQOSSupportItem       `aper:"optional,ext"`
+	EUTRANQOSSupportList *EUTRANQOSSupportList       `aper:"optional,ext"`
+	NGRANQOSSupportList  *NGRANQOSSupportList        `aper:"optional,ext"`
 	IEExtensions         *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -32,13 +32,25 @@ func (s *QOSParametersSupportList) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.EUTRANQOSSupportList != nil {
-		if err = s.EUTRANQOSSupportList.Encode(w); err != nil {
-			return fmt.Errorf("Encode EUTRANQOSSupportList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.EUTRANQOSSupportList.Value))
+			for i := 0; i < len(s.EUTRANQOSSupportList.Value); i++ {
+				itemPointers[i] = &(s.EUTRANQOSSupportList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode EUTRANQOSSupportList failed: %w", err)
+			}
 		}
 	}
 	if s.NGRANQOSSupportList != nil {
-		if err = s.NGRANQOSSupportList.Encode(w); err != nil {
-			return fmt.Errorf("Encode NGRANQOSSupportList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.NGRANQOSSupportList.Value))
+			for i := 0; i < len(s.NGRANQOSSupportList.Value); i++ {
+				itemPointers[i] = &(s.NGRANQOSSupportList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode NGRANQOSSupportList failed: %w", err)
+			}
 		}
 	}
 	return nil

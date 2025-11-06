@@ -29,10 +29,10 @@ func (s *NGRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err er
 	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 		return fmt.Errorf("Encode PriorityLevel failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PreEmptionCapability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
+	if err = s.PreEmptionCapability.Encode(w); err != nil {
 		return fmt.Errorf("Encode PreEmptionCapability failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PreEmptionVulnerability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
+	if err = s.PreEmptionVulnerability.Encode(w); err != nil {
 		return fmt.Errorf("Encode PreEmptionVulnerability failed: %w", err)
 	}
 	return nil

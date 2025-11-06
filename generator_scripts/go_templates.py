@@ -48,9 +48,6 @@ def render_sequence_struct(
                  final_go_type = pascal_case_converter(item.name) + "Extensions"
              else:
                  final_go_type = base_go_type
-        elif concrete_def and isinstance(concrete_def, ListDefinition):
-             of_type_go_name = pascal_case_converter(concrete_def.of_type)
-             final_go_type = f"[]{of_type_go_name}"
         else:
              final_go_type = pascal_case_converter(member.type)
         if final_go_type == "ANY":
@@ -58,7 +55,7 @@ def render_sequence_struct(
         
         is_list = isinstance(concrete_def, ListDefinition)
         is_optional = member.presence in ["optional", "conditional"]
-        pointer = "*" if is_optional and not is_list else ""
+        pointer = "*" if is_optional else ""
 
         tag_parts = []
         if concrete_def and hasattr(concrete_def, "min_val") and concrete_def.min_val is not None:

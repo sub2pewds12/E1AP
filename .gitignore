@@ -1,16 +1,9 @@
-# --- Python Virtual Environment ---
-# Ignore the virtual environment folder, which contains installed packages.
 venv/
 __pycache__/
 *.pyc
 
-# --- Jupyter Notebook Cache ---
-# Ignore the checkpoint files created by Jupyter.
 .ipynb_checkpoints/
 
-
-# --- IDE and OS specific files ---
-# Common files from editors and operating systems to ignore.
 .vscode/
 .idea/
 *.DS_Store

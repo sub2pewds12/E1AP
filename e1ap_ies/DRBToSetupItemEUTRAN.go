@@ -13,8 +13,8 @@ type DRBToSetupItemEUTRAN struct {
 	EUTRANQOS                        EUTRANQOS                         `aper:"mandatory,ext"`
 	S1ULUPTNLInformation             UPTNLInformation                  `aper:"mandatory,ext"`
 	DataForwardingInformationRequest *DataForwardingInformationRequest `aper:"optional,ext"`
-	CellGroupInformation             []CellGroupInformationItem        `aper:"mandatory,ext"`
-	DLUPParameters                   []UPParametersItem                `aper:"optional,ext"`
+	CellGroupInformation             CellGroupInformation              `aper:"mandatory,ext"`
+	DLUPParameters                   *UPParameters                     `aper:"optional,ext"`
 	DRBInactivityTimer               *InactivityTimer                  `aper:"lb:1,ub:7200,optional,ext"`
 	ExistingAllocatedS1DLUPTNLInfo   *UPTNLInformation                 `aper:"optional,ext"`
 	IEExtensions                     *ProtocolExtensionContainer       `aper:"optional,ext"`
@@ -61,12 +61,25 @@ func (s *DRBToSetupItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode DataForwardingInformationRequest failed: %w", err)
 		}
 	}
-	if err = s.CellGroupInformation.Encode(w); err != nil {
-		return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+
+	{
+		itemPointers := make([]aper.AperMarshaller, len(s.CellGroupInformation.Value))
+		for i := 0; i < len(s.CellGroupInformation.Value); i++ {
+			itemPointers[i] = &(s.CellGroupInformation.Value[i])
+		}
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+		}
 	}
 	if s.DLUPParameters != nil {
-		if err = s.DLUPParameters.Encode(w); err != nil {
-			return fmt.Errorf("Encode DLUPParameters failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DLUPParameters.Value))
+			for i := 0; i < len(s.DLUPParameters.Value); i++ {
+				itemPointers[i] = &(s.DLUPParameters.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DLUPParameters failed: %w", err)
+			}
 		}
 	}
 	if s.DRBInactivityTimer != nil {

@@ -1,6 +1,7 @@
 package e1ap_ies
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/lvdund/ngap/aper"
@@ -8,59 +9,166 @@ import (
 
 // IABUPTNLAddressUpdate is a generated SEQUENCE type.
 type IABUPTNLAddressUpdate struct {
-	TransactionID              TransactionID                `aper:"lb:0,ub:255,mandatory,ext"`
-	DLUPTNLAddressToUpdateList []DLUPTNLAddressToUpdateItem `aper:"ub:MaxnoofTNLAddresses,optional,ext"`
+	TransactionID              TransactionID               `aper:"lb:0,ub:255,mandatory,ext"`
+	DLUPTNLAddressToUpdateList *DLUPTNLAddressToUpdateList `aper:"ub:MaxnoofTNLAddresses,optional,ext"`
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *IABUPTNLAddressUpdate) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
-	}
-	var optionalityBitmap [1]byte
-	if s.DLUPTNLAddressToUpdateList != nil {
-		optionalityBitmap[0] |= 1 << 7
-	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
-	}
-	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-		return fmt.Errorf("Encode TransactionID failed: %w", err)
-	}
-	if s.DLUPTNLAddressToUpdateList != nil {
-		if err = s.DLUPTNLAddressToUpdateList.Encode(w); err != nil {
-			return fmt.Errorf("Encode DLUPTNLAddressToUpdateList failed: %w", err)
-		}
-	}
-	return nil
-}
-
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *IABUPTNLAddressUpdate) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
-	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
-	}
-
+// toIes transforms the IABUPTNLAddressUpdate struct into a slice of E1APMessageIEs.
+func (msg *IABUPTNLAddressUpdate) toIes() ([]E1APMessageIE, error) {
+	ies := make([]E1APMessageIE, 0)
 	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-			return fmt.Errorf("Decode TransactionID failed: %w", err)
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
 		}
-		s.TransactionID.Value = aper.Integer(val)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.DLUPTNLAddressToUpdateList = new(DLUPTNLAddressToUpdateList)
-		if err = s.DLUPTNLAddressToUpdateList.Decode(r); err != nil {
-			return fmt.Errorf("Decode DLUPTNLAddressToUpdateList failed: %w", err)
+	if msg.DLUPTNLAddressToUpdateList != nil {
+
+		tmp_DLUPTNLAddressToUpdateList := Sequence[aper.IE]{
+			c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
+			ext: false,
+		}
+
+		for i := 0; i < len(msg.DLUPTNLAddressToUpdateList.Value); i++ {
+			tmp_DLUPTNLAddressToUpdateList.Value = append(tmp_DLUPTNLAddressToUpdateList.Value, &msg.DLUPTNLAddressToUpdateList.Value[i])
+		}
+
+		{
+
+			tmp_DLUPTNLAddressToUpdateList := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.DLUPTNLAddressToUpdateList.Value); i++ {
+				tmp_DLUPTNLAddressToUpdateList.Value = append(tmp_DLUPTNLAddressToUpdateList.Value, &msg.DLUPTNLAddressToUpdateList.Value[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDDLUPTNLAddressToUpdateList},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       &tmp_DLUPTNLAddressToUpdateList,
+			})
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for IABUPTNLAddressUpdate")
+	var err error
+	return ies, err
+}
+
+// Encode for IABUPTNLAddressUpdate: Could not find associated procedure.
+
+// Decode implements the aper.AperUnmarshaller interface for IABUPTNLAddressUpdate.
+func (msg *IABUPTNLAddressUpdate) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("IABUPTNLAddressUpdate: %w", err)
+		}
+	}()
+
+	r := aper.NewReader(bytes.NewReader(buf))
+
+	decoder := IABUPTNLAddressUpdateDecoder{
+		msg:  msg,
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
-	return nil
+
+	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
+	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return
+	}
+
+	// After decoding all present IEs, validate that mandatory ones were found.
+
+	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+		err = fmt.Errorf("mandatory field TransactionID is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+type IABUPTNLAddressUpdateDecoder struct {
+	msg      *IABUPTNLAddressUpdate
+	diagList []CriticalityDiagnosticsIEItem
+	list     map[ProtocolIEID]*E1APMessageIE
+}
+
+func (decoder *IABUPTNLAddressUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
+	var id int64
+	var c uint64
+	var buf []byte
+	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return nil, err
+	}
+	msgIe = new(E1APMessageIE)
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		return nil, err
+	}
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
+
+	if buf, err = r.ReadOpenType(); err != nil {
+		return nil, err
+	}
+
+	ieId := msgIe.Id
+	if _, ok := decoder.list[ieId]; ok {
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+	}
+	decoder.list[ieId] = msgIe
+
+	ieR := aper.NewReader(bytes.NewReader(buf))
+	msg := decoder.msg
+
+	switch msgIe.Id {
+	case ProtocolIEIDTransactionID:
+
+		{
+			var val int64
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
+			}
+			msg.TransactionID.Value = aper.Integer(val)
+		}
+	case ProtocolIEIDDLUPTNLAddressToUpdateList:
+
+		{
+			itemDecoder := func(r *aper.AperReader) (*DLUPTNLAddressToUpdateItem, error) {
+
+				item := new(DLUPTNLAddressToUpdateItem)
+				if err := item.Decode(r); err != nil {
+					return nil, err
+				}
+				return item, nil
+			}
+			var decodedItems []DLUPTNLAddressToUpdateItem
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses}, false); err != nil {
+				return nil, fmt.Errorf("Decode DLUPTNLAddressToUpdateList failed: %w", err)
+			}
+
+			msg.DLUPTNLAddressToUpdateList = new(DLUPTNLAddressToUpdateList)
+			msg.DLUPTNLAddressToUpdateList.Value = decodedItems
+		}
+	default:
+		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
+	}
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

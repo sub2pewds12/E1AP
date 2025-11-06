@@ -10,9 +10,9 @@ import (
 
 // EarlyForwardingSNTransfer is a generated SEQUENCE type.
 type EarlyForwardingSNTransfer struct {
-	GNBCUCPUEE1APID                  GNBCUCPUEE1APID                    `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	GNBCUUPUEE1APID                  GNBCUUPUEE1APID                    `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	DRBsSubjectToEarlyForwardingList []DRBsSubjectToEarlyForwardingItem `aper:"mandatory,ext"`
+	GNBCUCPUEE1APID                  GNBCUCPUEE1APID                  `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	GNBCUUPUEE1APID                  GNBCUUPUEE1APID                  `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	DRBsSubjectToEarlyForwardingList DRBsSubjectToEarlyForwardingList `aper:"mandatory,ext"`
 }
 
 // toIes transforms the EarlyForwardingSNTransfer struct into a slice of E1APMessageIEs.
@@ -55,8 +55,8 @@ func (msg *EarlyForwardingSNTransfer) toIes() ([]E1APMessageIE, error) {
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.DRBsSubjectToEarlyForwardingList); i++ {
-			tmp_DRBsSubjectToEarlyForwardingList.Value = append(tmp_DRBsSubjectToEarlyForwardingList.Value, &msg.DRBsSubjectToEarlyForwardingList[i])
+		for i := 0; i < len(msg.DRBsSubjectToEarlyForwardingList.Value); i++ {
+			tmp_DRBsSubjectToEarlyForwardingList.Value = append(tmp_DRBsSubjectToEarlyForwardingList.Value, &msg.DRBsSubjectToEarlyForwardingList.Value[i])
 		}
 
 		{
@@ -66,8 +66,8 @@ func (msg *EarlyForwardingSNTransfer) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.DRBsSubjectToEarlyForwardingList); i++ {
-				tmp_DRBsSubjectToEarlyForwardingList.Value = append(tmp_DRBsSubjectToEarlyForwardingList.Value, &msg.DRBsSubjectToEarlyForwardingList[i])
+			for i := 0; i < len(msg.DRBsSubjectToEarlyForwardingList.Value); i++ {
+				tmp_DRBsSubjectToEarlyForwardingList.Value = append(tmp_DRBsSubjectToEarlyForwardingList.Value, &msg.DRBsSubjectToEarlyForwardingList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -213,7 +213,7 @@ func (decoder *EarlyForwardingSNTransferDecoder) decodeIE(r *aper.AperReader) (m
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return nil, fmt.Errorf("Decode DRBsSubjectToEarlyForwardingList failed: %w", err)
 			}
-			msg.DRBsSubjectToEarlyForwardingList = decodedItems
+			msg.DRBsSubjectToEarlyForwardingList.Value = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.

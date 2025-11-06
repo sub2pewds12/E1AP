@@ -6,6 +6,8 @@ from common_types import (
     StringDefinition,
     ListDefinition,
     BuiltinDefinition,
+    ASN1Definition,
+    InformationElement,
 )
 from asn1_parser import ASN1Parser
 from typing import Tuple, Set
@@ -91,7 +93,9 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
             min_val = getattr(asn1_def, "min_val", 0) or 0
             max_val = getattr(asn1_def, "max_val", 0) or 0
             
-            if "BIT STRING" in asn1_def.name.upper():
+            # This is the corrected condition that checks the actual underlying type
+            if (isinstance(asn1_def, StringDefinition) and asn1_def.string_type == "BIT STRING") or \
+            (isinstance(asn1_def, BuiltinDefinition) and "BIT STRING" in asn1_def.name.upper()):
                 value_code = f"""&BITSTRING{{
                     c:     aper.Constraint{{Lb: {min_val}, Ub: {max_val}}},
                     ext:   {str(is_extensible).lower()},
@@ -110,10 +114,12 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
             if not min_val_str.isdigit(): min_val_str = pascal_case_converter(min_val_str)
             max_val_str = asn1_def.max_val if asn1_def.max_val is not None else "0"
             if not max_val_str.isdigit(): max_val_str = pascal_case_converter(max_val_str)
-            
+
             _, of_type_def = go_type_resolver(asn1_def.of_type)
             loop_body = ""
+            wrapper_type = None
 
+            # Determine if the list items are primitives that need wrapping
             if isinstance(of_type_def, IntegerDefinition) and not isinstance(of_type_def, StringDefinition):
                 wrapper_type = "INTEGER"
                 value_constructor = "item.Value"
@@ -123,39 +129,52 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
             elif isinstance(of_type_def, StringDefinition) or (isinstance(of_type_def, BuiltinDefinition) and "STRING" in of_type_def.name.upper()):
                 if "BIT STRING" in of_type_def.name.upper() or (isinstance(of_type_def, StringDefinition) and of_type_def.string_type == "BIT STRING"):
                     wrapper_type = "BITSTRING"
-                    value_constructor = "item.Value"
                 else:
                     wrapper_type = "OCTETSTRING"
-                    value_constructor = "item.Value"
-            else:
-                # This is the fallback for lists of COMPLEX STRUCTS
-                wrapper_type = None # No wrapper needed
+                value_constructor = "item.Value"
 
-            # Now, generate the loop_body based on whether a wrapper is needed
+            # Since ALL list fields are now pointers to wrapper structs, we ALWAYS access the .Value field for the loop.
+            list_accessor = f"msg.{field_name}"
+
+            # We determine if the field is a "wrapper struct" by checking if its type
+            # is also a ListDefinition in the parser's records.
+            field_type_def = parser.definitions.get(ie.type)
+            is_wrapper_struct = isinstance(field_type_def, ListDefinition)
+
+            if is_wrapper_struct:
+                # If the field is a wrapper struct (optional OR mandatory), the slice is in the .Value field.
+                # If it's optional, the `if nil` check has already passed, so we can safely access .Value.
+                list_accessor += ".Value"
+            elif is_optional:
+                # If it's NOT a wrapper but IS optional, it must be a pointer-to-slice (*[]...).
+                # We must dereference it for the loop.
+                list_accessor = f"(*{list_accessor})"
+
             if wrapper_type:
                 # The items are PRIMITIVES and must be wrapped.
+                value_constructor = "item.Value"
                 loop_body = f"""
-            for _, item := range msg.{field_name} {{
-                wrapped_item := &{wrapper_type}{{
-                    c:     aper.Constraint{{Lb: {getattr(of_type_def, 'min_val', 0) or 0}, Ub: {getattr(of_type_def, 'max_val', 0) or 0}}},
-                    ext:   {str(getattr(of_type_def, 'is_extensible', False)).lower()},
-                    Value: {value_constructor},
-                }}
-			    {tmp_var_name}.Value = append({tmp_var_name}.Value, wrapped_item)
-            }}"""
+                for _, item := range {list_accessor} {{
+                    wrapped_item := &{wrapper_type}{{
+                        c:     aper.Constraint{{Lb: {getattr(of_type_def, 'min_val', 0) or 0}, Ub: {getattr(of_type_def, 'max_val', 0) or 0}}},
+                        ext:   {str(getattr(of_type_def, 'is_extensible', False)).lower()},
+                        Value: {value_constructor},
+                    }}
+                    {tmp_var_name}.Value = append({tmp_var_name}.Value, wrapped_item)
+                }}"""
             else:
                 # The items are COMPLEX STRUCTS and just need their address taken.
                 loop_body = f"""
-            for i := 0; i < len(msg.{field_name}); i++ {{
-			    {tmp_var_name}.Value = append({tmp_var_name}.Value, &msg.{field_name}[i])
-            }}"""
+                for i := 0; i < len({list_accessor}); i++ {{
+                    {tmp_var_name}.Value = append({tmp_var_name}.Value, &{list_accessor}[i])
+                }}"""
 
             value_code = f"&{tmp_var_name}"
             pre_append_code = f"""
             {tmp_var_name} := Sequence[aper.IE]{{
-			    c:   aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}},
-			    ext: {str(is_extensible).lower()},
-		    }}
+                c:   aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}},
+                ext: {str(is_extensible).lower()},
+            }}
             {loop_body}
             """
         
@@ -189,9 +208,8 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
         # Wrap in optionality check
         final_block = f"{{\n{full_logic_block}\n}}" # Wrap mandatory in braces for scope
         if is_optional:
+            # The check is now the same for ALL optional fields, which are now all pointers.
             check = f"msg.{field_name} != nil"
-            if isinstance(asn1_def, ListDefinition):
-                check = f"len(msg.{field_name}) > 0"
             final_block = f"if {check} {{\n{full_logic_block}\n}}"
             
         body_parts.append(final_block)
@@ -249,7 +267,7 @@ def render_internal_struct_methods(
     """
     Generates Encode and Decode methods for an internal SEQUENCE or CHOICE struct.
     """
-    required_imports = {"fmt", parser.aper_import_path}
+    required_imports = {"fmt", "math", parser.aper_import_path}
     if any(ie.presence in ["optional", "conditional"] for ie in item.ies):
         required_imports.add("io")
 
@@ -496,16 +514,18 @@ def _generate_sequence_encode_body(item: SequenceDefinition, parser: ASN1Parser)
     for ie in item.ies:
         field_name = pascal_case_converter(ie.ie)
         
-        # --- THIS IS THE FIX ---
-        _, asn1_def = parser.go_type_resolver(ie.type)
+        # --- THIS IS FIX #3 ---
+        # Define `go_type` and `asn1_def` from the resolver
+        go_type, asn1_def = parser.go_type_resolver(ie.type)
+        
         if not asn1_def:
             print(f"WARNING: Could not resolve type '{ie.type}' for field '{ie.ie}' in SEQUENCE '{item.name}'. Skipping field.")
-            continue # Skip to the next field in the loop
-        # --- END OF FIX ---
+            continue
             
         is_optional = ie.presence in ["optional", "conditional"]
         
-        encode_call = _generate_direct_encode_call(field_name, ie, asn1_def, parser)
+        # Now, pass `go_type` to the helper function
+        encode_call = _generate_direct_encode_call(field_name, go_type, ie, asn1_def, parser)
         
         if is_optional:
             encode_parts.append(f'if s.{field_name} != nil {{ {encode_call} }}')
@@ -713,18 +733,19 @@ def _generate_choice_decode_body(
     }}"""
 
 
-def _generate_direct_encode_call(field_name, ie, asn1_def, parser):
+def _generate_direct_encode_call(field_name: str, go_type: str, ie: InformationElement, asn1_def: ASN1Definition, parser: ASN1Parser) -> str:
     """
-    Helper to generate the Go code line for encoding a single field.
-    This version correctly accesses the .Value field of primitive structs.
+    Helper to generate the Go code line for encoding OR decoding a single field.
+    This version has a single, exhaustive if/elif/else chain to prevent errors.
     """
-    
     is_optional = ie.presence in ["optional", "conditional"]
     is_extensible = getattr(asn1_def, 'is_extensible', False)
-    
+
+    # Use .Value for all primitive structs. Go's '.' handles pointer dereferencing.
     value_accessor = f"s.{field_name}.Value"
 
     if ie.type == "ANY":
+        # This handles the 'Value' field in PDU wrappers like UnsuccessfulOutcome
         return f"""
         {{
             var buf bytes.Buffer
@@ -735,25 +756,63 @@ def _generate_direct_encode_call(field_name, ie, asn1_def, parser):
                 return fmt.Errorf("Encode {field_name} as OpenType failed: %w", err)
             }}
         }}"""
+    
+    elif isinstance(asn1_def, ListDefinition):
+        # This handles fields that are list types. Since all list fields are now
+        # pointers to wrapper structs, we must access the .Value field for the slice.
+        list_accessor = f"s.{field_name}.Value"
+        min_val_str = asn1_def.min_val or "0"
+        if not min_val_str.isdigit(): min_val_str = parser.pascal_case_converter(min_val_str)
+        max_val_str = asn1_def.max_val or "0"
+        if not max_val_str.isdigit(): max_val_str = parser.pascal_case_converter(max_val_str)
+
+        return f"""
+        {{
+            itemPointers := make([]aper.AperMarshaller, len({list_accessor}))
+            for i := 0; i < len({list_accessor}); i++ {{
+                itemPointers[i] = &({list_accessor}[i])
+            }}
+            if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {str(is_extensible).lower()}); err != nil {{
+                return fmt.Errorf("Encode {field_name} failed: %w", err)
+            }}
+        }}"""
+
     elif isinstance(asn1_def, IntegerDefinition):
-        return f'if err = w.WriteInteger(int64({value_accessor}), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+        if is_optional:
+            value_accessor = f"s.{field_name}.Value"
+        else:
+            value_accessor = f"s.{field_name}.Value"
 
-    elif isinstance(asn1_def, EnumDefinition):
-        num_enums = len(asn1_def.enum_values)
-        upper_bound = num_enums - 1 if num_enums > 0 else 0
-        return f'if err = w.WriteEnumerate(uint64({value_accessor}), aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+        min_val_attr = getattr(asn1_def, 'min_val', None)
+        min_val = parser.pascal_case_converter(str(min_val_attr) if min_val_attr is not None else '0')
 
-    elif isinstance(asn1_def, (StringDefinition, BuiltinDefinition)) and "STRING" in asn1_def.name.upper():
-        min_val = getattr(asn1_def, 'min_val', 0) or 0
-        max_val = getattr(asn1_def, 'max_val', 0) or 0
+        max_val_attr = getattr(asn1_def, 'max_val', None)
+        max_val_str = str(max_val_attr) if max_val_attr is not None else '0'
+        if max_val_str == "18446744073709551615":
+            max_val = "math.MaxInt64"
+        else:
+            max_val = parser.pascal_case_converter(max_val_str)
+
+        return f'if err = w.WriteInteger(int64({value_accessor}), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+    elif isinstance(asn1_def, StringDefinition):
+        # This block now ONLY handles StringDefinition objects
+        min_val = getattr(asn1_def, "min_val", 0) or 0
+        max_val = getattr(asn1_def, "max_val", 0) or 0
         
-        if "BIT STRING" in asn1_def.name.upper():
+        if asn1_def.string_type == "BIT STRING":
+            # Correctly generates a call to WriteBitString
             return f'if err = w.WriteBitString({value_accessor}.Bytes, uint({value_accessor}.NumBits), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
         else: # OCTET STRING
+            # Correctly generates a call to WriteOctetString
             return f'if err = w.WriteOctetString([]byte({value_accessor}), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+    
+    elif isinstance(asn1_def, BuiltinDefinition) and "STRING" in asn1_def.name.upper():
+        # This handles aliases to VisibleString, UTF8String, etc.
+        min_val = getattr(asn1_def, 'min_val', 0) or 0
+        max_val = getattr(asn1_def, 'max_val', 0) or 0
+        return f'if err = w.WriteOctetString([]byte({value_accessor}), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
 
-    else: # Complex type (SEQUENCE, CHOICE, LIST)
-        # For complex types, we call the Encode method on the field itself, not its .Value
+    else: # This is the final fallback ONLY for complex SEQUENCE and CHOICE structs
         return f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
 
 
@@ -892,6 +951,16 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
             }}
             return item, nil"""
 
+        assignment = ""
+        if is_optional:
+            # For optional fields, create a new pointer and assign the slice to its Value field.
+            assignment = f"""
+            msg.{field_name} = new({go_type})
+            msg.{field_name}.Value = decodedItems"""
+        else:
+            # For mandatory fields, the struct already exists; just assign the slice to its Value field.
+            assignment = f"msg.{field_name}.Value = decodedItems"
+
         return f"""
         {{
             itemDecoder := func(r *aper.AperReader) (*{of_type_go_name}, error) {{
@@ -901,7 +970,7 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
             if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {is_extensible}); err != nil {{
                 return nil, fmt.Errorf("Decode {field_name} failed: %w", err)
             }}
-            msg.{field_name} = decodedItems
+            {assignment}
         }}"""
 
         
@@ -1024,10 +1093,13 @@ def _generate_decoder_helper(go_name: str, item: SequenceDefinition, parser: ASN
         ie_id_const = f"ProtocolIEID{ie_id_const_base}"
         
         field_name = pascal_case_converter(ie.ie)
-        go_type, asn1_def = parser.go_type_resolver(ie.type)
-        
-        # 2. Get the specific decoding logic for this IE
-        decode_logic = _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser)
+        # First, get the semantic (wrapper struct) name
+        semantic_go_type = pascal_case_converter(ie.type)
+        # Then, resolve the underlying definition for logic branching
+        _, asn1_def = parser.go_type_resolver(ie.type)
+
+        # Pass the SEMANTIC name to the helper for use in `new()`
+        decode_logic = _generate_pdu_decode_call(field_name, semantic_go_type, ie, asn1_def, parser)
 
         case_blocks.append(f"case {ie_id_const}:\n{decode_logic}")
 
@@ -1119,18 +1191,25 @@ def _generate_internal_decode_call(field_name, go_type, ie, asn1_def, parser):
     # == INTEGER DEFINITION
     # ==============================================================================
     if isinstance(asn1_def, IntegerDefinition):
-        # --- THIS IS THE FIX for INTEGER ---
-        # The field `s.FieldName` is now a struct. We assign to its `Value` field.
+        min_val_attr = getattr(asn1_def, 'min_val', None)
+        min_val = parser.pascal_case_converter(str(min_val_attr) if min_val_attr is not None else '0')
+
+        max_val_attr = getattr(asn1_def, 'max_val', None)
+        max_val_str = str(max_val_attr) if max_val_attr is not None else '0'
+        if max_val_str == "18446744073709551615":
+            max_val = "math.MaxInt64"
+        else:
+            max_val = parser.pascal_case_converter(max_val_str)
+
         assignment = f"s.{field_name}.Value = aper.Integer(val)"
         if is_optional:
-            # For optional, we first `new` it up, then assign to the inner Value.
             assignment = f"s.{field_name} = new({go_type}); s.{field_name}.Value = aper.Integer(val)"
 
         return f"""
         {{
             var val int64
-            if val, err = r.ReadInteger(&aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{
-                 return fmt.Errorf("Decode {field_name} failed: %w", err)
+            if val, err = r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{
+                return fmt.Errorf("Decode {field_name} failed: %w", err)
             }}
             {assignment}
         }}"""
@@ -1181,13 +1260,11 @@ def _generate_internal_decode_call(field_name, go_type, ie, asn1_def, parser):
             if is_optional:
                 assignment = f"s.{field_name} = new({go_type}); s.{field_name}.Value = aper.OctetString(val)"
             return f"""
-            {{
-                var val []byte
-                if val, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
-                    return fmt.Errorf("Decode {field_name} failed: %w", err)
-                }}
-                {assignment}
-            }}"""
+            var val []byte
+            if val, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
+                return fmt.Errorf("Decode {field_name} failed: %w", err)
+            }}
+            {assignment}"""
             
     # ==============================================================================
     # == COMPLEX TYPES (SEQUENCE, CHOICE, LIST)

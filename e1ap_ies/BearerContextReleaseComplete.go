@@ -10,10 +10,10 @@ import (
 
 // BearerContextReleaseComplete is a generated SEQUENCE type.
 type BearerContextReleaseComplete struct {
-	GNBCUCPUEE1APID               GNBCUCPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	GNBCUUPUEE1APID               GNBCUUPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	CriticalityDiagnostics        *CriticalityDiagnostics `aper:"optional,ext"`
-	RetainabilityMeasurementsInfo []DRBRemovedItem        `aper:"optional,ext"`
+	GNBCUCPUEE1APID               GNBCUCPUEE1APID                `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	GNBCUUPUEE1APID               GNBCUUPUEE1APID                `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	CriticalityDiagnostics        *CriticalityDiagnostics        `aper:"optional,ext"`
+	RetainabilityMeasurementsInfo *RetainabilityMeasurementsInfo `aper:"optional,ext"`
 }
 
 // toIes transforms the BearerContextReleaseComplete struct into a slice of E1APMessageIEs.
@@ -60,15 +60,15 @@ func (msg *BearerContextReleaseComplete) toIes() ([]E1APMessageIE, error) {
 			})
 		}
 	}
-	if len(msg.RetainabilityMeasurementsInfo) > 0 {
+	if msg.RetainabilityMeasurementsInfo != nil {
 
 		tmp_RetainabilityMeasurementsInfo := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 0, Ub: 0},
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.RetainabilityMeasurementsInfo); i++ {
-			tmp_RetainabilityMeasurementsInfo.Value = append(tmp_RetainabilityMeasurementsInfo.Value, &msg.RetainabilityMeasurementsInfo[i])
+		for i := 0; i < len(msg.RetainabilityMeasurementsInfo.Value); i++ {
+			tmp_RetainabilityMeasurementsInfo.Value = append(tmp_RetainabilityMeasurementsInfo.Value, &msg.RetainabilityMeasurementsInfo.Value[i])
 		}
 
 		{
@@ -78,8 +78,8 @@ func (msg *BearerContextReleaseComplete) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.RetainabilityMeasurementsInfo); i++ {
-				tmp_RetainabilityMeasurementsInfo.Value = append(tmp_RetainabilityMeasurementsInfo.Value, &msg.RetainabilityMeasurementsInfo[i])
+			for i := 0; i < len(msg.RetainabilityMeasurementsInfo.Value); i++ {
+				tmp_RetainabilityMeasurementsInfo.Value = append(tmp_RetainabilityMeasurementsInfo.Value, &msg.RetainabilityMeasurementsInfo.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -221,7 +221,9 @@ func (decoder *BearerContextReleaseCompleteDecoder) decodeIE(r *aper.AperReader)
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return nil, fmt.Errorf("Decode RetainabilityMeasurementsInfo failed: %w", err)
 			}
-			msg.RetainabilityMeasurementsInfo = decodedItems
+
+			msg.RetainabilityMeasurementsInfo = new(RetainabilityMeasurementsInfo)
+			msg.RetainabilityMeasurementsInfo.Value = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.

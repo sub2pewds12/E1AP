@@ -8,9 +8,9 @@ import (
 
 // PDUSessionResourceConfirmModifiedItem is a generated SEQUENCE type.
 type PDUSessionResourceConfirmModifiedItem struct {
-	PDUSessionID                PDUSessionID                  `aper:"lb:0,ub:255,mandatory,ext"`
-	DRBConfirmModifiedListNGRAN []DRBConfirmModifiedItemNGRAN `aper:"optional,ext"`
-	IEExtensions                *ProtocolExtensionContainer   `aper:"optional,ext"`
+	PDUSessionID                PDUSessionID                 `aper:"lb:0,ub:255,mandatory,ext"`
+	DRBConfirmModifiedListNGRAN *DRBConfirmModifiedListNGRAN `aper:"optional,ext"`
+	IEExtensions                *ProtocolExtensionContainer  `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -32,8 +32,14 @@ func (s *PDUSessionResourceConfirmModifiedItem) Encode(w *aper.AperWriter) (err 
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
 	if s.DRBConfirmModifiedListNGRAN != nil {
-		if err = s.DRBConfirmModifiedListNGRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBConfirmModifiedListNGRAN failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DRBConfirmModifiedListNGRAN.Value))
+			for i := 0; i < len(s.DRBConfirmModifiedListNGRAN.Value); i++ {
+				itemPointers[i] = &(s.DRBConfirmModifiedListNGRAN.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DRBConfirmModifiedListNGRAN failed: %w", err)
+			}
 		}
 	}
 	return nil

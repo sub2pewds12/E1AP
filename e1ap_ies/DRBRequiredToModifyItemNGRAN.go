@@ -8,11 +8,11 @@ import (
 
 // DRBRequiredToModifyItemNGRAN is a generated SEQUENCE type.
 type DRBRequiredToModifyItemNGRAN struct {
-	DRBID                                DRBID                                      `aper:"lb:1,ub:32,mandatory,ext"`
-	GNBCUUPCellGroupRelatedConfiguration []GNBCUUPCellGroupRelatedConfigurationItem `aper:"optional,ext"`
-	FlowToRemove                         []QOSFlowItem                              `aper:"optional,ext"`
-	Cause                                Cause                                      `aper:"mandatory,ext"`
-	IEExtensions                         *ProtocolExtensionContainer                `aper:"optional,ext"`
+	DRBID                                DRBID                                 `aper:"lb:1,ub:32,mandatory,ext"`
+	GNBCUUPCellGroupRelatedConfiguration *GNBCUUPCellGroupRelatedConfiguration `aper:"optional,ext"`
+	FlowToRemove                         *QOSFlowList                          `aper:"optional,ext"`
+	Cause                                Cause                                 `aper:"mandatory,ext"`
+	IEExtensions                         *ProtocolExtensionContainer           `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -37,13 +37,25 @@ func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if s.GNBCUUPCellGroupRelatedConfiguration != nil {
-		if err = s.GNBCUUPCellGroupRelatedConfiguration.Encode(w); err != nil {
-			return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.GNBCUUPCellGroupRelatedConfiguration.Value))
+			for i := 0; i < len(s.GNBCUUPCellGroupRelatedConfiguration.Value); i++ {
+				itemPointers[i] = &(s.GNBCUUPCellGroupRelatedConfiguration.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
+			}
 		}
 	}
 	if s.FlowToRemove != nil {
-		if err = s.FlowToRemove.Encode(w); err != nil {
-			return fmt.Errorf("Encode FlowToRemove failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.FlowToRemove.Value))
+			for i := 0; i < len(s.FlowToRemove.Value); i++ {
+				itemPointers[i] = &(s.FlowToRemove.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode FlowToRemove failed: %w", err)
+			}
 		}
 	}
 	if err = s.Cause.Encode(w); err != nil {

@@ -2,6 +2,7 @@ package e1ap_ies
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/lvdund/ngap/aper"
 )
@@ -27,16 +28,16 @@ func (s *DRBUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.StartTimeStamp.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.StartTimeStamp.Value), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode StartTimeStamp failed: %w", err)
 	}
-	if err = s.EndTimeStamp.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.EndTimeStamp.Value), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode EndTimeStamp failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.UsageCountUL.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
+	if err = w.WriteInteger(int64(s.UsageCountUL.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
 		return fmt.Errorf("Encode UsageCountUL failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.UsageCountDL.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
+	if err = w.WriteInteger(int64(s.UsageCountDL.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
 		return fmt.Errorf("Encode UsageCountDL failed: %w", err)
 	}
 	return nil
@@ -61,7 +62,7 @@ func (s *DRBUsageReportItem) Decode(r *aper.AperReader) (err error) {
 
 	{
 		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
+		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
 			return fmt.Errorf("Decode UsageCountUL failed: %w", err)
 		}
 		s.UsageCountUL.Value = aper.Integer(val)
@@ -69,7 +70,7 @@ func (s *DRBUsageReportItem) Decode(r *aper.AperReader) (err error) {
 
 	{
 		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false); err != nil {
+		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
 			return fmt.Errorf("Decode UsageCountDL failed: %w", err)
 		}
 		s.UsageCountDL.Value = aper.Integer(val)

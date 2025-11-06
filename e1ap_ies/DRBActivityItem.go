@@ -28,7 +28,7 @@ func (s *DRBActivityItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.DRBActivity.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.DRBActivity.Encode(w); err != nil {
 		return fmt.Errorf("Encode DRBActivity failed: %w", err)
 	}
 	return nil

@@ -23,7 +23,7 @@ type BearerContextSetupRequest struct {
 	GNBDUID                               *GNBDUID                          `aper:"lb:0,ub:68719476735,optional,ext"`
 	TraceActivation                       *TraceActivation                  `aper:"optional,ext"`
 	NPNContextInfo                        *NPNContextInfo                   `aper:"optional,ext"`
-	ManagementBasedMDTPLMNList            []PLMNIdentity                    `aper:"lb:1,ub:MaxnoofMDTPLMNs,optional,ext"`
+	ManagementBasedMDTPLMNList            *MDTPLMNList                      `aper:"lb:1,ub:MaxnoofMDTPLMNs,optional,ext"`
 	CHOInitiation                         *CHOInitiation                    `aper:"optional,ext"`
 	AdditionalHandoverInfo                *AdditionalHandoverInfo           `aper:"optional,ext"`
 	DirectForwardingPathAvailability      *DirectForwardingPathAvailability `aper:"optional,ext"`
@@ -212,14 +212,14 @@ func (msg *BearerContextSetupRequest) toIes() ([]E1APMessageIE, error) {
 			})
 		}
 	}
-	if len(msg.ManagementBasedMDTPLMNList) > 0 {
+	if msg.ManagementBasedMDTPLMNList != nil {
 
 		tmp_ManagementBasedMDTPLMNList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 1, Ub: MaxnoofMDTPLMNs},
 			ext: false,
 		}
 
-		for _, item := range msg.ManagementBasedMDTPLMNList {
+		for _, item := range msg.ManagementBasedMDTPLMNList.Value {
 			wrapped_item := &OCTETSTRING{
 				c:     aper.Constraint{Lb: 3, Ub: 3},
 				ext:   false,
@@ -235,7 +235,7 @@ func (msg *BearerContextSetupRequest) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for _, item := range msg.ManagementBasedMDTPLMNList {
+			for _, item := range msg.ManagementBasedMDTPLMNList.Value {
 				wrapped_item := &OCTETSTRING{
 					c:     aper.Constraint{Lb: 3, Ub: 3},
 					ext:   false,
@@ -550,7 +550,9 @@ func (decoder *BearerContextSetupRequestDecoder) decodeIE(r *aper.AperReader) (m
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofMDTPLMNs}, false); err != nil {
 				return nil, fmt.Errorf("Decode ManagementBasedMDTPLMNList failed: %w", err)
 			}
-			msg.ManagementBasedMDTPLMNList = decodedItems
+
+			msg.ManagementBasedMDTPLMNList = new(MDTPLMNList)
+			msg.ManagementBasedMDTPLMNList.Value = decodedItems
 		}
 	case ProtocolIEIDCHOInitiation:
 		msg.CHOInitiation = new(CHOInitiation)

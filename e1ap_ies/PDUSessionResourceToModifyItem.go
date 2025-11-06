@@ -16,9 +16,9 @@ type PDUSessionResourceToModifyItem struct {
 	PDUSessionDataForwardingInformation        *DataForwardingInformation                `aper:"optional,ext"`
 	PDUSessionInactivityTimer                  *InactivityTimer                          `aper:"lb:1,ub:7200,optional,ext"`
 	NetworkInstance                            *NetworkInstance                          `aper:"lb:1,ub:256,optional,ext"`
-	DRBToSetupListNGRAN                        []DRBToSetupItemNGRAN                     `aper:"optional,ext"`
-	DRBToModifyListNGRAN                       []DRBToModifyItemNGRAN                    `aper:"optional,ext"`
-	DRBToRemoveListNGRAN                       []DRBToRemoveItemNGRAN                    `aper:"optional,ext"`
+	DRBToSetupListNGRAN                        *DRBToSetupListNGRAN                      `aper:"optional,ext"`
+	DRBToModifyListNGRAN                       *DRBToModifyListNGRAN                     `aper:"optional,ext"`
+	DRBToRemoveListNGRAN                       *DRBToRemoveListNGRAN                     `aper:"optional,ext"`
 	IEExtensions                               *PDUSessionResourceToModifyItemExtensions `aper:"optional,ext"`
 }
 
@@ -103,18 +103,36 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 		}
 	}
 	if s.DRBToSetupListNGRAN != nil {
-		if err = s.DRBToSetupListNGRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBToSetupListNGRAN failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DRBToSetupListNGRAN.Value))
+			for i := 0; i < len(s.DRBToSetupListNGRAN.Value); i++ {
+				itemPointers[i] = &(s.DRBToSetupListNGRAN.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DRBToSetupListNGRAN failed: %w", err)
+			}
 		}
 	}
 	if s.DRBToModifyListNGRAN != nil {
-		if err = s.DRBToModifyListNGRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBToModifyListNGRAN failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DRBToModifyListNGRAN.Value))
+			for i := 0; i < len(s.DRBToModifyListNGRAN.Value); i++ {
+				itemPointers[i] = &(s.DRBToModifyListNGRAN.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DRBToModifyListNGRAN failed: %w", err)
+			}
 		}
 	}
 	if s.DRBToRemoveListNGRAN != nil {
-		if err = s.DRBToRemoveListNGRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBToRemoveListNGRAN failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DRBToRemoveListNGRAN.Value))
+			for i := 0; i < len(s.DRBToRemoveListNGRAN.Value); i++ {
+				itemPointers[i] = &(s.DRBToRemoveListNGRAN.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DRBToRemoveListNGRAN failed: %w", err)
+			}
 		}
 	}
 	return nil

@@ -25,10 +25,10 @@ func (s *NRCGI) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.PLMNIdentity.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.PLMNIdentity.Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 		return fmt.Errorf("Encode PLMNIdentity failed: %w", err)
 	}
-	if err = s.NRCellIdentity.Encode(w); err != nil {
+	if err = w.WriteBitString(s.NRCellIdentity.Value.Bytes, uint(s.NRCellIdentity.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false); err != nil {
 		return fmt.Errorf("Encode NRCellIdentity failed: %w", err)
 	}
 	return nil

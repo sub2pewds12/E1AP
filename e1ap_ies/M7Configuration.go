@@ -28,7 +28,7 @@ func (s *M7Configuration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.M7period.Value), &aper.Constraint{Lb: 1, Ub: 60}, true); err != nil {
 		return fmt.Errorf("Encode M7period failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.M7LinksToLog.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+	if err = s.M7LinksToLog.Encode(w); err != nil {
 		return fmt.Errorf("Encode M7LinksToLog failed: %w", err)
 	}
 	return nil

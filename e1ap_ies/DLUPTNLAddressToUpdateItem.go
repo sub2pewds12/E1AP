@@ -25,10 +25,10 @@ func (s *DLUPTNLAddressToUpdateItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.OldTNLAdress.Encode(w); err != nil {
+	if err = w.WriteBitString(s.OldTNLAdress.Value.Bytes, uint(s.OldTNLAdress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode OldTNLAdress failed: %w", err)
 	}
-	if err = s.NewTNLAdress.Encode(w); err != nil {
+	if err = w.WriteBitString(s.NewTNLAdress.Value.Bytes, uint(s.NewTNLAdress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode NewTNLAdress failed: %w", err)
 	}
 	return nil

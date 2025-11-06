@@ -1,6 +1,7 @@
 package e1ap_ies
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/lvdund/ngap/aper"
@@ -11,153 +12,332 @@ type GNBCUUPConfigurationUpdate struct {
 	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,ext"`
 	GNBCUUPID                 GNBCUUPID                  `aper:"lb:0,ub:68719476735,mandatory,ext"`
 	GNBCUUPName               *GNBCUUPName               `aper:"optional,ext"`
-	SupportedPLMNs            []SupportedPLMNsItem       `aper:"lb:1,ub:MaxnoofSPLMNs,optional,ext"`
+	SupportedPLMNs            *SupportedPLMNsList        `aper:"lb:1,ub:MaxnoofSPLMNs,optional,ext"`
 	GNBCUUPCapacity           *GNBCUUPCapacity           `aper:"lb:0,ub:255,optional,ext"`
-	GNBCUUPTNLAToRemoveList   []GNBCUUPTNLAToRemoveItem  `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
+	GNBCUUPTNLAToRemoveList   *GNBCUUPTNLAToRemoveList   `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ext"`
 	ExtendedGNBCUUPName       *ExtendedGNBCUUPName       `aper:"optional,ext"`
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPConfigurationUpdate) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
-	}
-	var optionalityBitmap [1]byte
-	if s.GNBCUUPName != nil {
-		optionalityBitmap[0] |= 1 << 7
-	}
-	if s.SupportedPLMNs != nil {
-		optionalityBitmap[0] |= 1 << 6
-	}
-	if s.GNBCUUPCapacity != nil {
-		optionalityBitmap[0] |= 1 << 5
-	}
-	if s.GNBCUUPTNLAToRemoveList != nil {
-		optionalityBitmap[0] |= 1 << 4
-	}
-	if s.TransportLayerAddressInfo != nil {
-		optionalityBitmap[0] |= 1 << 3
-	}
-	if s.ExtendedGNBCUUPName != nil {
-		optionalityBitmap[0] |= 1 << 2
-	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(6), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
-	}
-	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-		return fmt.Errorf("Encode TransactionID failed: %w", err)
-	}
-	if err = w.WriteInteger(int64(s.GNBCUUPID.Value), &aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
-		return fmt.Errorf("Encode GNBCUUPID failed: %w", err)
-	}
-	if s.GNBCUUPName != nil {
-		if err = w.WriteOctetString([]byte(s.GNBCUUPName.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-			return fmt.Errorf("Encode GNBCUUPName failed: %w", err)
-		}
-	}
-	if s.SupportedPLMNs != nil {
-		if err = s.SupportedPLMNs.Encode(w); err != nil {
-			return fmt.Errorf("Encode SupportedPLMNs failed: %w", err)
-		}
-	}
-	if s.GNBCUUPCapacity != nil {
-		if err = w.WriteInteger(int64(s.GNBCUUPCapacity.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-			return fmt.Errorf("Encode GNBCUUPCapacity failed: %w", err)
-		}
-	}
-	if s.GNBCUUPTNLAToRemoveList != nil {
-		if err = s.GNBCUUPTNLAToRemoveList.Encode(w); err != nil {
-			return fmt.Errorf("Encode GNBCUUPTNLAToRemoveList failed: %w", err)
-		}
-	}
-	if s.TransportLayerAddressInfo != nil {
-		if err = s.TransportLayerAddressInfo.Encode(w); err != nil {
-			return fmt.Errorf("Encode TransportLayerAddressInfo failed: %w", err)
-		}
-	}
-	if s.ExtendedGNBCUUPName != nil {
-		if err = s.ExtendedGNBCUUPName.Encode(w); err != nil {
-			return fmt.Errorf("Encode ExtendedGNBCUUPName failed: %w", err)
-		}
-	}
-	return nil
-}
-
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPConfigurationUpdate) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
-	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
-	}
-
+// toIes transforms the GNBCUUPConfigurationUpdate struct into a slice of E1APMessageIEs.
+func (msg *GNBCUUPConfigurationUpdate) toIes() ([]E1APMessageIE, error) {
+	ies := make([]E1APMessageIE, 0)
 	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-			return fmt.Errorf("Decode TransactionID failed: %w", err)
-		}
-		s.TransactionID.Value = aper.Integer(val)
-	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
-			return fmt.Errorf("Decode GNBCUUPID failed: %w", err)
-		}
-		s.GNBCUUPID.Value = aper.Integer(val)
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 
 		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPName failed: %w", err)
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
+		}
+	}
+	{
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 68719476735},
+					ext:   false,
+					Value: msg.GNBCUUPID.Value,
+				},
+			})
+		}
+	}
+	if msg.GNBCUUPName != nil {
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPName},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value: &OCTETSTRING{
+					c:     aper.Constraint{Lb: 0, Ub: 0},
+					ext:   false,
+					Value: msg.GNBCUUPName.Value,
+				},
+			})
+		}
+	}
+	if msg.SupportedPLMNs != nil {
+
+		tmp_SupportedPLMNs := Sequence[aper.IE]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs},
+			ext: false,
+		}
+
+		for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
+			tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
+		}
+
+		{
+
+			tmp_SupportedPLMNs := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs},
+				ext: false,
 			}
-			s.GNBCUUPName = new(GNBCUUPName)
-			s.GNBCUUPName.Value = aper.OctetString(val)
+
+			for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
+				tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value:       &tmp_SupportedPLMNs,
+			})
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.SupportedPLMNs = new(SupportedPLMNsList)
-		if err = s.SupportedPLMNs.Decode(r); err != nil {
-			return fmt.Errorf("Decode SupportedPLMNs failed: %w", err)
+	if msg.GNBCUUPCapacity != nil {
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPCapacity},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   false,
+					Value: msg.GNBCUUPCapacity.Value,
+				},
+			})
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+	if msg.GNBCUUPTNLAToRemoveList != nil {
+
+		tmp_GNBCUUPTNLAToRemoveList := Sequence[aper.IE]{
+			c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
+			ext: false,
+		}
+
+		for i := 0; i < len(msg.GNBCUUPTNLAToRemoveList.Value); i++ {
+			tmp_GNBCUUPTNLAToRemoveList.Value = append(tmp_GNBCUUPTNLAToRemoveList.Value, &msg.GNBCUUPTNLAToRemoveList.Value[i])
+		}
+
+		{
+
+			tmp_GNBCUUPTNLAToRemoveList := Sequence[aper.IE]{
+				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
+				ext: false,
+			}
+
+			for i := 0; i < len(msg.GNBCUUPTNLAToRemoveList.Value); i++ {
+				tmp_GNBCUUPTNLAToRemoveList.Value = append(tmp_GNBCUUPTNLAToRemoveList.Value, &msg.GNBCUUPTNLAToRemoveList.Value[i])
+			}
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPTNLAToRemoveList},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value:       &tmp_GNBCUUPTNLAToRemoveList,
+			})
+		}
+	}
+	if msg.TransportLayerAddressInfo != nil {
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.TransportLayerAddressInfo,
+			})
+		}
+	}
+	if msg.ExtendedGNBCUUPName != nil {
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUUPName},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.ExtendedGNBCUUPName,
+			})
+		}
+	}
+	var err error
+	return ies, err
+}
+
+// Encode for GNBCUUPConfigurationUpdate: Could not find associated procedure.
+
+// Decode implements the aper.AperUnmarshaller interface for GNBCUUPConfigurationUpdate.
+func (msg *GNBCUUPConfigurationUpdate) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("GNBCUUPConfigurationUpdate: %w", err)
+		}
+	}()
+
+	r := aper.NewReader(bytes.NewReader(buf))
+
+	decoder := GNBCUUPConfigurationUpdateDecoder{
+		msg:  msg,
+		list: make(map[ProtocolIEID]*E1APMessageIE),
+	}
+
+	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
+	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return
+	}
+
+	// After decoding all present IEs, validate that mandatory ones were found.
+
+	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+		err = fmt.Errorf("mandatory field TransactionID is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+
+	if _, ok := decoder.list[ProtocolIEIDGNBCUUPID]; !ok {
+		err = fmt.Errorf("mandatory field GNBCUUPID is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUUPID,
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+type GNBCUUPConfigurationUpdateDecoder struct {
+	msg      *GNBCUUPConfigurationUpdate
+	diagList []CriticalityDiagnosticsIEItem
+	list     map[ProtocolIEID]*E1APMessageIE
+}
+
+func (decoder *GNBCUUPConfigurationUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
+	var id int64
+	var c uint64
+	var buf []byte
+	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return nil, err
+	}
+	msgIe = new(E1APMessageIE)
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		return nil, err
+	}
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
+
+	if buf, err = r.ReadOpenType(); err != nil {
+		return nil, err
+	}
+
+	ieId := msgIe.Id
+	if _, ok := decoder.list[ieId]; ok {
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+	}
+	decoder.list[ieId] = msgIe
+
+	ieR := aper.NewReader(bytes.NewReader(buf))
+	msg := decoder.msg
+
+	switch msgIe.Id {
+	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPCapacity failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.GNBCUUPCapacity = new(GNBCUUPCapacity)
-			s.GNBCUUPCapacity.Value = aper.Integer(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
-		s.GNBCUUPTNLAToRemoveList = new(GNBCUUPTNLAToRemoveList)
-		if err = s.GNBCUUPTNLAToRemoveList.Decode(r); err != nil {
-			return fmt.Errorf("Decode GNBCUUPTNLAToRemoveList failed: %w", err)
+	case ProtocolIEIDGNBCUUPID:
+
+		{
+			var val int64
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPID failed: %w", err)
+			}
+			msg.GNBCUUPID.Value = aper.Integer(val)
 		}
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
-		s.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
-		if err = s.TransportLayerAddressInfo.Decode(r); err != nil {
-			return fmt.Errorf("Decode TransportLayerAddressInfo failed: %w", err)
+	case ProtocolIEIDGNBCUUPName:
+
+		{
+			var val []byte
+			if val, err = ieR.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPName failed: %w", err)
+			}
+			msg.GNBCUUPName = new(GNBCUUPName)
+			msg.GNBCUUPName.Value = aper.OctetString(val)
 		}
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
-		s.ExtendedGNBCUUPName = new(ExtendedGNBCUUPName)
-		if err = s.ExtendedGNBCUUPName.Decode(r); err != nil {
-			return fmt.Errorf("Decode ExtendedGNBCUUPName failed: %w", err)
+	case ProtocolIEIDSupportedPLMNs:
+
+		{
+			itemDecoder := func(r *aper.AperReader) (*SupportedPLMNsItem, error) {
+
+				item := new(SupportedPLMNsItem)
+				if err := item.Decode(r); err != nil {
+					return nil, err
+				}
+				return item, nil
+			}
+			var decodedItems []SupportedPLMNsItem
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs}, false); err != nil {
+				return nil, fmt.Errorf("Decode SupportedPLMNs failed: %w", err)
+			}
+
+			msg.SupportedPLMNs = new(SupportedPLMNsList)
+			msg.SupportedPLMNs.Value = decodedItems
 		}
+	case ProtocolIEIDGNBCUUPCapacity:
+
+		{
+			var val int64
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPCapacity failed: %w", err)
+			}
+			msg.GNBCUUPCapacity = new(GNBCUUPCapacity)
+			msg.GNBCUUPCapacity.Value = aper.Integer(val)
+		}
+	case ProtocolIEIDGNBCUUPTNLAToRemoveList:
+
+		{
+			itemDecoder := func(r *aper.AperReader) (*GNBCUUPTNLAToRemoveItem, error) {
+
+				item := new(GNBCUUPTNLAToRemoveItem)
+				if err := item.Decode(r); err != nil {
+					return nil, err
+				}
+				return item, nil
+			}
+			var decodedItems []GNBCUUPTNLAToRemoveItem
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations}, false); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPTNLAToRemoveList failed: %w", err)
+			}
+
+			msg.GNBCUUPTNLAToRemoveList = new(GNBCUUPTNLAToRemoveList)
+			msg.GNBCUUPTNLAToRemoveList.Value = decodedItems
+		}
+	case ProtocolIEIDTransportLayerAddressInfo:
+		msg.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
+		if err = msg.TransportLayerAddressInfo.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode TransportLayerAddressInfo failed: %w", err)
+		}
+	case ProtocolIEIDExtendedGNBCUUPName:
+		msg.ExtendedGNBCUUPName = new(ExtendedGNBCUUPName)
+		if err = msg.ExtendedGNBCUUPName.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode ExtendedGNBCUUPName failed: %w", err)
+		}
+	default:
+		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for GNBCUUPConfigurationUpdate")
-	}
-	return nil
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

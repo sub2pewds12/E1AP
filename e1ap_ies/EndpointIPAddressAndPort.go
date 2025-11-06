@@ -25,10 +25,10 @@ func (s *EndpointIPAddressAndPort) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.EndpointIPAddress.Encode(w); err != nil {
+	if err = w.WriteBitString(s.EndpointIPAddress.Value.Bytes, uint(s.EndpointIPAddress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode EndpointIPAddress failed: %w", err)
 	}
-	if err = s.PortNumber.Encode(w); err != nil {
+	if err = w.WriteBitString(s.PortNumber.Value.Bytes, uint(s.PortNumber.Value.NumBits), &aper.Constraint{Lb: 16, Ub: 16}, false); err != nil {
 		return fmt.Errorf("Encode PortNumber failed: %w", err)
 	}
 	return nil

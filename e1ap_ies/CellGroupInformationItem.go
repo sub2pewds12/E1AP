@@ -40,17 +40,17 @@ func (s *CellGroupInformationItem) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode CellGroupID failed: %w", err)
 	}
 	if s.ULConfiguration != nil {
-		if err = w.WriteEnumerate(uint64(s.ULConfiguration.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+		if err = s.ULConfiguration.Encode(w); err != nil {
 			return fmt.Errorf("Encode ULConfiguration failed: %w", err)
 		}
 	}
 	if s.DLTXStop != nil {
-		if err = w.WriteEnumerate(uint64(s.DLTXStop.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = s.DLTXStop.Encode(w); err != nil {
 			return fmt.Errorf("Encode DLTXStop failed: %w", err)
 		}
 	}
 	if s.RATType != nil {
-		if err = w.WriteEnumerate(uint64(s.RATType.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = s.RATType.Encode(w); err != nil {
 			return fmt.Errorf("Encode RATType failed: %w", err)
 		}
 	}

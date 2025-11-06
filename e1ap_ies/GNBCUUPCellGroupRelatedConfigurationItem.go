@@ -36,7 +36,7 @@ func (s *GNBCUUPCellGroupRelatedConfigurationItem) Encode(w *aper.AperWriter) (e
 		return fmt.Errorf("Encode UPTNLInformation failed: %w", err)
 	}
 	if s.ULConfiguration != nil {
-		if err = w.WriteEnumerate(uint64(s.ULConfiguration.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+		if err = s.ULConfiguration.Encode(w); err != nil {
 			return fmt.Errorf("Encode ULConfiguration failed: %w", err)
 		}
 	}

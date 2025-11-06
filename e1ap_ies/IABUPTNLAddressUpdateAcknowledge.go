@@ -9,9 +9,9 @@ import (
 
 // IABUPTNLAddressUpdateAcknowledge is a generated SEQUENCE type.
 type IABUPTNLAddressUpdateAcknowledge struct {
-	TransactionID              TransactionID                `aper:"lb:0,ub:255,mandatory,ext"`
-	CriticalityDiagnostics     *CriticalityDiagnostics      `aper:"optional,ext"`
-	ULUPTNLAddressToUpdateList []ULUPTNLAddressToUpdateItem `aper:"ub:MaxnoofTNLAddresses,optional,ext"`
+	TransactionID              TransactionID               `aper:"lb:0,ub:255,mandatory,ext"`
+	CriticalityDiagnostics     *CriticalityDiagnostics     `aper:"optional,ext"`
+	ULUPTNLAddressToUpdateList *ULUPTNLAddressToUpdateList `aper:"ub:MaxnoofTNLAddresses,optional,ext"`
 }
 
 // toIes transforms the IABUPTNLAddressUpdateAcknowledge struct into a slice of E1APMessageIEs.
@@ -43,15 +43,15 @@ func (msg *IABUPTNLAddressUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 			})
 		}
 	}
-	if len(msg.ULUPTNLAddressToUpdateList) > 0 {
+	if msg.ULUPTNLAddressToUpdateList != nil {
 
 		tmp_ULUPTNLAddressToUpdateList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.ULUPTNLAddressToUpdateList); i++ {
-			tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList[i])
+		for i := 0; i < len(msg.ULUPTNLAddressToUpdateList.Value); i++ {
+			tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList.Value[i])
 		}
 
 		{
@@ -61,8 +61,8 @@ func (msg *IABUPTNLAddressUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.ULUPTNLAddressToUpdateList); i++ {
-				tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList[i])
+			for i := 0; i < len(msg.ULUPTNLAddressToUpdateList.Value); i++ {
+				tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -178,7 +178,9 @@ func (decoder *IABUPTNLAddressUpdateAcknowledgeDecoder) decodeIE(r *aper.AperRea
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses}, false); err != nil {
 				return nil, fmt.Errorf("Decode ULUPTNLAddressToUpdateList failed: %w", err)
 			}
-			msg.ULUPTNLAddressToUpdateList = decodedItems
+
+			msg.ULUPTNLAddressToUpdateList = new(ULUPTNLAddressToUpdateList)
+			msg.ULUPTNLAddressToUpdateList.Value = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.

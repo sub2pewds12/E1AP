@@ -28,11 +28,11 @@ func (s *SecurityAlgorithm) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.CipheringAlgorithm.Value), aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+	if err = s.CipheringAlgorithm.Encode(w); err != nil {
 		return fmt.Errorf("Encode CipheringAlgorithm failed: %w", err)
 	}
 	if s.IntegrityProtectionAlgorithm != nil {
-		if err = w.WriteEnumerate(uint64(s.IntegrityProtectionAlgorithm.Value), aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+		if err = s.IntegrityProtectionAlgorithm.Encode(w); err != nil {
 			return fmt.Errorf("Encode IntegrityProtectionAlgorithm failed: %w", err)
 		}
 	}

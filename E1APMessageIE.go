@@ -4,6 +4,9 @@ import (
 	"github.com/sub2pewds12/E1AP/e1ap_ies"
 )
 
+// createMessage is a factory function that instantiates the correct message struct
+// based on the PDU choice and the procedure code. This is a crucial part of the
+// decoding process.
 func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageUnmarshaller {
 	switch present {
 	case PduChoiceInitiatingMessage:
@@ -31,7 +34,7 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseRequest)
 		case e1ap_ies.ProcedureCodeE1Setup:
-			return new(e1ap_ies.GNBCUCPE1SetupRequest) // Assuming CP Setup is primary
+			return new(e1ap_ies.GNBCUCPE1SetupRequest) // Control Plane Setup is the standard initiating message
 		case e1ap_ies.ProcedureCodeEarlyForwardingSNTransfer:
 			return new(e1ap_ies.EarlyForwardingSNTransfer)
 		case e1ap_ies.ProcedureCodeErrorIndication:
@@ -55,7 +58,7 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		case e1ap_ies.ProcedureCodeResourceStatusReporting:
 			return new(e1ap_ies.ResourceStatusRequest)
 		case e1ap_ies.ProcedureCodeResourceStatusReportingInitiation:
-			return new(e1ap_ies.ResourceStatusUpdate) // Based on common patterns
+			return new(e1ap_ies.ResourceStatusUpdate)
 		case e1ap_ies.ProcedureCodeTraceStart:
 			return new(e1ap_ies.TraceStart)
 		case e1ap_ies.ProcedureCodeULDataNotification:
@@ -70,12 +73,12 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.BearerContextModificationConfirm)
 		case e1ap_ies.ProcedureCodeBearerContextRelease:
 			return new(e1ap_ies.BearerContextReleaseComplete)
-		case e1ap_ies.ProcedureCodeBearerContextSetup:
+		case e1ap_ies.Procedure_ies.BearerContextSetup:
 			return new(e1ap_ies.BearerContextSetupResponse)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseResponse)
 		case e1ap_ies.ProcedureCodeE1Setup:
-			return new(e1ap_ies.GNBCUCPE1SetupResponse) // Assuming CP
+			return new(e1ap_ies.GNBCUCPE1SetupResponse)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
 			return new(e1ap_ies.GNBCUCPConfigurationUpdateAcknowledge)
 		case e1ap_ies.ProcedureCodeGNBCUUPConfigurationUpdate:
@@ -95,7 +98,7 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		case e1ap_ies.ProcedureCodeBearerContextSetup:
 			return new(e1ap_ies.BearerContextSetupFailure)
 		case e1ap_ies.ProcedureCodeE1Setup:
-			return new(e1ap_ies.GNBCUCPE1SetupFailure) // Assuming CP
+			return new(e1ap_ies.GNBCUCPE1SetupFailure)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
 			return new(e1ap_ies.GNBCUCPConfigurationUpdateFailure)
 		case e1ap_ies.ProcedureCodeGNBCUUPConfigurationUpdate:
@@ -106,5 +109,7 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.ResourceStatusFailure)
 		}
 	}
-	return nil // Return nil if the message is unknown
+
+	// Return nil if the procedure code or message type is unknown or has no defined message.
+	return nil
 }

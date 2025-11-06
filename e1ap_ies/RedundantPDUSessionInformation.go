@@ -24,7 +24,7 @@ func (s *RedundantPDUSessionInformation) Encode(w *aper.AperWriter) (err error) 
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.RSN.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.RSN.Encode(w); err != nil {
 		return fmt.Errorf("Encode RSN failed: %w", err)
 	}
 	return nil

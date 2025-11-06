@@ -13,7 +13,7 @@ type GNBCUCPE1SetupResponse struct {
 	GNBCUUPID                 GNBCUUPID                  `aper:"lb:0,ub:68719476735,mandatory,ext"`
 	GNBCUUPName               *GNBCUUPName               `aper:"optional,ext"`
 	CNSupport                 CNSupport                  `aper:"mandatory,ext"`
-	SupportedPLMNs            []SupportedPLMNsItem       `aper:"lb:1,ub:MaxnoofSPLMNs,mandatory,ext"`
+	SupportedPLMNs            SupportedPLMNsList         `aper:"lb:1,ub:MaxnoofSPLMNs,mandatory,ext"`
 	GNBCUUPCapacity           *GNBCUUPCapacity           `aper:"lb:0,ub:255,optional,ext"`
 	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ext"`
 	ExtendedGNBCUUPName       *ExtendedGNBCUUPName       `aper:"optional,ext"`
@@ -89,8 +89,8 @@ func (msg *GNBCUCPE1SetupResponse) toIes() ([]E1APMessageIE, error) {
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.SupportedPLMNs); i++ {
-			tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs[i])
+		for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
+			tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
 		}
 
 		{
@@ -100,8 +100,8 @@ func (msg *GNBCUCPE1SetupResponse) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.SupportedPLMNs); i++ {
-				tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs[i])
+			for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
+				tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -277,7 +277,7 @@ func (decoder *GNBCUCPE1SetupResponseDecoder) decodeIE(r *aper.AperReader) (msgI
 			if val, err = ieR.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return nil, fmt.Errorf("Decode GNBCUUPName failed: %w", err)
 			}
-			msg.GNBCUUPName = new(aper.OctetString)
+			msg.GNBCUUPName = new(GNBCUUPName)
 			msg.GNBCUUPName.Value = aper.OctetString(val)
 		}
 	case ProtocolIEIDCNSupport:
@@ -304,7 +304,7 @@ func (decoder *GNBCUCPE1SetupResponseDecoder) decodeIE(r *aper.AperReader) (msgI
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs}, false); err != nil {
 				return nil, fmt.Errorf("Decode SupportedPLMNs failed: %w", err)
 			}
-			msg.SupportedPLMNs = decodedItems
+			msg.SupportedPLMNs.Value = decodedItems
 		}
 	case ProtocolIEIDGNBCUUPCapacity:
 

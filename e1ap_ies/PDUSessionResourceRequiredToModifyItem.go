@@ -10,8 +10,8 @@ import (
 type PDUSessionResourceRequiredToModifyItem struct {
 	PDUSessionID                 PDUSessionID                                      `aper:"lb:0,ub:255,mandatory,ext"`
 	NGDLUPTNLInformation         *UPTNLInformation                                 `aper:"optional,ext"`
-	DRBRequiredToModifyListNGRAN []DRBRequiredToModifyItemNGRAN                    `aper:"optional,ext"`
-	DRBRequiredToRemoveListNGRAN []DRBRequiredToRemoveItemNGRAN                    `aper:"optional,ext"`
+	DRBRequiredToModifyListNGRAN *DRBRequiredToModifyListNGRAN                     `aper:"optional,ext"`
+	DRBRequiredToRemoveListNGRAN *DRBRequiredToRemoveListNGRAN                     `aper:"optional,ext"`
 	IEExtensions                 *PDUSessionResourceRequiredToModifyItemExtensions `aper:"optional,ext"`
 }
 
@@ -45,13 +45,25 @@ func (s *PDUSessionResourceRequiredToModifyItem) Encode(w *aper.AperWriter) (err
 		}
 	}
 	if s.DRBRequiredToModifyListNGRAN != nil {
-		if err = s.DRBRequiredToModifyListNGRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBRequiredToModifyListNGRAN failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DRBRequiredToModifyListNGRAN.Value))
+			for i := 0; i < len(s.DRBRequiredToModifyListNGRAN.Value); i++ {
+				itemPointers[i] = &(s.DRBRequiredToModifyListNGRAN.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DRBRequiredToModifyListNGRAN failed: %w", err)
+			}
 		}
 	}
 	if s.DRBRequiredToRemoveListNGRAN != nil {
-		if err = s.DRBRequiredToRemoveListNGRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBRequiredToRemoveListNGRAN failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DRBRequiredToRemoveListNGRAN.Value))
+			for i := 0; i < len(s.DRBRequiredToRemoveListNGRAN.Value); i++ {
+				itemPointers[i] = &(s.DRBRequiredToRemoveListNGRAN.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode DRBRequiredToRemoveListNGRAN failed: %w", err)
+			}
 		}
 	}
 	return nil

@@ -28,7 +28,7 @@ func (s *GNBCUCPTNLAToAddItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.TNLAssociationTransportLayerAddress.Encode(w); err != nil {
 		return fmt.Errorf("Encode TNLAssociationTransportLayerAddress failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.TNLAssociationUsage.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
+	if err = s.TNLAssociationUsage.Encode(w); err != nil {
 		return fmt.Errorf("Encode TNLAssociationUsage failed: %w", err)
 	}
 	return nil

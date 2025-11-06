@@ -12,7 +12,7 @@ import (
 type BearerContextReleaseRequest struct {
 	GNBCUCPUEE1APID GNBCUCPUEE1APID `aper:"lb:0,ub:4294967295,mandatory,ext"`
 	GNBCUUPUEE1APID GNBCUUPUEE1APID `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	DRBStatusList   []DRBStatusItem `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
+	DRBStatusList   *DRBStatusList  `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
 	Cause           Cause           `aper:"mandatory,ext"`
 }
 
@@ -49,15 +49,15 @@ func (msg *BearerContextReleaseRequest) toIes() ([]E1APMessageIE, error) {
 			})
 		}
 	}
-	if len(msg.DRBStatusList) > 0 {
+	if msg.DRBStatusList != nil {
 
 		tmp_DRBStatusList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.DRBStatusList); i++ {
-			tmp_DRBStatusList.Value = append(tmp_DRBStatusList.Value, &msg.DRBStatusList[i])
+		for i := 0; i < len(msg.DRBStatusList.Value); i++ {
+			tmp_DRBStatusList.Value = append(tmp_DRBStatusList.Value, &msg.DRBStatusList.Value[i])
 		}
 
 		{
@@ -67,8 +67,8 @@ func (msg *BearerContextReleaseRequest) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.DRBStatusList); i++ {
-				tmp_DRBStatusList.Value = append(tmp_DRBStatusList.Value, &msg.DRBStatusList[i])
+			for i := 0; i < len(msg.DRBStatusList.Value); i++ {
+				tmp_DRBStatusList.Value = append(tmp_DRBStatusList.Value, &msg.DRBStatusList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -225,7 +225,9 @@ func (decoder *BearerContextReleaseRequestDecoder) decodeIE(r *aper.AperReader) 
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return nil, fmt.Errorf("Decode DRBStatusList failed: %w", err)
 			}
-			msg.DRBStatusList = decodedItems
+
+			msg.DRBStatusList = new(DRBStatusList)
+			msg.DRBStatusList.Value = decodedItems
 		}
 	case ProtocolIEIDCause:
 		if err = msg.Cause.Decode(ieR); err != nil {

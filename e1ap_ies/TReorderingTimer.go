@@ -24,7 +24,7 @@ func (s *TReorderingTimer) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.TReordering.Value), aper.Constraint{Lb: 0, Ub: 35}, true); err != nil {
+	if err = s.TReordering.Encode(w); err != nil {
 		return fmt.Errorf("Encode TReordering failed: %w", err)
 	}
 	return nil

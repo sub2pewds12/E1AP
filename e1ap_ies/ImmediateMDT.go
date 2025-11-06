@@ -36,7 +36,7 @@ func (s *ImmediateMDT) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.MeasurementsToActivate.Encode(w); err != nil {
+	if err = w.WriteBitString(s.MeasurementsToActivate.Value.Bytes, uint(s.MeasurementsToActivate.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
 		return fmt.Errorf("Encode MeasurementsToActivate failed: %w", err)
 	}
 	if s.MeasurementFour != nil {

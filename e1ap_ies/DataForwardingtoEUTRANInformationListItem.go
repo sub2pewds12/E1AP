@@ -9,7 +9,7 @@ import (
 // DataForwardingtoEUTRANInformationListItem is a generated SEQUENCE type.
 type DataForwardingtoEUTRANInformationListItem struct {
 	DataForwardingTunnelInformation UPTNLInformation            `aper:"mandatory,ext"`
-	QOSFlowsToBeForwardedList       []QOSFlowsToBeForwardedItem `aper:"mandatory,ext"`
+	QOSFlowsToBeForwardedList       QOSFlowsToBeForwardedList   `aper:"mandatory,ext"`
 	IEExtensions                    *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -28,8 +28,15 @@ func (s *DataForwardingtoEUTRANInformationListItem) Encode(w *aper.AperWriter) (
 	if err = s.DataForwardingTunnelInformation.Encode(w); err != nil {
 		return fmt.Errorf("Encode DataForwardingTunnelInformation failed: %w", err)
 	}
-	if err = s.QOSFlowsToBeForwardedList.Encode(w); err != nil {
-		return fmt.Errorf("Encode QOSFlowsToBeForwardedList failed: %w", err)
+
+	{
+		itemPointers := make([]aper.AperMarshaller, len(s.QOSFlowsToBeForwardedList.Value))
+		for i := 0; i < len(s.QOSFlowsToBeForwardedList.Value); i++ {
+			itemPointers[i] = &(s.QOSFlowsToBeForwardedList.Value[i])
+		}
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Encode QOSFlowsToBeForwardedList failed: %w", err)
+		}
 	}
 	return nil
 }

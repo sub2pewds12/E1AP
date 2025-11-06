@@ -36,12 +36,12 @@ func (s *QOSFlowRemovedItem) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode QOSFlowIdentifier failed: %w", err)
 	}
 	if s.QOSFlowReleasedInSession != nil {
-		if err = w.WriteEnumerate(uint64(s.QOSFlowReleasedInSession.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+		if err = s.QOSFlowReleasedInSession.Encode(w); err != nil {
 			return fmt.Errorf("Encode QOSFlowReleasedInSession failed: %w", err)
 		}
 	}
 	if s.QOSFlowAccumulatedSessionTime != nil {
-		if err = s.QOSFlowAccumulatedSessionTime.Encode(w); err != nil {
+		if err = w.WriteOctetString([]byte(s.QOSFlowAccumulatedSessionTime.Value), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
 			return fmt.Errorf("Encode QOSFlowAccumulatedSessionTime failed: %w", err)
 		}
 	}

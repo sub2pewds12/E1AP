@@ -11,8 +11,8 @@ type DRBToSetupItemNGRAN struct {
 	DRBID                               DRBID                             `aper:"lb:1,ub:32,mandatory,ext"`
 	SDAPConfiguration                   SDAPConfiguration                 `aper:"mandatory,ext"`
 	PDCPConfiguration                   PDCPConfiguration                 `aper:"mandatory,ext"`
-	CellGroupInformation                []CellGroupInformationItem        `aper:"mandatory,ext"`
-	QOSFlowInformationToBeSetup         []QOSFlowQOSParameterItem         `aper:"mandatory,ext"`
+	CellGroupInformation                CellGroupInformation              `aper:"mandatory,ext"`
+	QOSFlowInformationToBeSetup         QOSFlowQOSParameterList           `aper:"mandatory,ext"`
 	DRBDataForwardingInformationRequest *DataForwardingInformationRequest `aper:"optional,ext"`
 	DRBInactivityTimer                  *InactivityTimer                  `aper:"lb:1,ub:7200,optional,ext"`
 	PDCPSNStatusInformation             *PDCPSNStatusInformation          `aper:"optional,ext"`
@@ -49,11 +49,25 @@ func (s *DRBToSetupItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = s.PDCPConfiguration.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDCPConfiguration failed: %w", err)
 	}
-	if err = s.CellGroupInformation.Encode(w); err != nil {
-		return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+
+	{
+		itemPointers := make([]aper.AperMarshaller, len(s.CellGroupInformation.Value))
+		for i := 0; i < len(s.CellGroupInformation.Value); i++ {
+			itemPointers[i] = &(s.CellGroupInformation.Value[i])
+		}
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+		}
 	}
-	if err = s.QOSFlowInformationToBeSetup.Encode(w); err != nil {
-		return fmt.Errorf("Encode QOSFlowInformationToBeSetup failed: %w", err)
+
+	{
+		itemPointers := make([]aper.AperMarshaller, len(s.QOSFlowInformationToBeSetup.Value))
+		for i := 0; i < len(s.QOSFlowInformationToBeSetup.Value); i++ {
+			itemPointers[i] = &(s.QOSFlowInformationToBeSetup.Value[i])
+		}
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Encode QOSFlowInformationToBeSetup failed: %w", err)
+		}
 	}
 	if s.DRBDataForwardingInformationRequest != nil {
 		if err = s.DRBDataForwardingInformationRequest.Encode(w); err != nil {

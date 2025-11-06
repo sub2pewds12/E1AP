@@ -28,7 +28,7 @@ func (s *PDUSessionResourceActivityItem) Encode(w *aper.AperWriter) (err error) 
 	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PDUSessionResourceActivity.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
+	if err = s.PDUSessionResourceActivity.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDUSessionResourceActivity failed: %w", err)
 	}
 	return nil

@@ -10,10 +10,10 @@ import (
 
 // DLDataNotification is a generated SEQUENCE type.
 type DLDataNotification struct {
-	GNBCUCPUEE1APID        GNBCUCPUEE1APID          `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	GNBCUUPUEE1APID        GNBCUUPUEE1APID          `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	PPI                    *PPI                     `aper:"lb:0,ub:7,optional,ext"`
-	PDUSessionToNotifyList []PDUSessionToNotifyItem `aper:"optional,ext"`
+	GNBCUCPUEE1APID        GNBCUCPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	GNBCUUPUEE1APID        GNBCUUPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	PPI                    *PPI                    `aper:"lb:0,ub:7,optional,ext"`
+	PDUSessionToNotifyList *PDUSessionToNotifyList `aper:"optional,ext"`
 }
 
 // toIes transforms the DLDataNotification struct into a slice of E1APMessageIEs.
@@ -64,15 +64,15 @@ func (msg *DLDataNotification) toIes() ([]E1APMessageIE, error) {
 			})
 		}
 	}
-	if len(msg.PDUSessionToNotifyList) > 0 {
+	if msg.PDUSessionToNotifyList != nil {
 
 		tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 0, Ub: 0},
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
-			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
+		for i := 0; i < len(msg.PDUSessionToNotifyList.Value); i++ {
+			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList.Value[i])
 		}
 
 		{
@@ -82,8 +82,8 @@ func (msg *DLDataNotification) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
-				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
+			for i := 0; i < len(msg.PDUSessionToNotifyList.Value); i++ {
+				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -230,7 +230,9 @@ func (decoder *DLDataNotificationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return nil, fmt.Errorf("Decode PDUSessionToNotifyList failed: %w", err)
 			}
-			msg.PDUSessionToNotifyList = decodedItems
+
+			msg.PDUSessionToNotifyList = new(PDUSessionToNotifyList)
+			msg.PDUSessionToNotifyList.Value = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.

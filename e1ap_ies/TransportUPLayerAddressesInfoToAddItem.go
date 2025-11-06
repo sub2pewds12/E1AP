@@ -9,7 +9,7 @@ import (
 // TransportUPLayerAddressesInfoToAddItem is a generated SEQUENCE type.
 type TransportUPLayerAddressesInfoToAddItem struct {
 	IPSecTransportLayerAddress      TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ext"`
-	GTPTransportLayerAddressesToAdd []GTPTLAItem                `aper:"ub:MaxnoofGTPTLAs,optional,ext"`
+	GTPTransportLayerAddressesToAdd *GTPTLAs                    `aper:"ub:MaxnoofGTPTLAs,optional,ext"`
 	IEExtensions                    *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -28,12 +28,18 @@ func (s *TransportUPLayerAddressesInfoToAddItem) Encode(w *aper.AperWriter) (err
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.IPSecTransportLayerAddress.Encode(w); err != nil {
+	if err = w.WriteBitString(s.IPSecTransportLayerAddress.Value.Bytes, uint(s.IPSecTransportLayerAddress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode IPSecTransportLayerAddress failed: %w", err)
 	}
 	if s.GTPTransportLayerAddressesToAdd != nil {
-		if err = s.GTPTransportLayerAddressesToAdd.Encode(w); err != nil {
-			return fmt.Errorf("Encode GTPTransportLayerAddressesToAdd failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.GTPTransportLayerAddressesToAdd.Value))
+			for i := 0; i < len(s.GTPTransportLayerAddressesToAdd.Value); i++ {
+				itemPointers[i] = &(s.GTPTransportLayerAddressesToAdd.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: MaxnoofGTPTLAs}, false); err != nil {
+				return fmt.Errorf("Encode GTPTransportLayerAddressesToAdd failed: %w", err)
+			}
 		}
 	}
 	return nil

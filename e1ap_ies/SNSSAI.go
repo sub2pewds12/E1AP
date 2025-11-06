@@ -28,11 +28,11 @@ func (s *SNSSAI) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.SST.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.SST.Value), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode SST failed: %w", err)
 	}
 	if s.SD != nil {
-		if err = s.SD.Encode(w); err != nil {
+		if err = w.WriteOctetString([]byte(s.SD.Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 			return fmt.Errorf("Encode SD failed: %w", err)
 		}
 	}

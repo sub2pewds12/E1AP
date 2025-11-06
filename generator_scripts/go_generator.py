@@ -347,7 +347,6 @@ class GoCodeGenerator:
             logger.info("No simple types found to generate in common file.")
             return
 
-        # Add 'io' to the imports for the Encode/Decode methods
         go_code = 'package e1ap_ies\n\nimport (\n\t"fmt"\n\t"io"\n\t"github.com/lvdund/ngap/aper"\n)\n\n'
 
         sorted_items = sorted(simple_items, key=lambda x: self._standard_string(x.name))
@@ -356,17 +355,20 @@ class GoCodeGenerator:
         for item in sorted_items:
             go_name = self._standard_string(item.name)
             
-            
             underlying_type = ""
             encode_logic = ""
             decode_logic = ""
             
-            # --- THIS IS THE NEW LOGIC TO DETERMINE THE TYPE AND METHODS ---
-            
             if isinstance(item, IntegerDefinition) or (isinstance(item, AliasDefinition) and "INTEGER" in item.alias_of.upper()):
                 underlying_type = "aper.Integer"
-                min_val = getattr(item, 'min_val', 0) or 0
-                max_val = getattr(item, 'max_val', 0) or 0
+
+                # This is the corrected, robust logic from your code
+                min_val_str = getattr(item, 'min_val', None)
+                max_val_str = getattr(item, 'max_val', None)
+
+                min_val = self._format_go_value(min_val_str)
+                max_val = self._format_go_value(max_val_str)
+                
                 is_extensible = str(getattr(item, 'is_extensible', False)).lower()
 
                 encode_logic = f"return w.WriteInteger(int64(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
@@ -379,10 +381,14 @@ class GoCodeGenerator:
         return nil"""
 
             elif isinstance(item, StringDefinition) or (isinstance(item, AliasDefinition) and "STRING" in item.alias_of.upper()):
-                min_val = getattr(item, 'min_val', 0) or 0
-                max_val = getattr(item, 'max_val', 0) or 0
-                is_extensible = str(getattr(item, 'is_extensible', False)).lower()
+                # Applying the same corrected, robust logic here
+                min_val_str = getattr(item, 'min_val', None)
+                max_val_str = getattr(item, 'max_val', None)
 
+                min_val = self._format_go_value(min_val_str)
+                max_val = self._format_go_value(max_val_str)
+
+                is_extensible = str(getattr(item, 'is_extensible', False)).lower()
                 string_type_name = item.string_type if isinstance(item, StringDefinition) else item.alias_of
                 
                 if "BIT STRING" in string_type_name.upper():
@@ -400,26 +406,14 @@ class GoCodeGenerator:
         s.Value, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
         return err"""
 
-            # --- END OF NEW LOGIC ---
-
             if underlying_type:
                 total_count += 1
                 go_code += self._generate_header_comment(item, go_name)
-                
-                # Generate the struct
                 go_code += f"type {go_name} struct {{\n\tValue {underlying_type}\n}}\n\n"
-                
-                # Generate the Encode method
                 go_code += f"// Encode implements the aper.AperMarshaller interface.\n"
                 go_code += f"func (s *{go_name}) Encode(w *aper.AperWriter) error {{\n\t{encode_logic}\n}}\n\n"
-                
-                # Generate the Decode method
                 go_code += f"// Decode implements the aper.AperUnmarshaller interface.\n"
                 go_code += f"func (s *{go_name}) Decode(r *aper.AperReader) error {{\n\t{decode_logic}\n}}\n\n"
-
-                # Your existing validation logic can be preserved if you want, but it's less critical now.
-                # You would just need to change the receiver from `(v {go_name})` to `(s *{go_name})`
-                # and the check from `len(v)` to `len(s.Value)`.
                 
         if total_count > 0:
             file_path = os.path.join(self.output_dir, "e1ap_common_types.go")
@@ -505,7 +499,7 @@ class GoCodeGenerator:
                    "Indication", "Acknowledge", "Setup", "Transfer", "Notification",
                    "PDU" # for E1APPDU itself
                ]
-               is_pdu = isinstance(item, SequenceDefinition) and any(go_name.endswith(s) for s in pdu_suffixes)
+               is_pdu = item.name in self.message_to_procedure_map
               
                if is_pdu:
                    method_code, pdu_imports = render_pdu_methods(go_name, item, self.parser, self.message_to_procedure_map, self.procedures)

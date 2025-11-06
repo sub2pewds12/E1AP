@@ -8,9 +8,9 @@ import (
 
 // MRDCUsageInformation is a generated SEQUENCE type.
 type MRDCUsageInformation struct {
-	DataUsagePerPDUSessionReport []MRDCDataUsageReportItem   `aper:"lb:1,ub:Maxnooftimeperiods,optional,ext"`
-	DataUsagePerQOSFlowList      []DataUsagePerQOSFlowItem   `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
-	IEExtensions                 *ProtocolExtensionContainer `aper:"optional,ext"`
+	DataUsagePerPDUSessionReport *DataUsagePerPDUSessionReport `aper:"lb:1,ub:Maxnooftimeperiods,optional,ext"`
+	DataUsagePerQOSFlowList      *DataUsagePerQOSFlowList      `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
+	IEExtensions                 *ProtocolExtensionContainer   `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -32,13 +32,25 @@ func (s *MRDCUsageInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.DataUsagePerPDUSessionReport != nil {
-		if err = s.DataUsagePerPDUSessionReport.Encode(w); err != nil {
-			return fmt.Errorf("Encode DataUsagePerPDUSessionReport failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DataUsagePerPDUSessionReport.Value))
+			for i := 0; i < len(s.DataUsagePerPDUSessionReport.Value); i++ {
+				itemPointers[i] = &(s.DataUsagePerPDUSessionReport.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: Maxnooftimeperiods}, true); err != nil {
+				return fmt.Errorf("Encode DataUsagePerPDUSessionReport failed: %w", err)
+			}
 		}
 	}
 	if s.DataUsagePerQOSFlowList != nil {
-		if err = s.DataUsagePerQOSFlowList.Encode(w); err != nil {
-			return fmt.Errorf("Encode DataUsagePerQOSFlowList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.DataUsagePerQOSFlowList.Value))
+			for i := 0; i < len(s.DataUsagePerQOSFlowList.Value); i++ {
+				itemPointers[i] = &(s.DataUsagePerQOSFlowList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
+				return fmt.Errorf("Encode DataUsagePerQOSFlowList failed: %w", err)
+			}
 		}
 	}
 	return nil

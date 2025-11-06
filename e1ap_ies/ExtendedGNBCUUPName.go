@@ -56,25 +56,21 @@ func (s *ExtendedGNBCUUPName) Decode(r *aper.AperReader) (err error) {
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPNameVisibleString failed: %w", err)
-			}
-			s.GNBCUUPNameVisibleString = new(GNBCUUPNameVisibleString)
-			s.GNBCUUPNameVisibleString.Value = aper.OctetString(val)
+		var val []byte
+		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Decode GNBCUUPNameVisibleString failed: %w", err)
 		}
+		s.GNBCUUPNameVisibleString = new(GNBCUUPNameVisibleString)
+		s.GNBCUUPNameVisibleString.Value = aper.OctetString(val)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 
-		{
-			var val []byte
-			if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-				return fmt.Errorf("Decode GNBCUUPNameUTF8String failed: %w", err)
-			}
-			s.GNBCUUPNameUTF8String = new(GNBCUUPNameUTF8String)
-			s.GNBCUUPNameUTF8String.Value = aper.OctetString(val)
+		var val []byte
+		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Decode GNBCUUPNameUTF8String failed: %w", err)
 		}
+		s.GNBCUUPNameUTF8String = new(GNBCUUPNameUTF8String)
+		s.GNBCUUPNameUTF8String.Value = aper.OctetString(val)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

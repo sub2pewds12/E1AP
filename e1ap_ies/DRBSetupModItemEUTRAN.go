@@ -11,7 +11,7 @@ type DRBSetupModItemEUTRAN struct {
 	DRBID                             DRBID                       `aper:"lb:1,ub:32,mandatory,ext"`
 	S1DLUPTNLInformation              UPTNLInformation            `aper:"mandatory,ext"`
 	DataForwardingInformationResponse *DataForwardingInformation  `aper:"optional,ext"`
-	ULUPTransportParameters           []UPParametersItem          `aper:"mandatory,ext"`
+	ULUPTransportParameters           UPParameters                `aper:"mandatory,ext"`
 	IEExtensions                      *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -41,8 +41,15 @@ func (s *DRBSetupModItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode DataForwardingInformationResponse failed: %w", err)
 		}
 	}
-	if err = s.ULUPTransportParameters.Encode(w); err != nil {
-		return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
+
+	{
+		itemPointers := make([]aper.AperMarshaller, len(s.ULUPTransportParameters.Value))
+		for i := 0; i < len(s.ULUPTransportParameters.Value); i++ {
+			itemPointers[i] = &(s.ULUPTransportParameters.Value[i])
+		}
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
+		}
 	}
 	return nil
 }

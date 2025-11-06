@@ -10,9 +10,9 @@ import (
 
 // ULDataNotification is a generated SEQUENCE type.
 type ULDataNotification struct {
-	GNBCUCPUEE1APID        GNBCUCPUEE1APID          `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	GNBCUUPUEE1APID        GNBCUUPUEE1APID          `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	PDUSessionToNotifyList []PDUSessionToNotifyItem `aper:"mandatory,ext"`
+	GNBCUCPUEE1APID        GNBCUCPUEE1APID        `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	GNBCUUPUEE1APID        GNBCUUPUEE1APID        `aper:"lb:0,ub:4294967295,mandatory,ext"`
+	PDUSessionToNotifyList PDUSessionToNotifyList `aper:"mandatory,ext"`
 }
 
 // toIes transforms the ULDataNotification struct into a slice of E1APMessageIEs.
@@ -55,8 +55,8 @@ func (msg *ULDataNotification) toIes() ([]E1APMessageIE, error) {
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
-			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
+		for i := 0; i < len(msg.PDUSessionToNotifyList.Value); i++ {
+			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList.Value[i])
 		}
 
 		{
@@ -66,8 +66,8 @@ func (msg *ULDataNotification) toIes() ([]E1APMessageIE, error) {
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.PDUSessionToNotifyList); i++ {
-				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList[i])
+			for i := 0; i < len(msg.PDUSessionToNotifyList.Value); i++ {
+				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -213,7 +213,7 @@ func (decoder *ULDataNotificationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return nil, fmt.Errorf("Decode PDUSessionToNotifyList failed: %w", err)
 			}
-			msg.PDUSessionToNotifyList = decodedItems
+			msg.PDUSessionToNotifyList.Value = decodedItems
 		}
 	default:
 		// Handle unknown IEs based on criticality here, if needed.

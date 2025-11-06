@@ -8,11 +8,11 @@ import (
 
 // DRBRequiredToModifyItemEUTRAN is a generated SEQUENCE type.
 type DRBRequiredToModifyItemEUTRAN struct {
-	DRBID                                DRBID                                      `aper:"lb:1,ub:32,mandatory,ext"`
-	S1DLUPTNLInformation                 *UPTNLInformation                          `aper:"optional,ext"`
-	GNBCUUPCellGroupRelatedConfiguration []GNBCUUPCellGroupRelatedConfigurationItem `aper:"optional,ext"`
-	Cause                                Cause                                      `aper:"mandatory,ext"`
-	IEExtensions                         *ProtocolExtensionContainer                `aper:"optional,ext"`
+	DRBID                                DRBID                                 `aper:"lb:1,ub:32,mandatory,ext"`
+	S1DLUPTNLInformation                 *UPTNLInformation                     `aper:"optional,ext"`
+	GNBCUUPCellGroupRelatedConfiguration *GNBCUUPCellGroupRelatedConfiguration `aper:"optional,ext"`
+	Cause                                Cause                                 `aper:"mandatory,ext"`
+	IEExtensions                         *ProtocolExtensionContainer           `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -42,8 +42,14 @@ func (s *DRBRequiredToModifyItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.GNBCUUPCellGroupRelatedConfiguration != nil {
-		if err = s.GNBCUUPCellGroupRelatedConfiguration.Encode(w); err != nil {
-			return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.GNBCUUPCellGroupRelatedConfiguration.Value))
+			for i := 0; i < len(s.GNBCUUPCellGroupRelatedConfiguration.Value); i++ {
+				itemPointers[i] = &(s.GNBCUUPCellGroupRelatedConfiguration.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
+			}
 		}
 	}
 	if err = s.Cause.Encode(w); err != nil {

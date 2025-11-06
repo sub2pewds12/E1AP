@@ -25,10 +25,10 @@ func (s *GTPTunnel) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.TransportLayerAddress.Encode(w); err != nil {
+	if err = w.WriteBitString(s.TransportLayerAddress.Value.Bytes, uint(s.TransportLayerAddress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode TransportLayerAddress failed: %w", err)
 	}
-	if err = s.GTPTEID.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.GTPTEID.Value), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode GTPTEID failed: %w", err)
 	}
 	return nil

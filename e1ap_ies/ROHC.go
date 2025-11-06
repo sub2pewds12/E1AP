@@ -36,7 +36,7 @@ func (s *ROHC) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode ROHCProfiles failed: %w", err)
 	}
 	if s.ContinueROHC != nil {
-		if err = w.WriteEnumerate(uint64(s.ContinueROHC.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+		if err = s.ContinueROHC.Encode(w); err != nil {
 			return fmt.Errorf("Encode ContinueROHC failed: %w", err)
 		}
 	}

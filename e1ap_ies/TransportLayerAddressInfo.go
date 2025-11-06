@@ -8,9 +8,9 @@ import (
 
 // TransportLayerAddressInfo is a generated SEQUENCE type.
 type TransportLayerAddressInfo struct {
-	TransportUPLayerAddressesInfoToAddList    []TransportUPLayerAddressesInfoToAddItem    `aper:"optional,ext"`
-	TransportUPLayerAddressesInfoToRemoveList []TransportUPLayerAddressesInfoToRemoveItem `aper:"optional,ext"`
-	IEExtensions                              *ProtocolExtensionContainer                 `aper:"optional,ext"`
+	TransportUPLayerAddressesInfoToAddList    *TransportUPLayerAddressesInfoToAddList    `aper:"optional,ext"`
+	TransportUPLayerAddressesInfoToRemoveList *TransportUPLayerAddressesInfoToRemoveList `aper:"optional,ext"`
+	IEExtensions                              *ProtocolExtensionContainer                `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -32,13 +32,25 @@ func (s *TransportLayerAddressInfo) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.TransportUPLayerAddressesInfoToAddList != nil {
-		if err = s.TransportUPLayerAddressesInfoToAddList.Encode(w); err != nil {
-			return fmt.Errorf("Encode TransportUPLayerAddressesInfoToAddList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.TransportUPLayerAddressesInfoToAddList.Value))
+			for i := 0; i < len(s.TransportUPLayerAddressesInfoToAddList.Value); i++ {
+				itemPointers[i] = &(s.TransportUPLayerAddressesInfoToAddList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode TransportUPLayerAddressesInfoToAddList failed: %w", err)
+			}
 		}
 	}
 	if s.TransportUPLayerAddressesInfoToRemoveList != nil {
-		if err = s.TransportUPLayerAddressesInfoToRemoveList.Encode(w); err != nil {
-			return fmt.Errorf("Encode TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.TransportUPLayerAddressesInfoToRemoveList.Value))
+			for i := 0; i < len(s.TransportUPLayerAddressesInfoToRemoveList.Value); i++ {
+				itemPointers[i] = &(s.TransportUPLayerAddressesInfoToRemoveList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
+			}
 		}
 	}
 	return nil

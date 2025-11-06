@@ -16,7 +16,7 @@ type PDUSessionResourceToSetupModItem struct {
 	NGULUPTNLInformation                       UPTNLInformation                            `aper:"mandatory,ext"`
 	PDUSessionDataForwardingInformationRequest *DataForwardingInformationRequest           `aper:"optional,ext"`
 	PDUSessionInactivityTimer                  *InactivityTimer                            `aper:"lb:1,ub:7200,optional,ext"`
-	DRBToSetupModListNGRAN                     []DRBToSetupModItemNGRAN                    `aper:"mandatory,ext"`
+	DRBToSetupModListNGRAN                     DRBToSetupModListNGRAN                      `aper:"mandatory,ext"`
 	IEExtensions                               *PDUSessionResourceToSetupModItemExtensions `aper:"optional,ext"`
 }
 
@@ -44,7 +44,7 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PDUSessionType.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
+	if err = s.PDUSessionType.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDUSessionType failed: %w", err)
 	}
 	if err = s.SNSSAI.Encode(w); err != nil {
@@ -71,8 +71,15 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 			return fmt.Errorf("Encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
-	if err = s.DRBToSetupModListNGRAN.Encode(w); err != nil {
-		return fmt.Errorf("Encode DRBToSetupModListNGRAN failed: %w", err)
+
+	{
+		itemPointers := make([]aper.AperMarshaller, len(s.DRBToSetupModListNGRAN.Value))
+		for i := 0; i < len(s.DRBToSetupModListNGRAN.Value); i++ {
+			itemPointers[i] = &(s.DRBToSetupModListNGRAN.Value[i])
+		}
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			return fmt.Errorf("Encode DRBToSetupModListNGRAN failed: %w", err)
+		}
 	}
 	return nil
 }

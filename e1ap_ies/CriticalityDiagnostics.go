@@ -8,12 +8,12 @@ import (
 
 // CriticalityDiagnostics is a generated SEQUENCE type.
 type CriticalityDiagnostics struct {
-	ProcedureCode             *ProcedureCode                 `aper:"lb:0,ub:255,optional,ext"`
-	TriggeringMessage         *TriggeringMessage             `aper:"optional,ext"`
-	ProcedureCriticality      *Criticality                   `aper:"optional,ext"`
-	TransactionID             TransactionID                  `aper:"lb:0,ub:255,mandatory,ext"`
-	IEsCriticalityDiagnostics []CriticalityDiagnosticsIEItem `aper:"optional,ext"`
-	IEExtensions              *ProtocolExtensionContainer    `aper:"optional,ext"`
+	ProcedureCode             *ProcedureCode                `aper:"lb:0,ub:255,optional,ext"`
+	TriggeringMessage         *TriggeringMessage            `aper:"optional,ext"`
+	ProcedureCriticality      *Criticality                  `aper:"optional,ext"`
+	TransactionID             TransactionID                 `aper:"lb:0,ub:255,mandatory,ext"`
+	IEsCriticalityDiagnostics *CriticalityDiagnosticsIEList `aper:"optional,ext"`
+	IEExtensions              *ProtocolExtensionContainer   `aper:"optional,ext"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
@@ -46,12 +46,12 @@ func (s *CriticalityDiagnostics) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.TriggeringMessage != nil {
-		if err = w.WriteEnumerate(uint64(s.TriggeringMessage.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		if err = s.TriggeringMessage.Encode(w); err != nil {
 			return fmt.Errorf("Encode TriggeringMessage failed: %w", err)
 		}
 	}
 	if s.ProcedureCriticality != nil {
-		if err = w.WriteEnumerate(uint64(s.ProcedureCriticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		if err = s.ProcedureCriticality.Encode(w); err != nil {
 			return fmt.Errorf("Encode ProcedureCriticality failed: %w", err)
 		}
 	}
@@ -59,8 +59,14 @@ func (s *CriticalityDiagnostics) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
 	if s.IEsCriticalityDiagnostics != nil {
-		if err = s.IEsCriticalityDiagnostics.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEsCriticalityDiagnostics failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.IEsCriticalityDiagnostics.Value))
+			for i := 0; i < len(s.IEsCriticalityDiagnostics.Value); i++ {
+				itemPointers[i] = &(s.IEsCriticalityDiagnostics.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode IEsCriticalityDiagnostics failed: %w", err)
+			}
 		}
 	}
 	return nil

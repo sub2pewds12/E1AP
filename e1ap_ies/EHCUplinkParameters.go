@@ -24,7 +24,7 @@ func (s *EHCUplinkParameters) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.DRBContinueEHCUL.Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
+	if err = s.DRBContinueEHCUL.Encode(w); err != nil {
 		return fmt.Errorf("Encode DRBContinueEHCUL failed: %w", err)
 	}
 	return nil

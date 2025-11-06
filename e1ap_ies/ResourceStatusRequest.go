@@ -88,7 +88,7 @@ func (msg *ResourceStatusRequest) toIes() ([]E1APMessageIE, error) {
 			ies = append(ies, E1APMessageIE{
 				Id:          ProtocolIEID{Value: ProtocolIEIDReportCharacteristics},
 				Criticality: Criticality{Value: CriticalityReject},
-				Value: &OCTETSTRING{
+				Value: &BITSTRING{
 					c:     aper.Constraint{Lb: 36, Ub: 36},
 					ext:   false,
 					Value: msg.ReportCharacteristics.Value,

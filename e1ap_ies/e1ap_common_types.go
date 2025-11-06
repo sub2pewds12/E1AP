@@ -1223,13 +1223,13 @@ type ProtocolExtensionID struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *ProtocolExtensionID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: maxProtocolExtensions}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolExtensions}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ProtocolExtensionID) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: maxProtocolExtensions}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxProtocolExtensions}, false)
 	if err != nil {
 		return err
 	}
@@ -1244,13 +1244,13 @@ type ProtocolIEID struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *ProtocolIEID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ProtocolIEID) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: maxProtocolIEs}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false)
 	if err != nil {
 		return err
 	}

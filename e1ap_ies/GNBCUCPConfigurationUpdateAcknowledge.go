@@ -9,11 +9,11 @@ import (
 
 // GNBCUCPConfigurationUpdateAcknowledge is a generated SEQUENCE type.
 type GNBCUCPConfigurationUpdateAcknowledge struct {
-	TransactionID                TransactionID                  `aper:"lb:0,ub:255,mandatory,ext"`
-	CriticalityDiagnostics       *CriticalityDiagnostics        `aper:"optional,ext"`
-	GNBCUCPTNLASetupList         []GNBCUCPTNLASetupItem         `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
-	GNBCUCPTNLAFailedToSetupList []GNBCUCPTNLAFailedToSetupItem `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
-	TransportLayerAddressInfo    *TransportLayerAddressInfo     `aper:"optional,ext"`
+	TransactionID                TransactionID                 `aper:"lb:0,ub:255,mandatory,ext"`
+	CriticalityDiagnostics       *CriticalityDiagnostics       `aper:"optional,ext"`
+	GNBCUCPTNLASetupList         *GNBCUCPTNLASetupList         `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
+	GNBCUCPTNLAFailedToSetupList *GNBCUCPTNLAFailedToSetupList `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
+	TransportLayerAddressInfo    *TransportLayerAddressInfo    `aper:"optional,ext"`
 }
 
 // toIes transforms the GNBCUCPConfigurationUpdateAcknowledge struct into a slice of E1APMessageIEs.
@@ -45,15 +45,15 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 			})
 		}
 	}
-	if len(msg.GNBCUCPTNLASetupList) > 0 {
+	if msg.GNBCUCPTNLASetupList != nil {
 
 		tmp_GNBCUCPTNLASetupList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.GNBCUCPTNLASetupList); i++ {
-			tmp_GNBCUCPTNLASetupList.Value = append(tmp_GNBCUCPTNLASetupList.Value, &msg.GNBCUCPTNLASetupList[i])
+		for i := 0; i < len(msg.GNBCUCPTNLASetupList.Value); i++ {
+			tmp_GNBCUCPTNLASetupList.Value = append(tmp_GNBCUCPTNLASetupList.Value, &msg.GNBCUCPTNLASetupList.Value[i])
 		}
 
 		{
@@ -63,8 +63,8 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.GNBCUCPTNLASetupList); i++ {
-				tmp_GNBCUCPTNLASetupList.Value = append(tmp_GNBCUCPTNLASetupList.Value, &msg.GNBCUCPTNLASetupList[i])
+			for i := 0; i < len(msg.GNBCUCPTNLASetupList.Value); i++ {
+				tmp_GNBCUCPTNLASetupList.Value = append(tmp_GNBCUCPTNLASetupList.Value, &msg.GNBCUCPTNLASetupList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -74,15 +74,15 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 			})
 		}
 	}
-	if len(msg.GNBCUCPTNLAFailedToSetupList) > 0 {
+	if msg.GNBCUCPTNLAFailedToSetupList != nil {
 
 		tmp_GNBCUCPTNLAFailedToSetupList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
 			ext: false,
 		}
 
-		for i := 0; i < len(msg.GNBCUCPTNLAFailedToSetupList); i++ {
-			tmp_GNBCUCPTNLAFailedToSetupList.Value = append(tmp_GNBCUCPTNLAFailedToSetupList.Value, &msg.GNBCUCPTNLAFailedToSetupList[i])
+		for i := 0; i < len(msg.GNBCUCPTNLAFailedToSetupList.Value); i++ {
+			tmp_GNBCUCPTNLAFailedToSetupList.Value = append(tmp_GNBCUCPTNLAFailedToSetupList.Value, &msg.GNBCUCPTNLAFailedToSetupList.Value[i])
 		}
 
 		{
@@ -92,8 +92,8 @@ func (msg *GNBCUCPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 				ext: false,
 			}
 
-			for i := 0; i < len(msg.GNBCUCPTNLAFailedToSetupList); i++ {
-				tmp_GNBCUCPTNLAFailedToSetupList.Value = append(tmp_GNBCUCPTNLAFailedToSetupList.Value, &msg.GNBCUCPTNLAFailedToSetupList[i])
+			for i := 0; i < len(msg.GNBCUCPTNLAFailedToSetupList.Value); i++ {
+				tmp_GNBCUCPTNLAFailedToSetupList.Value = append(tmp_GNBCUCPTNLAFailedToSetupList.Value, &msg.GNBCUCPTNLAFailedToSetupList.Value[i])
 			}
 
 			ies = append(ies, E1APMessageIE{
@@ -220,7 +220,9 @@ func (decoder *GNBCUCPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.Ap
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations}, false); err != nil {
 				return nil, fmt.Errorf("Decode GNBCUCPTNLASetupList failed: %w", err)
 			}
-			msg.GNBCUCPTNLASetupList = decodedItems
+
+			msg.GNBCUCPTNLASetupList = new(GNBCUCPTNLASetupList)
+			msg.GNBCUCPTNLASetupList.Value = decodedItems
 		}
 	case ProtocolIEIDGNBCUCPTNLAFailedToSetupList:
 
@@ -237,7 +239,9 @@ func (decoder *GNBCUCPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.Ap
 			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations}, false); err != nil {
 				return nil, fmt.Errorf("Decode GNBCUCPTNLAFailedToSetupList failed: %w", err)
 			}
-			msg.GNBCUCPTNLAFailedToSetupList = decodedItems
+
+			msg.GNBCUCPTNLAFailedToSetupList = new(GNBCUCPTNLAFailedToSetupList)
+			msg.GNBCUCPTNLAFailedToSetupList.Value = decodedItems
 		}
 	case ProtocolIEIDTransportLayerAddressInfo:
 		msg.TransportLayerAddressInfo = new(TransportLayerAddressInfo)

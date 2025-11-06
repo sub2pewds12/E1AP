@@ -9,7 +9,7 @@ import (
 // DRBConfirmModifiedItemNGRAN is a generated SEQUENCE type.
 type DRBConfirmModifiedItemNGRAN struct {
 	DRBID                DRBID                       `aper:"lb:1,ub:32,mandatory,ext"`
-	CellGroupInformation []CellGroupInformationItem  `aper:"optional,ext"`
+	CellGroupInformation *CellGroupInformation       `aper:"optional,ext"`
 	IEExtensions         *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -32,8 +32,14 @@ func (s *DRBConfirmModifiedItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if s.CellGroupInformation != nil {
-		if err = s.CellGroupInformation.Encode(w); err != nil {
-			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupInformation.Value))
+			for i := 0; i < len(s.CellGroupInformation.Value); i++ {
+				itemPointers[i] = &(s.CellGroupInformation.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+			}
 		}
 	}
 	return nil

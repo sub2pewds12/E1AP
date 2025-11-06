@@ -1,7 +1,9 @@
 package e1ap_ies
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 
 	"github.com/lvdund/ngap/aper"
 )
@@ -15,91 +17,220 @@ type ResourceStatusUpdate struct {
 	HWCapacityIndicator           HWCapacityIndicator                            `aper:"mandatory,ext"`
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusUpdate) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
-	}
-	var optionalityBitmap [1]byte
-	if s.GNBCUUPMeasurementID != nil {
-		optionalityBitmap[0] |= 1 << 7
-	}
-	if s.TNLAvailableCapacityIndicator != nil {
-		optionalityBitmap[0] |= 1 << 6
-	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
-	}
-	if err = w.WriteInteger(int64(s.TransactionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-		return fmt.Errorf("Encode TransactionID failed: %w", err)
-	}
-	if err = w.WriteInteger(int64(s.GNBCUCPMeasurementID.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
-		return fmt.Errorf("Encode GNBCUCPMeasurementID failed: %w", err)
-	}
-	if s.GNBCUUPMeasurementID != nil {
-		if err = w.WriteInteger(int64(s.GNBCUUPMeasurementID.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
-			return fmt.Errorf("Encode GNBCUUPMeasurementID failed: %w", err)
+// toIes transforms the ResourceStatusUpdate struct into a slice of E1APMessageIEs.
+func (msg *ResourceStatusUpdate) toIes() ([]E1APMessageIE, error) {
+	ies := make([]E1APMessageIE, 0)
+	{
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 0, Ub: 255},
+					ext:   true,
+					Value: msg.TransactionID.Value,
+				},
+			})
 		}
 	}
-	if s.TNLAvailableCapacityIndicator != nil {
-		if err = s.TNLAvailableCapacityIndicator.Encode(w); err != nil {
-			return fmt.Errorf("Encode TNLAvailableCapacityIndicator failed: %w", err)
+	{
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
+				Criticality: Criticality{Value: CriticalityReject},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 1, Ub: 4095},
+					ext:   true,
+					Value: msg.GNBCUCPMeasurementID.Value,
+				},
+			})
 		}
 	}
-	if err = s.HWCapacityIndicator.Encode(w); err != nil {
-		return fmt.Errorf("Encode HWCapacityIndicator failed: %w", err)
+	if msg.GNBCUUPMeasurementID != nil {
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPMeasurementID},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value: &INTEGER{
+					c:     aper.Constraint{Lb: 1, Ub: 4095},
+					ext:   true,
+					Value: msg.GNBCUUPMeasurementID.Value,
+				},
+			})
+		}
 	}
-	return nil
+	if msg.TNLAvailableCapacityIndicator != nil {
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDTNLAvailableCapacityIndicator},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       msg.TNLAvailableCapacityIndicator,
+			})
+		}
+	}
+	{
+
+		{
+
+			ies = append(ies, E1APMessageIE{
+				Id:          ProtocolIEID{Value: ProtocolIEIDHWCapacityIndicator},
+				Criticality: Criticality{Value: CriticalityIgnore},
+				Value:       &msg.HWCapacityIndicator,
+			})
+		}
+	}
+	var err error
+	return ies, err
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusUpdate) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
-	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+// Encode implements the aper.AperMarshaller interface for ResourceStatusUpdate.
+func (msg *ResourceStatusUpdate) Encode(w io.Writer) error {
+	ies, err := msg.toIes()
+	if err != nil {
+		return fmt.Errorf("could not convert ResourceStatusUpdate to IEs: %w", err)
 	}
 
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-			return fmt.Errorf("Decode TransactionID failed: %w", err)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeResourceStatusReporting, Criticality{Value: CriticalityReject}, ies)
+}
+
+// Decode implements the aper.AperUnmarshaller interface for ResourceStatusUpdate.
+func (msg *ResourceStatusUpdate) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("ResourceStatusUpdate: %w", err)
 		}
-		s.TransactionID.Value = aper.Integer(val)
+	}()
+
+	r := aper.NewReader(bytes.NewReader(buf))
+
+	decoder := ResourceStatusUpdateDecoder{
+		msg:  msg,
+		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
-			return fmt.Errorf("Decode GNBCUCPMeasurementID failed: %w", err)
-		}
-		s.GNBCUCPMeasurementID.Value = aper.Integer(val)
+	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
+	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	// After decoding all present IEs, validate that mandatory ones were found.
+
+	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+		err = fmt.Errorf("mandatory field TransactionID is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDTransactionID,
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+
+	if _, ok := decoder.list[ProtocolIEIDGNBCUCPMeasurementID]; !ok {
+		err = fmt.Errorf("mandatory field GNBCUCPMeasurementID is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDGNBCUCPMeasurementID,
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+
+	if _, ok := decoder.list[ProtocolIEIDHWCapacityIndicator]; !ok {
+		err = fmt.Errorf("mandatory field HWCapacityIndicator is missing")
+		diagList = append(diagList, CriticalityDiagnosticsIEItem{
+			IECriticality: Criticality{Value: CriticalityReject},
+			IEID:          ProtocolIEIDHWCapacityIndicator,
+			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
+		})
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+type ResourceStatusUpdateDecoder struct {
+	msg      *ResourceStatusUpdate
+	diagList []CriticalityDiagnosticsIEItem
+	list     map[ProtocolIEID]*E1APMessageIE
+}
+
+func (decoder *ResourceStatusUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
+	var id int64
+	var c uint64
+	var buf []byte
+	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return nil, err
+	}
+	msgIe = new(E1APMessageIE)
+	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		return nil, err
+	}
+	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
+
+	if buf, err = r.ReadOpenType(); err != nil {
+		return nil, err
+	}
+
+	ieId := msgIe.Id
+	if _, ok := decoder.list[ieId]; ok {
+		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+	}
+	decoder.list[ieId] = msgIe
+
+	ieR := aper.NewReader(bytes.NewReader(buf))
+	msg := decoder.msg
+
+	switch msgIe.Id {
+	case ProtocolIEIDTransactionID:
 
 		{
 			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
-				return fmt.Errorf("Decode GNBCUUPMeasurementID failed: %w", err)
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
 			}
-			s.GNBCUUPMeasurementID = new(ResourceStatusUpdateIEsIDGNBCUUPMeasurementID)
-			s.GNBCUUPMeasurementID.Value = aper.Integer(val)
+			msg.TransactionID.Value = aper.Integer(val)
 		}
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.TNLAvailableCapacityIndicator = new(TNLAvailableCapacityIndicator)
-		if err = s.TNLAvailableCapacityIndicator.Decode(r); err != nil {
-			return fmt.Errorf("Decode TNLAvailableCapacityIndicator failed: %w", err)
+	case ProtocolIEIDGNBCUCPMeasurementID:
+
+		{
+			var val int64
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUCPMeasurementID failed: %w", err)
+			}
+			msg.GNBCUCPMeasurementID.Value = aper.Integer(val)
 		}
+	case ProtocolIEIDGNBCUUPMeasurementID:
+
+		{
+			var val int64
+			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true); err != nil {
+				return nil, fmt.Errorf("Decode GNBCUUPMeasurementID failed: %w", err)
+			}
+			msg.GNBCUUPMeasurementID = new(ResourceStatusUpdateIEsIDGNBCUUPMeasurementID)
+			msg.GNBCUUPMeasurementID.Value = aper.Integer(val)
+		}
+	case ProtocolIEIDTNLAvailableCapacityIndicator:
+		msg.TNLAvailableCapacityIndicator = new(TNLAvailableCapacityIndicator)
+		if err = msg.TNLAvailableCapacityIndicator.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode TNLAvailableCapacityIndicator failed: %w", err)
+		}
+	case ProtocolIEIDHWCapacityIndicator:
+		if err = msg.HWCapacityIndicator.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode HWCapacityIndicator failed: %w", err)
+		}
+	default:
+		// Handle unknown IEs based on criticality here, if needed.
+		// For now, we'll just ignore them.
+
 	}
-	if err = s.HWCapacityIndicator.Decode(r); err != nil {
-		return fmt.Errorf("Decode HWCapacityIndicator failed: %w", err)
-	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for ResourceStatusUpdate")
-	}
-	return nil
+	return msgIe, nil // Return the populated msgIe and a nil error
 }

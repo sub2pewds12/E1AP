@@ -9,8 +9,8 @@ import (
 // SupportedPLMNsItem is a generated SEQUENCE type.
 type SupportedPLMNsItem struct {
 	PLMNIdentity             PLMNIdentity                  `aper:"lb:3,ub:3,mandatory,ext"`
-	SliceSupportList         []SliceSupportItem            `aper:"optional,ext"`
-	NRCGISupportList         []NRCGISupportItem            `aper:"optional,ext"`
+	SliceSupportList         *SliceSupportList             `aper:"optional,ext"`
+	NRCGISupportList         *NRCGISupportList             `aper:"optional,ext"`
 	QOSParametersSupportList *QOSParametersSupportList     `aper:"optional,ext"`
 	IEExtensions             *SupportedPLMNsItemExtensions `aper:"optional,ext"`
 }
@@ -36,17 +36,29 @@ func (s *SupportedPLMNsItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.PLMNIdentity.Encode(w); err != nil {
+	if err = w.WriteOctetString([]byte(s.PLMNIdentity.Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 		return fmt.Errorf("Encode PLMNIdentity failed: %w", err)
 	}
 	if s.SliceSupportList != nil {
-		if err = s.SliceSupportList.Encode(w); err != nil {
-			return fmt.Errorf("Encode SliceSupportList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.SliceSupportList.Value))
+			for i := 0; i < len(s.SliceSupportList.Value); i++ {
+				itemPointers[i] = &(s.SliceSupportList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode SliceSupportList failed: %w", err)
+			}
 		}
 	}
 	if s.NRCGISupportList != nil {
-		if err = s.NRCGISupportList.Encode(w); err != nil {
-			return fmt.Errorf("Encode NRCGISupportList failed: %w", err)
+		{
+			itemPointers := make([]aper.AperMarshaller, len(s.NRCGISupportList.Value))
+			for i := 0; i < len(s.NRCGISupportList.Value); i++ {
+				itemPointers[i] = &(s.NRCGISupportList.Value[i])
+			}
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+				return fmt.Errorf("Encode NRCGISupportList failed: %w", err)
+			}
 		}
 	}
 	if s.QOSParametersSupportList != nil {

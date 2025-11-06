@@ -163,7 +163,7 @@ func (decoder *GNBCUCPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 			if val, err = ieR.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 				return nil, fmt.Errorf("Decode GNBCUCPName failed: %w", err)
 			}
-			msg.GNBCUCPName = new(aper.OctetString)
+			msg.GNBCUCPName = new(GNBCUCPName)
 			msg.GNBCUCPName.Value = aper.OctetString(val)
 		}
 	case ProtocolIEIDTransportLayerAddressInfo:

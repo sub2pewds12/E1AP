@@ -57,7 +57,7 @@ func (s *Dynamic5QIDescriptor) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DelayCritical != nil {
-		if err = w.WriteEnumerate(uint64(s.DelayCritical.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
+		if err = s.DelayCritical.Encode(w); err != nil {
 			return fmt.Errorf("Encode DelayCritical failed: %w", err)
 		}
 	}
