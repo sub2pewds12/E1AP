@@ -267,8 +267,8 @@ class GoCodeGenerator:
             return
 
         integer_consts, proc_code_consts, protocol_ie_consts = [], [], []
-        proc_code_type_name = self._standard_string("ProcedureCode")
-        protocol_ie_id_type_name = self._standard_string("ProtocolIE-ID")
+        proc_code_type_name = "aper.Integer"
+        protocol_ie_id_type_name = "aper.Integer"
 
         for item in constant_items:
             # Use the existing pascal-case converter
@@ -347,7 +347,7 @@ class GoCodeGenerator:
             logger.info("No simple types found to generate in common file.")
             return
 
-        go_code = 'package e1ap_ies\n\nimport (\n\t"fmt"\n\t"io"\n\t"github.com/lvdund/ngap/aper"\n)\n\n'
+        go_code = 'package e1ap_ies\n\nimport (\n\t"fmt"\n\t"io"\n\t"math"\n\t"github.com/lvdund/ngap/aper"\n)\n\n'
 
         sorted_items = sorted(simple_items, key=lambda x: self._standard_string(x.name))
         total_count = 0
@@ -359,53 +359,65 @@ class GoCodeGenerator:
             encode_logic = ""
             decode_logic = ""
             
+            # --- INTEGER BLOCK ---
             if isinstance(item, IntegerDefinition) or (isinstance(item, AliasDefinition) and "INTEGER" in item.alias_of.upper()):
                 underlying_type = "aper.Integer"
+                
+                min_val_attr = getattr(item, 'min_val', None)
+                min_val = self._format_go_value(str(min_val_attr) if min_val_attr is not None else '0')
 
-                # This is the corrected, robust logic from your code
-                min_val_str = getattr(item, 'min_val', None)
-                max_val_str = getattr(item, 'max_val', None)
-
-                min_val = self._format_go_value(min_val_str)
-                max_val = self._format_go_value(max_val_str)
+                # This is the new logic to handle the overflow
+                max_val_attr = getattr(item, 'max_val', None)
+                max_val_str = str(max_val_attr) if max_val_attr is not None else '0'
+                if max_val_str == "18446744073709551615":
+                    max_val = "math.MaxInt64"
+                else:
+                    max_val = self._format_go_value(max_val_str)
                 
                 is_extensible = str(getattr(item, 'is_extensible', False)).lower()
 
                 encode_logic = f"return w.WriteInteger(int64(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
                 decode_logic = f"""
-        val, err := r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
-        if err != nil {{
+            val, err := r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+            if err != nil {{
             return err
-        }}
-        s.Value = aper.Integer(val)
-        return nil"""
+            }}
+            s.Value = aper.Integer(val)
+            return nil"""
 
+            # --- STRING BLOCK ---
             elif isinstance(item, StringDefinition) or (isinstance(item, AliasDefinition) and "STRING" in item.alias_of.upper()):
-                # Applying the same corrected, robust logic here
-                min_val_str = getattr(item, 'min_val', None)
-                max_val_str = getattr(item, 'max_val', None)
-
-                min_val = self._format_go_value(min_val_str)
-                max_val = self._format_go_value(max_val_str)
-
+                min_val_attr = getattr(item, 'min_val', None)
+                min_val = self._format_go_value(str(min_val_attr) if min_val_attr is not None else '0')
+                max_val_attr = getattr(item, 'max_val', None)
+                max_val = self._format_go_value(str(max_val_attr) if max_val_attr is not None else '0')
                 is_extensible = str(getattr(item, 'is_extensible', False)).lower()
+
                 string_type_name = item.string_type if isinstance(item, StringDefinition) else item.alias_of
                 
+                # --- BIT STRING SUB-BLOCK ---
                 if "BIT STRING" in string_type_name.upper():
                     underlying_type = "aper.BitString"
                     encode_logic = f"return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
+                    # This is the CORRECT decode logic for BIT STRING
                     decode_logic = f"""
         var err error
-        s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        var numBits uint
+        s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        if err == nil {{
+            s.Value.NumBits = uint64(numBits)
+        }}
         return err"""
+                # --- OCTET STRING SUB-BLOCK ---
                 else: # OCTET STRING
                     underlying_type = "aper.OctetString"
                     encode_logic = f"return w.WriteOctetString([]byte(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
+                    # This is the CORRECT decode logic for OCTET STRING
                     decode_logic = f"""
         var err error
         s.Value, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
         return err"""
-
+        
             if underlying_type:
                 total_count += 1
                 go_code += self._generate_header_comment(item, go_name)
@@ -414,7 +426,7 @@ class GoCodeGenerator:
                 go_code += f"func (s *{go_name}) Encode(w *aper.AperWriter) error {{\n\t{encode_logic}\n}}\n\n"
                 go_code += f"// Decode implements the aper.AperUnmarshaller interface.\n"
                 go_code += f"func (s *{go_name}) Decode(r *aper.AperReader) error {{\n\t{decode_logic}\n}}\n\n"
-                
+                    
         if total_count > 0:
             file_path = os.path.join(self.output_dir, "e1ap_common_types.go")
             with open(file_path, "w", encoding="utf-8") as f:

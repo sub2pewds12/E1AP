@@ -322,7 +322,7 @@ func (msg *BearerContextSetupRequest) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert BearerContextSetupRequest to IEs: %w", err)
 	}
 
-	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeBearerContextSetup, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeBearerContextSetup}, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for BearerContextSetupRequest.
@@ -347,56 +347,56 @@ func (msg *BearerContextSetupRequest) Decode(buf []byte) (err error, diagList []
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
-	if _, ok := decoder.list[ProtocolIEIDGNBCUCPUEE1APID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID}]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDGNBCUCPUEE1APID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDSecurityInformation]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDSecurityInformation}]; !ok {
 		err = fmt.Errorf("mandatory field SecurityInformation is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDSecurityInformation,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDSecurityInformation},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDUEDLAggregateMaximumBitRate]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDUEDLAggregateMaximumBitRate}]; !ok {
 		err = fmt.Errorf("mandatory field UEDLAggregateMaximumBitRate is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDUEDLAggregateMaximumBitRate,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDUEDLAggregateMaximumBitRate},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDServingPLMN]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDServingPLMN}]; !ok {
 		err = fmt.Errorf("mandatory field ServingPLMN is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDServingPLMN,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDServingPLMN},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDActivityNotificationLevel]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDActivityNotificationLevel}]; !ok {
 		err = fmt.Errorf("mandatory field ActivityNotificationLevel is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDActivityNotificationLevel,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDActivityNotificationLevel},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDSystemBearerContextSetupRequest]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDSystemBearerContextSetupRequest}]; !ok {
 		err = fmt.Errorf("mandatory field SystemBearerContextSetupRequest is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDSystemBearerContextSetupRequest,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDSystemBearerContextSetupRequest},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -433,14 +433,14 @@ func (decoder *BearerContextSetupRequestDecoder) decodeIE(r *aper.AperReader) (m
 
 	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id {
+	switch msgIe.Id.Value {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{

@@ -54,7 +54,7 @@ func (msg *E1ReleaseRequest) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert E1ReleaseRequest to IEs: %w", err)
 	}
 
-	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeE1Release, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeE1Release}, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for E1ReleaseRequest.
@@ -79,20 +79,20 @@ func (msg *E1ReleaseRequest) Decode(buf []byte) (err error, diagList []Criticali
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
-	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDTransactionID}]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDTransactionID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDCause]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDCause}]; !ok {
 		err = fmt.Errorf("mandatory field Cause is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDCause,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDCause},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -129,14 +129,14 @@ func (decoder *E1ReleaseRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1A
 
 	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id {
+	switch msgIe.Id.Value {
 	case ProtocolIEIDTransactionID:
 
 		{

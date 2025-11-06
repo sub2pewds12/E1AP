@@ -63,6 +63,8 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
         if not asn1_def:
             print(f"WARNING: Could not resolve type '{ie.type}' for IE '{ie.ie}' in PDU '{go_name}'. Skipping.")
             continue
+        if not ie.id:
+            continue
 
         is_optional = ie.presence in ["optional", "conditional"]
         is_extensible = getattr(asn1_def, 'is_extensible', False)
@@ -225,7 +227,6 @@ func (msg *{go_name}) toIes() ([]E1APMessageIE, error) {{
 	var err error
 	return ies, err
 }}"""
-
     return final_func
 
 
@@ -1016,7 +1017,7 @@ func (msg *{go_name}) Encode(w io.Writer) error {{
 		return fmt.Errorf("could not convert {go_name} to IEs: %w", err)
 	}}
 
-	return encodeMessage(w, {pdu_choice_const}, {proc_code_const}, Criticality{{Value: {pdu_crit_const}}}, ies)
+	return encodeMessage(w, {pdu_choice_const}, ProcedureCode{{Value: {proc_code_const}}}, Criticality{{Value: {pdu_crit_const}}}, ies)
 }}"""
 
 
@@ -1026,18 +1027,18 @@ def _generate_pdu_decode(go_name: str, item: SequenceDefinition, parser: ASN1Par
     
     validation_parts = []
     for ie in item.ies:
-        if ie.presence == "mandatory":
+        if ie.presence == "mandatory" and ie.id:
             ie_id_const_base = pascal_case_converter(ie.id)
             if ie_id_const_base.startswith("Id"):
                 ie_id_const_base = ie_id_const_base[2:]
             ie_id_const = f"ProtocolIEID{ie_id_const_base}"
             field_name = pascal_case_converter(ie.ie)
             validation_parts.append(f"""
-    if _, ok := decoder.list[{ie_id_const}]; !ok {{
+    if _, ok := decoder.list[ProtocolIEID{{Value: {ie_id_const}}}]; !ok {{
 		err = fmt.Errorf("mandatory field {field_name} is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{{
 			IECriticality: Criticality{{Value: CriticalityReject}},
-			IEID:          {ie_id_const},
+			IEID:          ProtocolIEID{{Value: {ie_id_const}}},
 			TypeOfError:   TypeOfError{{Value: TypeOfErrorMissing}},
 		}})
 	}}""")
@@ -1086,6 +1087,8 @@ def _generate_decoder_helper(go_name: str, item: SequenceDefinition, parser: ASN
     
     case_blocks = []
     for ie in item.ies:
+        if not ie.id:
+            continue
         # 1. Get all the names and definitions
         ie_id_const_base = pascal_case_converter(ie.id)
         if ie_id_const_base.startswith("Id"):
@@ -1110,6 +1113,9 @@ def _generate_decoder_helper(go_name: str, item: SequenceDefinition, parser: ASN
     """)
 
     switch_body = "\n".join(case_blocks)
+    unused_var_logic = ""
+    if len(case_blocks) <= 1: # The list only contains the 'default' case
+        unused_var_logic = "\n\t_ = ieR\n\t_ = msg"
 
     return f"""
 type {decoder_name} struct {{
@@ -1138,14 +1144,14 @@ func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageI
 
 	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {{
-		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
-	msg := decoder.msg
-
-	switch msgIe.Id {{
+    msg := decoder.msg
+    {unused_var_logic}
+    switch msgIe.Id.Value {{
 	{switch_body}
 	}}
 	return msgIe, nil // Return the populated msgIe and a nil error
@@ -1256,15 +1262,22 @@ def _generate_internal_decode_call(field_name, go_type, ie, asn1_def, parser):
                 {assignment}
             }}"""
         else: # OCTET STRING
-            assignment = f"s.{field_name}.Value = aper.OctetString(val)"
-            if is_optional:
-                assignment = f"s.{field_name} = new({go_type}); s.{field_name}.Value = aper.OctetString(val)"
+            # This is the new logic to handle both wrapper structs and direct interface fields
+            if go_type == "ANY":
+                 assignment = f"s.{field_name} = &OCTETSTRING{{Value: aper.OctetString(val)}}"
+            else:
+                assignment = f"s.{field_name}.Value = aper.OctetString(val)"
+                if is_optional:
+                    assignment = f"s.{field_name} = new({go_type}); s.{field_name}.Value = aper.OctetString(val)"
+
             return f"""
-            var val []byte
-            if val, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
-                return fmt.Errorf("Decode {field_name} failed: %w", err)
-            }}
-            {assignment}"""
+            {{
+                var val []byte
+                if val, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
+                    return fmt.Errorf("Decode {field_name} failed: %w", err)
+                }}
+                {assignment}
+            }}"""
             
     # ==============================================================================
     # == COMPLEX TYPES (SEQUENCE, CHOICE, LIST)

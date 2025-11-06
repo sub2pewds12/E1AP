@@ -88,7 +88,7 @@ func (msg *DataUsageReport) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert DataUsageReport to IEs: %w", err)
 	}
 
-	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeDataUsageReport, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeDataUsageReport}, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for DataUsageReport.
@@ -113,29 +113,29 @@ func (msg *DataUsageReport) Decode(buf []byte) (err error, diagList []Criticalit
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
-	if _, ok := decoder.list[ProtocolIEIDGNBCUCPUEE1APID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID}]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDGNBCUCPUEE1APID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDGNBCUUPUEE1APID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID}]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDGNBCUUPUEE1APID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDDataUsageReportList]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDDataUsageReportList}]; !ok {
 		err = fmt.Errorf("mandatory field DataUsageReportList is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDDataUsageReportList,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDDataUsageReportList},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -172,14 +172,14 @@ func (decoder *DataUsageReportDecoder) decodeIE(r *aper.AperReader) (msgIe *E1AP
 
 	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id {
+	switch msgIe.Id.Value {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{

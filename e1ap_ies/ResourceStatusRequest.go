@@ -122,7 +122,7 @@ func (msg *ResourceStatusRequest) Encode(w io.Writer) error {
 		return fmt.Errorf("could not convert ResourceStatusRequest to IEs: %w", err)
 	}
 
-	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCodeResourceStatusReportingInitiation, Criticality{Value: CriticalityReject}, ies)
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeResourceStatusReportingInitiation}, Criticality{Value: CriticalityReject}, ies)
 }
 
 // Decode implements the aper.AperUnmarshaller interface for ResourceStatusRequest.
@@ -147,29 +147,29 @@ func (msg *ResourceStatusRequest) Decode(buf []byte) (err error, diagList []Crit
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
-	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDTransactionID}]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDTransactionID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDGNBCUCPMeasurementID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID}]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUCPMeasurementID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDGNBCUCPMeasurementID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDRegistrationRequest]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDRegistrationRequest}]; !ok {
 		err = fmt.Errorf("mandatory field RegistrationRequest is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDRegistrationRequest,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDRegistrationRequest},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -206,14 +206,14 @@ func (decoder *ResourceStatusRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 
 	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id {
+	switch msgIe.Id.Value {
 	case ProtocolIEIDTransactionID:
 
 		{

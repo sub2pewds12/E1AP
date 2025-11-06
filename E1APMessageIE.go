@@ -5,12 +5,11 @@ import (
 )
 
 // createMessage is a factory function that instantiates the correct message struct
-// based on the PDU choice and the procedure code. This is a crucial part of the
-// decoding process.
+// based on the PDU choice and the procedure code.
 func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageUnmarshaller {
 	switch present {
 	case PduChoiceInitiatingMessage:
-		switch int64(procedureCode.Value) {
+		switch procedureCode.Value {
 		case e1ap_ies.ProcedureCodeBearerContextInactivityNotification:
 			return new(e1ap_ies.BearerContextInactivityNotification)
 		case e1ap_ies.ProcedureCodeBearerContextModification:
@@ -33,8 +32,9 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.DataUsageReport)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseRequest)
-		case e1ap_ies.ProcedureCodeE1Setup:
-			return new(e1ap_ies.GNBCUCPE1SetupRequest) // Control Plane Setup is the standard initiating message
+		// This is the correct constant for the E1 Setup procedure
+		case e1ap_ies.ProcedureCodeGNBCUPE1Setup:
+			return new(e1ap_ies.GNBCUPE1SetupRequest)
 		case e1ap_ies.ProcedureCodeEarlyForwardingSNTransfer:
 			return new(e1ap_ies.EarlyForwardingSNTransfer)
 		case e1ap_ies.ProcedureCodeErrorIndication:
@@ -66,17 +66,18 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		}
 
 	case PduChoiceSuccessfulOutcome:
-		switch int64(procedureCode.Value) {
+		switch procedureCode.Value {
 		case e1ap_ies.ProcedureCodeBearerContextModification:
 			return new(e1ap_ies.BearerContextModificationResponse)
 		case e1ap_ies.ProcedureCodeBearerContextModificationRequired:
 			return new(e1ap_ies.BearerContextModificationConfirm)
 		case e1ap_ies.ProcedureCodeBearerContextRelease:
 			return new(e1ap_ies.BearerContextReleaseComplete)
-		case e1ap_ies.Procedure_ies.BearerContextSetup:
+		case e1ap_ies.ProcedureCodeBearerContextSetup:
 			return new(e1ap_ies.BearerContextSetupResponse)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseResponse)
+		// This is the correct constant for the E1 Setup procedure
 		case e1ap_ies.ProcedureCodeE1Setup:
 			return new(e1ap_ies.GNBCUCPE1SetupResponse)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
@@ -92,11 +93,12 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		}
 
 	case PduChoiceUnsuccessfulOutcome:
-		switch int64(procedureCode.Value) {
+		switch procedureCode.Value {
 		case e1ap_ies.ProcedureCodeBearerContextModification:
 			return new(e1ap_ies.BearerContextModificationFailure)
 		case e1ap_ies.ProcedureCodeBearerContextSetup:
 			return new(e1ap_ies.BearerContextSetupFailure)
+		// This is the correct constant for the E1 Setup procedure
 		case e1ap_ies.ProcedureCodeE1Setup:
 			return new(e1ap_ies.GNBCUCPE1SetupFailure)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
@@ -110,6 +112,5 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		}
 	}
 
-	// Return nil if the procedure code or message type is unknown or has no defined message.
 	return nil
 }

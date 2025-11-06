@@ -1,6 +1,8 @@
 package e1ap_ies
 
 import (
+	"math"
+
 	"github.com/lvdund/ngap/aper"
 )
 
@@ -18,7 +20,11 @@ func (s *AdditionalRRMPriorityIndex) Encode(w *aper.AperWriter) error {
 func (s *AdditionalRRMPriorityIndex) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 32, Ub: 32}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 32, Ub: 32}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -156,7 +162,11 @@ func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Encode(w *aper.AperWriter) er
 func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 131072}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 131072}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -245,13 +255,13 @@ type DRBUsageReportItemUsageCountDL struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *DRBUsageReportItemUsageCountDL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *DRBUsageReportItemUsageCountDL) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 	if err != nil {
 		return err
 	}
@@ -266,13 +276,13 @@ type DRBUsageReportItemUsageCountUL struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *DRBUsageReportItemUsageCountUL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *DRBUsageReportItemUsageCountUL) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 	if err != nil {
 		return err
 	}
@@ -687,7 +697,11 @@ func (s *InterfacesToTrace) Encode(w *aper.AperWriter) error {
 func (s *InterfacesToTrace) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -755,13 +769,13 @@ type MRDCDataUsageReportItemUsageCountDL struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *MRDCDataUsageReportItemUsageCountDL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *MRDCDataUsageReportItemUsageCountDL) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 	if err != nil {
 		return err
 	}
@@ -776,13 +790,13 @@ type MRDCDataUsageReportItemUsageCountUL struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *MRDCDataUsageReportItemUsageCountUL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *MRDCDataUsageReportItemUsageCountUL) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 18446744073709551615}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
 	if err != nil {
 		return err
 	}
@@ -867,7 +881,11 @@ func (s *MeasurementsToActivate) Encode(w *aper.AperWriter) error {
 func (s *MeasurementsToActivate) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -885,7 +903,11 @@ func (s *NID) Encode(w *aper.AperWriter) error {
 func (s *NID) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 44, Ub: 44}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 44, Ub: 44}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -903,7 +925,11 @@ func (s *NRCellIdentity) Encode(w *aper.AperWriter) error {
 func (s *NRCellIdentity) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -1149,7 +1175,11 @@ func (s *PortNumber) Encode(w *aper.AperWriter) error {
 func (s *PortNumber) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 16, Ub: 16}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 16, Ub: 16}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -1332,7 +1362,11 @@ func (s *QOSMappingInformationDscp) Encode(w *aper.AperWriter) error {
 func (s *QOSMappingInformationDscp) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -1350,7 +1384,11 @@ func (s *QOSMappingInformationFlowLabel) Encode(w *aper.AperWriter) error {
 func (s *QOSMappingInformationFlowLabel) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 20, Ub: 20}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 20, Ub: 20}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -1491,7 +1529,11 @@ func (s *ReportCharacteristics) Encode(w *aper.AperWriter) error {
 func (s *ReportCharacteristics) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 
@@ -1857,7 +1899,11 @@ func (s *TransportLayerAddress) Encode(w *aper.AperWriter) error {
 func (s *TransportLayerAddress) Decode(r *aper.AperReader) error {
 
 	var err error
-	s.Value.Bytes, s.Value.NumBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 160}, false)
+	var numBits uint
+	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 160}, false)
+	if err == nil {
+		s.Value.NumBits = uint64(numBits)
+	}
 	return err
 }
 

@@ -176,38 +176,38 @@ func (msg *GNBCUCPE1SetupResponse) Decode(buf []byte) (err error, diagList []Cri
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
-	if _, ok := decoder.list[ProtocolIEIDTransactionID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDTransactionID}]; !ok {
 		err = fmt.Errorf("mandatory field TransactionID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDTransactionID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDGNBCUUPID]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUUPID}]; !ok {
 		err = fmt.Errorf("mandatory field GNBCUUPID is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDGNBCUUPID,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDCNSupport]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDCNSupport}]; !ok {
 		err = fmt.Errorf("mandatory field CNSupport is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDCNSupport,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDCNSupport},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
 
-	if _, ok := decoder.list[ProtocolIEIDSupportedPLMNs]; !ok {
+	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs}]; !ok {
 		err = fmt.Errorf("mandatory field SupportedPLMNs is missing")
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
-			IEID:          ProtocolIEIDSupportedPLMNs,
+			IEID:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
 			TypeOfError:   TypeOfError{Value: TypeOfErrorMissing},
 		})
 	}
@@ -244,14 +244,14 @@ func (decoder *GNBCUCPE1SetupResponseDecoder) decodeIE(r *aper.AperReader) (msgI
 
 	ieId := msgIe.Id
 	if _, ok := decoder.list[ieId]; ok {
-		return nil, fmt.Errorf("duplicated protocol IE ID %%d", ieId)
+		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
 	decoder.list[ieId] = msgIe
 
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id {
+	switch msgIe.Id.Value {
 	case ProtocolIEIDTransactionID:
 
 		{
