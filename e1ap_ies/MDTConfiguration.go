@@ -44,13 +44,8 @@ func (s *MDTConfiguration) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("Decode MdtActivation failed: %w", err)
-		}
-		s.MdtActivation.Value = aper.Enumerated(val)
+	if err = s.MdtActivation.Decode(r); err != nil {
+		return fmt.Errorf("Decode MdtActivation failed: %w", err)
 	}
 	if err = s.MDTMode.Decode(r); err != nil {
 		return fmt.Errorf("Decode MDTMode failed: %w", err)

@@ -68,13 +68,8 @@ func (s *DRBRequiredToModifyItemEUTRAN) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
-			return fmt.Errorf("Decode DRBID failed: %w", err)
-		}
-		s.DRBID.Value = aper.Integer(val)
+	if err = s.DRBID.Decode(r); err != nil {
+		return fmt.Errorf("Decode DRBID failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.S1DLUPTNLInformation = new(UPTNLInformation)

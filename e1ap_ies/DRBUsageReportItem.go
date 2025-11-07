@@ -59,21 +59,11 @@ func (s *DRBUsageReportItem) Decode(r *aper.AperReader) (err error) {
 	if err = s.EndTimeStamp.Decode(r); err != nil {
 		return fmt.Errorf("Decode EndTimeStamp failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
-			return fmt.Errorf("Decode UsageCountUL failed: %w", err)
-		}
-		s.UsageCountUL.Value = aper.Integer(val)
+	if err = s.UsageCountUL.Decode(r); err != nil {
+		return fmt.Errorf("Decode UsageCountUL failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
-			return fmt.Errorf("Decode UsageCountDL failed: %w", err)
-		}
-		s.UsageCountDL.Value = aper.Integer(val)
+	if err = s.UsageCountDL.Decode(r); err != nil {
+		return fmt.Errorf("Decode UsageCountDL failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

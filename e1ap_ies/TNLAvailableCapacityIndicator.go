@@ -41,37 +41,17 @@ func (s *TNLAvailableCapacityIndicator) Decode(r *aper.AperReader) (err error) {
 	if isExtensible, err = r.ReadBool(); err != nil {
 		return fmt.Errorf("Read extensibility bool failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16777216}, true); err != nil {
-			return fmt.Errorf("Decode DLTNLOfferedCapacity failed: %w", err)
-		}
-		s.DLTNLOfferedCapacity.Value = aper.Integer(val)
+	if err = s.DLTNLOfferedCapacity.Decode(r); err != nil {
+		return fmt.Errorf("Decode DLTNLOfferedCapacity failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
-			return fmt.Errorf("Decode DLTNLAvailableCapacity failed: %w", err)
-		}
-		s.DLTNLAvailableCapacity.Value = aper.Integer(val)
+	if err = s.DLTNLAvailableCapacity.Decode(r); err != nil {
+		return fmt.Errorf("Decode DLTNLAvailableCapacity failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16777216}, true); err != nil {
-			return fmt.Errorf("Decode ULTNLOfferedCapacity failed: %w", err)
-		}
-		s.ULTNLOfferedCapacity.Value = aper.Integer(val)
+	if err = s.ULTNLOfferedCapacity.Decode(r); err != nil {
+		return fmt.Errorf("Decode ULTNLOfferedCapacity failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
-			return fmt.Errorf("Decode ULTNLAvailableCapacity failed: %w", err)
-		}
-		s.ULTNLAvailableCapacity.Value = aper.Integer(val)
+	if err = s.ULTNLAvailableCapacity.Decode(r); err != nil {
+		return fmt.Errorf("Decode ULTNLAvailableCapacity failed: %w", err)
 	}
 	if err = s.IEExtensions.Decode(r); err != nil {
 		return fmt.Errorf("Decode IEExtensions failed: %w", err)

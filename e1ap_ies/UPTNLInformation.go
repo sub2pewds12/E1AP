@@ -46,14 +46,15 @@ func (s *UPTNLInformation) Encode(w *aper.AperWriter) (err error) {
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *UPTNLInformation) Decode(r *aper.AperReader) (err error) {
 
-	// 1. Read the choice index.
+	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
 	var choice uint64
 	if choice, err = r.ReadChoice(1, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
+	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
 
 	// 2. Decode the selected member.
-	switch choice {
+	switch s.Choice {
 	case 0:
 		s.GTPTunnel = new(GTPTunnel)
 		if err = s.GTPTunnel.Decode(r); err != nil {

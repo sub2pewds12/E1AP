@@ -52,14 +52,15 @@ func (s *EarlyForwardingCOUNTInfo) Encode(w *aper.AperWriter) (err error) {
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *EarlyForwardingCOUNTInfo) Decode(r *aper.AperReader) (err error) {
 
-	// 1. Read the choice index.
+	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
 	var choice uint64
 	if choice, err = r.ReadChoice(2, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
+	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
 
 	// 2. Decode the selected member.
-	switch choice {
+	switch s.Choice {
 	case 0:
 		s.FirstDLCount = new(FirstDLCount)
 		if err = s.FirstDLCount.Decode(r); err != nil {

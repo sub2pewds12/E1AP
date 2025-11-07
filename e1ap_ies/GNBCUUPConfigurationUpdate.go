@@ -3,6 +3,7 @@ package e1ap_ies
 import (
 	"bytes"
 	"fmt"
+	"io"
 
 	"github.com/lvdund/ngap/aper"
 )
@@ -166,7 +167,15 @@ func (msg *GNBCUUPConfigurationUpdate) toIes() ([]E1APMessageIE, error) {
 	return ies, err
 }
 
-// Encode for GNBCUUPConfigurationUpdate: Could not find associated procedure.
+// Encode implements the aper.AperMarshaller interface for GNBCUUPConfigurationUpdate.
+func (msg *GNBCUUPConfigurationUpdate) Encode(w io.Writer) error {
+	ies, err := msg.toIes()
+	if err != nil {
+		return fmt.Errorf("could not convert GNBCUUPConfigurationUpdate to IEs: %w", err)
+	}
+
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeGNBCUUPConfigurationUpdate}, Criticality{Value: CriticalityReject}, ies)
+}
 
 // Decode implements the aper.AperUnmarshaller interface for GNBCUUPConfigurationUpdate.
 func (msg *GNBCUUPConfigurationUpdate) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
@@ -335,9 +344,25 @@ func (decoder *GNBCUUPConfigurationUpdateDecoder) decodeIE(r *aper.AperReader) (
 			return nil, fmt.Errorf("Decode ExtendedGNBCUUPName failed: %w", err)
 		}
 	default:
-		// Handle unknown IEs based on criticality here, if needed.
-		// For now, we'll just ignore them.
-
+		switch msgIe.Criticality.Value {
+		case CriticalityReject:
+			// If an unknown IE is critical, the PDU cannot be processed.
+			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
+				IECriticality: msgIe.Criticality,
+				IEID:          msgIe.Id,
+				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
+			})
+		case CriticalityNotify:
+			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
+			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
+				IECriticality: msgIe.Criticality,
+				IEID:          msgIe.Id,
+				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
+			})
+		case CriticalityIgnore:
+			// Ignore and proceed.
+		}
 	}
 	return msgIe, nil // Return the populated msgIe and a nil error
 }

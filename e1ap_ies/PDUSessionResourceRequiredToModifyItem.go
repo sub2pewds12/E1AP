@@ -79,13 +79,8 @@ func (s *PDUSessionResourceRequiredToModifyItem) Decode(r *aper.AperReader) (err
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-			return fmt.Errorf("Decode PDUSessionID failed: %w", err)
-		}
-		s.PDUSessionID.Value = aper.Integer(val)
+	if err = s.PDUSessionID.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDUSessionID failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.NGDLUPTNLInformation = new(UPTNLInformation)

@@ -4,8 +4,6 @@ import (
 	"github.com/sub2pewds12/E1AP/e1ap_ies"
 )
 
-// createMessage is a factory function that instantiates the correct message struct
-// based on the PDU choice and the procedure code.
 func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageUnmarshaller {
 	switch present {
 	case PduChoiceInitiatingMessage:
@@ -32,7 +30,6 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.DataUsageReport)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseRequest)
-		// This is the correct constant for the E1 Setup procedure
 		case e1ap_ies.ProcedureCodeGNBCUPE1Setup:
 			return new(e1ap_ies.GNBCUPE1SetupRequest)
 		case e1ap_ies.ProcedureCodeEarlyForwardingSNTransfer:
@@ -77,7 +74,6 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.BearerContextSetupResponse)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseResponse)
-		// This is the correct constant for the E1 Setup procedure
 		case e1ap_ies.ProcedureCodeE1Setup:
 			return new(e1ap_ies.GNBCUCPE1SetupResponse)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
@@ -98,7 +94,6 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.BearerContextModificationFailure)
 		case e1ap_ies.ProcedureCodeBearerContextSetup:
 			return new(e1ap_ies.BearerContextSetupFailure)
-		// This is the correct constant for the E1 Setup procedure
 		case e1ap_ies.ProcedureCodeE1Setup:
 			return new(e1ap_ies.GNBCUCPE1SetupFailure)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:

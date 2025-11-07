@@ -9,8 +9,8 @@ import (
 // SystemBearerContextModificationRequired is a generated CHOICE type.
 type SystemBearerContextModificationRequired struct {
 	Choice                        uint64 `json:"-"`
-	DRBRequiredToModifyListEUTRAN *[]DRBRequiredToModifyItemEUTRAN
-	DRBRequiredToRemoveListEUTRAN *[]DRBRequiredToRemoveItemEUTRAN
+	DRBRequiredToModifyListEUTRAN *DRBRequiredToModifyListEUTRAN
+	DRBRequiredToRemoveListEUTRAN *DRBRequiredToRemoveListEUTRAN
 }
 
 const (
@@ -30,25 +30,11 @@ func (s *SystemBearerContextModificationRequired) Encode(w *aper.AperWriter) (er
 	// 2. Encode the selected member.
 	switch s.Choice {
 	case SystemBearerContextModificationRequiredPresentDRBRequiredToModifyListEUTRAN:
-		tmp_wrapper := Sequence[*DRBRequiredToModifyItemEUTRAN]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.DRBRequiredToModifyListEUTRAN {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBRequiredToModifyListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBRequiredToModifyListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationRequiredPresentDRBRequiredToRemoveListEUTRAN:
-		tmp_wrapper := Sequence[*DRBRequiredToRemoveItemEUTRAN]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.DRBRequiredToRemoveListEUTRAN {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBRequiredToRemoveListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBRequiredToRemoveListEUTRAN failed: %w", err)
 		}
 	default:
@@ -60,50 +46,25 @@ func (s *SystemBearerContextModificationRequired) Encode(w *aper.AperWriter) (er
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *SystemBearerContextModificationRequired) Decode(r *aper.AperReader) (err error) {
 
-	// 1. Read the choice index.
+	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
 	var choice uint64
 	if choice, err = r.ReadChoice(1, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
+	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
 
 	// 2. Decode the selected member.
-	switch choice {
+	switch s.Choice {
 	case 0:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBRequiredToModifyItemEUTRAN, error) {
-			item := new(DRBRequiredToModifyItemEUTRAN)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBRequiredToModifyItemEUTRAN
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.DRBRequiredToModifyListEUTRAN = new(DRBRequiredToModifyListEUTRAN)
+		if err = s.DRBRequiredToModifyListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBRequiredToModifyListEUTRAN failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBRequiredToModifyListEUTRAN = &decodedItems
 	case 1:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBRequiredToRemoveItemEUTRAN, error) {
-			item := new(DRBRequiredToRemoveItemEUTRAN)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBRequiredToRemoveItemEUTRAN
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.DRBRequiredToRemoveListEUTRAN = new(DRBRequiredToRemoveListEUTRAN)
+		if err = s.DRBRequiredToRemoveListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBRequiredToRemoveListEUTRAN failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBRequiredToRemoveListEUTRAN = &decodedItems
 	default:
 		return fmt.Errorf("Decode choice of SystemBearerContextModificationRequired with unknown choice index %d", choice)
 	}

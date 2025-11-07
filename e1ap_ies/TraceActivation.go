@@ -58,13 +58,8 @@ func (s *TraceActivation) Decode(r *aper.AperReader) (err error) {
 	if err = s.InterfacesToTrace.Decode(r); err != nil {
 		return fmt.Errorf("Decode InterfacesToTrace failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 5}, true); err != nil {
-			return fmt.Errorf("Decode TraceDepth failed: %w", err)
-		}
-		s.TraceDepth.Value = aper.Enumerated(val)
+	if err = s.TraceDepth.Decode(r); err != nil {
+		return fmt.Errorf("Decode TraceDepth failed: %w", err)
 	}
 	if err = s.TraceCollectionEntityIPAddress.Decode(r); err != nil {
 		return fmt.Errorf("Decode TraceCollectionEntityIPAddress failed: %w", err)

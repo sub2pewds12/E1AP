@@ -40,13 +40,8 @@ func (s *EHCUplinkParameters) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("Decode DRBContinueEHCUL failed: %w", err)
-		}
-		s.DRBContinueEHCUL.Value = aper.Enumerated(val)
+	if err = s.DRBContinueEHCUL.Decode(r); err != nil {
+		return fmt.Errorf("Decode DRBContinueEHCUL failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

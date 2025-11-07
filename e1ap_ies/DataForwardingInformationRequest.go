@@ -55,13 +55,8 @@ func (s *DataForwardingInformationRequest) Decode(r *aper.AperReader) (err error
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-			return fmt.Errorf("Decode DataForwardingRequest failed: %w", err)
-		}
-		s.DataForwardingRequest.Value = aper.Enumerated(val)
+	if err = s.DataForwardingRequest.Decode(r); err != nil {
+		return fmt.Errorf("Decode DataForwardingRequest failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.QOSFlowsForwardedOnFwdTunnels = new(QOSFlowMappingList)

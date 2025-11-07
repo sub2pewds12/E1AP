@@ -83,45 +83,25 @@ func (s *CriticalityDiagnostics) Decode(r *aper.AperReader) (err error) {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-				return fmt.Errorf("Decode ProcedureCode failed: %w", err)
-			}
-			s.ProcedureCode = new(ProcedureCode)
-			s.ProcedureCode.Value = aper.Integer(val)
+		s.ProcedureCode = new(ProcedureCode)
+		if err = s.ProcedureCode.Decode(r); err != nil {
+			return fmt.Errorf("Decode ProcedureCode failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.TriggeringMessage = new(TriggeringMessage)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-				return fmt.Errorf("Decode TriggeringMessage failed: %w", err)
-			}
-			s.TriggeringMessage.Value = aper.Enumerated(val)
+		if err = s.TriggeringMessage.Decode(r); err != nil {
+			return fmt.Errorf("Decode TriggeringMessage failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.ProcedureCriticality = new(Criticality)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-				return fmt.Errorf("Decode ProcedureCriticality failed: %w", err)
-			}
-			s.ProcedureCriticality.Value = aper.Enumerated(val)
+		if err = s.ProcedureCriticality.Decode(r); err != nil {
+			return fmt.Errorf("Decode ProcedureCriticality failed: %w", err)
 		}
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-			return fmt.Errorf("Decode TransactionID failed: %w", err)
-		}
-		s.TransactionID.Value = aper.Integer(val)
+	if err = s.TransactionID.Decode(r); err != nil {
+		return fmt.Errorf("Decode TransactionID failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.IEsCriticalityDiagnostics = new(CriticalityDiagnosticsIEList)

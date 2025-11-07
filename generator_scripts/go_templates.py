@@ -91,16 +91,12 @@ def render_choice_struct(
 
     const_block = "const (\n" + "\n".join(const_lines) + "\n)"
 
-    field_lines = ["\tChoice\tuint64 `json:\"-\"`"] # Added json tag to hide from marshalling
+    field_lines = ["\tChoice\tuint64 `json:\"-\"`"] 
     for member in item.ies:
         member_go_name = pascal_case_converter(member.ie)
         base_go_type, concrete_def = go_type_resolver(member.type)
-        final_go_type = ""
-        if concrete_def and isinstance(concrete_def, ListDefinition):
-             of_type_go_name = pascal_case_converter(concrete_def.of_type)
-             final_go_type = f"[]{of_type_go_name}"
-        else:
-             final_go_type = base_go_type
+        final_go_type = base_go_type
+
         field_lines.append(f"\t{member_go_name}\t*{final_go_type}")
 
     struct_body = "\n".join(field_lines)

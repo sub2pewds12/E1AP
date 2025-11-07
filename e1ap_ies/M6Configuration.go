@@ -44,21 +44,11 @@ func (s *M6Configuration) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 13}, true); err != nil {
-			return fmt.Errorf("Decode M6reportInterval failed: %w", err)
-		}
-		s.M6reportInterval.Value = aper.Enumerated(val)
+	if err = s.M6reportInterval.Decode(r); err != nil {
+		return fmt.Errorf("Decode M6reportInterval failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-			return fmt.Errorf("Decode M6LinksToLog failed: %w", err)
-		}
-		s.M6LinksToLog.Value = aper.Enumerated(val)
+	if err = s.M6LinksToLog.Decode(r); err != nil {
+		return fmt.Errorf("Decode M6LinksToLog failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

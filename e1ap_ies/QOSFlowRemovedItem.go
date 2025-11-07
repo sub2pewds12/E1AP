@@ -58,23 +58,13 @@ func (s *QOSFlowRemovedItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
-			return fmt.Errorf("Decode QOSFlowIdentifier failed: %w", err)
-		}
-		s.QOSFlowIdentifier.Value = aper.Integer(val)
+	if err = s.QOSFlowIdentifier.Decode(r); err != nil {
+		return fmt.Errorf("Decode QOSFlowIdentifier failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.QOSFlowReleasedInSession = new(QOSFlowRemovedItemQOSFlowReleasedInSession)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-				return fmt.Errorf("Decode QOSFlowReleasedInSession failed: %w", err)
-			}
-			s.QOSFlowReleasedInSession.Value = aper.Enumerated(val)
+		if err = s.QOSFlowReleasedInSession.Decode(r); err != nil {
+			return fmt.Errorf("Decode QOSFlowReleasedInSession failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {

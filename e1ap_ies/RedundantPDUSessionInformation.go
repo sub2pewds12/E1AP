@@ -40,13 +40,8 @@ func (s *RedundantPDUSessionInformation) Decode(r *aper.AperReader) (err error) 
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("Decode RSN failed: %w", err)
-		}
-		s.RSN.Value = aper.Enumerated(val)
+	if err = s.RSN.Decode(r); err != nil {
+		return fmt.Errorf("Decode RSN failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

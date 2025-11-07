@@ -91,69 +91,39 @@ func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode MaxFlowBitRateDownlink failed: %w", err)
-			}
-			s.MaxFlowBitRateDownlink = new(BitRate)
-			s.MaxFlowBitRateDownlink.Value = aper.Integer(val)
+		s.MaxFlowBitRateDownlink = new(BitRate)
+		if err = s.MaxFlowBitRateDownlink.Decode(r); err != nil {
+			return fmt.Errorf("Decode MaxFlowBitRateDownlink failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode MaxFlowBitRateUplink failed: %w", err)
-			}
-			s.MaxFlowBitRateUplink = new(BitRate)
-			s.MaxFlowBitRateUplink.Value = aper.Integer(val)
+		s.MaxFlowBitRateUplink = new(BitRate)
+		if err = s.MaxFlowBitRateUplink.Decode(r); err != nil {
+			return fmt.Errorf("Decode MaxFlowBitRateUplink failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode GuaranteedFlowBitRateDownlink failed: %w", err)
-			}
-			s.GuaranteedFlowBitRateDownlink = new(BitRate)
-			s.GuaranteedFlowBitRateDownlink.Value = aper.Integer(val)
+		s.GuaranteedFlowBitRateDownlink = new(BitRate)
+		if err = s.GuaranteedFlowBitRateDownlink.Decode(r); err != nil {
+			return fmt.Errorf("Decode GuaranteedFlowBitRateDownlink failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode GuaranteedFlowBitRateUplink failed: %w", err)
-			}
-			s.GuaranteedFlowBitRateUplink = new(BitRate)
-			s.GuaranteedFlowBitRateUplink.Value = aper.Integer(val)
+		s.GuaranteedFlowBitRateUplink = new(BitRate)
+		if err = s.GuaranteedFlowBitRateUplink.Decode(r); err != nil {
+			return fmt.Errorf("Decode GuaranteedFlowBitRateUplink failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
-				return fmt.Errorf("Decode MaxPacketLossRateDownlink failed: %w", err)
-			}
-			s.MaxPacketLossRateDownlink = new(MaxPacketLossRate)
-			s.MaxPacketLossRateDownlink.Value = aper.Integer(val)
+		s.MaxPacketLossRateDownlink = new(MaxPacketLossRate)
+		if err = s.MaxPacketLossRateDownlink.Decode(r); err != nil {
+			return fmt.Errorf("Decode MaxPacketLossRateDownlink failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
-				return fmt.Errorf("Decode MaxPacketLossRateUplink failed: %w", err)
-			}
-			s.MaxPacketLossRateUplink = new(MaxPacketLossRate)
-			s.MaxPacketLossRateUplink.Value = aper.Integer(val)
+		s.MaxPacketLossRateUplink = new(MaxPacketLossRate)
+		if err = s.MaxPacketLossRateUplink.Decode(r); err != nil {
+			return fmt.Errorf("Decode MaxPacketLossRateUplink failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {

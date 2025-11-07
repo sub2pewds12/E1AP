@@ -103,46 +103,26 @@ func (s *QoSFlowLevelQoSParameters) Decode(r *aper.AperReader) (err error) {
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.ReflectiveQOSAttribute = new(QoSFlowLevelQoSParametersReflectiveQOSAttribute)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode ReflectiveQOSAttribute failed: %w", err)
-			}
-			s.ReflectiveQOSAttribute.Value = aper.Enumerated(val)
+		if err = s.ReflectiveQOSAttribute.Decode(r); err != nil {
+			return fmt.Errorf("Decode ReflectiveQOSAttribute failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.AdditionalQOSInformation = new(QoSFlowLevelQoSParametersAdditionalQOSInformation)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode AdditionalQOSInformation failed: %w", err)
-			}
-			s.AdditionalQOSInformation.Value = aper.Enumerated(val)
+		if err = s.AdditionalQOSInformation.Decode(r); err != nil {
+			return fmt.Errorf("Decode AdditionalQOSInformation failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
-				return fmt.Errorf("Decode PagingPolicyIndicator failed: %w", err)
-			}
-			s.PagingPolicyIndicator = new(QoSFlowLevelQoSParametersPagingPolicyIndicator)
-			s.PagingPolicyIndicator.Value = aper.Integer(val)
+		s.PagingPolicyIndicator = new(QoSFlowLevelQoSParametersPagingPolicyIndicator)
+		if err = s.PagingPolicyIndicator.Decode(r); err != nil {
+			return fmt.Errorf("Decode PagingPolicyIndicator failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
 		s.ReflectiveQOSIndicator = new(QoSFlowLevelQoSParametersReflectiveQOSIndicator)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode ReflectiveQOSIndicator failed: %w", err)
-			}
-			s.ReflectiveQOSIndicator.Value = aper.Enumerated(val)
+		if err = s.ReflectiveQOSIndicator.Decode(r); err != nil {
+			return fmt.Errorf("Decode ReflectiveQOSIndicator failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {

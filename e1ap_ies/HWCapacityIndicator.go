@@ -33,21 +33,11 @@ func (s *HWCapacityIndicator) Decode(r *aper.AperReader) (err error) {
 	if isExtensible, err = r.ReadBool(); err != nil {
 		return fmt.Errorf("Read extensibility bool failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 16777216}, true); err != nil {
-			return fmt.Errorf("Decode OfferedThroughput failed: %w", err)
-		}
-		s.OfferedThroughput.Value = aper.Integer(val)
+	if err = s.OfferedThroughput.Decode(r); err != nil {
+		return fmt.Errorf("Decode OfferedThroughput failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
-			return fmt.Errorf("Decode AvailableThroughput failed: %w", err)
-		}
-		s.AvailableThroughput.Value = aper.Integer(val)
+	if err = s.AvailableThroughput.Decode(r); err != nil {
+		return fmt.Errorf("Decode AvailableThroughput failed: %w", err)
 	}
 	if err = s.IEExtensions.Decode(r); err != nil {
 		return fmt.Errorf("Decode IEExtensions failed: %w", err)

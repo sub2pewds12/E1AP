@@ -129,29 +129,14 @@ func (s *PDCPConfiguration) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 10, Ub: 10}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("Decode PDCPSNSizeUL failed: %w", err)
-		}
-		s.PDCPSNSizeUL.Value = aper.Enumerated(val)
+	if err = s.PDCPSNSizeUL.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDCPSNSizeUL failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("Decode PDCPSNSizeDL failed: %w", err)
-		}
-		s.PDCPSNSizeDL.Value = aper.Enumerated(val)
+	if err = s.PDCPSNSizeDL.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDCPSNSizeDL failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
-			return fmt.Errorf("Decode RLCMode failed: %w", err)
-		}
-		s.RLCMode.Value = aper.Enumerated(val)
+	if err = s.RLCMode.Decode(r); err != nil {
+		return fmt.Errorf("Decode RLCMode failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.ROHCParameters = new(ROHCParameters)
@@ -167,79 +152,44 @@ func (s *PDCPConfiguration) Decode(r *aper.AperReader) (err error) {
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.DiscardTimer = new(DiscardTimer)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
-				return fmt.Errorf("Decode DiscardTimer failed: %w", err)
-			}
-			s.DiscardTimer.Value = aper.Enumerated(val)
+		if err = s.DiscardTimer.Decode(r); err != nil {
+			return fmt.Errorf("Decode DiscardTimer failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.ULDataSplitThreshold = new(ULDataSplitThreshold)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 23}, true); err != nil {
-				return fmt.Errorf("Decode ULDataSplitThreshold failed: %w", err)
-			}
-			s.ULDataSplitThreshold.Value = aper.Enumerated(val)
+		if err = s.ULDataSplitThreshold.Decode(r); err != nil {
+			return fmt.Errorf("Decode ULDataSplitThreshold failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
 		s.PDCPDuplication = new(PDCPDuplication)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode PDCPDuplication failed: %w", err)
-			}
-			s.PDCPDuplication.Value = aper.Enumerated(val)
+		if err = s.PDCPDuplication.Decode(r); err != nil {
+			return fmt.Errorf("Decode PDCPDuplication failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
 		s.PDCPReestablishment = new(PDCPReestablishment)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode PDCPReestablishment failed: %w", err)
-			}
-			s.PDCPReestablishment.Value = aper.Enumerated(val)
+		if err = s.PDCPReestablishment.Decode(r); err != nil {
+			return fmt.Errorf("Decode PDCPReestablishment failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {
 		s.PDCPDataRecovery = new(PDCPDataRecovery)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode PDCPDataRecovery failed: %w", err)
-			}
-			s.PDCPDataRecovery.Value = aper.Enumerated(val)
+		if err = s.PDCPDataRecovery.Decode(r); err != nil {
+			return fmt.Errorf("Decode PDCPDataRecovery failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<0) > 0 {
 		s.DuplicationActivation = new(DuplicationActivation)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-				return fmt.Errorf("Decode DuplicationActivation failed: %w", err)
-			}
-			s.DuplicationActivation.Value = aper.Enumerated(val)
+		if err = s.DuplicationActivation.Decode(r); err != nil {
+			return fmt.Errorf("Decode DuplicationActivation failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<7) > 0 {
 		s.OutOfOrderDelivery = new(OutOfOrderDelivery)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-				return fmt.Errorf("Decode OutOfOrderDelivery failed: %w", err)
-			}
-			s.OutOfOrderDelivery.Value = aper.Enumerated(val)
+		if err = s.OutOfOrderDelivery.Decode(r); err != nil {
+			return fmt.Errorf("Decode OutOfOrderDelivery failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<6) > 0 {

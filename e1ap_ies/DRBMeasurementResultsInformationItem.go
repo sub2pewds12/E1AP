@@ -49,23 +49,13 @@ func (s *DRBMeasurementResultsInformationItem) Decode(r *aper.AperReader) (err e
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
-			return fmt.Errorf("Decode DRBID failed: %w", err)
-		}
-		s.DRBID.Value = aper.Integer(val)
+	if err = s.DRBID.Decode(r); err != nil {
+		return fmt.Errorf("Decode DRBID failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 10000}, true); err != nil {
-				return fmt.Errorf("Decode ULD1Result failed: %w", err)
-			}
-			s.ULD1Result = new(DRBMeasurementResultsInformationItemULD1Result)
-			s.ULD1Result.Value = aper.Integer(val)
+		s.ULD1Result = new(DRBMeasurementResultsInformationItemULD1Result)
+		if err = s.ULD1Result.Decode(r); err != nil {
+			return fmt.Errorf("Decode ULD1Result failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {

@@ -44,21 +44,11 @@ func (s *PDCPCount) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 262143}, false); err != nil {
-			return fmt.Errorf("Decode PDCPSN failed: %w", err)
-		}
-		s.PDCPSN.Value = aper.Integer(val)
+	if err = s.PDCPSN.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDCPSN failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-			return fmt.Errorf("Decode HFN failed: %w", err)
-		}
-		s.HFN.Value = aper.Integer(val)
+	if err = s.HFN.Decode(r); err != nil {
+		return fmt.Errorf("Decode HFN failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

@@ -151,9 +151,25 @@ func (decoder *E1ReleaseRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1A
 			return nil, fmt.Errorf("Decode Cause failed: %w", err)
 		}
 	default:
-		// Handle unknown IEs based on criticality here, if needed.
-		// For now, we'll just ignore them.
-
+		switch msgIe.Criticality.Value {
+		case CriticalityReject:
+			// If an unknown IE is critical, the PDU cannot be processed.
+			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
+				IECriticality: msgIe.Criticality,
+				IEID:          msgIe.Id,
+				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
+			})
+		case CriticalityNotify:
+			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
+			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
+				IECriticality: msgIe.Criticality,
+				IEID:          msgIe.Id,
+				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
+			})
+		case CriticalityIgnore:
+			// Ignore and proceed.
+		}
 	}
 	return msgIe, nil // Return the populated msgIe and a nil error
 }

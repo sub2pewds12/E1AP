@@ -47,21 +47,11 @@ func (s *PrivateIEField) Decode(r *aper.AperReader) (err error) {
 	if err = s.ID.Decode(r); err != nil {
 		return fmt.Errorf("Decode ID failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-			return fmt.Errorf("Decode Criticality failed: %w", err)
-		}
-		s.Criticality.Value = aper.Enumerated(val)
+	if err = s.Criticality.Decode(r); err != nil {
+		return fmt.Errorf("Decode Criticality failed: %w", err)
 	}
-
-	{
-		var val []byte
-		if val, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-			return fmt.Errorf("Decode Value failed: %w", err)
-		}
-		s.Value = &OCTETSTRING{Value: aper.OctetString(val)}
+	if err = s.Value.Decode(r); err != nil {
+		return fmt.Errorf("Decode Value failed: %w", err)
 	}
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for PrivateIEField")

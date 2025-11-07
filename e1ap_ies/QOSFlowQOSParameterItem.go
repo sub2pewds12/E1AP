@@ -53,26 +53,16 @@ func (s *QOSFlowQOSParameterItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
-			return fmt.Errorf("Decode QOSFlowIdentifier failed: %w", err)
-		}
-		s.QOSFlowIdentifier.Value = aper.Integer(val)
+	if err = s.QOSFlowIdentifier.Decode(r); err != nil {
+		return fmt.Errorf("Decode QOSFlowIdentifier failed: %w", err)
 	}
 	if err = s.QoSFlowLevelQoSParameters.Decode(r); err != nil {
 		return fmt.Errorf("Decode QoSFlowLevelQoSParameters failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.QoSFlowMappingIndication = new(QOSFlowMappingIndication)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-				return fmt.Errorf("Decode QoSFlowMappingIndication failed: %w", err)
-			}
-			s.QoSFlowMappingIndication.Value = aper.Enumerated(val)
+		if err = s.QoSFlowMappingIndication.Decode(r); err != nil {
+			return fmt.Errorf("Decode QoSFlowMappingIndication failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {

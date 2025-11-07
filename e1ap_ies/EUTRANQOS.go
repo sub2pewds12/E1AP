@@ -53,13 +53,8 @@ func (s *EUTRANQOS) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-			return fmt.Errorf("Decode QCI failed: %w", err)
-		}
-		s.QCI.Value = aper.Integer(val)
+	if err = s.QCI.Decode(r); err != nil {
+		return fmt.Errorf("Decode QCI failed: %w", err)
 	}
 	if err = s.EUTRANallocationAndRetentionPriority.Decode(r); err != nil {
 		return fmt.Errorf("Decode EUTRANallocationAndRetentionPriority failed: %w", err)

@@ -30,14 +30,14 @@ class ASN1Patcher:
             name = p_def["name"]
             def_type = p_def["type"]
 
-            item = None # Start with None
+            item = None 
 
             if def_type == "SEQUENCE":
                 item = SequenceDefinition(name=name, source_file="manual_patch")
                 if "from_ie_set" in p_def:
                     ie_set_name = p_def["from_ie_set"]
-                    # The IE sets are stored in self.ie_sets by the parser, not existing_definitions
-                    ie_set = self.parser.ie_sets.get(ie_set_name) # Assuming you pass parser to patcher
+                    
+                    ie_set = self.parser.ie_sets.get(ie_set_name) 
                     if ie_set:
                         for ie_data in ie_set:
                             ie_name_to_add = ie_data['id'].replace("id-", "")
@@ -80,7 +80,7 @@ class ASN1Patcher:
             logger.warning(f"Go patches directory '{self.go_patches_dir}' not found. Skipping file patches.")
             return
 
-        # Part 1: Delete junk files (this can also be moved to config if it grows)
+        
         files_to_delete = [
             "ue_associated_logical_e1_connection_list_res_item_ack_item.go",
             "ue_associated_logical_e1_connection_list_res_item.go",
@@ -91,7 +91,7 @@ class ASN1Patcher:
                 os.remove(filepath)
                 logger.info(f"PATCHER: Deleted junk file: {filename}")
 
-        # Part 2: Overwrite files with correct content from templates
+        
         for template_name in os.listdir(self.go_patches_dir):
             if template_name.endswith(".go.template"):
                 output_filename = template_name.replace(".template", "")

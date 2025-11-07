@@ -3,6 +3,7 @@ package e1ap_ies
 import (
 	"bytes"
 	"fmt"
+	"io"
 
 	"github.com/lvdund/ngap/aper"
 )
@@ -80,7 +81,15 @@ func (msg *GNBCUCPMeasurementResultsInformation) toIes() ([]E1APMessageIE, error
 	return ies, err
 }
 
-// Encode for GNBCUCPMeasurementResultsInformation: Could not find associated procedure.
+// Encode implements the aper.AperMarshaller interface for GNBCUCPMeasurementResultsInformation.
+func (msg *GNBCUCPMeasurementResultsInformation) Encode(w io.Writer) error {
+	ies, err := msg.toIes()
+	if err != nil {
+		return fmt.Errorf("could not convert GNBCUCPMeasurementResultsInformation to IEs: %w", err)
+	}
+
+	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeGNBCUCPMeasurementResultsInformation}, Criticality{Value: CriticalityReject}, ies)
+}
 
 // Decode implements the aper.AperUnmarshaller interface for GNBCUCPMeasurementResultsInformation.
 func (msg *GNBCUCPMeasurementResultsInformation) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
@@ -207,9 +216,25 @@ func (decoder *GNBCUCPMeasurementResultsInformationDecoder) decodeIE(r *aper.Ape
 			msg.DRBMeasurementResultsInformationList.Value = decodedItems
 		}
 	default:
-		// Handle unknown IEs based on criticality here, if needed.
-		// For now, we'll just ignore them.
-
+		switch msgIe.Criticality.Value {
+		case CriticalityReject:
+			// If an unknown IE is critical, the PDU cannot be processed.
+			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
+				IECriticality: msgIe.Criticality,
+				IEID:          msgIe.Id,
+				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
+			})
+		case CriticalityNotify:
+			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
+			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
+				IECriticality: msgIe.Criticality,
+				IEID:          msgIe.Id,
+				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
+			})
+		case CriticalityIgnore:
+			// Ignore and proceed.
+		}
 	}
 	return msgIe, nil // Return the populated msgIe and a nil error
 }

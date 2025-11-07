@@ -44,13 +44,8 @@ func (s *PDUSessionResourceDataUsageItem) Decode(r *aper.AperReader) (err error)
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-			return fmt.Errorf("Decode PDUSessionID failed: %w", err)
-		}
-		s.PDUSessionID.Value = aper.Integer(val)
+	if err = s.PDUSessionID.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDUSessionID failed: %w", err)
 	}
 	if err = s.MRDCUsageInformation.Decode(r); err != nil {
 		return fmt.Errorf("Decode MRDCUsageInformation failed: %w", err)

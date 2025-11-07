@@ -73,47 +73,27 @@ func (s *GBRQosInformation) Decode(r *aper.AperReader) (err error) {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode ERABMaximumBitrateDL failed: %w", err)
-			}
-			s.ERABMaximumBitrateDL = new(BitRate)
-			s.ERABMaximumBitrateDL.Value = aper.Integer(val)
+		s.ERABMaximumBitrateDL = new(BitRate)
+		if err = s.ERABMaximumBitrateDL.Decode(r); err != nil {
+			return fmt.Errorf("Decode ERABMaximumBitrateDL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode ERABMaximumBitrateUL failed: %w", err)
-			}
-			s.ERABMaximumBitrateUL = new(BitRate)
-			s.ERABMaximumBitrateUL.Value = aper.Integer(val)
+		s.ERABMaximumBitrateUL = new(BitRate)
+		if err = s.ERABMaximumBitrateUL.Decode(r); err != nil {
+			return fmt.Errorf("Decode ERABMaximumBitrateUL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode ERABGuaranteedBitrateDL failed: %w", err)
-			}
-			s.ERABGuaranteedBitrateDL = new(BitRate)
-			s.ERABGuaranteedBitrateDL.Value = aper.Integer(val)
+		s.ERABGuaranteedBitrateDL = new(BitRate)
+		if err = s.ERABGuaranteedBitrateDL.Decode(r); err != nil {
+			return fmt.Errorf("Decode ERABGuaranteedBitrateDL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode ERABGuaranteedBitrateUL failed: %w", err)
-			}
-			s.ERABGuaranteedBitrateUL = new(BitRate)
-			s.ERABGuaranteedBitrateUL.Value = aper.Integer(val)
+		s.ERABGuaranteedBitrateUL = new(BitRate)
+		if err = s.ERABGuaranteedBitrateUL.Decode(r); err != nil {
+			return fmt.Errorf("Decode ERABGuaranteedBitrateUL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {

@@ -9,8 +9,8 @@ import (
 // ActivityInformation is a generated CHOICE type.
 type ActivityInformation struct {
 	Choice                         uint64 `json:"-"`
-	DRBActivityList                *[]DRBActivityItem
-	PDUSessionResourceActivityList *[]PDUSessionResourceActivityItem
+	DRBActivityList                *DRBActivityList
+	PDUSessionResourceActivityList *PDUSessionResourceActivityList
 	UEActivity                     *UEActivity
 	ChoiceExtension                *ProtocolIESingleContainer
 }
@@ -34,25 +34,11 @@ func (s *ActivityInformation) Encode(w *aper.AperWriter) (err error) {
 	// 2. Encode the selected member.
 	switch s.Choice {
 	case ActivityInformationPresentDRBActivityList:
-		tmp_wrapper := Sequence[*DRBActivityItem]{
-			c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
-			ext: false,
-		}
-		for _, i := range *s.DRBActivityList {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBActivityList.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBActivityList failed: %w", err)
 		}
 	case ActivityInformationPresentPDUSessionResourceActivityList:
-		tmp_wrapper := Sequence[*PDUSessionResourceActivityItem]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.PDUSessionResourceActivityList {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.PDUSessionResourceActivityList.Encode(w); err != nil {
 			return fmt.Errorf("Encode PDUSessionResourceActivityList failed: %w", err)
 		}
 	case ActivityInformationPresentUEActivity:
@@ -72,50 +58,25 @@ func (s *ActivityInformation) Encode(w *aper.AperWriter) (err error) {
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ActivityInformation) Decode(r *aper.AperReader) (err error) {
 
-	// 1. Read the choice index.
+	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
 	var choice uint64
 	if choice, err = r.ReadChoice(3, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
+	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
 
 	// 2. Decode the selected member.
-	switch choice {
+	switch s.Choice {
 	case 0:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBActivityItem, error) {
-			item := new(DRBActivityItem)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBActivityItem
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
+		s.DRBActivityList = new(DRBActivityList)
+		if err = s.DRBActivityList.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBActivityList failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBActivityList = &decodedItems
 	case 1:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*PDUSessionResourceActivityItem, error) {
-			item := new(PDUSessionResourceActivityItem)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []PDUSessionResourceActivityItem
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.PDUSessionResourceActivityList = new(PDUSessionResourceActivityList)
+		if err = s.PDUSessionResourceActivityList.Decode(r); err != nil {
 			return fmt.Errorf("Decode PDUSessionResourceActivityList failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.PDUSessionResourceActivityList = &decodedItems
 	case 2:
 		s.UEActivity = new(UEActivity)
 		if err = s.UEActivity.Decode(r); err != nil {

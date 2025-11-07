@@ -112,21 +112,11 @@ func (s *PDUSessionResourceToSetupItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-			return fmt.Errorf("Decode PDUSessionID failed: %w", err)
-		}
-		s.PDUSessionID.Value = aper.Integer(val)
+	if err = s.PDUSessionID.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDUSessionID failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
-			return fmt.Errorf("Decode PDUSessionType failed: %w", err)
-		}
-		s.PDUSessionType.Value = aper.Enumerated(val)
+	if err = s.PDUSessionType.Decode(r); err != nil {
+		return fmt.Errorf("Decode PDUSessionType failed: %w", err)
 	}
 	if err = s.SNSSAI.Decode(r); err != nil {
 		return fmt.Errorf("Decode SNSSAI failed: %w", err)
@@ -135,14 +125,9 @@ func (s *PDUSessionResourceToSetupItem) Decode(r *aper.AperReader) (err error) {
 		return fmt.Errorf("Decode SecurityIndication failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode PDUSessionResourceDLAMBR failed: %w", err)
-			}
-			s.PDUSessionResourceDLAMBR = new(BitRate)
-			s.PDUSessionResourceDLAMBR.Value = aper.Integer(val)
+		s.PDUSessionResourceDLAMBR = new(BitRate)
+		if err = s.PDUSessionResourceDLAMBR.Decode(r); err != nil {
+			return fmt.Errorf("Decode PDUSessionResourceDLAMBR failed: %w", err)
 		}
 	}
 	if err = s.NGULUPTNLInformation.Decode(r); err != nil {
@@ -155,14 +140,9 @@ func (s *PDUSessionResourceToSetupItem) Decode(r *aper.AperReader) (err error) {
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
-				return fmt.Errorf("Decode PDUSessionInactivityTimer failed: %w", err)
-			}
-			s.PDUSessionInactivityTimer = new(InactivityTimer)
-			s.PDUSessionInactivityTimer.Value = aper.Integer(val)
+		s.PDUSessionInactivityTimer = new(InactivityTimer)
+		if err = s.PDUSessionInactivityTimer.Decode(r); err != nil {
+			return fmt.Errorf("Decode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
@@ -172,14 +152,9 @@ func (s *PDUSessionResourceToSetupItem) Decode(r *aper.AperReader) (err error) {
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
-				return fmt.Errorf("Decode NetworkInstance failed: %w", err)
-			}
-			s.NetworkInstance = new(NetworkInstance)
-			s.NetworkInstance.Value = aper.Integer(val)
+		s.NetworkInstance = new(NetworkInstance)
+		if err = s.NetworkInstance.Decode(r); err != nil {
+			return fmt.Errorf("Decode NetworkInstance failed: %w", err)
 		}
 	}
 	if err = s.DRBToSetupListNGRAN.Decode(r); err != nil {

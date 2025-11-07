@@ -54,13 +54,8 @@ func (s *GNBCUCPTNLAToUpdateItem) Decode(r *aper.AperReader) (err error) {
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.TNLAssociationUsage = new(TNLAssociationUsage)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-				return fmt.Errorf("Decode TNLAssociationUsage failed: %w", err)
-			}
-			s.TNLAssociationUsage.Value = aper.Enumerated(val)
+		if err = s.TNLAssociationUsage.Decode(r); err != nil {
+			return fmt.Errorf("Decode TNLAssociationUsage failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {

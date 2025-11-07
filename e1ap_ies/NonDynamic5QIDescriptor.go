@@ -67,45 +67,25 @@ func (s *NonDynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-			return fmt.Errorf("Decode FiveQI failed: %w", err)
-		}
-		s.FiveQI.Value = aper.Integer(val)
+	if err = s.FiveQI.Decode(r); err != nil {
+		return fmt.Errorf("Decode FiveQI failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 127}, true); err != nil {
-				return fmt.Errorf("Decode QoSPriorityLevel failed: %w", err)
-			}
-			s.QoSPriorityLevel = new(QoSPriorityLevel)
-			s.QoSPriorityLevel.Value = aper.Integer(val)
+		s.QoSPriorityLevel = new(QoSPriorityLevel)
+		if err = s.QoSPriorityLevel.Decode(r); err != nil {
+			return fmt.Errorf("Decode QoSPriorityLevel failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
-				return fmt.Errorf("Decode AveragingWindow failed: %w", err)
-			}
-			s.AveragingWindow = new(AveragingWindow)
-			s.AveragingWindow.Value = aper.Integer(val)
+		s.AveragingWindow = new(AveragingWindow)
+		if err = s.AveragingWindow.Decode(r); err != nil {
+			return fmt.Errorf("Decode AveragingWindow failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
-				return fmt.Errorf("Decode MaxDataBurstVolume failed: %w", err)
-			}
-			s.MaxDataBurstVolume = new(MaxDataBurstVolume)
-			s.MaxDataBurstVolume.Value = aper.Integer(val)
+		s.MaxDataBurstVolume = new(MaxDataBurstVolume)
+		if err = s.MaxDataBurstVolume.Decode(r); err != nil {
+			return fmt.Errorf("Decode MaxDataBurstVolume failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {

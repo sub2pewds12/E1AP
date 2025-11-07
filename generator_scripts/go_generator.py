@@ -32,8 +32,8 @@ class GoCodeGenerator:
         message_to_procedure_map: Dict[str, str],
         output_dir: str,
         patcher: "ASN1Patcher",
-        acronyms: List[str],      # Correctly placed before parser
-        parser: "ASN1Parser"      # Correctly placed at the end
+        acronyms: List[str],      
+        parser: "ASN1Parser"      
     ):
         self.definitions = definitions
         self.failures = failures
@@ -41,8 +41,8 @@ class GoCodeGenerator:
         self.message_to_procedure_map = message_to_procedure_map
         self.output_dir = output_dir
         self.patcher = patcher
-        self.acronyms = set(acronyms) # This line will now work correctly
-        self.parser = parser         # This line will now work correctly
+        self.acronyms = set(acronyms) 
+        self.parser = parser         
         self.generated_files = set()
         self.name_overrides = {
             "UE-associatedLogicalE1-ConnectionListResItem": "UEAssociatedLogicalE1ConnectionItemRes",
@@ -157,21 +157,21 @@ class GoCodeGenerator:
         while isinstance(definition, AliasDefinition):
             next_type_name = definition.alias_of
             
-            # Infinite loop prevention
+            
             if next_type_name in visited:
                 logger.warning(f"Circular alias dependency detected for '{type_name}' at '{next_type_name}'. Breaking.")
-                # Fallback to just returning the last known type name
+                
                 return self._standard_string(next_type_name), None
             visited.add(next_type_name)
 
-            # Get the next definition in the chain
+            
             next_def = self.definitions.get(next_type_name)
             if not next_def:
                 logger.warning(f"Alias '{next_type_name}' for type '{definition.name}' not found. Breaking chain.")
-                # Fallback to returning the last known type name
+                
                 return self._standard_string(next_type_name), None
             
-            # Update the definition for the next loop iteration
+            
             definition = next_def
 
         if isinstance(definition, (IntegerDefinition, ConstantDefinition)):
@@ -271,24 +271,24 @@ class GoCodeGenerator:
         protocol_ie_id_type_name = "aper.Integer"
 
         for item in constant_items:
-            # Use the existing pascal-case converter
+            
             base_name = self._standard_string(item.name)
             
-            # Clean the "Id" prefix that comes from ASN.1 names like "id-e1Setup"
+            
             if base_name.startswith("Id"):
                 base_name = base_name[2:]
 
             value = self._format_go_value(item.min_val)
 
-            # Check the ASN.1 type of the constant to categorize it
+            
             if item.const_type == "ProcedureCode":
-                # This will generate names like: ProcedureCodeE1Setup
+                
                 proc_code_consts.append((f"ProcedureCode{base_name}", value))
             elif item.const_type == "ProtocolIE-ID":
-                # This will generate names like: ProtocolIEIDGNBCUCPUEE1APID
+                
                 protocol_ie_consts.append((f"ProtocolIEID{base_name}", value))
             else:
-                # For all other integer constants
+                
                 integer_consts.append((base_name, value))
 
         sorter = lambda item: (
@@ -359,14 +359,14 @@ class GoCodeGenerator:
             encode_logic = ""
             decode_logic = ""
             
-            # --- INTEGER BLOCK ---
+            
             if isinstance(item, IntegerDefinition) or (isinstance(item, AliasDefinition) and "INTEGER" in item.alias_of.upper()):
                 underlying_type = "aper.Integer"
                 
                 min_val_attr = getattr(item, 'min_val', None)
                 min_val = self._format_go_value(str(min_val_attr) if min_val_attr is not None else '0')
 
-                # This is the new logic to handle the overflow
+                
                 max_val_attr = getattr(item, 'max_val', None)
                 max_val_str = str(max_val_attr) if max_val_attr is not None else '0'
                 if max_val_str == "18446744073709551615":
@@ -385,7 +385,7 @@ class GoCodeGenerator:
             s.Value = aper.Integer(val)
             return nil"""
 
-            # --- STRING BLOCK ---
+            
             elif isinstance(item, StringDefinition) or (isinstance(item, AliasDefinition) and "STRING" in item.alias_of.upper()):
                 min_val_attr = getattr(item, 'min_val', None)
                 min_val = self._format_go_value(str(min_val_attr) if min_val_attr is not None else '0')
@@ -395,11 +395,11 @@ class GoCodeGenerator:
 
                 string_type_name = item.string_type if isinstance(item, StringDefinition) else item.alias_of
                 
-                # --- BIT STRING SUB-BLOCK ---
+                
                 if "BIT STRING" in string_type_name.upper():
                     underlying_type = "aper.BitString"
                     encode_logic = f"return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
-                    # This is the CORRECT decode logic for BIT STRING
+                    
                     decode_logic = f"""
         var err error
         var numBits uint
@@ -408,11 +408,11 @@ class GoCodeGenerator:
             s.Value.NumBits = uint64(numBits)
         }}
         return err"""
-                # --- OCTET STRING SUB-BLOCK ---
-                else: # OCTET STRING
+                
+                else: 
                     underlying_type = "aper.OctetString"
                     encode_logic = f"return w.WriteOctetString([]byte(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
-                    # This is the CORRECT decode logic for OCTET STRING
+                    
                     decode_logic = f"""
         var err error
         s.Value, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
@@ -457,22 +457,22 @@ class GoCodeGenerator:
                         extension_set = self.parser.extension_sets.get(extension_set_name)
                         
                         if extension_set:
-                            # 1. Determine names
+                            
                             ext_go_name = self._standard_string(item.name) + "Extensions"
                             ext_filename = ext_go_name + ".go"
                             ext_filepath = os.path.join(self.output_dir, ext_filename)
 
-                            # 2. Generate the struct code
+                            
                             ext_struct_code = render_extension_struct_only(
                                 go_name=ext_go_name,
                                 extension_set=extension_set,
                                 pascal_case_converter=self._standard_string,
                             )
                             
-                            # 3. Generate the method code using the template
+                            
                             ext_method_code, ext_imports = render_extension_methods(ext_go_name)
                             
-                            # 4. Assemble the full file content, including imports, struct, and methods
+                            
                             ext_file_content = "package e1ap_ies\n\n"
                             if ext_imports:
                                 ext_file_content += "import (\n"
@@ -481,14 +481,14 @@ class GoCodeGenerator:
                                 ext_file_content += ")\n\n"
                             ext_file_content += f"{ext_struct_code}\n\n{ext_method_code}"
 
-                            # 5. Write the complete file directly to disk
+                            
                             with open(ext_filepath, "w", encoding="utf-8") as f:
                                 f.write(ext_file_content)
 
                             self.generated_files.add(ext_filename)
                             logger.info(f"SUCCESS: Wrote type-safe extensions file to '{ext_filename}'.")
                             
-                            # We only need one extension struct per sequence, so we can stop looking.
+                            
                             break
 
 
@@ -500,16 +500,16 @@ class GoCodeGenerator:
                filename = go_name + ".go"
                file_path = os.path.join(self.output_dir, filename)
               
-               # Step 1: Generate the struct (your _generate_struct_for_item helper
-               # must now be able to handle ListDefinition).
+               
+               
                struct_code = self._generate_struct_for_item(item)
               
-               # Step 2: Generate the methods
+               
                method_code, required_imports = "", set()
                pdu_suffixes = [
                    "Request", "Response", "Failure", "Command", "Complete",
                    "Indication", "Acknowledge", "Setup", "Transfer", "Notification",
-                   "PDU" # for E1APPDU itself
+                   "PDU" 
                ]
                is_pdu = item.name in self.message_to_procedure_map
               
@@ -522,11 +522,11 @@ class GoCodeGenerator:
                elif isinstance(item, EnumDefinition):
                    method_code, enum_imports = render_enum_methods(go_name, item)
                    required_imports.update(enum_imports)
-               elif isinstance(item, ListDefinition): # <-- This new block handles lists
+               elif isinstance(item, ListDefinition): 
                    method_code, list_imports = render_list_methods(go_name, item, self.parser)
                    required_imports.update(list_imports)
               
-               # Step 3: Assemble and write
+               
                file_content = "package e1ap_ies\n\n"
                if required_imports:
                    file_content += "import (\n"
@@ -560,7 +560,7 @@ class GoCodeGenerator:
         if isinstance(item, EnumDefinition):
             return render_enum_struct(go_name, item.enum_values, self._standard_string)
         if isinstance(item, ListDefinition):
-            # This is the new part for the helper, make sure it's here.
+            
             return render_list_struct(go_name, item, self._standard_string)
         return ""
 

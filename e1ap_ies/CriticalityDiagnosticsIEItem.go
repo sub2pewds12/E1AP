@@ -36,29 +36,14 @@ func (s *CriticalityDiagnosticsIEItem) Decode(r *aper.AperReader) (err error) {
 	if isExtensible, err = r.ReadBool(); err != nil {
 		return fmt.Errorf("Read extensibility bool failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-			return fmt.Errorf("Decode IECriticality failed: %w", err)
-		}
-		s.IECriticality.Value = aper.Enumerated(val)
+	if err = s.IECriticality.Decode(r); err != nil {
+		return fmt.Errorf("Decode IECriticality failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false); err != nil {
-			return fmt.Errorf("Decode IEID failed: %w", err)
-		}
-		s.IEID.Value = aper.Integer(val)
+	if err = s.IEID.Decode(r); err != nil {
+		return fmt.Errorf("Decode IEID failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("Decode TypeOfError failed: %w", err)
-		}
-		s.TypeOfError.Value = aper.Enumerated(val)
+	if err = s.TypeOfError.Decode(r); err != nil {
+		return fmt.Errorf("Decode TypeOfError failed: %w", err)
 	}
 	if isExtensible {
 		return fmt.Errorf("Extensions not yet implemented for CriticalityDiagnosticsIEItem")

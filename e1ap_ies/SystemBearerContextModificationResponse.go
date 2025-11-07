@@ -9,11 +9,11 @@ import (
 // SystemBearerContextModificationResponse is a generated CHOICE type.
 type SystemBearerContextModificationResponse struct {
 	Choice                        uint64 `json:"-"`
-	DRBSetupModListEUTRAN         *[]DRBSetupModItemEUTRAN
-	DRBFailedModListEUTRAN        *[]DRBFailedModItemEUTRAN
-	DRBModifiedListEUTRAN         *[]DRBModifiedItemEUTRAN
-	DRBFailedToModifyListEUTRAN   *[]DRBFailedToModifyItemEUTRAN
-	RetainabilityMeasurementsInfo *[]DRBRemovedItem
+	DRBSetupModListEUTRAN         *DRBSetupModListEUTRAN
+	DRBFailedModListEUTRAN        *DRBFailedModListEUTRAN
+	DRBModifiedListEUTRAN         *DRBModifiedListEUTRAN
+	DRBFailedToModifyListEUTRAN   *DRBFailedToModifyListEUTRAN
+	RetainabilityMeasurementsInfo *RetainabilityMeasurementsInfo
 }
 
 const (
@@ -36,58 +36,23 @@ func (s *SystemBearerContextModificationResponse) Encode(w *aper.AperWriter) (er
 	// 2. Encode the selected member.
 	switch s.Choice {
 	case SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN:
-		tmp_wrapper := Sequence[*DRBSetupModItemEUTRAN]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.DRBSetupModListEUTRAN {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBSetupModListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBSetupModListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBFailedModListEUTRAN:
-		tmp_wrapper := Sequence[*DRBFailedModItemEUTRAN]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.DRBFailedModListEUTRAN {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBFailedModListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBFailedModListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBModifiedListEUTRAN:
-		tmp_wrapper := Sequence[*DRBModifiedItemEUTRAN]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.DRBModifiedListEUTRAN {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBModifiedListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBModifiedListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBFailedToModifyListEUTRAN:
-		tmp_wrapper := Sequence[*DRBFailedToModifyItemEUTRAN]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.DRBFailedToModifyListEUTRAN {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.DRBFailedToModifyListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("Encode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentRetainabilityMeasurementsInfo:
-		tmp_wrapper := Sequence[*DRBRemovedItem]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
-			ext: false,
-		}
-		for _, i := range *s.RetainabilityMeasurementsInfo {
-			tmp_wrapper.Value = append(tmp_wrapper.Value, &i)
-		}
-		if err = tmp_wrapper.Encode(w); err != nil {
+		if err = s.RetainabilityMeasurementsInfo.Encode(w); err != nil {
 			return fmt.Errorf("Encode RetainabilityMeasurementsInfo failed: %w", err)
 		}
 	default:
@@ -99,104 +64,40 @@ func (s *SystemBearerContextModificationResponse) Encode(w *aper.AperWriter) (er
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *SystemBearerContextModificationResponse) Decode(r *aper.AperReader) (err error) {
 
-	// 1. Read the choice index.
+	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
 	var choice uint64
 	if choice, err = r.ReadChoice(4, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
+	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
 
 	// 2. Decode the selected member.
-	switch choice {
+	switch s.Choice {
 	case 0:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBSetupModItemEUTRAN, error) {
-			item := new(DRBSetupModItemEUTRAN)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBSetupModItemEUTRAN
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.DRBSetupModListEUTRAN = new(DRBSetupModListEUTRAN)
+		if err = s.DRBSetupModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBSetupModListEUTRAN failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBSetupModListEUTRAN = &decodedItems
 	case 1:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBFailedModItemEUTRAN, error) {
-			item := new(DRBFailedModItemEUTRAN)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBFailedModItemEUTRAN
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.DRBFailedModListEUTRAN = new(DRBFailedModListEUTRAN)
+		if err = s.DRBFailedModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBFailedModListEUTRAN failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBFailedModListEUTRAN = &decodedItems
 	case 2:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBModifiedItemEUTRAN, error) {
-			item := new(DRBModifiedItemEUTRAN)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBModifiedItemEUTRAN
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.DRBModifiedListEUTRAN = new(DRBModifiedListEUTRAN)
+		if err = s.DRBModifiedListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBModifiedListEUTRAN failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBModifiedListEUTRAN = &decodedItems
 	case 3:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBFailedToModifyItemEUTRAN, error) {
-			item := new(DRBFailedToModifyItemEUTRAN)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBFailedToModifyItemEUTRAN
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.DRBFailedToModifyListEUTRAN = new(DRBFailedToModifyListEUTRAN)
+		if err = s.DRBFailedToModifyListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.DRBFailedToModifyListEUTRAN = &decodedItems
 	case 4:
-		// 1. Create a DECODER function for the list item, as required by ReadSequenceOf.
-		itemDecoder := func(r *aper.AperReader) (*DRBRemovedItem, error) {
-			item := new(DRBRemovedItem)
-			if err := item.Decode(r); err != nil {
-				return nil, err
-			}
-			return item, nil
-		}
-
-		// 2. Decode the list using the aper library's generic function.
-		var decodedItems []DRBRemovedItem
-		if decodedItems, err = aper.ReadSequenceOf(itemDecoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		s.RetainabilityMeasurementsInfo = new(RetainabilityMeasurementsInfo)
+		if err = s.RetainabilityMeasurementsInfo.Decode(r); err != nil {
 			return fmt.Errorf("Decode RetainabilityMeasurementsInfo failed: %w", err)
 		}
-
-		// 3. Assign the decoded slice of values.
-		s.RetainabilityMeasurementsInfo = &decodedItems
 	default:
 		return fmt.Errorf("Decode choice of SystemBearerContextModificationResponse with unknown choice index %d", choice)
 	}

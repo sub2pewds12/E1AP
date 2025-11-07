@@ -49,13 +49,8 @@ func (s *TSCTrafficInformation) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 640000}, true); err != nil {
-			return fmt.Errorf("Decode Periodicity failed: %w", err)
-		}
-		s.Periodicity.Value = aper.Integer(val)
+	if err = s.Periodicity.Decode(r); err != nil {
+		return fmt.Errorf("Decode Periodicity failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.BurstArrivalTime = new(BurstArrivalTime)

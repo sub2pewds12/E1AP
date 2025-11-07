@@ -44,21 +44,11 @@ func (s *UEAssociatedLogicalE1ConnectionItem) Decode(r *aper.AperReader) (err er
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-			return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
-		}
-		s.GNBCUCPUEE1APID.Value = aper.Integer(val)
+	if err = s.GNBCUCPUEE1APID.Decode(r); err != nil {
+		return fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-			return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
-		}
-		s.GNBCUUPUEE1APID.Value = aper.Integer(val)
+	if err = s.GNBCUUPUEE1APID.Decode(r); err != nil {
+		return fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)

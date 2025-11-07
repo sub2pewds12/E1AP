@@ -76,45 +76,25 @@ func (s *AlternativeQoSParaSetItem) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val int64
-		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
-			return fmt.Errorf("Decode AlternativeQoSParameterIndex failed: %w", err)
-		}
-		s.AlternativeQoSParameterIndex.Value = aper.Integer(val)
+	if err = s.AlternativeQoSParameterIndex.Decode(r); err != nil {
+		return fmt.Errorf("Decode AlternativeQoSParameterIndex failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode GuaranteedFlowBitRateDL failed: %w", err)
-			}
-			s.GuaranteedFlowBitRateDL = new(BitRate)
-			s.GuaranteedFlowBitRateDL.Value = aper.Integer(val)
+		s.GuaranteedFlowBitRateDL = new(BitRate)
+		if err = s.GuaranteedFlowBitRateDL.Decode(r); err != nil {
+			return fmt.Errorf("Decode GuaranteedFlowBitRateDL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-				return fmt.Errorf("Decode GuaranteedFlowBitRateUL failed: %w", err)
-			}
-			s.GuaranteedFlowBitRateUL = new(BitRate)
-			s.GuaranteedFlowBitRateUL.Value = aper.Integer(val)
+		s.GuaranteedFlowBitRateUL = new(BitRate)
+		if err = s.GuaranteedFlowBitRateUL.Decode(r); err != nil {
+			return fmt.Errorf("Decode GuaranteedFlowBitRateUL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-
-		{
-			var val int64
-			if val, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1023}, true); err != nil {
-				return fmt.Errorf("Decode PacketDelayBudget failed: %w", err)
-			}
-			s.PacketDelayBudget = new(PacketDelayBudget)
-			s.PacketDelayBudget.Value = aper.Integer(val)
+		s.PacketDelayBudget = new(PacketDelayBudget)
+		if err = s.PacketDelayBudget.Decode(r); err != nil {
+			return fmt.Errorf("Decode PacketDelayBudget failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {

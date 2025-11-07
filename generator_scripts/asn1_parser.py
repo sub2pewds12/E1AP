@@ -203,14 +203,14 @@ class ASN1Parser:
             full_def_lines.append(cleaned_line)
             open_braces += cleaned_line.count("{") - cleaned_line.count("}")
             
-            # --- THIS IS THE ONE-LINE FIX ---
-            # We must also count parentheses to correctly find the end of the definition.
+            
+            
             open_braces += cleaned_line.count("(") - cleaned_line.count(")")
-            # --- END OF FIX ---
+            
 
             has_started = True
 
-            # Your existing break logic now works correctly because open_braces is accurate.
+            
             if (
                 open_braces == 0
                 and "{" not in "".join(full_def_lines)
@@ -351,7 +351,7 @@ class ASN1Parser:
         
         container_match = re.search(
             r"ProtocolIE-Container\s*\{\s*\{\s*([\w-]+)\s*\}\s*\}",
-            def_part_for_container_search # Search in the cleaned string
+            def_part_for_container_search 
         )
         
         if container_match:
@@ -618,9 +618,9 @@ class ASN1Parser:
     def _handle_multiline_def_state(self, line: str):
         """Handles a line when we are inside a multi-line definition block."""
         if "::=" in line:
-            # This part handles cases where a new definition starts before the old one ended.
+            
             self._process_complete_definition(is_malformed=True)
-            # We then need to re-process the current line in the SEARCHING state.
+            
             self._handle_searching_state(line, "unknown", -1)
             return
 
@@ -628,14 +628,14 @@ class ASN1Parser:
         
         self.open_braces += line.count("{") - line.count("}")
         
-        # --- THIS IS THE ONE-LINE FIX ---
-        # We must also count parentheses to correctly find the end of the definition.
+        
+        
         self.open_braces += line.count("(") - line.count(")")
-        # --- END OF FIX ---
+        
 
         if self.open_braces <= 0:
             self._process_complete_definition()
-            # This ensures the state is clean for the next definition.
+            
             self._reset_state()
 
 
@@ -655,15 +655,15 @@ class ASN1Parser:
         
         item = None
 
-        # --- THIS IS THE FINAL, CORRECTED DISPATCHER ---
+        
 
-        # Priority 1: Your proven guard for boilerplate and parameterized types.
+        
         if name_part == "DEFINITIONS AUTOMATIC TAGS":
             self._reset_state()
             return
 
         if "{" in name_part and "}" in name_part:
-            # As you requested, we log these as failures for now, to be handled by the patcher.
+            
             self.failures.append({
                 "name": name_part, "text": full_def_str,
                 "file": source_file, "line": source_line,
@@ -672,8 +672,8 @@ class ASN1Parser:
             self._reset_state()
             return
 
-        # Priority 2: Handle special 3GPP constructs that don't return an 'item'.
-        # Each of these now has the critical return statement to fix the fall-through bug.
+        
+        
         elif "E1AP-PROTOCOL-IES" in name_part:
             sanitized_name = name_part.replace("E1AP-PROTOCOL-IES", "").strip()
             self._parse_ie_set(sanitized_name, def_part)
@@ -698,8 +698,8 @@ class ASN1Parser:
             self._reset_state()
             return
 
-        # Priority 3: Handle all concrete types that should produce an 'item'.
-        # This logic is correct and will now be reached with clean data.
+        
+        
         elif "SEQUENCE" in def_part and " OF " in def_part:
             item = self._parse_sequence_of(name_part, def_part, source_file, source_line, full_def_str)
         
@@ -709,13 +709,13 @@ class ASN1Parser:
         else:
             item = self._parse_simple_definition(name_part, def_part, source_file, source_line, full_def_str)
 
-        # --- End of Dispatcher ---
+        
 
         if item:
             if item.name not in self.definitions:
                 self.definitions[item.name] = item
         else:
-            # If item is still None after all checks, it's a genuine, UNEXPECTED failure.
+            
             self.failures.append({"name": name_part, "text": full_def_str, "file": source_file, "line": source_line})
 
         self._reset_state()
@@ -771,7 +771,7 @@ class ASN1Parser:
         Parses a ...-PROTOCOL-EXTENSION block into a structured list of metadata.
         This logic is analogous to _parse_ie_set.
         """
-        # The regex is the same as for IE Sets.
+        
         ie_pattern = re.compile(
             r"\{\s*ID\s+(?P<id>[\w-]+)\s+CRITICALITY\s+(?P<crit>[\w-]+)\s+(?:TYPE|EXTENSION)\s+(?P<type>.+?)\s+PRESENCE\s+(?P<pres>[\w-]+)\s*\}"
         )
@@ -779,7 +779,7 @@ class ASN1Parser:
         extension_list_for_set = []
 
         for match in matches:
-            # We don't need to handle inline types here as extensions are always named.
+            
             type_name = match.group("type").strip().rstrip(",")
             
             ext_data = {
@@ -791,11 +791,11 @@ class ASN1Parser:
             extension_list_for_set.append(ext_data)
 
         if extension_list_for_set:
-            # Store the result in our new dictionary.
+            
             self.extension_sets[name] = extension_list_for_set
             logger.info(f"Successfully parsed Extension Set '{name}' with {len(extension_list_for_set)} extensions.")
         else:
-            # If the set is empty (e.g., just "..."), we can log it differently.
+            
             logger.debug(f"Identified empty or abstract Extension Set: {name}")
 
     def _parse_parameterized_field(self, name_part: str, def_part: str, source_file: str, source_line: int, full_text: str) -> Optional[ASN1Definition]:
@@ -803,34 +803,34 @@ class ASN1Parser:
         Parses a parameterized ...-Field definition by resolving the CLASS.&field lookups.
         e.g., ProtocolIE-Field { E1AP-PROTOCOL-IES : IEsSetParam }
         """
-        # Extract the base name (e.g., "ProtocolIE-Field") and the CLASS name.
+        
         match = re.match(r"([\w-]+)\s*\{\s*([\w-]+)\s*:", name_part)
         if not match: return None
         
         base_name, class_name = match.group(1), match.group(2)
         
-        # We now create a concrete SEQUENCE definition for this field.
+        
         item = SequenceDefinition(base_name, source_file, source_line, full_text)
 
-        # Find all the CLASS.&field lookups in the definition body.
+        
         field_lookups = re.findall(r"([\w-]+)\s+([\w-]+)\.&([\w-]+)", def_part)
         
         for member_name, lookup_class_name, lookup_field_name in field_lookups:
-            if lookup_class_name != class_name: continue # Ensure it's referencing the correct class
+            if lookup_class_name != class_name: continue 
 
-            # Find the parsed CLASS definition from our pre-scan pass.
+            
             class_def = self.classes.get(class_name)
             if not class_def: continue
 
-            # Look up the type of the field (e.g., find the type of '&id' in 'E1AP-PROTOCOL-IES').
+            
             field_info = class_def.fields.get(lookup_field_name.lower())
             if not field_info: continue
             
-            # Add the resolved member to our new SEQUENCE definition.
+            
             new_ie = InformationElement(
                 ie=member_name,
-                type=field_info.type, # Use the type we found from the CLASS
-                presence="mandatory" # Field members are always mandatory
+                type=field_info.type, 
+                presence="mandatory" 
             )
             item.ies.append(new_ie)
 
@@ -885,13 +885,13 @@ class ASN1Parser:
                 name_part = line_text.split("::=", 1)[0].strip()
                 if name_part in patched_definitions_to_skip:
                     _, end_index = self._extract_full_definition(i)
-                    # Add all line numbers belonging to this definition to our skip set.
+                    
                     for skip_line_num in range(i, end_index + 1):
                         lines_to_skip.add(skip_line_num)
 
-        # This loop now correctly drives the state machine for all definitions.
+        
         for i, (line_text, source_file, source_line) in enumerate(self.lines):
-            # Your skip logic is now here
+            
             if i in lines_to_skip:
                 continue
 
@@ -899,7 +899,7 @@ class ASN1Parser:
             if not cleaned_line:
                 continue
             
-            # Your guards against malformed lines are preserved here
+            
             if "::=" in cleaned_line:
                 name_part = cleaned_line.split("::=", 1)[0].strip()
                 if "{" in name_part and "}" in name_part:
@@ -913,22 +913,22 @@ class ASN1Parser:
                     )
                      continue
 
-            # This is the correct state machine driver
+            
             if self.state == ParserState.SEARCHING:
                 self._handle_searching_state(cleaned_line, source_file, source_line)
             elif self.state == ParserState.IN_MULTILINE_DEF:
                 self._handle_multiline_def_state(cleaned_line)
 
-        # Process any remaining definition at the end of the file.
+        
         if self.current_def_lines:
             self._process_complete_definition()
 
         logger.info("PASS 2 COMPLETE.")
 
-        # The function now immediately returns the correct data.
+        
         return (
             self.definitions,
-            self.failures, # This list is no longer being wiped out
+            self.failures, 
             self.procedures,
             self.message_to_procedure_map,
         )

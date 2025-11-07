@@ -49,23 +49,13 @@ func (s *SecurityAlgorithm) Decode(r *aper.AperReader) (err error) {
 	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Read optionality bitmap failed: %w", err)
 	}
-
-	{
-		var val uint64
-		if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
-			return fmt.Errorf("Decode CipheringAlgorithm failed: %w", err)
-		}
-		s.CipheringAlgorithm.Value = aper.Enumerated(val)
+	if err = s.CipheringAlgorithm.Decode(r); err != nil {
+		return fmt.Errorf("Decode CipheringAlgorithm failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.IntegrityProtectionAlgorithm = new(IntegrityProtectionAlgorithm)
-
-		{
-			var val uint64
-			if val, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
-				return fmt.Errorf("Decode IntegrityProtectionAlgorithm failed: %w", err)
-			}
-			s.IntegrityProtectionAlgorithm.Value = aper.Enumerated(val)
+		if err = s.IntegrityProtectionAlgorithm.Decode(r); err != nil {
+			return fmt.Errorf("Decode IntegrityProtectionAlgorithm failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {

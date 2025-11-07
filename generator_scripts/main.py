@@ -9,7 +9,7 @@ from go_generator import GoCodeGenerator
 from asn1_patches import ASN1Patcher
 from common_types import ASN1Definition
 
-# python main.py --input-dir ../extracted_sections/ --output-dir ../e1ap_ies/
+
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ def load_lines_with_context(directory: str, files_to_skip: List[str]) -> List[Tu
     for filename in section_files:
         if filename in set(files_to_skip):
             logger.warning(f"Skipping file '{filename}' as it is handled by manual patches.")
-            continue # Skip to the next file
+            continue 
 
         filepath = os.path.join(directory, filename)
         with open(filepath, "r", encoding="utf-8") as f:
@@ -128,7 +128,7 @@ def main():
             logger.info(f"Rescued {rescued_count} definitions from the failure list via manual patches.")
 
     if failures:
-            # I've updated the message for clarity.
+            
             logger.warning("--- The following definitions remain unparsed (after patches): ---")
             for failure in sorted(failures, key=lambda x: x['name']):
                 logger.warning(f"  - {failure['name']}")

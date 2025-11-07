@@ -34,7 +34,7 @@ func (s *PrivateIEID) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode Local failed: %w", err)
 		}
 	case PrivateIEIDPresentGlobal:
-		if err = s.Global.Encode(w); err != nil {
+		if err = w.WriteOctetString([]byte(*s.Global), nil, false); err != nil {
 			return fmt.Errorf("Encode Global failed: %w", err)
 		}
 	default:
@@ -46,24 +46,27 @@ func (s *PrivateIEID) Encode(w *aper.AperWriter) (err error) {
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *PrivateIEID) Decode(r *aper.AperReader) (err error) {
 
-	// 1. Read the choice index.
+	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
 	var choice uint64
 	if choice, err = r.ReadChoice(1, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
+	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
 
 	// 2. Decode the selected member.
-	switch choice {
+	switch s.Choice {
 	case 0:
 		s.Local = new(INTEGER)
 		if err = s.Local.Decode(r); err != nil {
 			return fmt.Errorf("Decode Local failed: %w", err)
 		}
 	case 1:
-		s.Global = new(string)
-		if err = s.Global.Decode(r); err != nil {
+		var val []byte
+		if val, err = r.ReadOctetString(nil, false); err != nil {
 			return fmt.Errorf("Decode Global failed: %w", err)
 		}
+		tmpStr := string(val)
+		s.Global = &tmpStr
 	default:
 		return fmt.Errorf("Decode choice of PrivateIEID with unknown choice index %d", choice)
 	}
