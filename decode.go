@@ -8,7 +8,7 @@ import (
 	"github.com/sub2pewds12/E1AP/e1ap_ies"
 )
 
-func E1apDecode(buf []byte) (pdu E1AP_PDU, err error, diagnostics []e1ap_ies.CriticalityDiagnosticsIEItem) {
+func E1apDecode(buf []byte) (pdu E1AP_PDU, diagnostics []e1ap_ies.CriticalityDiagnosticsIEItem, err error) {
 	r := aper.NewReader(bytes.NewBuffer(buf))
 
 	choice, err := r.ReadChoice(2, false)

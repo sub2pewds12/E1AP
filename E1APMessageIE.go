@@ -30,8 +30,10 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.DataUsageReport)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseRequest)
-		case e1ap_ies.ProcedureCodeGNBCUPE1Setup:
-			return new(e1ap_ies.GNBCUPE1SetupRequest)
+		case e1ap_ies.ProcedureCodeGNBCUCPE1Setup:
+			return new(e1ap_ies.GNBCUCPE1SetupRequest)
+		case e1ap_ies.ProcedureCodeGNBCUUPE1Setup:
+			return new(e1ap_ies.GNBCUUPE1SetupRequest)
 		case e1ap_ies.ProcedureCodeEarlyForwardingSNTransfer:
 			return new(e1ap_ies.EarlyForwardingSNTransfer)
 		case e1ap_ies.ProcedureCodeErrorIndication:
@@ -74,7 +76,7 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 			return new(e1ap_ies.BearerContextSetupResponse)
 		case e1ap_ies.ProcedureCodeE1Release:
 			return new(e1ap_ies.E1ReleaseResponse)
-		case e1ap_ies.ProcedureCodeE1Setup:
+		case e1ap_ies.ProcedureCodeGNBCUCPE1Setup:
 			return new(e1ap_ies.GNBCUCPE1SetupResponse)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
 			return new(e1ap_ies.GNBCUCPConfigurationUpdateAcknowledge)
@@ -87,14 +89,13 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		case e1ap_ies.ProcedureCodeResourceStatusReporting:
 			return new(e1ap_ies.ResourceStatusResponse)
 		}
-
 	case PduChoiceUnsuccessfulOutcome:
 		switch procedureCode.Value {
 		case e1ap_ies.ProcedureCodeBearerContextModification:
 			return new(e1ap_ies.BearerContextModificationFailure)
 		case e1ap_ies.ProcedureCodeBearerContextSetup:
 			return new(e1ap_ies.BearerContextSetupFailure)
-		case e1ap_ies.ProcedureCodeE1Setup:
+		case e1ap_ies.ProcedureCodeGNBCUCPE1Setup:
 			return new(e1ap_ies.GNBCUCPE1SetupFailure)
 		case e1ap_ies.ProcedureCodeGNBCUCPConfigurationUpdate:
 			return new(e1ap_ies.GNBCUCPConfigurationUpdateFailure)
