@@ -106,7 +106,7 @@ func (uo *UnsuccessfulOutcome) Encode(w io.Writer) error {
 
 func E1apEncode(msg MessageEncoder) (wire []byte, err error) {
 	var buf bytes.Buffer
-	// It simply calls the Encode method on the provided message.
+
 	if err = msg.Encode(&buf); err == nil {
 		wire = buf.Bytes()
 	}

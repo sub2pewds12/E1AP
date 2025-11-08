@@ -1,4 +1,3 @@
-// This test file should be in your top-level 'e1ap' package.
 package e1ap
 
 import (
@@ -11,7 +10,7 @@ import (
 )
 
 func TestE1SetupRequest(t *testing.T) {
-	// 1. Arrange: Create the original message struct.
+
 	originalMsg := &e1ap_ies.GNBCUCPE1SetupRequest{
 		TransactionID: e1ap_ies.TransactionID{Value: aper.Integer(123)},
 		GNBCUCPName: &e1ap_ies.GNBCUCPName{
@@ -23,7 +22,7 @@ func TestE1SetupRequest(t *testing.T) {
 					{
 						IPSecTransportLayerAddress: e1ap_ies.TransportLayerAddress{
 							Value: aper.BitString{
-								Bytes:   []byte{0x0A, 0x0B, 0x0C, 0x0E}, // 10.11.12.14
+								Bytes:   []byte{0x0A, 0x0B, 0x0C, 0x0E},
 								NumBits: 32,
 							},
 						},
@@ -32,7 +31,7 @@ func TestE1SetupRequest(t *testing.T) {
 								{
 									GTPTransportLayerAddresses: e1ap_ies.TransportLayerAddress{
 										Value: aper.BitString{
-											Bytes:   []byte{0x0A, 0x0B, 0x0C, 0x0D}, // 10.11.12.13
+											Bytes:   []byte{0x0A, 0x0B, 0x0C, 0x0D},
 											NumBits: 32,
 										},
 									},
@@ -45,9 +44,6 @@ func TestE1SetupRequest(t *testing.T) {
 		},
 	}
 
-	// 2. Act: Encode the message.
-	// THIS IS THE CRITICAL FIX: We bypass the broken E1apEncode dispatcher.
-	// Instead, we manually create the InitiatingMessage wrapper and call its Encode method directly.
 	pduToEncode := &InitiatingMessage{
 		ProcedureCode: e1ap_ies.ProcedureCode{Value: e1ap_ies.ProcedureCodeGNBCUPE1Setup},
 		Criticality:   e1ap_ies.Criticality{Value: e1ap_ies.CriticalityReject},
@@ -61,7 +57,6 @@ func TestE1SetupRequest(t *testing.T) {
 	encodedBytes := buf.Bytes()
 	t.Logf("Encoded PDU (len=%d): %X", len(encodedBytes), encodedBytes)
 
-	// 3. Act: Decode the message.
 	decodedPDU, diags, err := E1apDecode(encodedBytes)
 	if err != nil {
 		t.Fatalf("E1apDecode failed: %v", err)
@@ -70,7 +65,6 @@ func TestE1SetupRequest(t *testing.T) {
 		t.Logf("Received non-critical diagnostics: %+v", diags)
 	}
 
-	// 4. Assert: Check if the decoded message is what we expect.
 	im, ok := decodedPDU.Message.(*InitiatingMessage)
 	if !ok {
 		t.Fatalf("Decoded PDU.Message is not of expected type *InitiatingMessage")
