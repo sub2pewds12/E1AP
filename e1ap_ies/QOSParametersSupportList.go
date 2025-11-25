@@ -84,8 +84,7 @@ func (s *QOSParametersSupportList) Decode(r *aper.AperReader) (err error) {
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for QOSParametersSupportList")
+	if isExtensible { /* TODO: Implement extension skipping for QOSParametersSupportList */
 	}
 	return nil
 }

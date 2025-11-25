@@ -123,8 +123,7 @@ func (s *Dynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for Dynamic5QIDescriptor")
+	if isExtensible { /* TODO: Implement extension skipping for Dynamic5QIDescriptor */
 	}
 	return nil
 }

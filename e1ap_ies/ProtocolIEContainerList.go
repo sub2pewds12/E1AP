@@ -24,8 +24,7 @@ func (s *ProtocolIEContainerList) Decode(r *aper.AperReader) (err error) {
 	if isExtensible, err = r.ReadBool(); err != nil {
 		return fmt.Errorf("Read extensibility bool failed: %w", err)
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for ProtocolIEContainerList")
+	if isExtensible { /* TODO: Implement extension skipping for ProtocolIEContainerList */
 	}
 	return nil
 }

@@ -4,6 +4,8 @@ import (
 	"github.com/sub2pewds12/E1AP/e1ap_ies"
 )
 
+// createMessage is a factory function that instantiates the correct message struct
+// based on the PDU choice and the procedure code.
 func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageUnmarshaller {
 	switch present {
 	case PduChoiceInitiatingMessage:
@@ -89,6 +91,7 @@ func createMessage(present uint8, procedureCode e1ap_ies.ProcedureCode) MessageU
 		case e1ap_ies.ProcedureCodeResourceStatusReporting:
 			return new(e1ap_ies.ResourceStatusResponse)
 		}
+
 	case PduChoiceUnsuccessfulOutcome:
 		switch procedureCode.Value {
 		case e1ap_ies.ProcedureCodeBearerContextModification:

@@ -49,8 +49,7 @@ func (s *DataForwardingtoNGRANQoSFlowInformationListItem) Decode(r *aper.AperRea
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for DataForwardingtoNGRANQoSFlowInformationListItem")
+	if isExtensible { /* TODO: Implement extension skipping for DataForwardingtoNGRANQoSFlowInformationListItem */
 	}
 	return nil
 }

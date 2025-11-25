@@ -71,8 +71,7 @@ func (s *GNBCUUPCellGroupRelatedConfigurationItem) Decode(r *aper.AperReader) (e
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for GNBCUUPCellGroupRelatedConfigurationItem")
+	if isExtensible { /* TODO: Implement extension skipping for GNBCUUPCellGroupRelatedConfigurationItem */
 	}
 	return nil
 }

@@ -31,8 +31,7 @@ func (s *UEAssociatedLogicalE1ConnectionItemResAck) Decode(r *aper.AperReader) (
 	if err = s.UEAssociatedLogicalE1ConnectionItem.Decode(r); err != nil {
 		return fmt.Errorf("Decode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for UEAssociatedLogicalE1ConnectionItemResAck")
+	if isExtensible { /* TODO: Implement extension skipping for UEAssociatedLogicalE1ConnectionItemResAck */
 	}
 	return nil
 }

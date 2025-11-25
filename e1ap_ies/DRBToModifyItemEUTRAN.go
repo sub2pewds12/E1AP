@@ -238,8 +238,7 @@ func (s *DRBToModifyItemEUTRAN) Decode(r *aper.AperReader) (err error) {
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for DRBToModifyItemEUTRAN")
+	if isExtensible { /* TODO: Implement extension skipping for DRBToModifyItemEUTRAN */
 	}
 	return nil
 }

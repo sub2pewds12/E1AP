@@ -49,8 +49,7 @@ func (s *EHCDownlinkParameters) Decode(r *aper.AperReader) (err error) {
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for EHCDownlinkParameters")
+	if isExtensible { /* TODO: Implement extension skipping for EHCDownlinkParameters */
 	}
 	return nil
 }

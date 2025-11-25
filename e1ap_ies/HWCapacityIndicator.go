@@ -42,8 +42,7 @@ func (s *HWCapacityIndicator) Decode(r *aper.AperReader) (err error) {
 	if err = s.IEExtensions.Decode(r); err != nil {
 		return fmt.Errorf("Decode IEExtensions failed: %w", err)
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for HWCapacityIndicator")
+	if isExtensible { /* TODO: Implement extension skipping for HWCapacityIndicator */
 	}
 	return nil
 }

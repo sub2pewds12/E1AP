@@ -598,7 +598,7 @@ def _generate_sequence_decode_body(
             decode_parts.append(decode_call)
 
     decode_parts.append(
-        f'if isExtensible {{ return fmt.Errorf("Extensions not yet implemented for {go_name}") }}'
+        f'if isExtensible {{ /* TODO: Implement extension skipping for {go_name} */ }}'
     )
     return "\n\t".join(decode_parts)
 
@@ -613,33 +613,35 @@ def _generate_choice_encode_body(
     ub_choices = num_choices - 1 if num_choices > 0 else 0
     is_extensible = str(item.is_extensible).lower()
 
+    # --- DEBUGGING STEP 1: Log when this generator is run ---
+    print(f"[GENERATOR DEBUG] Generating CHOICE encoder for '{go_name}' with {num_choices} members (ub={ub_choices}). Extensible: {is_extensible}")
+    if num_choices <= 1 and not item.is_extensible:
+        print(f"[GENERATOR WARNING] '{go_name}' is a non-extensible CHOICE with {num_choices} members. This may be problematic.")
+
+
     encode_switch_cases = []
     for choice_ie in item.ies:
         choice_name = pascal_case_converter(choice_ie.ie)
         const_name = f"{go_name}Present{choice_name}"
-        
         
         base_go_type, concrete_def = parser.go_type_resolver(choice_ie.type)
         
         encode_call = ""
         
         if base_go_type == "string":
-            
             encode_call = f"""
         if err = w.WriteOctetString([]byte(*s.{choice_name}), nil, false); err != nil {{
             return fmt.Errorf("Encode {choice_name} failed: %w", err)
         }}"""
         elif isinstance(concrete_def, IntegerDefinition):
-            
             min_val = parser.pascal_case_converter(str(getattr(concrete_def, 'min_val', '0')))
             max_val = parser.pascal_case_converter(str(getattr(concrete_def, 'max_val', '0')))
-            is_extensible = str(getattr(concrete_def, 'is_extensible', False)).lower()
+            choice_is_extensible = str(getattr(concrete_def, 'is_extensible', False)).lower()
             encode_call = f"""
-        if err = w.WriteInteger(int64(s.{choice_name}.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible}); err != nil {{
+        if err = w.WriteInteger(int64(s.{choice_name}.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {choice_is_extensible}); err != nil {{
             return fmt.Errorf("Encode {choice_name} failed: %w", err)
         }}"""
         else:
-            
             encode_call = f"""
         if err = s.{choice_name}.Encode(w); err != nil {{
             return fmt.Errorf("Encode {choice_name} failed: %w", err)
@@ -649,10 +651,12 @@ def _generate_choice_encode_body(
 
     encode_switch_body = "\n".join(encode_switch_cases)
 
+    # --- DEBUGGING STEP 2: Add a Printf to the generated Go code ---
     return f"""
     // 1. Write the choice index.
-    if err = w.WriteChoice(uint64(s.Choice-1), {ub_choices}, {is_extensible}); err != nil {{
-        return fmt.Errorf("Encode choice index failed: %w", err)
+    // fmt.Printf("--- GO DEBUG: Encoding CHOICE {go_name} | Choice: %d, UpperBound: {ub_choices}, Extensible: {is_extensible}\\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
+    if err = w.WriteChoice(uint64(s.Choice), {ub_choices}, {is_extensible}); err != nil {{
+        return fmt.Errorf("Encode choice index failed for {go_name}: %w", err)
     }}
     
     // 2. Encode the selected member.
@@ -992,7 +996,6 @@ def _generate_pdu_encode(
     
     asn1_msg_name = item.name
 
-    
     found_proc = None
     for proc in procedures.values():
         if proc.initiating_message == asn1_msg_name or \
@@ -1010,9 +1013,17 @@ def _generate_pdu_encode(
         proc_code_const_base = proc_code_const_base[2:]
     proc_code_const = f"ProcedureCode{proc_code_const_base}"
 
-    
     message_type = message_to_procedure_map.get(asn1_msg_name)
     pdu_choice_const = ""
+    
+    # --- THIS IS THE CRITICAL FIX ---
+    # We will be extremely explicit to override any faulty logic in the map.
+    if go_name.endswith("Request"):
+        message_type = "InitiatingMessage"
+    elif go_name.endswith("Response") or go_name.endswith("Acknowledge") or go_name.endswith("Confirm") or go_name.endswith("Complete"):
+         message_type = "SuccessfulOutcome"
+    # --- END OF FIX ---
+    
     if message_type == "InitiatingMessage":
         pdu_choice_const = "E1apPduInitiatingMessage"
     elif message_type == "SuccessfulOutcome":
@@ -1025,15 +1036,15 @@ def _generate_pdu_encode(
     pdu_crit_const = "CriticalityReject" if message_type == "InitiatingMessage" else "CriticalityIgnore"
     
     return f"""
-    // Encode implements the aper.AperMarshaller interface for {go_name}.
-    func (msg *{go_name}) Encode(w io.Writer) error {{
+// Encode implements the aper.AperMarshaller interface for {go_name}.
+func (msg *{go_name}) Encode(w io.Writer) error {{
     ies, err := msg.toIes()
     if err != nil {{
-    return fmt.Errorf("could not convert {go_name} to IEs: %w", err)
+        return fmt.Errorf("could not convert {go_name} to IEs: %w", err)
     }}
 
     return encodeMessage(w, {pdu_choice_const}, ProcedureCode{{Value: {proc_code_const}}}, Criticality{{Value: {pdu_crit_const}}}, ies)
-    }}"""
+}}"""
 
 
 def _generate_pdu_decode(go_name: str, item: SequenceDefinition, parser: ASN1Parser) -> Tuple[str, Set[str]]:

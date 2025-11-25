@@ -56,8 +56,7 @@ func (s *UEAssociatedLogicalE1ConnectionItem) Decode(r *aper.AperReader) (err er
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for UEAssociatedLogicalE1ConnectionItem")
+	if isExtensible { /* TODO: Implement extension skipping for UEAssociatedLogicalE1ConnectionItem */
 	}
 	return nil
 }

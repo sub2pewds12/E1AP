@@ -25,8 +25,9 @@ const (
 func (s *ResetType) Encode(w *aper.AperWriter) (err error) {
 
 	// 1. Write the choice index.
-	if err = w.WriteChoice(uint64(s.Choice-1), 2, false); err != nil {
-		return fmt.Errorf("Encode choice index failed: %w", err)
+	// fmt.Printf("--- GO DEBUG: Encoding CHOICE ResetType | Choice: %d, UpperBound: 2, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
+	if err = w.WriteChoice(uint64(s.Choice), 2, false); err != nil {
+		return fmt.Errorf("Encode choice index failed for ResetType: %w", err)
 	}
 
 	// 2. Encode the selected member.

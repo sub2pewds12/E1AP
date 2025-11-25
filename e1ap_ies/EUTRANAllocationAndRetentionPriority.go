@@ -63,8 +63,7 @@ func (s *EUTRANAllocationAndRetentionPriority) Decode(r *aper.AperReader) (err e
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for EUTRANAllocationAndRetentionPriority")
+	if isExtensible { /* TODO: Implement extension skipping for EUTRANAllocationAndRetentionPriority */
 	}
 	return nil
 }

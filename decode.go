@@ -44,10 +44,25 @@ func E1apDecode(buf []byte) (pdu E1AP_PDU, diagnostics []e1ap_ies.CriticalityDia
 		return
 	}
 
-	pdu.Message = &InitiatingMessage{
-		ProcedureCode: procedureCode,
-		Criticality:   criticality,
-		Value:         message,
+	switch pdu.Present {
+	case PduChoiceInitiatingMessage:
+		pdu.Message = &InitiatingMessage{
+			ProcedureCode: procedureCode,
+			Criticality:   criticality,
+			Value:         message,
+		}
+	case PduChoiceSuccessfulOutcome:
+		pdu.Message = &SuccessfulOutcome{
+			ProcedureCode: procedureCode,
+			Criticality:   criticality,
+			Value:         message,
+		}
+	case PduChoiceUnsuccessfulOutcome:
+		pdu.Message = &UnsuccessfulOutcome{
+			ProcedureCode: procedureCode,
+			Criticality:   criticality,
+			Value:         message,
+		}
 	}
 
 	return

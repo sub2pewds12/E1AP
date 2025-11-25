@@ -1,16 +1,15 @@
-package e1ap
+package e1ap_test
 
 import (
-	"bytes"
 	"reflect"
 	"testing"
 
 	"github.com/lvdund/ngap/aper"
+	e1ap "github.com/sub2pewds12/E1AP"
 	"github.com/sub2pewds12/E1AP/e1ap_ies"
 )
 
 func TestE1SetupRequest(t *testing.T) {
-
 	originalMsg := &e1ap_ies.GNBCUCPE1SetupRequest{
 		TransactionID: e1ap_ies.TransactionID{Value: aper.Integer(123)},
 		GNBCUCPName: &e1ap_ies.GNBCUCPName{
@@ -44,20 +43,13 @@ func TestE1SetupRequest(t *testing.T) {
 		},
 	}
 
-	pduToEncode := &InitiatingMessage{
-		ProcedureCode: e1ap_ies.ProcedureCode{Value: e1ap_ies.ProcedureCodeGNBCUPE1Setup},
-		Criticality:   e1ap_ies.Criticality{Value: e1ap_ies.CriticalityReject},
-		Value:         originalMsg,
+	encodedBytes, err := e1ap.E1apEncode(originalMsg)
+	if err != nil {
+		t.Fatalf("E1apEncode failed: %v", err)
 	}
-
-	var buf bytes.Buffer
-	if err := pduToEncode.Encode(&buf); err != nil {
-		t.Fatalf("Encode failed: %v", err)
-	}
-	encodedBytes := buf.Bytes()
 	t.Logf("Encoded PDU (len=%d): %X", len(encodedBytes), encodedBytes)
 
-	decodedPDU, diags, err := E1apDecode(encodedBytes)
+	decodedPDU, diags, err := e1ap.E1apDecode(encodedBytes)
 	if err != nil {
 		t.Fatalf("E1apDecode failed: %v", err)
 	}
@@ -65,13 +57,13 @@ func TestE1SetupRequest(t *testing.T) {
 		t.Logf("Received non-critical diagnostics: %+v", diags)
 	}
 
-	im, ok := decodedPDU.Message.(*InitiatingMessage)
+	im, ok := decodedPDU.Message.(*e1ap.InitiatingMessage)
 	if !ok {
-		t.Fatalf("Decoded PDU.Message is not of expected type *InitiatingMessage")
+		t.Fatalf("Decoded message is not *e1ap.InitiatingMessage. Got %T", decodedPDU.Message)
 	}
 	decodedMsg, ok := im.Value.(*e1ap_ies.GNBCUCPE1SetupRequest)
 	if !ok {
-		t.Fatalf("Decoded message is not of expected type *e1ap_ies.GNBCUCPE1SetupRequest")
+		t.Fatalf("Decoded message value is not *e1ap_ies.GNBCUCPE1SetupRequest. Got %T", im.Value)
 	}
 
 	if !reflect.DeepEqual(originalMsg, decodedMsg) {

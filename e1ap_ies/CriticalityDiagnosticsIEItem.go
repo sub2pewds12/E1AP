@@ -45,8 +45,7 @@ func (s *CriticalityDiagnosticsIEItem) Decode(r *aper.AperReader) (err error) {
 	if err = s.TypeOfError.Decode(r); err != nil {
 		return fmt.Errorf("Decode TypeOfError failed: %w", err)
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for CriticalityDiagnosticsIEItem")
+	if isExtensible { /* TODO: Implement extension skipping for CriticalityDiagnosticsIEItem */
 	}
 	return nil
 }

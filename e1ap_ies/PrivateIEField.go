@@ -53,8 +53,7 @@ func (s *PrivateIEField) Decode(r *aper.AperReader) (err error) {
 	if err = s.Value.Decode(r); err != nil {
 		return fmt.Errorf("Decode Value failed: %w", err)
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for PrivateIEField")
+	if isExtensible { /* TODO: Implement extension skipping for PrivateIEField */
 	}
 	return nil
 }

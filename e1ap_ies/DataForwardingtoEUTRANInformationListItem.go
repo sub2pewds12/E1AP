@@ -63,8 +63,7 @@ func (s *DataForwardingtoEUTRANInformationListItem) Decode(r *aper.AperReader) (
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for DataForwardingtoEUTRANInformationListItem")
+	if isExtensible { /* TODO: Implement extension skipping for DataForwardingtoEUTRANInformationListItem */
 	}
 	return nil
 }

@@ -2,12 +2,12 @@ package e1ap_ies
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 
-	"github.com/lvdund/ngap/aper" // Your aper path
+	"github.com/lvdund/ngap/aper"
 )
 
-// PDU Choice constants
 const (
 	E1apPduInitiatingMessage   uint8 = 0
 	E1apPduSuccessfulOutcome   uint8 = 1
@@ -16,40 +16,37 @@ const (
 
 func encodeMessage(w io.Writer, present uint8, procedureCode ProcedureCode, criticality Criticality, ies []E1APMessageIE) (err error) {
 	aw := aper.NewWriter(w)
+	defer aw.Close()
 
-	// The APER spec for the PDU itself might not have this first bit, let's assume it's just the choice.
-	// if err = aw.WriteBool(false); err != nil { return }
-
-	if err = aw.WriteChoice(uint64(present), 2, false); err != nil { // Extensibility might be false
-		return
+	if err = aw.WriteChoice(uint64(present)+1, 2, false); err != nil {
+		return fmt.Errorf("Encode PDU Choice failed: %w", err)
 	}
+
 	if err = procedureCode.Encode(aw); err != nil {
-		return
+		return fmt.Errorf("Encode ProcedureCode failed: %w", err)
 	}
 	if err = criticality.Encode(aw); err != nil {
-		return
+		return fmt.Errorf("Encode Criticality failed: %w", err)
 	}
 
-	// Encode IEs to a temporary buffer
 	var buf bytes.Buffer
-	cW := aper.NewWriter(&buf)
+	ieWriter := aper.NewWriter(&buf)
 
-	// Create a slice of interfaces for the generic function
-	ieInterfaces := make([]aper.IE, len(ies))
+	var ieMarshallers []aper.AperMarshaller
 	for i := range ies {
-		ieInterfaces[i] = &ies[i]
+		ieMarshallers = append(ieMarshallers, &ies[i])
 	}
 
-	if err = aper.WriteSequenceOf(ieInterfaces, cW, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return
+	if err = aper.WriteSequenceOf(ieMarshallers, ieWriter, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return fmt.Errorf("Encode IEs into buffer failed: %w", err)
 	}
-	if err = cW.Close(); err != nil {
-		return
+	if err = ieWriter.Close(); err != nil {
+		return fmt.Errorf("Close IE buffer writer failed: %w", err)
 	}
 
-	// Write the buffer as an Open Type
 	if err = aw.WriteOpenType(buf.Bytes()); err != nil {
-		return
+		return fmt.Errorf("Encode OpenType failed: %w", err)
 	}
-	return aw.Close()
+
+	return nil
 }

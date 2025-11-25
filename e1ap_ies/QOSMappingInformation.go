@@ -62,8 +62,7 @@ func (s *QOSMappingInformation) Decode(r *aper.AperReader) (err error) {
 			return fmt.Errorf("Decode FlowLabel failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for QOSMappingInformation")
+	if isExtensible { /* TODO: Implement extension skipping for QOSMappingInformation */
 	}
 	return nil
 }

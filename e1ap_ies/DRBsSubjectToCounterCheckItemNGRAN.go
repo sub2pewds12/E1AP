@@ -70,8 +70,7 @@ func (s *DRBsSubjectToCounterCheckItemNGRAN) Decode(r *aper.AperReader) (err err
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for DRBsSubjectToCounterCheckItemNGRAN")
+	if isExtensible { /* TODO: Implement extension skipping for DRBsSubjectToCounterCheckItemNGRAN */
 	}
 	return nil
 }

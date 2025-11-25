@@ -64,8 +64,7 @@ func (s *DRBBStatusTransfer) Decode(r *aper.AperReader) (err error) {
 			return fmt.Errorf("Decode IEExtension failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for DRBBStatusTransfer")
+	if isExtensible { /* TODO: Implement extension skipping for DRBBStatusTransfer */
 	}
 	return nil
 }

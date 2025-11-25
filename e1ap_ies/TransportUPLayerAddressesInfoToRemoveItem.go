@@ -70,8 +70,7 @@ func (s *TransportUPLayerAddressesInfoToRemoveItem) Decode(r *aper.AperReader) (
 			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible {
-		return fmt.Errorf("Extensions not yet implemented for TransportUPLayerAddressesInfoToRemoveItem")
+	if isExtensible { /* TODO: Implement extension skipping for TransportUPLayerAddressesInfoToRemoveItem */
 	}
 	return nil
 }

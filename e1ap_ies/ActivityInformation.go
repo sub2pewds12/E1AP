@@ -27,8 +27,9 @@ const (
 func (s *ActivityInformation) Encode(w *aper.AperWriter) (err error) {
 
 	// 1. Write the choice index.
-	if err = w.WriteChoice(uint64(s.Choice-1), 3, false); err != nil {
-		return fmt.Errorf("Encode choice index failed: %w", err)
+	// fmt.Printf("--- GO DEBUG: Encoding CHOICE ActivityInformation | Choice: %d, UpperBound: 3, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
+	if err = w.WriteChoice(uint64(s.Choice), 3, false); err != nil {
+		return fmt.Errorf("Encode choice index failed for ActivityInformation: %w", err)
 	}
 
 	// 2. Encode the selected member.
