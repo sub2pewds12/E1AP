@@ -15,7 +15,7 @@ func E1apDecode(buf []byte) (pdu E1AP_PDU, diagnostics []e1ap_ies.CriticalityDia
 	if err != nil {
 		return
 	}
-	pdu.Present = uint8(choice)
+	pdu.Present = uint8(choice) - 1
 
 	v, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
 	if err != nil {

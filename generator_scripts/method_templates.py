@@ -854,7 +854,7 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
             return f'msg.{field_name} = new({go_type});\n\t\t{decode_block}'
         return decode_block
 
-    elif isinstance(asn1_def, (StringDefinition, BuiltinDefinition)) and "STRING" in asn1_def.name.upper():
+    elif isinstance(asn1_def, (StringDefinition, BuiltinDefinition)) and "STRING" in asn1_def.name.upper() and (go_type.startswith("aper.") or go_type == "string"):
         
         min_val = getattr(asn1_def, 'min_val', 0) or 0
         max_val = getattr(asn1_def, 'max_val', 0) or 0

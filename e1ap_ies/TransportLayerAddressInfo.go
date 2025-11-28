@@ -8,8 +8,8 @@ import (
 
 // TransportLayerAddressInfo is a generated SEQUENCE type.
 type TransportLayerAddressInfo struct {
-	TransportUPLayerAddressesInfoToAddList    *TransportUPLayerAddressesInfoToAddList    `aper:"optional,ext"`
-	TransportUPLayerAddressesInfoToRemoveList *TransportUPLayerAddressesInfoToRemoveList `aper:"optional,ext"`
+	TransportUPLayerAddressesInfoToAddList    *TransportUPLayerAddressesInfoToAddList    `aper:"lb:1,ub:MaxnoofTLAs,optional,ext"`
+	TransportUPLayerAddressesInfoToRemoveList *TransportUPLayerAddressesInfoToRemoveList `aper:"lb:1,ub:MaxnoofTLAs,optional,ext"`
 	IEExtensions                              *ProtocolExtensionContainer                `aper:"optional,ext"`
 }
 
@@ -37,7 +37,7 @@ func (s *TransportLayerAddressInfo) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.TransportUPLayerAddressesInfoToAddList.Value); i++ {
 				itemPointers[i] = &(s.TransportUPLayerAddressesInfoToAddList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofTLAs}, false); err != nil {
 				return fmt.Errorf("Encode TransportUPLayerAddressesInfoToAddList failed: %w", err)
 			}
 		}
@@ -48,7 +48,7 @@ func (s *TransportLayerAddressInfo) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.TransportUPLayerAddressesInfoToRemoveList.Value); i++ {
 				itemPointers[i] = &(s.TransportUPLayerAddressesInfoToRemoveList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofTLAs}, false); err != nil {
 				return fmt.Errorf("Encode TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
 			}
 		}

@@ -12,7 +12,7 @@ import (
 type ULDataNotification struct {
 	GNBCUCPUEE1APID        GNBCUCPUEE1APID        `aper:"lb:0,ub:4294967295,mandatory,ext"`
 	GNBCUUPUEE1APID        GNBCUUPUEE1APID        `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	PDUSessionToNotifyList PDUSessionToNotifyList `aper:"mandatory,ext"`
+	PDUSessionToNotifyList PDUSessionToNotifyList `aper:"lb:1,ub:MaxnoofPDUSessionResource,mandatory,ext"`
 }
 
 // toIes transforms the ULDataNotification struct into a slice of E1APMessageIEs.
@@ -51,7 +51,7 @@ func (msg *ULDataNotification) toIes() ([]E1APMessageIE, error) {
 	{
 
 		tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
+			c:   aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource},
 			ext: false,
 		}
 
@@ -62,7 +62,7 @@ func (msg *ULDataNotification) toIes() ([]E1APMessageIE, error) {
 		{
 
 			tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: 0},
+				c:   aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource},
 				ext: false,
 			}
 
@@ -210,7 +210,7 @@ func (decoder *ULDataNotificationDecoder) decodeIE(r *aper.AperReader) (msgIe *E
 				return item, nil
 			}
 			var decodedItems []PDUSessionToNotifyItem
-			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource}, false); err != nil {
 				return nil, fmt.Errorf("Decode PDUSessionToNotifyList failed: %w", err)
 			}
 			msg.PDUSessionToNotifyList.Value = decodedItems

@@ -12,10 +12,10 @@ type PDUSessionResourceModifiedItem struct {
 	NGDLUPTNLInformation                        *UPTNLInformation                         `aper:"optional,ext"`
 	SecurityResult                              *SecurityResult                           `aper:"optional,ext"`
 	PDUSessionDataForwardingInformationResponse *DataForwardingInformation                `aper:"optional,ext"`
-	DRBSetupListNGRAN                           *DRBSetupListNGRAN                        `aper:"optional,ext"`
-	DRBFailedListNGRAN                          *DRBFailedListNGRAN                       `aper:"optional,ext"`
-	DRBModifiedListNGRAN                        *DRBModifiedListNGRAN                     `aper:"optional,ext"`
-	DRBFailedToModifyListNGRAN                  *DRBFailedToModifyListNGRAN               `aper:"optional,ext"`
+	DRBSetupListNGRAN                           *DRBSetupListNGRAN                        `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
+	DRBFailedListNGRAN                          *DRBFailedListNGRAN                       `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
+	DRBModifiedListNGRAN                        *DRBModifiedListNGRAN                     `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
+	DRBFailedToModifyListNGRAN                  *DRBFailedToModifyListNGRAN               `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
 	IEExtensions                                *PDUSessionResourceModifiedItemExtensions `aper:"optional,ext"`
 }
 
@@ -76,7 +76,7 @@ func (s *PDUSessionResourceModifiedItem) Encode(w *aper.AperWriter) (err error) 
 			for i := 0; i < len(s.DRBSetupListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBSetupListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBSetupListNGRAN failed: %w", err)
 			}
 		}
@@ -87,7 +87,7 @@ func (s *PDUSessionResourceModifiedItem) Encode(w *aper.AperWriter) (err error) 
 			for i := 0; i < len(s.DRBFailedListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBFailedListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBFailedListNGRAN failed: %w", err)
 			}
 		}
@@ -98,7 +98,7 @@ func (s *PDUSessionResourceModifiedItem) Encode(w *aper.AperWriter) (err error) 
 			for i := 0; i < len(s.DRBModifiedListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBModifiedListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBModifiedListNGRAN failed: %w", err)
 			}
 		}
@@ -109,7 +109,7 @@ func (s *PDUSessionResourceModifiedItem) Encode(w *aper.AperWriter) (err error) 
 			for i := 0; i < len(s.DRBFailedToModifyListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBFailedToModifyListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBFailedToModifyListNGRAN failed: %w", err)
 			}
 		}

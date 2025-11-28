@@ -260,14 +260,9 @@ func (decoder *CellTrafficTraceDecoder) decodeIE(r *aper.AperReader) (msgIe *E1A
 			msg.PrivacyIndicator.Value = aper.Enumerated(val)
 		}
 	case ProtocolIEIDURIaddress:
-
-		{
-			var val []byte
-			if val, err = ieR.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-				return nil, fmt.Errorf("Decode URIaddress failed: %w", err)
-			}
-			msg.URIaddress = new(URIaddress)
-			msg.URIaddress.Value = aper.OctetString(val)
+		msg.URIaddress = new(URIaddress)
+		if err = msg.URIaddress.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode URIaddress failed: %w", err)
 		}
 	default:
 		switch msgIe.Criticality.Value {

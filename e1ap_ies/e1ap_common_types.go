@@ -1190,13 +1190,13 @@ type PriorityLevel struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *PriorityLevel) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 15}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *PriorityLevel) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 15}, false)
 	if err != nil {
 		return err
 	}
@@ -1211,13 +1211,13 @@ type PrivateIEIDLocal struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *PrivateIEIDLocal) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: MaxPrivateIEs}, false)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *PrivateIEIDLocal) Decode(r *aper.AperReader) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxPrivateIEs}, false)
 	if err != nil {
 		return err
 	}

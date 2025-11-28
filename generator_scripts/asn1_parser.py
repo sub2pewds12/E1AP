@@ -138,13 +138,11 @@ class ASN1Parser:
 
     def _parse_constraints(self, line_part: str) -> Dict[str, Any]:
         constraints = {"min_val": None, "max_val": None}
+        
+        # Use line_part directly to avoid issues with nested parentheses truncation
+        content = line_part
 
-        match = re.search(r"\([^)]+\)", line_part)
-        if not match:
-            return constraints
-        content = match.group(0)
-
-        size_range_match = re.search(r"SIZE\s*\(([\w\d-]+)\.\.([\w\d-]+)\)", content)
+        size_range_match = re.search(r"SIZE\s*\(([\w\d-]+)\s*\.\.\s*([\w\d-]+)\)", content)
         if size_range_match:
             constraints["min_val"] = size_range_match.group(1)
             constraints["max_val"] = size_range_match.group(2)
@@ -157,14 +155,12 @@ class ASN1Parser:
             constraints["max_val"] = val
             return constraints
 
-        range_match = re.search(r"\(([\w\d-]+)\.\.([\w\d-]+)", content)
+        range_match = re.search(r"\(([\w\d-]+)\s*\.\.\s*([\w\d-]+)", content)
         if range_match:
             min_val = range_match.group(1)
             max_val = range_match.group(2)
-            if not min_val.isalpha() or min_val in self.definitions:
-                constraints["min_val"] = min_val
-            if not max_val.isalpha() or max_val in self.definitions:
-                constraints["max_val"] = max_val
+            constraints["min_val"] = min_val
+            constraints["max_val"] = max_val
             return constraints
 
         fixed_val_match = re.search(r"\(([\w\d-]+)\)", content)

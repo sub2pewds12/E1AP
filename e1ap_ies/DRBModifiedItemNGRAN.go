@@ -9,10 +9,10 @@ import (
 // DRBModifiedItemNGRAN is a generated SEQUENCE type.
 type DRBModifiedItemNGRAN struct {
 	DRBID                   DRBID                           `aper:"lb:1,ub:32,mandatory,ext"`
-	ULUPTransportParameters *UPParameters                   `aper:"optional,ext"`
+	ULUPTransportParameters *UPParameters                   `aper:"lb:1,ub:MaxnoofUPParameters,optional,ext"`
 	PDCPSNStatusInformation *PDCPSNStatusInformation        `aper:"optional,ext"`
-	FlowSetupList           *QOSFlowList                    `aper:"optional,ext"`
-	FlowFailedList          *QOSFlowFailedList              `aper:"optional,ext"`
+	FlowSetupList           *QOSFlowList                    `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
+	FlowFailedList          *QOSFlowFailedList              `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
 	IEExtensions            *DRBModifiedItemNGRANExtensions `aper:"optional,ext"`
 }
 
@@ -49,7 +49,7 @@ func (s *DRBModifiedItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.ULUPTransportParameters.Value); i++ {
 				itemPointers[i] = &(s.ULUPTransportParameters.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
 				return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
 			}
 		}
@@ -65,7 +65,7 @@ func (s *DRBModifiedItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.FlowSetupList.Value); i++ {
 				itemPointers[i] = &(s.FlowSetupList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 				return fmt.Errorf("Encode FlowSetupList failed: %w", err)
 			}
 		}
@@ -76,7 +76,7 @@ func (s *DRBModifiedItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.FlowFailedList.Value); i++ {
 				itemPointers[i] = &(s.FlowFailedList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 				return fmt.Errorf("Encode FlowFailedList failed: %w", err)
 			}
 		}

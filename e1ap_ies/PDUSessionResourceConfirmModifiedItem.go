@@ -9,7 +9,7 @@ import (
 // PDUSessionResourceConfirmModifiedItem is a generated SEQUENCE type.
 type PDUSessionResourceConfirmModifiedItem struct {
 	PDUSessionID                PDUSessionID                 `aper:"lb:0,ub:255,mandatory,ext"`
-	DRBConfirmModifiedListNGRAN *DRBConfirmModifiedListNGRAN `aper:"optional,ext"`
+	DRBConfirmModifiedListNGRAN *DRBConfirmModifiedListNGRAN `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
 	IEExtensions                *ProtocolExtensionContainer  `aper:"optional,ext"`
 }
 
@@ -37,7 +37,7 @@ func (s *PDUSessionResourceConfirmModifiedItem) Encode(w *aper.AperWriter) (err 
 			for i := 0; i < len(s.DRBConfirmModifiedListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBConfirmModifiedListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBConfirmModifiedListNGRAN failed: %w", err)
 			}
 		}

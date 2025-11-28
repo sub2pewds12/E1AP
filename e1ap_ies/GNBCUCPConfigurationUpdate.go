@@ -256,14 +256,9 @@ func (decoder *GNBCUCPConfigurationUpdateDecoder) decodeIE(r *aper.AperReader) (
 			msg.TransactionID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDGNBCUCPName:
-
-		{
-			var val []byte
-			if val, err = ieR.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUCPName failed: %w", err)
-			}
-			msg.GNBCUCPName = new(GNBCUCPName)
-			msg.GNBCUCPName.Value = aper.OctetString(val)
+		msg.GNBCUCPName = new(GNBCUCPName)
+		if err = msg.GNBCUCPName.Decode(ieR); err != nil {
+			return nil, fmt.Errorf("Decode GNBCUCPName failed: %w", err)
 		}
 	case ProtocolIEIDGNBCUCPTNLAToAddList:
 

@@ -8,7 +8,7 @@ import (
 
 // EUTRANAllocationAndRetentionPriority is a generated SEQUENCE type.
 type EUTRANAllocationAndRetentionPriority struct {
-	PriorityLevel           PriorityLevel               `aper:"lb:0,ub:0,mandatory,ext"`
+	PriorityLevel           PriorityLevel               `aper:"lb:0,ub:15,mandatory,ext"`
 	PreEmptionCapability    PreEmptionCapability        `aper:"mandatory,ext"`
 	PreEmptionVulnerability PreEmptionVulnerability     `aper:"mandatory,ext"`
 	IEExtensions            *ProtocolExtensionContainer `aper:"optional,ext"`
@@ -26,7 +26,7 @@ func (s *EUTRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err e
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
 		return fmt.Errorf("Encode PriorityLevel failed: %w", err)
 	}
 	if err = s.PreEmptionCapability.Encode(w); err != nil {

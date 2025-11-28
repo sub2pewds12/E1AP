@@ -9,7 +9,7 @@ import (
 // PDUSessionToNotifyItem is a generated SEQUENCE type.
 type PDUSessionToNotifyItem struct {
 	PDUSessionID PDUSessionID                `aper:"lb:0,ub:255,mandatory,ext"`
-	QOSFlowList  QOSFlowList                 `aper:"mandatory,ext"`
+	QOSFlowList  QOSFlowList                 `aper:"lb:1,ub:MaxnoofQoSFlows,mandatory,ext"`
 	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -34,7 +34,7 @@ func (s *PDUSessionToNotifyItem) Encode(w *aper.AperWriter) (err error) {
 		for i := 0; i < len(s.QOSFlowList.Value); i++ {
 			itemPointers[i] = &(s.QOSFlowList.Value[i])
 		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 			return fmt.Errorf("Encode QOSFlowList failed: %w", err)
 		}
 	}

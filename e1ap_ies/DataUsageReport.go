@@ -12,7 +12,7 @@ import (
 type DataUsageReport struct {
 	GNBCUCPUEE1APID     GNBCUCPUEE1APID     `aper:"lb:0,ub:4294967295,mandatory,ext"`
 	GNBCUUPUEE1APID     GNBCUUPUEE1APID     `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	DataUsageReportList DataUsageReportList `aper:"mandatory,ext"`
+	DataUsageReportList DataUsageReportList `aper:"lb:1,ub:MaxnoofDRBs,mandatory,ext"`
 }
 
 // toIes transforms the DataUsageReport struct into a slice of E1APMessageIEs.
@@ -51,7 +51,7 @@ func (msg *DataUsageReport) toIes() ([]E1APMessageIE, error) {
 	{
 
 		tmp_DataUsageReportList := Sequence[aper.IE]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
+			c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 			ext: false,
 		}
 
@@ -62,7 +62,7 @@ func (msg *DataUsageReport) toIes() ([]E1APMessageIE, error) {
 		{
 
 			tmp_DataUsageReportList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: 0},
+				c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 				ext: false,
 			}
 
@@ -210,7 +210,7 @@ func (decoder *DataUsageReportDecoder) decodeIE(r *aper.AperReader) (msgIe *E1AP
 				return item, nil
 			}
 			var decodedItems []DataUsageReportItem
-			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return nil, fmt.Errorf("Decode DataUsageReportList failed: %w", err)
 			}
 			msg.DataUsageReportList.Value = decodedItems

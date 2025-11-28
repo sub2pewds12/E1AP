@@ -13,8 +13,8 @@ type DRBToSetupModItemEUTRAN struct {
 	EUTRANQOS                        EUTRANQOS                         `aper:"mandatory,ext"`
 	S1ULUPTNLInformation             UPTNLInformation                  `aper:"mandatory,ext"`
 	DataForwardingInformationRequest *DataForwardingInformationRequest `aper:"optional,ext"`
-	CellGroupInformation             CellGroupInformation              `aper:"mandatory,ext"`
-	DLUPParameters                   *UPParameters                     `aper:"optional,ext"`
+	CellGroupInformation             CellGroupInformation              `aper:"lb:1,ub:MaxnoofCellGroups,mandatory,ext"`
+	DLUPParameters                   *UPParameters                     `aper:"lb:1,ub:MaxnoofUPParameters,optional,ext"`
 	DRBInactivityTimer               *InactivityTimer                  `aper:"lb:1,ub:7200,optional,ext"`
 	IEExtensions                     *ProtocolExtensionContainer       `aper:"optional,ext"`
 }
@@ -63,7 +63,7 @@ func (s *DRBToSetupModItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		for i := 0; i < len(s.CellGroupInformation.Value); i++ {
 			itemPointers[i] = &(s.CellGroupInformation.Value[i])
 		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
 			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
 		}
 	}
@@ -73,7 +73,7 @@ func (s *DRBToSetupModItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.DLUPParameters.Value); i++ {
 				itemPointers[i] = &(s.DLUPParameters.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
 				return fmt.Errorf("Encode DLUPParameters failed: %w", err)
 			}
 		}

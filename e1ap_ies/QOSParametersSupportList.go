@@ -8,8 +8,8 @@ import (
 
 // QOSParametersSupportList is a generated SEQUENCE type.
 type QOSParametersSupportList struct {
-	EUTRANQOSSupportList *EUTRANQOSSupportList       `aper:"optional,ext"`
-	NGRANQOSSupportList  *NGRANQOSSupportList        `aper:"optional,ext"`
+	EUTRANQOSSupportList *EUTRANQOSSupportList       `aper:"lb:1,ub:MaxnoofEUTRANQOSParameters,optional,ext"`
+	NGRANQOSSupportList  *NGRANQOSSupportList        `aper:"lb:1,ub:MaxnoofNGRANQOSParameters,optional,ext"`
 	IEExtensions         *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -37,7 +37,7 @@ func (s *QOSParametersSupportList) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.EUTRANQOSSupportList.Value); i++ {
 				itemPointers[i] = &(s.EUTRANQOSSupportList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofEUTRANQOSParameters}, false); err != nil {
 				return fmt.Errorf("Encode EUTRANQOSSupportList failed: %w", err)
 			}
 		}
@@ -48,7 +48,7 @@ func (s *QOSParametersSupportList) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.NGRANQOSSupportList.Value); i++ {
 				itemPointers[i] = &(s.NGRANQOSSupportList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofNGRANQOSParameters}, false); err != nil {
 				return fmt.Errorf("Encode NGRANQOSSupportList failed: %w", err)
 			}
 		}

@@ -9,8 +9,8 @@ import (
 // DRBRequiredToModifyItemNGRAN is a generated SEQUENCE type.
 type DRBRequiredToModifyItemNGRAN struct {
 	DRBID                                DRBID                                 `aper:"lb:1,ub:32,mandatory,ext"`
-	GNBCUUPCellGroupRelatedConfiguration *GNBCUUPCellGroupRelatedConfiguration `aper:"optional,ext"`
-	FlowToRemove                         *QOSFlowList                          `aper:"optional,ext"`
+	GNBCUUPCellGroupRelatedConfiguration *GNBCUUPCellGroupRelatedConfiguration `aper:"lb:1,ub:MaxnoofUPParameters,optional,ext"`
+	FlowToRemove                         *QOSFlowList                          `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
 	Cause                                Cause                                 `aper:"mandatory,ext"`
 	IEExtensions                         *ProtocolExtensionContainer           `aper:"optional,ext"`
 }
@@ -42,7 +42,7 @@ func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.GNBCUUPCellGroupRelatedConfiguration.Value); i++ {
 				itemPointers[i] = &(s.GNBCUUPCellGroupRelatedConfiguration.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
 				return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
 			}
 		}
@@ -53,7 +53,7 @@ func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.FlowToRemove.Value); i++ {
 				itemPointers[i] = &(s.FlowToRemove.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 				return fmt.Errorf("Encode FlowToRemove failed: %w", err)
 			}
 		}

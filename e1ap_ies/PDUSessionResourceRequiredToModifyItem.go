@@ -10,8 +10,8 @@ import (
 type PDUSessionResourceRequiredToModifyItem struct {
 	PDUSessionID                 PDUSessionID                                      `aper:"lb:0,ub:255,mandatory,ext"`
 	NGDLUPTNLInformation         *UPTNLInformation                                 `aper:"optional,ext"`
-	DRBRequiredToModifyListNGRAN *DRBRequiredToModifyListNGRAN                     `aper:"optional,ext"`
-	DRBRequiredToRemoveListNGRAN *DRBRequiredToRemoveListNGRAN                     `aper:"optional,ext"`
+	DRBRequiredToModifyListNGRAN *DRBRequiredToModifyListNGRAN                     `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
+	DRBRequiredToRemoveListNGRAN *DRBRequiredToRemoveListNGRAN                     `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
 	IEExtensions                 *PDUSessionResourceRequiredToModifyItemExtensions `aper:"optional,ext"`
 }
 
@@ -50,7 +50,7 @@ func (s *PDUSessionResourceRequiredToModifyItem) Encode(w *aper.AperWriter) (err
 			for i := 0; i < len(s.DRBRequiredToModifyListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBRequiredToModifyListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBRequiredToModifyListNGRAN failed: %w", err)
 			}
 		}
@@ -61,7 +61,7 @@ func (s *PDUSessionResourceRequiredToModifyItem) Encode(w *aper.AperWriter) (err
 			for i := 0; i < len(s.DRBRequiredToRemoveListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBRequiredToRemoveListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBRequiredToRemoveListNGRAN failed: %w", err)
 			}
 		}

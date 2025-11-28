@@ -13,8 +13,8 @@ type PDUSessionResourceSetupItem struct {
 	NGDLUPTNLInformation                        UPTNLInformation                            `aper:"mandatory,ext"`
 	PDUSessionDataForwardingInformationResponse *DataForwardingInformation                  `aper:"optional,ext"`
 	NGDLUPUnchanged                             *PDUSessionResourceSetupItemNGDLUPUnchanged `aper:"optional,ext"`
-	DRBSetupListNGRAN                           DRBSetupListNGRAN                           `aper:"mandatory,ext"`
-	DRBFailedListNGRAN                          *DRBFailedListNGRAN                         `aper:"optional,ext"`
+	DRBSetupListNGRAN                           DRBSetupListNGRAN                           `aper:"lb:1,ub:MaxnoofDRBs,mandatory,ext"`
+	DRBFailedListNGRAN                          *DRBFailedListNGRAN                         `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
 	IEExtensions                                *PDUSessionResourceSetupItemExtensions      `aper:"optional,ext"`
 }
 
@@ -69,7 +69,7 @@ func (s *PDUSessionResourceSetupItem) Encode(w *aper.AperWriter) (err error) {
 		for i := 0; i < len(s.DRBSetupListNGRAN.Value); i++ {
 			itemPointers[i] = &(s.DRBSetupListNGRAN.Value[i])
 		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 			return fmt.Errorf("Encode DRBSetupListNGRAN failed: %w", err)
 		}
 	}
@@ -79,7 +79,7 @@ func (s *PDUSessionResourceSetupItem) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.DRBFailedListNGRAN.Value); i++ {
 				itemPointers[i] = &(s.DRBFailedListNGRAN.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return fmt.Errorf("Encode DRBFailedListNGRAN failed: %w", err)
 			}
 		}

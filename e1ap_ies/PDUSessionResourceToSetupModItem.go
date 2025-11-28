@@ -16,7 +16,7 @@ type PDUSessionResourceToSetupModItem struct {
 	NGULUPTNLInformation                       UPTNLInformation                            `aper:"mandatory,ext"`
 	PDUSessionDataForwardingInformationRequest *DataForwardingInformationRequest           `aper:"optional,ext"`
 	PDUSessionInactivityTimer                  *InactivityTimer                            `aper:"lb:1,ub:7200,optional,ext"`
-	DRBToSetupModListNGRAN                     DRBToSetupModListNGRAN                      `aper:"mandatory,ext"`
+	DRBToSetupModListNGRAN                     DRBToSetupModListNGRAN                      `aper:"lb:1,ub:MaxnoofDRBs,mandatory,ext"`
 	IEExtensions                               *PDUSessionResourceToSetupModItemExtensions `aper:"optional,ext"`
 }
 
@@ -77,7 +77,7 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 		for i := 0; i < len(s.DRBToSetupModListNGRAN.Value); i++ {
 			itemPointers[i] = &(s.DRBToSetupModListNGRAN.Value[i])
 		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 			return fmt.Errorf("Encode DRBToSetupModListNGRAN failed: %w", err)
 		}
 	}

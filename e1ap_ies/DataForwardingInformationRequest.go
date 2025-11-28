@@ -9,7 +9,7 @@ import (
 // DataForwardingInformationRequest is a generated SEQUENCE type.
 type DataForwardingInformationRequest struct {
 	DataForwardingRequest         DataForwardingRequest       `aper:"mandatory,ext"`
-	QOSFlowsForwardedOnFwdTunnels *QOSFlowMappingList         `aper:"optional,ext"`
+	QOSFlowsForwardedOnFwdTunnels *QOSFlowMappingList         `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
 	IEExtensions                  *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -37,7 +37,7 @@ func (s *DataForwardingInformationRequest) Encode(w *aper.AperWriter) (err error
 			for i := 0; i < len(s.QOSFlowsForwardedOnFwdTunnels.Value); i++ {
 				itemPointers[i] = &(s.QOSFlowsForwardedOnFwdTunnels.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 				return fmt.Errorf("Encode QOSFlowsForwardedOnFwdTunnels failed: %w", err)
 			}
 		}

@@ -21,7 +21,7 @@ func (s *QOSFlowQOSParameterList) Encode(w *aper.AperWriter) (err error) {
 	}
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
-	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 		return fmt.Errorf("WriteSequenceOf for QOSFlowQOSParameterList failed: %w", err)
 	}
 	return nil
@@ -41,7 +41,7 @@ func (s *QOSFlowQOSParameterList) Decode(r *aper.AperReader) (err error) {
 	// 2. Call the generic ReadSequenceOf helper.
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []QOSFlowQOSParameterItem // <--- FIX: Removed the '*'
-	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 		return fmt.Errorf("ReadSequenceOf for QOSFlowQOSParameterList failed: %w", err)
 	}
 

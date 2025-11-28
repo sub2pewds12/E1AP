@@ -12,7 +12,7 @@ import (
 type GNBCUCPMeasurementResultsInformation struct {
 	GNBCUCPUEE1APID                      GNBCUCPUEE1APID                      `aper:"lb:0,ub:4294967295,mandatory,ext"`
 	GNBCUUPUEE1APID                      GNBCUUPUEE1APID                      `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	DRBMeasurementResultsInformationList DRBMeasurementResultsInformationList `aper:"mandatory,ext"`
+	DRBMeasurementResultsInformationList DRBMeasurementResultsInformationList `aper:"lb:1,ub:MaxnoofDRBs,mandatory,ext"`
 }
 
 // toIes transforms the GNBCUCPMeasurementResultsInformation struct into a slice of E1APMessageIEs.
@@ -51,7 +51,7 @@ func (msg *GNBCUCPMeasurementResultsInformation) toIes() ([]E1APMessageIE, error
 	{
 
 		tmp_DRBMeasurementResultsInformationList := Sequence[aper.IE]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
+			c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 			ext: false,
 		}
 
@@ -62,7 +62,7 @@ func (msg *GNBCUCPMeasurementResultsInformation) toIes() ([]E1APMessageIE, error
 		{
 
 			tmp_DRBMeasurementResultsInformationList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: 0},
+				c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 				ext: false,
 			}
 
@@ -210,7 +210,7 @@ func (decoder *GNBCUCPMeasurementResultsInformationDecoder) decodeIE(r *aper.Ape
 				return item, nil
 			}
 			var decodedItems []DRBMeasurementResultsInformationItem
-			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return nil, fmt.Errorf("Decode DRBMeasurementResultsInformationList failed: %w", err)
 			}
 			msg.DRBMeasurementResultsInformationList.Value = decodedItems

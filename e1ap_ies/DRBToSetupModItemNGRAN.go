@@ -11,8 +11,8 @@ type DRBToSetupModItemNGRAN struct {
 	DRBID                               DRBID                             `aper:"lb:1,ub:32,mandatory,ext"`
 	SDAPConfiguration                   SDAPConfiguration                 `aper:"mandatory,ext"`
 	PDCPConfiguration                   PDCPConfiguration                 `aper:"mandatory,ext"`
-	CellGroupInformation                CellGroupInformation              `aper:"mandatory,ext"`
-	FlowMappingInformation              QOSFlowQOSParameterList           `aper:"mandatory,ext"`
+	CellGroupInformation                CellGroupInformation              `aper:"lb:1,ub:MaxnoofCellGroups,mandatory,ext"`
+	FlowMappingInformation              QOSFlowQOSParameterList           `aper:"lb:1,ub:MaxnoofQoSFlows,mandatory,ext"`
 	DRBDataForwardingInformationRequest *DataForwardingInformationRequest `aper:"optional,ext"`
 	DRBInactivityTimer                  *InactivityTimer                  `aper:"lb:1,ub:7200,optional,ext"`
 	PDCPSNStatusInformation             *PDCPSNStatusInformation          `aper:"optional,ext"`
@@ -55,7 +55,7 @@ func (s *DRBToSetupModItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		for i := 0; i < len(s.CellGroupInformation.Value); i++ {
 			itemPointers[i] = &(s.CellGroupInformation.Value[i])
 		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
 			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
 		}
 	}
@@ -65,7 +65,7 @@ func (s *DRBToSetupModItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		for i := 0; i < len(s.FlowMappingInformation.Value); i++ {
 			itemPointers[i] = &(s.FlowMappingInformation.Value[i])
 		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
 			return fmt.Errorf("Encode FlowMappingInformation failed: %w", err)
 		}
 	}

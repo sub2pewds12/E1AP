@@ -9,8 +9,8 @@ import (
 // SupportedPLMNsItem is a generated SEQUENCE type.
 type SupportedPLMNsItem struct {
 	PLMNIdentity             PLMNIdentity                  `aper:"lb:3,ub:3,mandatory,ext"`
-	SliceSupportList         *SliceSupportList             `aper:"optional,ext"`
-	NRCGISupportList         *NRCGISupportList             `aper:"optional,ext"`
+	SliceSupportList         *SliceSupportList             `aper:"lb:1,ub:MaxnoofSliceItems,optional,ext"`
+	NRCGISupportList         *NRCGISupportList             `aper:"lb:1,ub:MaxnoofNRCGI,optional,ext"`
 	QOSParametersSupportList *QOSParametersSupportList     `aper:"optional,ext"`
 	IEExtensions             *SupportedPLMNsItemExtensions `aper:"optional,ext"`
 }
@@ -45,7 +45,7 @@ func (s *SupportedPLMNsItem) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.SliceSupportList.Value); i++ {
 				itemPointers[i] = &(s.SliceSupportList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofSliceItems}, false); err != nil {
 				return fmt.Errorf("Encode SliceSupportList failed: %w", err)
 			}
 		}
@@ -56,7 +56,7 @@ func (s *SupportedPLMNsItem) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.NRCGISupportList.Value); i++ {
 				itemPointers[i] = &(s.NRCGISupportList.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofNRCGI}, false); err != nil {
 				return fmt.Errorf("Encode NRCGISupportList failed: %w", err)
 			}
 		}

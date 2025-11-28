@@ -11,7 +11,7 @@ type DRBModifiedItemEUTRAN struct {
 	DRBID                   DRBID                       `aper:"lb:1,ub:32,mandatory,ext"`
 	S1DLUPTNLInformation    *UPTNLInformation           `aper:"optional,ext"`
 	PDCPSNStatusInformation *PDCPSNStatusInformation    `aper:"optional,ext"`
-	ULUPTransportParameters *UPParameters               `aper:"optional,ext"`
+	ULUPTransportParameters *UPParameters               `aper:"lb:1,ub:MaxnoofUPParameters,optional,ext"`
 	IEExtensions            *ProtocolExtensionContainer `aper:"optional,ext"`
 }
 
@@ -55,7 +55,7 @@ func (s *DRBModifiedItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 			for i := 0; i < len(s.ULUPTransportParameters.Value); i++ {
 				itemPointers[i] = &(s.ULUPTransportParameters.Value[i])
 			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
 				return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
 			}
 		}

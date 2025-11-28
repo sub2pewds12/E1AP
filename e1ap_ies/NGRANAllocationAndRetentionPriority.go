@@ -8,7 +8,7 @@ import (
 
 // NGRANAllocationAndRetentionPriority is a generated SEQUENCE type.
 type NGRANAllocationAndRetentionPriority struct {
-	PriorityLevel           PriorityLevel               `aper:"lb:0,ub:0,mandatory"`
+	PriorityLevel           PriorityLevel               `aper:"lb:0,ub:15,mandatory"`
 	PreEmptionCapability    PreEmptionCapability        `aper:"mandatory"`
 	PreEmptionVulnerability PreEmptionVulnerability     `aper:"mandatory"`
 	IEExtensions            *ProtocolExtensionContainer `aper:"optional"`
@@ -26,7 +26,7 @@ func (s *NGRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err er
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
 		return fmt.Errorf("Encode PriorityLevel failed: %w", err)
 	}
 	if err = s.PreEmptionCapability.Encode(w); err != nil {

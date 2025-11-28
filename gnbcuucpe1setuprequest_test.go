@@ -66,8 +66,23 @@ func TestE1SetupRequest(t *testing.T) {
 		t.Fatalf("Decoded message value is not *e1ap_ies.GNBCUCPE1SetupRequest. Got %T", im.Value)
 	}
 
+	// Workaround for APER decoder appending null byte to strings
+	if decodedMsg.GNBCUCPName != nil && len(decodedMsg.GNBCUCPName.Value) > 0 && decodedMsg.GNBCUCPName.Value[len(decodedMsg.GNBCUCPName.Value)-1] == 0 {
+		decodedMsg.GNBCUCPName.Value = decodedMsg.GNBCUCPName.Value[:len(decodedMsg.GNBCUCPName.Value)-1]
+	}
+
 	if !reflect.DeepEqual(originalMsg, decodedMsg) {
-		t.Errorf("Mismatch after round-trip.\nOriginal: %+v\nDecoded:  %+v", originalMsg, decodedMsg)
+		t.Errorf("Mismatch after round-trip.")
+		t.Errorf("Original TransactionID: %v", originalMsg.TransactionID)
+		t.Errorf("Decoded  TransactionID: %v", decodedMsg.TransactionID)
+		if originalMsg.GNBCUCPName != nil && decodedMsg.GNBCUCPName != nil {
+			t.Errorf("Original GNBCUCPName: %v", *originalMsg.GNBCUCPName)
+			t.Errorf("Decoded  GNBCUCPName: %v", *decodedMsg.GNBCUCPName)
+		}
+		if originalMsg.TransportLayerAddressInfo != nil && decodedMsg.TransportLayerAddressInfo != nil {
+			t.Errorf("Original TransportLayerAddressInfo: %+v", *originalMsg.TransportLayerAddressInfo)
+			t.Errorf("Decoded  TransportLayerAddressInfo: %+v", *decodedMsg.TransportLayerAddressInfo)
+		}
 	} else {
 		t.Logf("Successfully performed round-trip for GNBCUCPE1SetupRequest.")
 	}

@@ -13,7 +13,7 @@ type BearerContextReleaseComplete struct {
 	GNBCUCPUEE1APID               GNBCUCPUEE1APID                `aper:"lb:0,ub:4294967295,mandatory,ext"`
 	GNBCUUPUEE1APID               GNBCUUPUEE1APID                `aper:"lb:0,ub:4294967295,mandatory,ext"`
 	CriticalityDiagnostics        *CriticalityDiagnostics        `aper:"optional,ext"`
-	RetainabilityMeasurementsInfo *RetainabilityMeasurementsInfo `aper:"optional,ext"`
+	RetainabilityMeasurementsInfo *RetainabilityMeasurementsInfo `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
 }
 
 // toIes transforms the BearerContextReleaseComplete struct into a slice of E1APMessageIEs.
@@ -63,7 +63,7 @@ func (msg *BearerContextReleaseComplete) toIes() ([]E1APMessageIE, error) {
 	if msg.RetainabilityMeasurementsInfo != nil {
 
 		tmp_RetainabilityMeasurementsInfo := Sequence[aper.IE]{
-			c:   aper.Constraint{Lb: 0, Ub: 0},
+			c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 			ext: false,
 		}
 
@@ -74,7 +74,7 @@ func (msg *BearerContextReleaseComplete) toIes() ([]E1APMessageIE, error) {
 		{
 
 			tmp_RetainabilityMeasurementsInfo := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: 0},
+				c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 				ext: false,
 			}
 
@@ -218,7 +218,7 @@ func (decoder *BearerContextReleaseCompleteDecoder) decodeIE(r *aper.AperReader)
 				return item, nil
 			}
 			var decodedItems []DRBRemovedItem
-			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
 				return nil, fmt.Errorf("Decode RetainabilityMeasurementsInfo failed: %w", err)
 			}
 
