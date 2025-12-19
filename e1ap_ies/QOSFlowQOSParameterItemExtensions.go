@@ -19,7 +19,7 @@ func (s *QOSFlowQOSParameterItemExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.RedundantQosFlowIndicator != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDRedundantQosFlowIndicator},
+			ID:             ProtocolIEID{Value: ProtocolIEIDRedundantQosFlowIndicator},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.RedundantQosFlowIndicator,
 		})
@@ -27,22 +27,29 @@ func (s *QOSFlowQOSParameterItemExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.TSCTrafficCharacteristics != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDTSCTrafficCharacteristics},
+			ID:             ProtocolIEID{Value: ProtocolIEIDTSCTrafficCharacteristics},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.TSCTrafficCharacteristics,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -65,7 +72,7 @@ func (s *QOSFlowQOSParameterItemExtensions) Decode(r *aper.AperReader) error {
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDRedundantQosFlowIndicator:
 			s.RedundantQosFlowIndicator = new(RedundantQoSFlowIndicator)

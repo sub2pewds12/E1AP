@@ -67,7 +67,7 @@ func (decoder *PrivateMessageDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APM
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
 	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (decoder *PrivateMessageDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APM
 		return nil, err
 	}
 
-	ieId := msgIe.Id
+	ieId := msgIe.ID
 	if _, ok := decoder.list[ieId]; ok {
 		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
@@ -90,17 +90,17 @@ func (decoder *PrivateMessageDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APM
 
 	_ = ieR
 	_ = msg
-	switch msgIe.Id.Value {
+	switch msgIe.ID.Value {
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
+				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:

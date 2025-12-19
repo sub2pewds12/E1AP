@@ -23,7 +23,7 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.OldQoSFlowMapULendmarkerexpected != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDOldQoSFlowMapULendmarkerexpected},
+			ID:             ProtocolIEID{Value: ProtocolIEIDOldQoSFlowMapULendmarkerexpected},
 			Criticality:    Criticality{Value: CriticalityReject},
 			ExtensionValue: s.OldQoSFlowMapULendmarkerexpected,
 		})
@@ -31,7 +31,7 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.DRBQOS != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDDRBQOS},
+			ID:             ProtocolIEID{Value: ProtocolIEIDDRBQOS},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.DRBQOS,
 		})
@@ -39,7 +39,7 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.EarlyForwardingCOUNTReq != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTReq},
+			ID:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTReq},
 			Criticality:    Criticality{Value: CriticalityReject},
 			ExtensionValue: s.EarlyForwardingCOUNTReq,
 		})
@@ -47,7 +47,7 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.EarlyForwardingCOUNTInfo != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTInfo},
+			ID:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTInfo},
 			Criticality:    Criticality{Value: CriticalityReject},
 			ExtensionValue: s.EarlyForwardingCOUNTInfo,
 		})
@@ -55,7 +55,7 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.DAPSRequestInfo != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDDAPSRequestInfo},
+			ID:             ProtocolIEID{Value: ProtocolIEIDDAPSRequestInfo},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.DAPSRequestInfo,
 		})
@@ -63,22 +63,29 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.EarlyDataForwardingIndicator != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDEarlyDataForwardingIndicator},
+			ID:             ProtocolIEID{Value: ProtocolIEIDEarlyDataForwardingIndicator},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.EarlyDataForwardingIndicator,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -101,7 +108,7 @@ func (s *DRBToModifyItemNGRANExtensions) Decode(r *aper.AperReader) error {
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDOldQoSFlowMapULendmarkerexpected:
 			s.OldQoSFlowMapULendmarkerexpected = new(QOSFlowList)

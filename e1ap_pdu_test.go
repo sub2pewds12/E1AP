@@ -25,6 +25,7 @@ func TestE1AP_PDU_InitiatingMessage(t *testing.T) {
 	if len(encoded) == 0 {
 		t.Fatal("Encoded bytes are empty")
 	}
+	t.Logf("Encoded InitiatingMessage (len=%d): %X", len(encoded), encoded)
 
 	// 3. Decode
 	pdu, _, err := e1ap.E1apDecode(encoded)
@@ -66,6 +67,7 @@ func TestE1AP_PDU_InitiatingMessage(t *testing.T) {
 			t.Errorf("Expected GNBCUCPName 'my-gNB-CU-CP', got '%s'", string(decodedReq.GNBCUCPName.Value))
 		}
 	}
+	t.Logf("Decoded InitiatingMessage: %+v", decodedReq)
 }
 
 func TestE1AP_PDU_SuccessfulOutcome(t *testing.T) {
@@ -93,6 +95,7 @@ func TestE1AP_PDU_SuccessfulOutcome(t *testing.T) {
 	if len(encoded) == 0 {
 		t.Fatal("Encoded bytes are empty")
 	}
+	t.Logf("Encoded SuccessfulOutcome (len=%d): %X", len(encoded), encoded)
 
 	// 3. Decode
 	pdu, _, err := e1ap.E1apDecode(encoded)
@@ -124,6 +127,7 @@ func TestE1AP_PDU_SuccessfulOutcome(t *testing.T) {
 	if decodedResp.TransactionID.Value != 123 {
 		t.Errorf("Expected TransactionID 123, got %d", decodedResp.TransactionID.Value)
 	}
+	t.Logf("Decoded SuccessfulOutcome: %+v", decodedResp)
 }
 
 func TestE1AP_PDU_UnsuccessfulOutcome(t *testing.T) {
@@ -146,6 +150,7 @@ func TestE1AP_PDU_UnsuccessfulOutcome(t *testing.T) {
 	if len(encoded) == 0 {
 		t.Fatal("Encoded bytes are empty")
 	}
+	t.Logf("Encoded UnsuccessfulOutcome (len=%d): %X", len(encoded), encoded)
 
 	// 3. Decode
 	pdu, _, err := e1ap.E1apDecode(encoded)
@@ -180,4 +185,5 @@ func TestE1AP_PDU_UnsuccessfulOutcome(t *testing.T) {
 	if decodedFail.Cause.Choice != e1ap_ies.CausePresentRadioNetwork {
 		t.Errorf("Expected CausePresentRadioNetwork, got %d", decodedFail.Cause.Choice)
 	}
+	t.Logf("Decoded UnsuccessfulOutcome: %+v", decodedFail)
 }

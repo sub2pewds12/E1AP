@@ -13,16 +13,18 @@ type CellGroupInformation struct {
 
 func (s *CellGroupInformation) Encode(w *aper.AperWriter) (err error) {
 
-	// 1. Create a temporary slice of the INTERFACE type.
-	itemPointers := make([]aper.AperMarshaller, len(s.Value)) // <-- FIX: Changed from []*aper.AperMarshaller
-	for i := 0; i < len(s.Value); i++ {
-		// Assigning a pointer-to-struct to an interface value is correct.
-		itemPointers[i] = &s.Value[i]
+	tmp := Sequence[aper.IE]{
+		c:   aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups},
+		ext: false,
 	}
 
-	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
-	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-		return fmt.Errorf("writeSequenceOf for CellGroupInformation failed: %w", err)
+	for i := 0; i < len(s.Value); i++ {
+		tmp.Value = append(tmp.Value, &s.Value[i])
+	}
+
+	if err = tmp.Encode(w); err != nil {
+		err = fmt.Errorf("encode CellGroupInformation failed: %w", err)
+		return
 	}
 	return nil
 }

@@ -11,15 +11,30 @@ import (
 // E1APMessageIE is the generic container for all Information Elements in a PDU.
 // This is a foundational type for the PDU encoding/decoding pattern.
 type E1APMessageIE struct {
-	Id          ProtocolIEID
+	ID          ProtocolIEID
 	Criticality Criticality
 	Value       aper.IE
 }
 
+// ProtocolIEField is an alias for E1APMessageIE, ensuring compatibility with generated code.
+type ProtocolIEField = E1APMessageIE
+
+// ProtocolIESingleContainer is effectively a single IE field in E1AP usage.
+type ProtocolIESingleContainer = E1APMessageIE
+
+// ProtocolIEContainer is a list of IEs.
+type ProtocolIEContainer = []E1APMessageIE
+
+// ProtocolIEContainerList is a list of containers (rarely used, but aliased for safety).
+type ProtocolIEContainerList = []ProtocolIEContainer
+
+// PrivateIEContainer is a list of Private IEs (conceptually similar to extensions).
+type PrivateIEContainer = []ProtocolExtensionField
+
 // Encode implements the aper.AperMarshaller interface.
 func (ie *E1APMessageIE) Encode(w *aper.AperWriter) error {
 	// 1. Encode the ID
-	if err := w.WriteInteger(int64(ie.Id.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	if err := w.WriteInteger(int64(ie.ID.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
 		return fmt.Errorf("encode IE ID failed: %w", err)
 	}
 
@@ -231,7 +246,7 @@ func (s *ProtocolExtensionContainer) Decode(r *aper.AperReader) (err error) {
 
 // ProtocolExtensionField is the item within the container.
 type ProtocolExtensionField struct {
-	Id             ProtocolIEID
+	ID             ProtocolIEID
 	Criticality    Criticality
 	ExtensionValue aper.IE
 	ValueBytes     []byte // To store raw bytes during decoding
@@ -239,7 +254,7 @@ type ProtocolExtensionField struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *ProtocolExtensionField) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteInteger(int64(s.Id.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	if err = w.WriteInteger(int64(s.ID.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
 		return fmt.Errorf("encode ProtocolExtensionField ID failed: %w", err)
 	}
 	if err = s.Criticality.Encode(w); err != nil {
@@ -262,7 +277,7 @@ func (s *ProtocolExtensionField) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ProtocolExtensionField) Decode(r *aper.AperReader) (err error) {
-	if err = s.Id.Decode(r); err != nil {
+	if err = s.ID.Decode(r); err != nil {
 		return fmt.Errorf("decode ProtocolExtensionField ID failed: %w", err)
 	}
 	if err = s.Criticality.Decode(r); err != nil {

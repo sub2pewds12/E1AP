@@ -30,28 +30,20 @@ func (msg *BearerContextModificationRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 
 	ies = append(ies, E1APMessageIE{
-		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		ID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
 		Criticality: Criticality{Value: CriticalityReject},
-		Value: &INTEGER{
-			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-			ext:   false,
-			Value: msg.GNBCUCPUEE1APID.Value,
-		},
+		Value:       &msg.GNBCUCPUEE1APID,
 	})
 
 	ies = append(ies, E1APMessageIE{
-		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+		ID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
 		Criticality: Criticality{Value: CriticalityReject},
-		Value: &INTEGER{
-			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-			ext:   false,
-			Value: msg.GNBCUUPUEE1APID.Value,
-		},
+		Value:       &msg.GNBCUUPUEE1APID,
 	})
 	if msg.SecurityInformation != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDSecurityInformation},
+			ID:          ProtocolIEID{Value: ProtocolIEIDSecurityInformation},
 			Criticality: Criticality{Value: CriticalityReject},
 			Value:       msg.SecurityInformation,
 		})
@@ -59,79 +51,55 @@ func (msg *BearerContextModificationRequest) toIes() ([]E1APMessageIE, error) {
 	if msg.UEDLAggregateMaximumBitRate != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDUEDLAggregateMaximumBitRate},
+			ID:          ProtocolIEID{Value: ProtocolIEIDUEDLAggregateMaximumBitRate},
 			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4000000000000},
-				ext:   true,
-				Value: msg.UEDLAggregateMaximumBitRate.Value,
-			},
+			Value:       msg.UEDLAggregateMaximumBitRate,
 		})
 	}
 	if msg.UEDLMaximumIntegrityProtectedDataRate != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDUEDLMaximumIntegrityProtectedDataRate},
+			ID:          ProtocolIEID{Value: ProtocolIEIDUEDLMaximumIntegrityProtectedDataRate},
 			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 4000000000000},
-				ext:   true,
-				Value: msg.UEDLMaximumIntegrityProtectedDataRate.Value,
-			},
+			Value:       msg.UEDLMaximumIntegrityProtectedDataRate,
 		})
 	}
 	if msg.BearerContextStatusChange != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDBearerContextStatusChange},
+			ID:          ProtocolIEID{Value: ProtocolIEIDBearerContextStatusChange},
 			Criticality: Criticality{Value: CriticalityReject},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 1},
-				ext:   true,
-				Value: msg.BearerContextStatusChange.Value,
-			},
+			Value:       msg.BearerContextStatusChange,
 		})
 	}
 	if msg.NewULTNLInformationRequired != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDNewULTNLInformationRequired},
+			ID:          ProtocolIEID{Value: ProtocolIEIDNewULTNLInformationRequired},
 			Criticality: Criticality{Value: CriticalityReject},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 0},
-				ext:   true,
-				Value: msg.NewULTNLInformationRequired.Value,
-			},
+			Value:       msg.NewULTNLInformationRequired,
 		})
 	}
 	if msg.UEInactivityTimer != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDUEInactivityTimer},
+			ID:          ProtocolIEID{Value: ProtocolIEIDUEInactivityTimer},
 			Criticality: Criticality{Value: CriticalityReject},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 1, Ub: 7200},
-				ext:   true,
-				Value: msg.UEInactivityTimer.Value,
-			},
+			Value:       msg.UEInactivityTimer,
 		})
 	}
 	if msg.DataDiscardRequired != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDDataDiscardRequired},
+			ID:          ProtocolIEID{Value: ProtocolIEIDDataDiscardRequired},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 0},
-				ext:   true,
-				Value: msg.DataDiscardRequired.Value,
-			},
+			Value:       msg.DataDiscardRequired,
 		})
 	}
 	if msg.SystemBearerContextModificationRequest != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDSystemBearerContextModificationRequest},
+			ID:          ProtocolIEID{Value: ProtocolIEIDSystemBearerContextModificationRequest},
 			Criticality: Criticality{Value: CriticalityReject},
 			Value:       msg.SystemBearerContextModificationRequest,
 		})
@@ -139,37 +107,25 @@ func (msg *BearerContextModificationRequest) toIes() ([]E1APMessageIE, error) {
 	if msg.RANUEID != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDRANUEID},
+			ID:          ProtocolIEID{Value: ProtocolIEIDRANUEID},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &OCTETSTRING{
-				c:     aper.Constraint{Lb: 8, Ub: 8},
-				ext:   false,
-				Value: msg.RANUEID.Value,
-			},
+			Value:       msg.RANUEID,
 		})
 	}
 	if msg.GNBDUID != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDGNBDUID},
+			ID:          ProtocolIEID{Value: ProtocolIEIDGNBDUID},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 68719476735},
-				ext:   false,
-				Value: msg.GNBDUID.Value,
-			},
+			Value:       msg.GNBDUID,
 		})
 	}
 	if msg.ActivityNotificationLevel != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDActivityNotificationLevel},
+			ID:          ProtocolIEID{Value: ProtocolIEIDActivityNotificationLevel},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &ENUMERATED{
-				c:     aper.Constraint{Lb: 0, Ub: 2},
-				ext:   true,
-				Value: msg.ActivityNotificationLevel.Value,
-			},
+			Value:       msg.ActivityNotificationLevel,
 		})
 	}
 	return ies, nil
@@ -247,7 +203,7 @@ func (decoder *BearerContextModificationRequestDecoder) decodeIE(r *aper.AperRea
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
 	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
 	if err != nil {
 		return nil, err
@@ -259,7 +215,7 @@ func (decoder *BearerContextModificationRequestDecoder) decodeIE(r *aper.AperRea
 		return nil, err
 	}
 
-	ieId := msgIe.Id
+	ieId := msgIe.ID
 	if _, ok := decoder.list[ieId]; ok {
 		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
@@ -268,7 +224,7 @@ func (decoder *BearerContextModificationRequestDecoder) decodeIE(r *aper.AperRea
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
+	switch msgIe.ID.Value {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
@@ -386,12 +342,12 @@ func (decoder *BearerContextModificationRequestDecoder) decodeIE(r *aper.AperRea
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
+				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:

@@ -19,7 +19,7 @@ func (s *DRBModifiedItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.EarlyForwardingCOUNTInfo != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTInfo},
+			ID:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTInfo},
 			Criticality:    Criticality{Value: CriticalityReject},
 			ExtensionValue: s.EarlyForwardingCOUNTInfo,
 		})
@@ -27,22 +27,29 @@ func (s *DRBModifiedItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.OldQoSFlowMapULendmarkerexpected != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDOldQoSFlowMapULendmarkerexpected},
+			ID:             ProtocolIEID{Value: ProtocolIEIDOldQoSFlowMapULendmarkerexpected},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.OldQoSFlowMapULendmarkerexpected,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -65,7 +72,7 @@ func (s *DRBModifiedItemNGRANExtensions) Decode(r *aper.AperReader) error {
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDEarlyForwardingCOUNTInfo:
 			s.EarlyForwardingCOUNTInfo = new(EarlyForwardingCOUNTInfo)

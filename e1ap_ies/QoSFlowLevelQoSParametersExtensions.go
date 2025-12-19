@@ -21,7 +21,7 @@ func (s *QoSFlowLevelQoSParametersExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.QoSMonitoringRequest != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDQoSMonitoringRequest},
+			ID:             ProtocolIEID{Value: ProtocolIEIDQoSMonitoringRequest},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.QoSMonitoringRequest,
 		})
@@ -29,7 +29,7 @@ func (s *QoSFlowLevelQoSParametersExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.MCGOfferedGBRQoSFlowInfo != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDMCGOfferedGBRQoSFlowInfo},
+			ID:             ProtocolIEID{Value: ProtocolIEIDMCGOfferedGBRQoSFlowInfo},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.MCGOfferedGBRQoSFlowInfo,
 		})
@@ -37,7 +37,7 @@ func (s *QoSFlowLevelQoSParametersExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.QosMonitoringReportingFrequency != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDQosMonitoringReportingFrequency},
+			ID:             ProtocolIEID{Value: ProtocolIEIDQosMonitoringReportingFrequency},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.QosMonitoringReportingFrequency,
 		})
@@ -45,22 +45,29 @@ func (s *QoSFlowLevelQoSParametersExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.QoSMonitoringDisabled != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDQoSMonitoringDisabled},
+			ID:             ProtocolIEID{Value: ProtocolIEIDQoSMonitoringDisabled},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.QoSMonitoringDisabled,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -83,7 +90,7 @@ func (s *QoSFlowLevelQoSParametersExtensions) Decode(r *aper.AperReader) error {
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDQoSMonitoringRequest:
 			s.QoSMonitoringRequest = new(QosMonitoringRequest)

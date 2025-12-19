@@ -22,7 +22,7 @@ func (s *PDUSessionResourceToModifyItemExtensions) Encode(w *aper.AperWriter) er
 
 	if s.SNSSAI != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDSNSSAI},
+			ID:             ProtocolIEID{Value: ProtocolIEIDSNSSAI},
 			Criticality:    Criticality{Value: CriticalityReject},
 			ExtensionValue: s.SNSSAI,
 		})
@@ -30,7 +30,7 @@ func (s *PDUSessionResourceToModifyItemExtensions) Encode(w *aper.AperWriter) er
 
 	if s.CommonNetworkInstance != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDCommonNetworkInstance},
+			ID:             ProtocolIEID{Value: ProtocolIEIDCommonNetworkInstance},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.CommonNetworkInstance,
 		})
@@ -38,7 +38,7 @@ func (s *PDUSessionResourceToModifyItemExtensions) Encode(w *aper.AperWriter) er
 
 	if s.RedundantNGULUPTNLInformation != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDRedundantNGULUPTNLInformation},
+			ID:             ProtocolIEID{Value: ProtocolIEIDRedundantNGULUPTNLInformation},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.RedundantNGULUPTNLInformation,
 		})
@@ -46,7 +46,7 @@ func (s *PDUSessionResourceToModifyItemExtensions) Encode(w *aper.AperWriter) er
 
 	if s.RedundantCommonNetworkInstance != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDRedundantCommonNetworkInstance},
+			ID:             ProtocolIEID{Value: ProtocolIEIDRedundantCommonNetworkInstance},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.RedundantCommonNetworkInstance,
 		})
@@ -54,22 +54,29 @@ func (s *PDUSessionResourceToModifyItemExtensions) Encode(w *aper.AperWriter) er
 
 	if s.DataForwardingtoEUTRANInformationList != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDDataForwardingtoEUTRANInformationList},
+			ID:             ProtocolIEID{Value: ProtocolIEIDDataForwardingtoEUTRANInformationList},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.DataForwardingtoEUTRANInformationList,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -92,7 +99,7 @@ func (s *PDUSessionResourceToModifyItemExtensions) Decode(r *aper.AperReader) er
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDSNSSAI:
 			s.SNSSAI = new(SNSSAI)

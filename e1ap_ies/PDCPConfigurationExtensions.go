@@ -20,7 +20,7 @@ func (s *PDCPConfigurationExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.PDCPStatusReportIndication != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDPDCPStatusReportIndication},
+			ID:             ProtocolIEID{Value: ProtocolIEIDPDCPStatusReportIndication},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.PDCPStatusReportIndication,
 		})
@@ -28,7 +28,7 @@ func (s *PDCPConfigurationExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.AdditionalPDCPduplicationInformation != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDAdditionalPDCPduplicationInformation},
+			ID:             ProtocolIEID{Value: ProtocolIEIDAdditionalPDCPduplicationInformation},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.AdditionalPDCPduplicationInformation,
 		})
@@ -36,22 +36,29 @@ func (s *PDCPConfigurationExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.EHCParameters != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDEHCParameters},
+			ID:             ProtocolIEID{Value: ProtocolIEIDEHCParameters},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.EHCParameters,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -74,7 +81,7 @@ func (s *PDCPConfigurationExtensions) Decode(r *aper.AperReader) error {
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDPDCPStatusReportIndication:
 			s.PDCPStatusReportIndication = new(PDCPStatusReportIndication)

@@ -19,29 +19,16 @@ func (msg *IABUPTNLAddressUpdate) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 
 	ies = append(ies, E1APMessageIE{
-		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		ID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
 		Criticality: Criticality{Value: CriticalityReject},
-		Value: &INTEGER{
-			c:     aper.Constraint{Lb: 0, Ub: 255},
-			ext:   true,
-			Value: msg.TransactionID.Value,
-		},
+		Value:       &msg.TransactionID,
 	})
 	if msg.DLUPTNLAddressToUpdateList != nil {
 
-		tmpDLUPTNLAddressToUpdateList := Sequence[aper.IE]{
-			c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
-			ext: false,
-		}
-
-		for i := 0; i < len(msg.DLUPTNLAddressToUpdateList.Value); i++ {
-			tmpDLUPTNLAddressToUpdateList.Value = append(tmpDLUPTNLAddressToUpdateList.Value, &msg.DLUPTNLAddressToUpdateList.Value[i])
-		}
-
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDDLUPTNLAddressToUpdateList},
+			ID:          ProtocolIEID{Value: ProtocolIEIDDLUPTNLAddressToUpdateList},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       &tmpDLUPTNLAddressToUpdateList,
+			Value:       msg.DLUPTNLAddressToUpdateList,
 		})
 	}
 	return ies, nil
@@ -108,7 +95,7 @@ func (decoder *IABUPTNLAddressUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
 	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
 	if err != nil {
 		return nil, err
@@ -120,7 +107,7 @@ func (decoder *IABUPTNLAddressUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe
 		return nil, err
 	}
 
-	ieId := msgIe.Id
+	ieId := msgIe.ID
 	if _, ok := decoder.list[ieId]; ok {
 		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
@@ -129,7 +116,7 @@ func (decoder *IABUPTNLAddressUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
+	switch msgIe.ID.Value {
 	case ProtocolIEIDTransactionID:
 
 		{
@@ -162,12 +149,12 @@ func (decoder *IABUPTNLAddressUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
+				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:

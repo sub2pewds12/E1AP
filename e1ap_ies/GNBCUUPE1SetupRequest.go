@@ -25,79 +25,48 @@ func (msg *GNBCUUPE1SetupRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
 
 	ies = append(ies, E1APMessageIE{
-		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		ID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
 		Criticality: Criticality{Value: CriticalityReject},
-		Value: &INTEGER{
-			c:     aper.Constraint{Lb: 0, Ub: 255},
-			ext:   true,
-			Value: msg.TransactionID.Value,
-		},
+		Value:       &msg.TransactionID,
 	})
 
 	ies = append(ies, E1APMessageIE{
-		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
+		ID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
 		Criticality: Criticality{Value: CriticalityReject},
-		Value: &INTEGER{
-			c:     aper.Constraint{Lb: 0, Ub: 68719476735},
-			ext:   false,
-			Value: msg.GNBCUUPID.Value,
-		},
+		Value:       &msg.GNBCUUPID,
 	})
 	if msg.GNBCUUPName != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPName},
+			ID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPName},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &OCTETSTRING{
-				c:     aper.Constraint{Lb: 0, Ub: 0},
-				ext:   false,
-				Value: msg.GNBCUUPName.Value,
-			},
+			Value:       msg.GNBCUUPName,
 		})
 	}
 
 	ies = append(ies, E1APMessageIE{
-		Id:          ProtocolIEID{Value: ProtocolIEIDCNSupport},
+		ID:          ProtocolIEID{Value: ProtocolIEIDCNSupport},
 		Criticality: Criticality{Value: CriticalityReject},
-		Value: &ENUMERATED{
-			c:     aper.Constraint{Lb: 0, Ub: 2},
-			ext:   true,
-			Value: msg.CNSupport.Value,
-		},
+		Value:       &msg.CNSupport,
 	})
-	{
 
-		tmpSupportedPLMNs := Sequence[aper.IE]{
-			c:   aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs},
-			ext: false,
-		}
-
-		for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
-			tmpSupportedPLMNs.Value = append(tmpSupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
-		}
-
-		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
-			Criticality: Criticality{Value: CriticalityReject},
-			Value:       &tmpSupportedPLMNs,
-		})
-	}
+	ies = append(ies, E1APMessageIE{
+		ID:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value:       &msg.SupportedPLMNs,
+	})
 	if msg.GNBCUUPCapacity != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPCapacity},
+			ID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPCapacity},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value: &INTEGER{
-				c:     aper.Constraint{Lb: 0, Ub: 255},
-				ext:   false,
-				Value: msg.GNBCUUPCapacity.Value,
-			},
+			Value:       msg.GNBCUUPCapacity,
 		})
 	}
 	if msg.TransportLayerAddressInfo != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
+			ID:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
 			Criticality: Criticality{Value: CriticalityIgnore},
 			Value:       msg.TransportLayerAddressInfo,
 		})
@@ -105,7 +74,7 @@ func (msg *GNBCUUPE1SetupRequest) toIes() ([]E1APMessageIE, error) {
 	if msg.ExtendedGNBCUUPName != nil {
 
 		ies = append(ies, E1APMessageIE{
-			Id:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUUPName},
+			ID:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUUPName},
 			Criticality: Criticality{Value: CriticalityIgnore},
 			Value:       msg.ExtendedGNBCUUPName,
 		})
@@ -207,7 +176,7 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
+	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
 	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
 	if err != nil {
 		return nil, err
@@ -219,7 +188,7 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 		return nil, err
 	}
 
-	ieId := msgIe.Id
+	ieId := msgIe.ID
 	if _, ok := decoder.list[ieId]; ok {
 		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}
@@ -228,7 +197,7 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 	ieR := aper.NewReader(bytes.NewReader(buf))
 	msg := decoder.msg
 
-	switch msgIe.Id.Value {
+	switch msgIe.ID.Value {
 	case ProtocolIEIDTransactionID:
 
 		{
@@ -302,12 +271,12 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
+				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:

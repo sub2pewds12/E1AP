@@ -2,7 +2,6 @@ package e1ap_test
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/lvdund/ngap/aper"
@@ -34,41 +33,32 @@ func Test_E1New(t *testing.T) {
 	var b []byte
 	var err error
 	if b, err = e1ap.E1apEncode(&msg); err != nil {
-		fmt.Println("E1apEncode err:", err)
-		return
+		t.Fatalf("E1apEncode err: %v", err)
 	}
-	fmt.Printf("Encoded: %v", b)
-
-	fmt.Println("================================")
-	fmt.Println("================================")
-	fmt.Println("Decode:")
+	t.Logf("Encoded (len=%d): %X", len(b), b)
 
 	var pdu e1ap.E1AP_PDU
 	var diags []e1ap_ies.CriticalityDiagnosticsIEItem
 	if pdu, diags, err = e1ap.E1apDecode(b); err != nil {
-		fmt.Println("E1apDecode err:", err)
-		return
+		t.Fatalf("E1apDecode err: %v", err)
 	}
 	if len(diags) > 0 {
-		fmt.Println("Diagnostics:", diags)
+		t.Logf("Diagnostics: %+v", diags)
 	}
-	fmt.Println("Decoded:", pdu)
+	t.Logf("Decoded PDU: %+v", pdu)
 
 	// Type assertion to access specific fields
 	if initiatingMsg, ok := pdu.Message.(*e1ap.InitiatingMessage); ok {
 		if decode_msg, ok := initiatingMsg.Value.(*e1ap_ies.GNBCUCPE1SetupRequest); ok {
-			fmt.Println(decode_msg.TransactionID)
+			t.Logf("Decoded TransactionID: %v", decode_msg.TransactionID)
 			if decode_msg.GNBCUCPName != nil {
-				fmt.Println(decode_msg.GNBCUCPName)
+				t.Logf("Decoded GNBCUCPName: %s", string(decode_msg.GNBCUCPName.Value))
 			}
 			if decode_msg.TransportLayerAddressInfo != nil {
-				fmt.Println(decode_msg.TransportLayerAddressInfo)
+				t.Logf("Decoded TransportLayerAddressInfo: %+v", decode_msg.TransportLayerAddressInfo)
 			}
 		}
 	}
-
-	fmt.Println("================================")
-	fmt.Println("================================")
 
 	// Manual IE Encode/Decode Test (Simulating ies.NewBITSTRING)
 	// Using GNBCUCPName as it's a simple wrapper type
@@ -76,19 +66,17 @@ func Test_E1New(t *testing.T) {
 	w := aper.NewWriter(&buf)
 	ie := e1ap_ies.GNBCUCPName{Value: aper.OctetString("test-name")}
 	if err = ie.Encode(w); err != nil {
-		fmt.Println("err ie encode:", err)
-		return
+		t.Fatalf("err ie encode: %v", err)
 	}
 	w.Close()
-	fmt.Println("encode ie:", buf.Bytes())
+	t.Logf("encode ie: %X", buf.Bytes())
 
 	r := aper.NewReader(&buf)
 	decodedIE := e1ap_ies.GNBCUCPName{}
 	if err = decodedIE.Decode(r); err != nil {
-		fmt.Println("err ie decode:", err)
-		return
+		t.Fatalf("err ie decode: %v", err)
 	}
-	fmt.Println("Decode ie:", decodedIE.Value)
+	t.Logf("Decode ie: %s", string(decodedIE.Value))
 }
 
 func Test_Sequence(t *testing.T) {
@@ -111,24 +99,19 @@ func Test_Sequence(t *testing.T) {
 	var buf bytes.Buffer
 	w := aper.NewWriter(&buf)
 	if err := list.Encode(w); err != nil {
-		fmt.Println("encode sequence err:", err)
-		return
+		t.Fatalf("encode sequence err: %v", err)
 	}
 	w.Close()
-	fmt.Println("Encode:", buf.Bytes())
-
-	fmt.Println("================================")
-	fmt.Println("================================")
+	t.Logf("Encode: %X", buf.Bytes())
 
 	r := aper.NewReader(&buf)
 	decodedList := e1ap_ies.TransportUPLayerAddressesInfoToAddList{}
 
 	if err := decodedList.Decode(r); err != nil {
-		fmt.Println("decode sequence err:", err)
-		return
+		t.Fatalf("decode sequence err: %v", err)
 	}
 
-	fmt.Println("Decode", len(decodedList.Value), decodedList.Value[0].IPSecTransportLayerAddress)
+	t.Logf("Decode %d items. First Item: %+v", len(decodedList.Value), decodedList.Value[0].IPSecTransportLayerAddress)
 }
 
 func Test_Bitstring(t *testing.T) {
@@ -137,28 +120,26 @@ func Test_Bitstring(t *testing.T) {
 
 	w := aper.NewWriter(&buf)
 	b := []byte{0xa0}
-	fmt.Println(len(b))
+
 	// Using constraints similar to the mentor's example
 	if err = w.WriteBitString(
 		b,
 		1,
 		&aper.Constraint{Lb: 1, Ub: 3},
 		false); err != nil {
-		fmt.Println("err ie encode:", err)
-		return
+		t.Fatalf("err ie encode: %v", err)
 	}
 	w.Close()
-	fmt.Println("encode ie:", buf.Bytes())
+	t.Logf("encode ie: %X", buf.Bytes())
 
 	r := aper.NewReader(&buf)
 	var content []byte
 	var nbits uint
 	content, nbits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 3}, false)
 	if err != nil {
-		fmt.Println("err ie decode:", err)
-		return
+		t.Fatalf("err ie decode: %v", err)
 	}
-	fmt.Println("Decode ie:", content, nbits)
+	t.Logf("Decode ie: %X (nbits=%d)", content, nbits)
 }
 
 func Test_BITSTRING_Struct(t *testing.T) {
@@ -176,19 +157,14 @@ func Test_BITSTRING_Struct(t *testing.T) {
 
 	w := aper.NewWriter(&buf)
 	if err = ie.Encode(w); err != nil {
-		fmt.Println("err ie encode:", err)
-		return
+		t.Fatalf("err ie encode: %v", err)
 	}
 	w.Close()
-
-	fmt.Println("================================")
-	fmt.Println("================================")
 
 	r := aper.NewReader(&buf)
 	newie := e1ap_ies.TransportLayerAddress{}
 	if err = newie.Decode(r); err != nil {
-		fmt.Println("err ie decode:", err)
-		return
+		t.Fatalf("err ie decode: %v", err)
 	}
-	fmt.Println(newie)
+	t.Logf("Decoded Struct: %+v", newie)
 }

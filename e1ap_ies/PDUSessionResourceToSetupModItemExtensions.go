@@ -21,7 +21,7 @@ func (s *PDUSessionResourceToSetupModItemExtensions) Encode(w *aper.AperWriter) 
 
 	if s.NetworkInstance != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDNetworkInstance},
+			ID:             ProtocolIEID{Value: ProtocolIEIDNetworkInstance},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.NetworkInstance,
 		})
@@ -29,7 +29,7 @@ func (s *PDUSessionResourceToSetupModItemExtensions) Encode(w *aper.AperWriter) 
 
 	if s.CommonNetworkInstance != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDCommonNetworkInstance},
+			ID:             ProtocolIEID{Value: ProtocolIEIDCommonNetworkInstance},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.CommonNetworkInstance,
 		})
@@ -37,7 +37,7 @@ func (s *PDUSessionResourceToSetupModItemExtensions) Encode(w *aper.AperWriter) 
 
 	if s.RedundantNGULUPTNLInformation != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDRedundantNGULUPTNLInformation},
+			ID:             ProtocolIEID{Value: ProtocolIEIDRedundantNGULUPTNLInformation},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.RedundantNGULUPTNLInformation,
 		})
@@ -45,22 +45,29 @@ func (s *PDUSessionResourceToSetupModItemExtensions) Encode(w *aper.AperWriter) 
 
 	if s.RedundantCommonNetworkInstance != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDRedundantCommonNetworkInstance},
+			ID:             ProtocolIEID{Value: ProtocolIEIDRedundantCommonNetworkInstance},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.RedundantCommonNetworkInstance,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -83,7 +90,7 @@ func (s *PDUSessionResourceToSetupModItemExtensions) Decode(r *aper.AperReader) 
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDNetworkInstance:
 			s.NetworkInstance = new(NetworkInstance)

@@ -85,5 +85,6 @@ func TestE1SetupRequest(t *testing.T) {
 		}
 	} else {
 		t.Logf("Successfully performed round-trip for GNBCUCPE1SetupRequest.")
+		t.Logf("Decoded Message Structure: %+v", decodedMsg)
 	}
 }

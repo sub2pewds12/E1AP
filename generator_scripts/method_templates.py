@@ -72,7 +72,16 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
         value_code = ""
         pre_append_code = ""
         
-        if isinstance(asn1_def, IntegerDefinition) and not isinstance(asn1_def, StringDefinition):
+        is_named = ie.type not in ["INTEGER", "OCTET STRING", "BIT STRING", "ENUMERATED", "OBJECT IDENTIFIER", "PrintableString", "VisibleString"]
+        is_simple = isinstance(asn1_def, (IntegerDefinition, EnumDefinition, StringDefinition)) or \
+                    (isinstance(asn1_def, BuiltinDefinition) and "STRING" in asn1_def.name.upper())
+
+        if is_named and is_simple:
+            value_code = f"msg.{field_name}"
+            if not is_optional:
+                value_code = f"&{value_code}"
+        
+        elif isinstance(asn1_def, IntegerDefinition) and not isinstance(asn1_def, StringDefinition):
             
             value_code = f"""&INTEGER{{
                 c:     aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}},
@@ -110,7 +119,7 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
                     Value: msg.{field_name}.Value,
                 }}"""
 
-        elif isinstance(asn1_def, ListDefinition):
+        elif isinstance(asn1_def, ListDefinition) and False: # Force use of generated Encode method
             tmp_var_name = f"tmp{field_name}"
             min_val_str = asn1_def.min_val if asn1_def.min_val is not None else "0"
             if not min_val_str.isdigit(): min_val_str = pascal_case_converter(min_val_str)
@@ -195,7 +204,7 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
         
         full_ie_append_code = f"""
             ies = append(ies, E1APMessageIE{{
-			    Id:          ProtocolIEID{{Value: {ie_id_const}}},
+			    ID:          ProtocolIEID{{Value: {ie_id_const}}},
 			    Criticality: Criticality{{Value: {crit_const}}},
 			    Value:       {value_code},
 		    }})"""
@@ -356,7 +365,7 @@ def render_extension_methods(go_name: str, extension_set: list, parser: ASN1Pars
         encode_checks.append(f"""
     if s.{field_name} != nil {{
         extensions = append(extensions, &ProtocolExtensionField{{
-            Id:          ProtocolIEID{{Value: {id_const}}},
+            ID:          ProtocolIEID{{Value: {id_const}}},
             Criticality: Criticality{{Value: {crit_const}}},
             ExtensionValue: s.{field_name},
         }})
@@ -371,18 +380,25 @@ func (s *{go_name}) Encode(w *aper.AperWriter) error {{
     {encode_body}
 
     if len(extensions) > 0 {{
-        itemPointers := make([]aper.AperMarshaller, len(extensions))
-        for i := 0; i < len(extensions); i++ {{
-            itemPointers[i] = extensions[i]
-        }}
-        if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
-            return fmt.Errorf("encode extension container failed: %w", err)
-        }}
-    }} else {{
-         if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
-            return fmt.Errorf("encode empty extension container failed: %w", err)
-        }}
-    }}
+		tmp := Sequence[*ProtocolExtensionField]{{
+			c:   aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}},
+			ext: false,
+		}}
+		for i := 0; i < len(extensions); i++ {{
+			tmp.Value = append(tmp.Value, extensions[i])
+		}}
+		if err := tmp.Encode(w); err != nil {{
+			return fmt.Errorf("encode extension container failed: %w", err)
+		}}
+	}} else {{
+		tmp := Sequence[*ProtocolExtensionField]{{
+			c:   aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}},
+			ext: false,
+		}}
+		if err := tmp.Encode(w); err != nil {{
+			return fmt.Errorf("encode empty extension container failed: %w", err)
+		}}
+	}}
     return nil
 }}"""
 
@@ -419,7 +435,7 @@ func (s *{go_name}) Decode(r *aper.AperReader) error {{
 	}}
 
 	for _, ext := range extensions {{
-		switch ext.Id.Value {{
+		switch ext.ID.Value {{
 {decode_switch}
 		default:
 			// Unknown extension, ignore
@@ -453,17 +469,19 @@ def render_list_methods(
     is_extensible = str(getattr(item, "is_extensible", False)).lower()
 
     encode_body = f"""
-    // 1. Create a temporary slice of the INTERFACE type.
-    itemPointers := make([]aper.AperMarshaller, len(s.Value)) // <-- FIX: Changed from []*aper.AperMarshaller
-    for i := 0; i < len(s.Value); i++ {{
-        // Assigning a pointer-to-struct to an interface value is correct.
-        itemPointers[i] = &s.Value[i] 
-    }}
+	tmp := Sequence[aper.IE]{{
+		c:   aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}},
+		ext: {is_extensible},
+	}}
 
-    // 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
-    if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {is_extensible}); err != nil {{
-        return fmt.Errorf("writeSequenceOf for {go_name} failed: %w", err)
-    }}"""
+	for i := 0; i < len(s.Value); i++ {{
+		tmp.Value = append(tmp.Value, &s.Value[i])
+	}}
+
+	if err = tmp.Encode(w); err != nil {{
+		err = fmt.Errorf("encode {go_name} failed: %w", err)
+		return
+	}}"""
 
     decode_body = f"""
     // 1. Create a decoder function for the item type.
@@ -1143,12 +1161,12 @@ def _generate_decoder_helper(go_name: str, item: SequenceDefinition, parser: ASN
         switch msgIe.Criticality.Value {{
         case CriticalityReject:
             // If an unknown IE is critical, the PDU cannot be processed.
-            return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
+            return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
         case CriticalityNotify:
             // Per 3GPP TS 38.463 Section 10.3, report and proceed.
             decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{{
                 IECriticality: msgIe.Criticality,
-                IEID:          msgIe.Id,
+                IEID:          msgIe.ID,
                 TypeOfError:   TypeOfError{{Value: TypeOfErrorNotUnderstood}},
             }})
         case CriticalityIgnore:
@@ -1174,7 +1192,7 @@ func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageI
 		return nil, err
 	}}
 	msgIe = new(E1APMessageIE)
-	msgIe.Id = ProtocolIEID{{Value: aper.Integer(id)}}
+	msgIe.ID = ProtocolIEID{{Value: aper.Integer(id)}}
 	c, err := r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: 2}}, false)
 	if err != nil {{
 		return nil, err
@@ -1186,7 +1204,7 @@ func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageI
 		return nil, err
 	}}
 
-	ieId := msgIe.Id
+	ieId := msgIe.ID
 	if _, ok := decoder.list[ieId]; ok {{
 		return nil, fmt.Errorf("duplicated protocol IE ID %d", ieId.Value)
 	}}
@@ -1195,7 +1213,7 @@ func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageI
 	ieR := aper.NewReader(bytes.NewReader(buf))
     msg := decoder.msg
     {unused_var_logic}
-    switch msgIe.Id.Value {{
+    switch msgIe.ID.Value {{
 	{switch_body}
 	}}
 	return msgIe, nil // Return the populated msgIe and a nil error

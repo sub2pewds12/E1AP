@@ -20,7 +20,7 @@ func (s *Dynamic5QIDescriptorExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.ExtendedPacketDelayBudget != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDExtendedPacketDelayBudget},
+			ID:             ProtocolIEID{Value: ProtocolIEIDExtendedPacketDelayBudget},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.ExtendedPacketDelayBudget,
 		})
@@ -28,7 +28,7 @@ func (s *Dynamic5QIDescriptorExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.CNPacketDelayBudgetDownlink != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDCNPacketDelayBudgetDownlink},
+			ID:             ProtocolIEID{Value: ProtocolIEIDCNPacketDelayBudgetDownlink},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.CNPacketDelayBudgetDownlink,
 		})
@@ -36,22 +36,29 @@ func (s *Dynamic5QIDescriptorExtensions) Encode(w *aper.AperWriter) error {
 
 	if s.CNPacketDelayBudgetUplink != nil {
 		extensions = append(extensions, &ProtocolExtensionField{
-			Id:             ProtocolIEID{Value: ProtocolIEIDCNPacketDelayBudgetUplink},
+			ID:             ProtocolIEID{Value: ProtocolIEIDCNPacketDelayBudgetUplink},
 			Criticality:    Criticality{Value: CriticalityIgnore},
 			ExtensionValue: s.CNPacketDelayBudgetUplink,
 		})
 	}
 
 	if len(extensions) > 0 {
-		itemPointers := make([]aper.AperMarshaller, len(extensions))
-		for i := 0; i < len(extensions); i++ {
-			itemPointers[i] = extensions[i]
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
 		}
-		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		for i := 0; i < len(extensions); i++ {
+			tmp.Value = append(tmp.Value, extensions[i])
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
-		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		tmp := Sequence[*ProtocolExtensionField]{
+			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
+			ext: false,
+		}
+		if err := tmp.Encode(w); err != nil {
 			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
@@ -74,7 +81,7 @@ func (s *Dynamic5QIDescriptorExtensions) Decode(r *aper.AperReader) error {
 	}
 
 	for _, ext := range extensions {
-		switch ext.Id.Value {
+		switch ext.ID.Value {
 
 		case ProtocolIEIDExtendedPacketDelayBudget:
 			s.ExtendedPacketDelayBudget = new(ExtendedPacketDelayBudget)

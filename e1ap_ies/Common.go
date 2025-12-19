@@ -32,12 +32,17 @@ func encodeMessage(w io.Writer, present uint8, procedureCode ProcedureCode, crit
 	var buf bytes.Buffer
 	ieWriter := aper.NewWriter(&buf)
 
-	var ieMarshallers []aper.AperMarshaller
-	for i := range ies {
-		ieMarshallers = append(ieMarshallers, &ies[i])
+	// Use Sequence[*E1APMessageIE] helper to marshaling IEs
+	tmp := Sequence[*E1APMessageIE]{
+		c:   aper.Constraint{Lb: 0, Ub: 65535},
+		ext: false,
 	}
 
-	if err = aper.WriteSequenceOf(ieMarshallers, ieWriter, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	for i := range ies {
+		tmp.Value = append(tmp.Value, &ies[i])
+	}
+
+	if err = tmp.Encode(ieWriter); err != nil {
 		return fmt.Errorf("encode IEs into buffer failed: %w", err)
 	}
 	if err = ieWriter.Close(); err != nil {

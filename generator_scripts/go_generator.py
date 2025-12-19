@@ -218,6 +218,19 @@ class GoCodeGenerator:
 
         for item in self.definitions.values():
             if not isinstance(item, dict):
+                if item.name in [
+                    "ProtocolIEField", "ProtocolIE-Field",
+                    "ProtocolExtensionField", "ProtocolExtension-Field",
+                    "ProtocolIEContainer", "ProtocolIE-Container",
+                    "ProtocolIEContainerList", "ProtocolIE-ContainerList",
+                    "ProtocolIESingleContainer", "ProtocolIE-SingleContainer",
+                    "PrivateIEField", "PrivateIE-Field",
+                    "PrivateIEContainer", "PrivateIE-Container",
+                    "ProtocolExtensionContainer", "ProtocolExtension-Container",
+                ]:
+                    print(f"DEBUG: Skipping generation of {item.name}")
+                    continue
+
                 classification = self._classify_definition(item)
                 if classification != "unknown":
                     classified_defs[classification].append(item)
