@@ -25,11 +25,16 @@ func (s *M4Configuration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.M4period.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.M4period.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
 		return fmt.Errorf("Encode M4period failed: %w", err)
 	}
-	if err = s.M4LinksToLog.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.M4LinksToLog.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
 		return fmt.Errorf("Encode M4LinksToLog failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

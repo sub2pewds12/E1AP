@@ -18,31 +18,23 @@ type ResetAcknowledge struct {
 // toIes transforms the ResetAcknowledge struct into a slice of E1APMessageIEs.
 func (msg *ResetAcknowledge) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 	if msg.CriticalityDiagnostics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.CriticalityDiagnostics,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.CriticalityDiagnostics,
+		})
 	}
 	var err error
 	return ies, err

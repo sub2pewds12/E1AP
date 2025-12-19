@@ -556,6 +556,7 @@ class ASN1Parser:
         if container_match and container_match.group(1) in [
             "ProtocolIE-SingleContainer",
             "ProtocolIE-Container",
+            "ProtocolExtensionContainer",
         ]:
 
             item.of_type = container_match.group(1)

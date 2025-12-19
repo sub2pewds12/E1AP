@@ -58,21 +58,21 @@ func (s *EarlyForwardingCOUNTInfo) Decode(r *aper.AperReader) (err error) {
 	if choice, err = r.ReadChoice(2, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.FirstDLCount = new(FirstDLCount)
 		if err = s.FirstDLCount.Decode(r); err != nil {
 			return fmt.Errorf("Decode FirstDLCount failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.DLDiscardingCount = new(DLDiscarding)
 		if err = s.DLDiscardingCount.Decode(r); err != nil {
 			return fmt.Errorf("Decode DLDiscardingCount failed: %w", err)
 		}
-	case 2:
+	case 3:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
 			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)

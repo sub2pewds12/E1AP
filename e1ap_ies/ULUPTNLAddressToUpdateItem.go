@@ -31,6 +31,11 @@ func (s *ULUPTNLAddressToUpdateItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(s.NewTNLAdress.Value.Bytes, uint(s.NewTNLAdress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode NewTNLAdress failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

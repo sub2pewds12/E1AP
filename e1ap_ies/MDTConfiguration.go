@@ -25,11 +25,16 @@ func (s *MDTConfiguration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.MdtActivation.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.MdtActivation.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 		return fmt.Errorf("Encode MdtActivation failed: %w", err)
 	}
 	if err = s.MDTMode.Encode(w); err != nil {
 		return fmt.Errorf("Encode MDTMode failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

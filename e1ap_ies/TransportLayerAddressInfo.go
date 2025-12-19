@@ -32,25 +32,18 @@ func (s *TransportLayerAddressInfo) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.TransportUPLayerAddressesInfoToAddList != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.TransportUPLayerAddressesInfoToAddList.Value))
-			for i := 0; i < len(s.TransportUPLayerAddressesInfoToAddList.Value); i++ {
-				itemPointers[i] = &(s.TransportUPLayerAddressesInfoToAddList.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofTLAs}, false); err != nil {
-				return fmt.Errorf("Encode TransportUPLayerAddressesInfoToAddList failed: %w", err)
-			}
+		if err = s.TransportUPLayerAddressesInfoToAddList.Encode(w); err != nil {
+			return fmt.Errorf("Encode TransportUPLayerAddressesInfoToAddList failed: %w", err)
 		}
 	}
 	if s.TransportUPLayerAddressesInfoToRemoveList != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.TransportUPLayerAddressesInfoToRemoveList.Value))
-			for i := 0; i < len(s.TransportUPLayerAddressesInfoToRemoveList.Value); i++ {
-				itemPointers[i] = &(s.TransportUPLayerAddressesInfoToRemoveList.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofTLAs}, false); err != nil {
-				return fmt.Errorf("Encode TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
-			}
+		if err = s.TransportUPLayerAddressesInfoToRemoveList.Encode(w); err != nil {
+			return fmt.Errorf("Encode TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

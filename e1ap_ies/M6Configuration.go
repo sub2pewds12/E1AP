@@ -25,11 +25,16 @@ func (s *M6Configuration) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.M6reportInterval.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.M6reportInterval.Value), aper.Constraint{Lb: 0, Ub: 13}, true); err != nil {
 		return fmt.Errorf("Encode M6reportInterval failed: %w", err)
 	}
-	if err = s.M6LinksToLog.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.M6LinksToLog.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
 		return fmt.Errorf("Encode M6LinksToLog failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

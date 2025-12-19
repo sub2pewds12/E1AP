@@ -40,6 +40,11 @@ func (s *EUTRANQOS) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode GbrQosInformation failed: %w", err)
 		}
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

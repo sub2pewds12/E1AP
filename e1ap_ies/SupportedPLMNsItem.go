@@ -40,30 +40,23 @@ func (s *SupportedPLMNsItem) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode PLMNIdentity failed: %w", err)
 	}
 	if s.SliceSupportList != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.SliceSupportList.Value))
-			for i := 0; i < len(s.SliceSupportList.Value); i++ {
-				itemPointers[i] = &(s.SliceSupportList.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofSliceItems}, false); err != nil {
-				return fmt.Errorf("Encode SliceSupportList failed: %w", err)
-			}
+		if err = s.SliceSupportList.Encode(w); err != nil {
+			return fmt.Errorf("Encode SliceSupportList failed: %w", err)
 		}
 	}
 	if s.NRCGISupportList != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.NRCGISupportList.Value))
-			for i := 0; i < len(s.NRCGISupportList.Value); i++ {
-				itemPointers[i] = &(s.NRCGISupportList.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofNRCGI}, false); err != nil {
-				return fmt.Errorf("Encode NRCGISupportList failed: %w", err)
-			}
+		if err = s.NRCGISupportList.Encode(w); err != nil {
+			return fmt.Errorf("Encode NRCGISupportList failed: %w", err)
 		}
 	}
 	if s.QOSParametersSupportList != nil {
 		if err = s.QOSParametersSupportList.Encode(w); err != nil {
 			return fmt.Errorf("Encode QOSParametersSupportList failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

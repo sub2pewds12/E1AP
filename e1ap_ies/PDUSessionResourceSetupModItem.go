@@ -54,25 +54,17 @@ func (s *PDUSessionResourceSetupModItem) Encode(w *aper.AperWriter) (err error) 
 			return fmt.Errorf("Encode PDUSessionDataForwardingInformationResponse failed: %w", err)
 		}
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.DRBSetupModListNGRAN.Value))
-		for i := 0; i < len(s.DRBSetupModListNGRAN.Value); i++ {
-			itemPointers[i] = &(s.DRBSetupModListNGRAN.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-			return fmt.Errorf("Encode DRBSetupModListNGRAN failed: %w", err)
-		}
+	if err = s.DRBSetupModListNGRAN.Encode(w); err != nil {
+		return fmt.Errorf("Encode DRBSetupModListNGRAN failed: %w", err)
 	}
 	if s.DRBFailedModListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBFailedModListNGRAN.Value))
-			for i := 0; i < len(s.DRBFailedModListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBFailedModListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBFailedModListNGRAN failed: %w", err)
-			}
+		if err = s.DRBFailedModListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBFailedModListNGRAN failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

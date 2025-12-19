@@ -27,6 +27,11 @@ func (s *GNBCUCPTNLASetupItem) Encode(w *aper.AperWriter) (err error) {
 	if err = s.TNLAssociationTransportLayerAddress.Encode(w); err != nil {
 		return fmt.Errorf("Encode TNLAssociationTransportLayerAddress failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

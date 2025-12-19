@@ -49,25 +49,11 @@ func (s *DRBToSetupItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = s.PDCPConfiguration.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDCPConfiguration failed: %w", err)
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.CellGroupInformation.Value))
-		for i := 0; i < len(s.CellGroupInformation.Value); i++ {
-			itemPointers[i] = &(s.CellGroupInformation.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
-		}
+	if err = s.CellGroupInformation.Encode(w); err != nil {
+		return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.QOSFlowInformationToBeSetup.Value))
-		for i := 0; i < len(s.QOSFlowInformationToBeSetup.Value); i++ {
-			itemPointers[i] = &(s.QOSFlowInformationToBeSetup.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-			return fmt.Errorf("Encode QOSFlowInformationToBeSetup failed: %w", err)
-		}
+	if err = s.QOSFlowInformationToBeSetup.Encode(w); err != nil {
+		return fmt.Errorf("Encode QOSFlowInformationToBeSetup failed: %w", err)
 	}
 	if s.DRBDataForwardingInformationRequest != nil {
 		if err = s.DRBDataForwardingInformationRequest.Encode(w); err != nil {
@@ -75,13 +61,18 @@ func (s *DRBToSetupItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DRBInactivityTimer != nil {
-		if err = w.WriteInteger(int64(s.DRBInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.DRBInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode DRBInactivityTimer failed: %w", err)
 		}
 	}
 	if s.PDCPSNStatusInformation != nil {
 		if err = s.PDCPSNStatusInformation.Encode(w); err != nil {
 			return fmt.Errorf("Encode PDCPSNStatusInformation failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

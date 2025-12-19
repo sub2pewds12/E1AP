@@ -470,7 +470,7 @@ class GoCodeGenerator:
                             )
                             
                             
-                            ext_method_code, ext_imports = render_extension_methods(ext_go_name)
+                            ext_method_code, ext_imports = render_extension_methods(ext_go_name, extension_set, self.parser)
                             
                             
                             ext_file_content = "package e1ap_ies\n\n"

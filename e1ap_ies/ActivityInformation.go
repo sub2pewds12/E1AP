@@ -64,26 +64,26 @@ func (s *ActivityInformation) Decode(r *aper.AperReader) (err error) {
 	if choice, err = r.ReadChoice(3, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.DRBActivityList = new(DRBActivityList)
 		if err = s.DRBActivityList.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBActivityList failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.PDUSessionResourceActivityList = new(PDUSessionResourceActivityList)
 		if err = s.PDUSessionResourceActivityList.Decode(r); err != nil {
 			return fmt.Errorf("Decode PDUSessionResourceActivityList failed: %w", err)
 		}
-	case 2:
+	case 3:
 		s.UEActivity = new(UEActivity)
 		if err = s.UEActivity.Decode(r); err != nil {
 			return fmt.Errorf("Decode UEActivity failed: %w", err)
 		}
-	case 3:
+	case 4:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
 			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)

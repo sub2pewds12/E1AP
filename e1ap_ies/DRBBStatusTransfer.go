@@ -29,12 +29,17 @@ func (s *DRBBStatusTransfer) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.ReceiveStatusofPDCPSDU != nil {
-		if err = w.WriteBitString(s.ReceiveStatusofPDCPSDU.Value.Bytes, uint(s.ReceiveStatusofPDCPSDU.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 131072}, false); err != nil {
+		if err = w.WriteBitString((*s.ReceiveStatusofPDCPSDU).Value.Bytes, uint((*s.ReceiveStatusofPDCPSDU).Value.NumBits), &aper.Constraint{Lb: 1, Ub: 131072}, false); err != nil {
 			return fmt.Errorf("Encode ReceiveStatusofPDCPSDU failed: %w", err)
 		}
 	}
 	if err = s.CountValue.Encode(w); err != nil {
 		return fmt.Errorf("Encode CountValue failed: %w", err)
+	}
+	if s.IEExtension != nil {
+		if err = s.IEExtension.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtension failed: %w", err)
+		}
 	}
 	return nil
 }

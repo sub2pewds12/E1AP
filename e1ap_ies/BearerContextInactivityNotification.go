@@ -18,47 +18,32 @@ type BearerContextInactivityNotification struct {
 // toIes transforms the BearerContextInactivityNotification struct into a slice of E1APMessageIEs.
 func (msg *BearerContextInactivityNotification) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUCPUEE1APID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUCPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUUPUEE1APID.Value,
+		},
+	})
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUUPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDActivityInformation},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value:       &msg.ActivityInformation,
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDActivityInformation},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value:       &msg.ActivityInformation,
+	})
 	var err error
 	return ies, err
 }

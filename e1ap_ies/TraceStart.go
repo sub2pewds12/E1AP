@@ -18,47 +18,32 @@ type TraceStart struct {
 // toIes transforms the TraceStart struct into a slice of E1APMessageIEs.
 func (msg *TraceStart) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUCPUEE1APID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUCPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUUPUEE1APID.Value,
+		},
+	})
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUUPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTraceActivation},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &msg.TraceActivation,
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTraceActivation},
+		Criticality: Criticality{Value: CriticalityIgnore},
+		Value:       &msg.TraceActivation,
+	})
 	var err error
 	return ies, err
 }

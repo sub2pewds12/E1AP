@@ -32,25 +32,18 @@ func (s *MRDCUsageInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.DataUsagePerPDUSessionReport != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DataUsagePerPDUSessionReport.Value))
-			for i := 0; i < len(s.DataUsagePerPDUSessionReport.Value); i++ {
-				itemPointers[i] = &(s.DataUsagePerPDUSessionReport.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: Maxnooftimeperiods}, true); err != nil {
-				return fmt.Errorf("Encode DataUsagePerPDUSessionReport failed: %w", err)
-			}
+		if err = s.DataUsagePerPDUSessionReport.Encode(w); err != nil {
+			return fmt.Errorf("Encode DataUsagePerPDUSessionReport failed: %w", err)
 		}
 	}
 	if s.DataUsagePerQOSFlowList != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DataUsagePerQOSFlowList.Value))
-			for i := 0; i < len(s.DataUsagePerQOSFlowList.Value); i++ {
-				itemPointers[i] = &(s.DataUsagePerQOSFlowList.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-				return fmt.Errorf("Encode DataUsagePerQOSFlowList failed: %w", err)
-			}
+		if err = s.DataUsagePerQOSFlowList.Encode(w); err != nil {
+			return fmt.Errorf("Encode DataUsagePerQOSFlowList failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

@@ -32,14 +32,13 @@ func (s *PDUSessionResourceConfirmModifiedItem) Encode(w *aper.AperWriter) (err 
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
 	if s.DRBConfirmModifiedListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBConfirmModifiedListNGRAN.Value))
-			for i := 0; i < len(s.DRBConfirmModifiedListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBConfirmModifiedListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBConfirmModifiedListNGRAN failed: %w", err)
-			}
+		if err = s.DRBConfirmModifiedListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBConfirmModifiedListNGRAN failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

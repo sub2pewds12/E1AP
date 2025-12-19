@@ -52,7 +52,7 @@ func (s *PDUSessionResourceToSetupItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
-	if err = s.PDUSessionType.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.PDUSessionType.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
 		return fmt.Errorf("Encode PDUSessionType failed: %w", err)
 	}
 	if err = s.SNSSAI.Encode(w); err != nil {
@@ -62,7 +62,7 @@ func (s *PDUSessionResourceToSetupItem) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode SecurityIndication failed: %w", err)
 	}
 	if s.PDUSessionResourceDLAMBR != nil {
-		if err = w.WriteInteger(int64(s.PDUSessionResourceDLAMBR.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PDUSessionResourceDLAMBR).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionResourceDLAMBR failed: %w", err)
 		}
 	}
@@ -75,7 +75,7 @@ func (s *PDUSessionResourceToSetupItem) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.PDUSessionInactivityTimer != nil {
-		if err = w.WriteInteger(int64(s.PDUSessionInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PDUSessionInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
@@ -85,18 +85,16 @@ func (s *PDUSessionResourceToSetupItem) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.NetworkInstance != nil {
-		if err = w.WriteInteger(int64(s.NetworkInstance.Value), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.NetworkInstance).Value), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
 			return fmt.Errorf("Encode NetworkInstance failed: %w", err)
 		}
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.DRBToSetupListNGRAN.Value))
-		for i := 0; i < len(s.DRBToSetupListNGRAN.Value); i++ {
-			itemPointers[i] = &(s.DRBToSetupListNGRAN.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-			return fmt.Errorf("Encode DRBToSetupListNGRAN failed: %w", err)
+	if err = s.DRBToSetupListNGRAN.Encode(w); err != nil {
+		return fmt.Errorf("Encode DRBToSetupListNGRAN failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

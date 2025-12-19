@@ -32,8 +32,13 @@ func (s *DRBMeasurementResultsInformationItem) Encode(w *aper.AperWriter) (err e
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if s.ULD1Result != nil {
-		if err = w.WriteInteger(int64(s.ULD1Result.Value), &aper.Constraint{Lb: 0, Ub: 10000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.ULD1Result).Value), &aper.Constraint{Lb: 0, Ub: 10000}, true); err != nil {
 			return fmt.Errorf("Encode ULD1Result failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

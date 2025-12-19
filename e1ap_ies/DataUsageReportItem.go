@@ -29,17 +29,15 @@ func (s *DataUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
-	if err = s.RATType.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.RATType.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 		return fmt.Errorf("Encode RATType failed: %w", err)
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.DRBUsageReportList.Value))
-		for i := 0; i < len(s.DRBUsageReportList.Value); i++ {
-			itemPointers[i] = &(s.DRBUsageReportList.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: Maxnooftimeperiods}, false); err != nil {
-			return fmt.Errorf("Encode DRBUsageReportList failed: %w", err)
+	if err = s.DRBUsageReportList.Encode(w); err != nil {
+		return fmt.Errorf("Encode DRBUsageReportList failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

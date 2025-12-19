@@ -195,24 +195,26 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
 
         
         full_ie_append_code = f"""
-        {{
-            {pre_append_code}
             ies = append(ies, E1APMessageIE{{
 			    Id:          ProtocolIEID{{Value: {ie_id_const}}},
 			    Criticality: Criticality{{Value: {crit_const}}},
 			    Value:       {value_code},
-		    }})
-        }}"""
+		    }})"""
         
         
         full_logic_block = f"{pre_append_code}\n{full_ie_append_code}"
 
         
-        final_block = f"{{\n{full_logic_block}\n}}" 
         if is_optional:
             
             check = f"msg.{field_name} != nil"
             final_block = f"if {check} {{\n{full_logic_block}\n}}"
+        elif pre_append_code.strip():
+            # If there is pre-logic (like loops), keep the braces for scope safety (e.g. 'i' variable)
+            final_block = f"{{\n{full_logic_block}\n}}" 
+        else:
+            # Simple mandatory IE, no braces needed
+            final_block = full_logic_block
             
         body_parts.append(final_block)
 
@@ -337,28 +339,101 @@ func (e *{go_name}) Decode(r *aper.AperReader) error {{
     return f"{encode_func}\n\n{decode_func}", required_imports
 
 
-def render_extension_methods(go_name: str) -> Tuple[str, Set[str]]:
+def render_extension_methods(go_name: str, extension_set: list, parser: ASN1Parser) -> Tuple[str, Set[str]]:
     """
     Generates Encode and Decode methods for a type-safe extension struct.
-    This is a complex pattern involving bitmaps and open types.
     """
-    required_imports = {"io", "fmt", "github.com/lvdund/ngap/aper"}
+    required_imports = {"io", "fmt", "bytes", parser.aper_import_path}
+    pascal_case_converter = parser.pascal_case_converter
 
-    print(f"// TODO: Generating extension methods for {go_name}")
+    # --- ENCODE GENERATION ---
+    encode_checks = []
+    for ext in extension_set:
+        field_name = pascal_case_converter(ext['id'])
+        type_name = pascal_case_converter(ext['type'])
+        
+        id_const = f"ProtocolIEID{field_name}"
+        crit_const = f"Criticality{pascal_case_converter(ext['crit'])}"
+        
+        encode_checks.append(f"""
+    if s.{field_name} != nil {{
+        extensions = append(extensions, &ProtocolExtensionField{{
+            Id:          ProtocolIEID{{Value: {id_const}}},
+            Criticality: Criticality{{Value: {crit_const}}},
+            ExtensionValue: s.{field_name},
+        }})
+    }}""")
 
-    encode_code = f"""
+    encode_body = "\n".join(encode_checks)
+    
+    encode_func = f"""
+// Encode implements the aper.AperMarshaller interface.
 func (s *{go_name}) Encode(w *aper.AperWriter) error {{
-    // Extension container encoding logic for {go_name} to be generated here.
-    return fmt.Errorf("Encode not implemented for extension struct {go_name}")
-}}
-"""
-    decode_code = f"""
+    var extensions []*ProtocolExtensionField
+    {encode_body}
+
+    if len(extensions) > 0 {{
+        itemPointers := make([]aper.AperMarshaller, len(extensions))
+        for i := 0; i < len(extensions); i++ {{
+            itemPointers[i] = extensions[i]
+        }}
+        if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
+            return fmt.Errorf("Encode extension container failed: %w", err)
+        }}
+    }} else {{
+         if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
+            return fmt.Errorf("Encode empty extension container failed: %w", err)
+        }}
+    }}
+    return nil
+}}"""
+
+    # --- DECODE GENERATION ---
+    decode_cases = []
+    for ext in extension_set:
+        field_name = pascal_case_converter(ext['id'])
+        type_name = pascal_case_converter(ext['type'])
+        id_const = f"ProtocolIEID{field_name}"
+        
+        decode_cases.append(f"""
+        case {id_const}:
+            s.{field_name} = new({type_name})
+            if err := s.{field_name}.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {{
+                return fmt.Errorf("Decode extension {field_name} failed: %w", err)
+            }}""")
+
+    decode_switch = "\n".join(decode_cases)
+
+    decode_func = f"""
+// Decode implements the aper.AperUnmarshaller interface.
 func (s *{go_name}) Decode(r *aper.AperReader) error {{
-    // Extension container decoding logic for {go_name} to be generated here.
-    return fmt.Errorf("Decode not implemented for extension struct {go_name}")
-}}
-"""
-    return f"{encode_code}\n{decode_code}", required_imports
+    var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
+    decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {{
+        var item ProtocolExtensionField
+        if err := item.Decode(r); err != nil {{
+            return nil, err
+        }}
+        ptr := &item
+        return &ptr, nil
+    }}
+
+    var extensions []*ProtocolExtensionField
+    var err error
+    if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
+        return fmt.Errorf("Decode extension container failed: %w", err)
+    }}
+
+    for _, ext := range extensions {{
+        switch ext.Id.Value {{
+        {decode_switch}
+        default:
+            // Unknown extension, ignore
+        }}
+    }}
+    return nil
+}}"""
+
+    return f"{encode_func}\n{decode_func}", required_imports
 
 
 def render_list_methods(
@@ -443,9 +518,23 @@ def _generate_direct_encode_call(
     if isinstance(asn1_def, IntegerDefinition):
         if is_optional:
             value_accessor = f"(*{value_accessor})"
+        
+        min_val = asn1_def.min_val or 0
+        if not str(min_val).isdigit(): 
+            min_val = pascal_case_converter(str(min_val))
+            if min_val and min_val[0].islower(): min_val = min_val[0].upper() + min_val[1:]
+        
+        max_val = asn1_def.max_val or 0
+        max_val_str = str(max_val).strip()
+        print(f"DEBUG: field={field_name}, max_val_raw={max_val}, max_val_str='{max_val_str}'")
+        if max_val_str == "18446744073709551615":
+             max_val = "math.MaxInt64" # Cap at MaxInt64 for Go int64 compatibility
+        elif not max_val_str.isdigit(): 
+            max_val = pascal_case_converter(max_val_str)
+            if max_val and max_val[0].islower(): max_val = max_val[0].upper() + max_val[1:]
+        print(f"DEBUG: field={field_name}, final max_val='{max_val}'")
 
-        return f'if err = w.WriteInteger(int64({value_accessor}), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
-
+        return f'if err = w.WriteInteger(int64({value_accessor}.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
     elif isinstance(asn1_def, EnumDefinition):
         if is_optional:
             value_accessor = f"(*{value_accessor})"
@@ -458,9 +547,9 @@ def _generate_direct_encode_call(
         if is_optional:
             value_accessor = f"(*{value_accessor})"
         if asn1_def.string_type == "BIT STRING":
-            return f"if err = w.WriteBitString({value_accessor}.Bytes, uint({value_accessor}.NumBits), &aper.Constraint{{...}}); err != nil {{...}}"
+             return f'if err = w.WriteBitString({value_accessor}.Value.Bytes, uint({value_accessor}.Value.NumBits), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
         else:
-            return f"if err = w.WriteOctetString([]byte({value_accessor}), &aper.Constraint{{...}}); err != nil {{...}}"
+             return f'if err = w.WriteOctetString([]byte({value_accessor}.Value), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
 
     else:
         return f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
@@ -515,18 +604,19 @@ def _generate_sequence_encode_body(item: SequenceDefinition, parser: ASN1Parser)
     for ie in item.ies:
         field_name = pascal_case_converter(ie.ie)
         
-        
-        
         go_type, asn1_def = parser.go_type_resolver(ie.type)
         
-        if not asn1_def:
+        # FIX: Allow ProtocolExtensionContainer even if asn1_def is None
+        if not asn1_def and ie.type != "ProtocolExtensionContainer":
             print(f"WARNING: Could not resolve type '{ie.type}' for field '{ie.ie}' in SEQUENCE '{item.name}'. Skipping field.")
             continue
             
         is_optional = ie.presence in ["optional", "conditional"]
         
-        
-        encode_call = _generate_direct_encode_call(field_name, go_type, ie, asn1_def, parser)
+        if ie.type == "ProtocolExtensionContainer":
+             encode_call = f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+        else:
+             encode_call = _generate_direct_encode_call(field_name, ie, asn1_def, parser, is_struct_extensible)
         
         if is_optional:
             encode_parts.append(f'if s.{field_name} != nil {{ {encode_call} }}')
@@ -716,7 +806,7 @@ def _generate_choice_decode_body(
         }}"""
         
         
-        decode_switch_cases.append(f"case {i}:{alloc_and_decode}")
+        decode_switch_cases.append(f"case {i+1}:{alloc_and_decode}")
         
     decode_switch_body = "\n".join(decode_switch_cases)
 
@@ -726,97 +816,17 @@ def _generate_choice_decode_body(
     if choice, err = r.ReadChoice({ub_choices}, {is_extensible}); err != nil {{
         return fmt.Errorf("Read choice index failed: %w", err)
     }}
-    s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+    s.Choice = choice // Choice is 1-based from ReadChoice
 
     // 2. Decode the selected member.
-    switch s.Choice {{
+    switch choice {{
     {decode_switch_body}
     default:
         return fmt.Errorf("Decode choice of {go_name} with unknown choice index %d", choice)
     }}"""
 
 
-def _generate_direct_encode_call(field_name: str, go_type: str, ie: InformationElement, asn1_def: ASN1Definition, parser: ASN1Parser) -> str:
-    """
-    Helper to generate the Go code line for encoding OR decoding a single field.
-    This version has a single, exhaustive if/elif/else chain to prevent errors.
-    """
-    is_optional = ie.presence in ["optional", "conditional"]
-    is_extensible = getattr(asn1_def, 'is_extensible', False)
 
-    
-    value_accessor = f"s.{field_name}.Value"
-
-    if ie.type == "ANY":
-        
-        return f"""
-        {{
-            var buf bytes.Buffer
-            if err = s.{field_name}.Encode(aper.NewWriter(&buf)); err != nil {{
-                return fmt.Errorf("Encode {field_name} (OpenType) failed: %w", err)
-            }}
-            if err = w.WriteOpenType(buf.Bytes()); err != nil {{
-                return fmt.Errorf("Encode {field_name} as OpenType failed: %w", err)
-            }}
-        }}"""
-    
-    elif isinstance(asn1_def, ListDefinition):
-        
-        
-        list_accessor = f"s.{field_name}.Value"
-        min_val_str = asn1_def.min_val or "0"
-        if not min_val_str.isdigit(): min_val_str = parser.pascal_case_converter(min_val_str)
-        max_val_str = asn1_def.max_val or "0"
-        if not max_val_str.isdigit(): max_val_str = parser.pascal_case_converter(max_val_str)
-
-        return f"""
-        {{
-            itemPointers := make([]aper.AperMarshaller, len({list_accessor}))
-            for i := 0; i < len({list_accessor}); i++ {{
-                itemPointers[i] = &({list_accessor}[i])
-            }}
-            if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {str(is_extensible).lower()}); err != nil {{
-                return fmt.Errorf("Encode {field_name} failed: %w", err)
-            }}
-        }}"""
-
-    elif isinstance(asn1_def, IntegerDefinition):
-        if is_optional:
-            value_accessor = f"s.{field_name}.Value"
-        else:
-            value_accessor = f"s.{field_name}.Value"
-
-        min_val_attr = getattr(asn1_def, 'min_val', None)
-        min_val = parser.pascal_case_converter(str(min_val_attr) if min_val_attr is not None else '0')
-
-        max_val_attr = getattr(asn1_def, 'max_val', None)
-        max_val_str = str(max_val_attr) if max_val_attr is not None else '0'
-        if max_val_str == "18446744073709551615":
-            max_val = "math.MaxInt64"
-        else:
-            max_val = parser.pascal_case_converter(max_val_str)
-
-        return f'if err = w.WriteInteger(int64({value_accessor}), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
-    elif isinstance(asn1_def, StringDefinition):
-        
-        min_val = getattr(asn1_def, "min_val", 0) or 0
-        max_val = getattr(asn1_def, "max_val", 0) or 0
-        
-        if asn1_def.string_type == "BIT STRING":
-            
-            return f'if err = w.WriteBitString({value_accessor}.Bytes, uint({value_accessor}.NumBits), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
-        else: 
-            
-            return f'if err = w.WriteOctetString([]byte({value_accessor}), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
-    
-    elif isinstance(asn1_def, BuiltinDefinition) and "STRING" in asn1_def.name.upper():
-        
-        min_val = getattr(asn1_def, 'min_val', 0) or 0
-        max_val = getattr(asn1_def, 'max_val', 0) or 0
-        return f'if err = w.WriteOctetString([]byte({value_accessor}), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
-
-    else: 
-        return f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
 
 
 def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
@@ -1200,31 +1210,6 @@ func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageI
 }}""", {"bytes"}
 
 
-
-
-
-def render_extension_methods(go_name: str) -> Tuple[str, Set[str]]:
-    """
-    Generates placeholder Encode and Decode methods for a type-safe extension struct.
-    """
-    required_imports = {"fmt", "io"} 
-
-    encode_code = f"""
-// Encode implements the aper.AperMarshaller interface.
-func (s *{go_name}) Encode(w *aper.AperWriter) error {{
-	// TODO: Implement the complex APER extension container encoding logic.
-	// This involves creating a bitmap of present extensions and encoding each one as an open type.
-	return fmt.Errorf("Encode not yet implemented for {go_name}")
-}}
-"""
-    decode_code = f"""
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *{go_name}) Decode(r *aper.AperReader) error {{
-	// TODO: Implement the complex APER extension container decoding logic.
-	// This involves reading a bitmap and then decoding each present extension as an open type.
-	return fmt.Errorf("Decode not yet implemented for {go_name}")
-}}
-"""
     return f"{encode_code}\n{decode_code}", required_imports
 
 def _generate_internal_decode_call(field_name, go_type, ie, asn1_def, parser):

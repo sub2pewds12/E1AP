@@ -32,14 +32,13 @@ func (s *DRBConfirmModifiedItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if s.CellGroupInformation != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupInformation.Value))
-			for i := 0; i < len(s.CellGroupInformation.Value); i++ {
-				itemPointers[i] = &(s.CellGroupInformation.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-				return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
-			}
+		if err = s.CellGroupInformation.Encode(w); err != nil {
+			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

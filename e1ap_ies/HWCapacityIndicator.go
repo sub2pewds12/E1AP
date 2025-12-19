@@ -24,6 +24,9 @@ func (s *HWCapacityIndicator) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.AvailableThroughput.Value), &aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
 		return fmt.Errorf("Encode AvailableThroughput failed: %w", err)
 	}
+	if err = s.IEExtensions.Encode(w); err != nil {
+		return fmt.Errorf("Encode IEExtensions failed: %w", err)
+	}
 	return nil
 }
 

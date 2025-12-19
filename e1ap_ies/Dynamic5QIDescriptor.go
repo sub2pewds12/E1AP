@@ -52,23 +52,28 @@ func (s *Dynamic5QIDescriptor) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode PacketErrorRate failed: %w", err)
 	}
 	if s.FiveQI != nil {
-		if err = w.WriteInteger(int64(s.FiveQI.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.FiveQI).Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
 			return fmt.Errorf("Encode FiveQI failed: %w", err)
 		}
 	}
 	if s.DelayCritical != nil {
-		if err = s.DelayCritical.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.DelayCritical).Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
 			return fmt.Errorf("Encode DelayCritical failed: %w", err)
 		}
 	}
 	if s.AveragingWindow != nil {
-		if err = w.WriteInteger(int64(s.AveragingWindow.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.AveragingWindow).Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
 			return fmt.Errorf("Encode AveragingWindow failed: %w", err)
 		}
 	}
 	if s.MaxDataBurstVolume != nil {
-		if err = w.WriteInteger(int64(s.MaxDataBurstVolume.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.MaxDataBurstVolume).Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
 			return fmt.Errorf("Encode MaxDataBurstVolume failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

@@ -58,23 +58,23 @@ func (s *SystemBearerContextSetupRequest) Decode(r *aper.AperReader) (err error)
 	if choice, err = r.ReadChoice(2, true); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.DRBToSetupListEUTRAN = new(DRBToSetupListEUTRAN)
 		if err = s.DRBToSetupListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBToSetupListEUTRAN failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.SubscriberProfileIDforRFP = new(SubscriberProfileIDforRFP)
 		var val int64
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
 			return fmt.Errorf("Decode SubscriberProfileIDforRFP failed: %w", err)
 		}
 		s.SubscriberProfileIDforRFP.Value = aper.Integer(val)
-	case 2:
+	case 3:
 		s.AdditionalRRMPriorityIndex = new(AdditionalRRMPriorityIndex)
 		if err = s.AdditionalRRMPriorityIndex.Decode(r); err != nil {
 			return fmt.Errorf("Decode AdditionalRRMPriorityIndex failed: %w", err)

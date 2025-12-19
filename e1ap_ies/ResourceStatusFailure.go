@@ -20,72 +20,51 @@ type ResourceStatusFailure struct {
 // toIes transforms the ResourceStatusFailure struct into a slice of E1APMessageIEs.
 func (msg *ResourceStatusFailure) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 1, Ub: 4095},
-					ext:   true,
-					Value: msg.GNBCUCPMeasurementID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 1, Ub: 4095},
+			ext:   true,
+			Value: msg.GNBCUCPMeasurementID.Value,
+		},
+	})
 	if msg.GNBCUUPMeasurementID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPMeasurementID},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 1, Ub: 4095},
-					ext:   true,
-					Value: msg.GNBCUUPMeasurementID.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPMeasurementID},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 1, Ub: 4095},
+				ext:   true,
+				Value: msg.GNBCUUPMeasurementID.Value,
+			},
+		})
 	}
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDCause},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &msg.Cause,
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDCause},
+		Criticality: Criticality{Value: CriticalityIgnore},
+		Value:       &msg.Cause,
+	})
 	if msg.CriticalityDiagnostics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.CriticalityDiagnostics,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.CriticalityDiagnostics,
+		})
 	}
 	var err error
 	return ies, err

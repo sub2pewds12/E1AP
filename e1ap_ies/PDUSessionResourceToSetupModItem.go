@@ -44,7 +44,7 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
-	if err = s.PDUSessionType.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.PDUSessionType.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
 		return fmt.Errorf("Encode PDUSessionType failed: %w", err)
 	}
 	if err = s.SNSSAI.Encode(w); err != nil {
@@ -54,7 +54,7 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 		return fmt.Errorf("Encode SecurityIndication failed: %w", err)
 	}
 	if s.PDUSessionResourceAMBR != nil {
-		if err = w.WriteInteger(int64(s.PDUSessionResourceAMBR.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PDUSessionResourceAMBR).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionResourceAMBR failed: %w", err)
 		}
 	}
@@ -67,18 +67,16 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 		}
 	}
 	if s.PDUSessionInactivityTimer != nil {
-		if err = w.WriteInteger(int64(s.PDUSessionInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PDUSessionInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.DRBToSetupModListNGRAN.Value))
-		for i := 0; i < len(s.DRBToSetupModListNGRAN.Value); i++ {
-			itemPointers[i] = &(s.DRBToSetupModListNGRAN.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-			return fmt.Errorf("Encode DRBToSetupModListNGRAN failed: %w", err)
+	if err = s.DRBToSetupModListNGRAN.Encode(w); err != nil {
+		return fmt.Errorf("Encode DRBToSetupModListNGRAN failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

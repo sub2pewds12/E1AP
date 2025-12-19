@@ -29,15 +29,20 @@ func (s *SecurityIndication) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
-	if err = s.IntegrityProtectionIndication.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.IntegrityProtectionIndication.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
 		return fmt.Errorf("Encode IntegrityProtectionIndication failed: %w", err)
 	}
-	if err = s.ConfidentialityProtectionIndication.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.ConfidentialityProtectionIndication.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
 		return fmt.Errorf("Encode ConfidentialityProtectionIndication failed: %w", err)
 	}
 	if s.MaximumIPdatarate != nil {
 		if err = s.MaximumIPdatarate.Encode(w); err != nil {
 			return fmt.Errorf("Encode MaximumIPdatarate failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

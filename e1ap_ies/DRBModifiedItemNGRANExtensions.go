@@ -1,6 +1,7 @@
 package e1ap_ies
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/lvdund/ngap/aper"
@@ -14,14 +15,75 @@ type DRBModifiedItemNGRANExtensions struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *DRBModifiedItemNGRANExtensions) Encode(w *aper.AperWriter) error {
-	// TODO: Implement the complex APER extension container encoding logic.
-	// This involves creating a bitmap of present extensions and encoding each one as an open type.
-	return fmt.Errorf("Encode not yet implemented for DRBModifiedItemNGRANExtensions")
+	var extensions []*ProtocolExtensionField
+
+	if s.EarlyForwardingCOUNTInfo != nil {
+		extensions = append(extensions, &ProtocolExtensionField{
+			Id:             ProtocolIEID{Value: ProtocolIEIDEarlyForwardingCOUNTInfo},
+			Criticality:    Criticality{Value: CriticalityReject},
+			ExtensionValue: s.EarlyForwardingCOUNTInfo,
+		})
+	}
+
+	if s.OldQoSFlowMapULendmarkerexpected != nil {
+		extensions = append(extensions, &ProtocolExtensionField{
+			Id:             ProtocolIEID{Value: ProtocolIEIDOldQoSFlowMapULendmarkerexpected},
+			Criticality:    Criticality{Value: CriticalityIgnore},
+			ExtensionValue: s.OldQoSFlowMapULendmarkerexpected,
+		})
+	}
+
+	if len(extensions) > 0 {
+		itemPointers := make([]aper.AperMarshaller, len(extensions))
+		for i := 0; i < len(extensions); i++ {
+			itemPointers[i] = extensions[i]
+		}
+		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+			return fmt.Errorf("Encode extension container failed: %w", err)
+		}
+	} else {
+		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+			return fmt.Errorf("Encode empty extension container failed: %w", err)
+		}
+	}
+	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *DRBModifiedItemNGRANExtensions) Decode(r *aper.AperReader) error {
-	// TODO: Implement the complex APER extension container decoding logic.
-	// This involves reading a bitmap and then decoding each present extension as an open type.
-	return fmt.Errorf("Decode not yet implemented for DRBModifiedItemNGRANExtensions")
+	var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
+	decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {
+		var item ProtocolExtensionField
+		if err := item.Decode(r); err != nil {
+			return nil, err
+		}
+		ptr := &item
+		return &ptr, nil
+	}
+
+	var extensions []*ProtocolExtensionField
+	var err error
+	if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		return fmt.Errorf("Decode extension container failed: %w", err)
+	}
+
+	for _, ext := range extensions {
+		switch ext.Id.Value {
+
+		case ProtocolIEIDEarlyForwardingCOUNTInfo:
+			s.EarlyForwardingCOUNTInfo = new(EarlyForwardingCOUNTInfo)
+			if err := s.EarlyForwardingCOUNTInfo.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+				return fmt.Errorf("Decode extension EarlyForwardingCOUNTInfo failed: %w", err)
+			}
+
+		case ProtocolIEIDOldQoSFlowMapULendmarkerexpected:
+			s.OldQoSFlowMapULendmarkerexpected = new(QOSFlowList)
+			if err := s.OldQoSFlowMapULendmarkerexpected.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+				return fmt.Errorf("Decode extension OldQoSFlowMapULendmarkerexpected failed: %w", err)
+			}
+		default:
+			// Unknown extension, ignore
+		}
+	}
+	return nil
 }

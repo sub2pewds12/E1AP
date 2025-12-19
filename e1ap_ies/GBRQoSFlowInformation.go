@@ -48,33 +48,38 @@ func (s *GBRQoSFlowInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.MaxFlowBitRateDownlink != nil {
-		if err = w.WriteInteger(int64(s.MaxFlowBitRateDownlink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.MaxFlowBitRateDownlink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode MaxFlowBitRateDownlink failed: %w", err)
 		}
 	}
 	if s.MaxFlowBitRateUplink != nil {
-		if err = w.WriteInteger(int64(s.MaxFlowBitRateUplink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.MaxFlowBitRateUplink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode MaxFlowBitRateUplink failed: %w", err)
 		}
 	}
 	if s.GuaranteedFlowBitRateDownlink != nil {
-		if err = w.WriteInteger(int64(s.GuaranteedFlowBitRateDownlink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateDownlink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode GuaranteedFlowBitRateDownlink failed: %w", err)
 		}
 	}
 	if s.GuaranteedFlowBitRateUplink != nil {
-		if err = w.WriteInteger(int64(s.GuaranteedFlowBitRateUplink.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateUplink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode GuaranteedFlowBitRateUplink failed: %w", err)
 		}
 	}
 	if s.MaxPacketLossRateDownlink != nil {
-		if err = w.WriteInteger(int64(s.MaxPacketLossRateDownlink.Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.MaxPacketLossRateDownlink).Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
 			return fmt.Errorf("Encode MaxPacketLossRateDownlink failed: %w", err)
 		}
 	}
 	if s.MaxPacketLossRateUplink != nil {
-		if err = w.WriteInteger(int64(s.MaxPacketLossRateUplink.Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.MaxPacketLossRateUplink).Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
 			return fmt.Errorf("Encode MaxPacketLossRateUplink failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

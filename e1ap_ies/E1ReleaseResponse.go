@@ -16,21 +16,16 @@ type E1ReleaseResponse struct {
 // toIes transforms the E1ReleaseResponse struct into a slice of E1APMessageIEs.
 func (msg *E1ReleaseResponse) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 	var err error
 	return ies, err
 }

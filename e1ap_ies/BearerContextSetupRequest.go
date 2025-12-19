@@ -33,184 +33,133 @@ type BearerContextSetupRequest struct {
 // toIes transforms the BearerContextSetupRequest struct into a slice of E1APMessageIEs.
 func (msg *BearerContextSetupRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUCPUEE1APID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUCPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDSecurityInformation},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value:       &msg.SecurityInformation,
+	})
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDSecurityInformation},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value:       &msg.SecurityInformation,
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDUEDLAggregateMaximumBitRate},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4000000000000},
-					ext:   true,
-					Value: msg.UEDLAggregateMaximumBitRate.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDUEDLAggregateMaximumBitRate},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4000000000000},
+			ext:   true,
+			Value: msg.UEDLAggregateMaximumBitRate.Value,
+		},
+	})
 	if msg.UEDLMaximumIntegrityProtectedDataRate != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDUEDLMaximumIntegrityProtectedDataRate},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4000000000000},
-					ext:   true,
-					Value: msg.UEDLMaximumIntegrityProtectedDataRate.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDUEDLMaximumIntegrityProtectedDataRate},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 4000000000000},
+				ext:   true,
+				Value: msg.UEDLMaximumIntegrityProtectedDataRate.Value,
+			},
+		})
 	}
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDServingPLMN},
+		Criticality: Criticality{Value: CriticalityIgnore},
+		Value: &OCTETSTRING{
+			c:     aper.Constraint{Lb: 3, Ub: 3},
+			ext:   false,
+			Value: msg.ServingPLMN.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDServingPLMN},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 3, Ub: 3},
-					ext:   false,
-					Value: msg.ServingPLMN.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDActivityNotificationLevel},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 2},
-					ext:   true,
-					Value: msg.ActivityNotificationLevel.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDActivityNotificationLevel},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &ENUMERATED{
+			c:     aper.Constraint{Lb: 0, Ub: 2},
+			ext:   true,
+			Value: msg.ActivityNotificationLevel.Value,
+		},
+	})
 	if msg.UEInactivityTimer != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDUEInactivityTimer},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 1, Ub: 7200},
-					ext:   true,
-					Value: msg.UEInactivityTimer.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDUEInactivityTimer},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 1, Ub: 7200},
+				ext:   true,
+				Value: msg.UEInactivityTimer.Value,
+			},
+		})
 	}
 	if msg.BearerContextStatusChange != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDBearerContextStatusChange},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 1},
-					ext:   true,
-					Value: msg.BearerContextStatusChange.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDBearerContextStatusChange},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 1},
+				ext:   true,
+				Value: msg.BearerContextStatusChange.Value,
+			},
+		})
 	}
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDSystemBearerContextSetupRequest},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value:       &msg.SystemBearerContextSetupRequest,
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDSystemBearerContextSetupRequest},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value:       &msg.SystemBearerContextSetupRequest,
+	})
 	if msg.RANUEID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDRANUEID},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 8, Ub: 8},
-					ext:   false,
-					Value: msg.RANUEID.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDRANUEID},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &OCTETSTRING{
+				c:     aper.Constraint{Lb: 8, Ub: 8},
+				ext:   false,
+				Value: msg.RANUEID.Value,
+			},
+		})
 	}
 	if msg.GNBDUID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBDUID},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 68719476735},
-					ext:   false,
-					Value: msg.GNBDUID.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBDUID},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 68719476735},
+				ext:   false,
+				Value: msg.GNBDUID.Value,
+			},
+		})
 	}
 	if msg.TraceActivation != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTraceActivation},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.TraceActivation,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDTraceActivation},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.TraceActivation,
+		})
 	}
 	if msg.NPNContextInfo != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDNPNContextInfo},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value:       msg.NPNContextInfo,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDNPNContextInfo},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value:       msg.NPNContextInfo,
+		})
 	}
 	if msg.ManagementBasedMDTPLMNList != nil {
 
@@ -228,88 +177,59 @@ func (msg *BearerContextSetupRequest) toIes() ([]E1APMessageIE, error) {
 			tmp_ManagementBasedMDTPLMNList.Value = append(tmp_ManagementBasedMDTPLMNList.Value, wrapped_item)
 		}
 
-		{
-
-			tmp_ManagementBasedMDTPLMNList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 1, Ub: MaxnoofMDTPLMNs},
-				ext: false,
-			}
-
-			for _, item := range msg.ManagementBasedMDTPLMNList.Value {
-				wrapped_item := &OCTETSTRING{
-					c:     aper.Constraint{Lb: 3, Ub: 3},
-					ext:   false,
-					Value: item.Value,
-				}
-				tmp_ManagementBasedMDTPLMNList.Value = append(tmp_ManagementBasedMDTPLMNList.Value, wrapped_item)
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDManagementBasedMDTPLMNList},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &tmp_ManagementBasedMDTPLMNList,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDManagementBasedMDTPLMNList},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       &tmp_ManagementBasedMDTPLMNList,
+		})
 	}
 	if msg.CHOInitiation != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDCHOInitiation},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 0},
-					ext:   true,
-					Value: msg.CHOInitiation.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDCHOInitiation},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 0},
+				ext:   true,
+				Value: msg.CHOInitiation.Value,
+			},
+		})
 	}
 	if msg.AdditionalHandoverInfo != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDAdditionalHandoverInfo},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 0},
-					ext:   true,
-					Value: msg.AdditionalHandoverInfo.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDAdditionalHandoverInfo},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 0},
+				ext:   true,
+				Value: msg.AdditionalHandoverInfo.Value,
+			},
+		})
 	}
 	if msg.DirectForwardingPathAvailability != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDDirectForwardingPathAvailability},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 1},
-					ext:   true,
-					Value: msg.DirectForwardingPathAvailability.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDDirectForwardingPathAvailability},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 1},
+				ext:   true,
+				Value: msg.DirectForwardingPathAvailability.Value,
+			},
+		})
 	}
 	if msg.GNBCUUPUEE1APID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUUPUEE1APID.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+				ext:   false,
+				Value: msg.GNBCUUPUEE1APID.Value,
+			},
+		})
 	}
 	var err error
 	return ies, err

@@ -19,36 +19,26 @@ type BearerContextReleaseRequest struct {
 // toIes transforms the BearerContextReleaseRequest struct into a slice of E1APMessageIEs.
 func (msg *BearerContextReleaseRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUCPUEE1APID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUCPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUUPUEE1APID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUUPUEE1APID.Value,
+		},
+	})
 	if msg.DRBStatusList != nil {
 
 		tmp_DRBStatusList := Sequence[aper.IE]{
@@ -60,35 +50,18 @@ func (msg *BearerContextReleaseRequest) toIes() ([]E1APMessageIE, error) {
 			tmp_DRBStatusList.Value = append(tmp_DRBStatusList.Value, &msg.DRBStatusList.Value[i])
 		}
 
-		{
-
-			tmp_DRBStatusList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
-				ext: false,
-			}
-
-			for i := 0; i < len(msg.DRBStatusList.Value); i++ {
-				tmp_DRBStatusList.Value = append(tmp_DRBStatusList.Value, &msg.DRBStatusList.Value[i])
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDDRBStatusList},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &tmp_DRBStatusList,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDDRBStatusList},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       &tmp_DRBStatusList,
+		})
 	}
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDCause},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &msg.Cause,
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDCause},
+		Criticality: Criticality{Value: CriticalityIgnore},
+		Value:       &msg.Cause,
+	})
 	var err error
 	return ies, err
 }

@@ -31,6 +31,11 @@ func (s *PDCPCount) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.HFN.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
 		return fmt.Errorf("Encode HFN failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

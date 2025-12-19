@@ -227,19 +227,42 @@ func (s *ProtocolExtensionContainer) Decode(r *aper.AperReader) (err error) {
 
 // ProtocolExtensionField is the item within the container.
 type ProtocolExtensionField struct {
-	Id           ProtocolIEID
-	Criticality  Criticality
+	Id             ProtocolIEID
+	Criticality    Criticality
 	ExtensionValue aper.IE
+	ValueBytes     []byte // To store raw bytes during decoding
 }
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *ProtocolExtensionField) Encode(w *aper.AperWriter) (err error) {
-    // TODO: Implement the real APER encoding logic for an extension field.
+	if err = w.WriteInteger(int64(s.Id.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+		return fmt.Errorf("Encode ProtocolExtensionField ID failed: %w", err)
+	}
+	if err = s.Criticality.Encode(w); err != nil {
+		return fmt.Errorf("Encode ProtocolExtensionField Criticality failed: %w", err)
+	}
+	// Encode ExtensionValue as Open Type
+	var buf bytes.Buffer
+	if err = s.ExtensionValue.Encode(aper.NewWriter(&buf)); err != nil {
+		return fmt.Errorf("Encode ProtocolExtensionField ExtensionValue failed: %w", err)
+	}
+	if err = w.WriteOpenType(buf.Bytes()); err != nil {
+		return fmt.Errorf("Encode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
+	}
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ProtocolExtensionField) Decode(r *aper.AperReader) (err error) {
-    // TODO: Implement the real APER decoding logic for an extension field.
+	if err = s.Id.Decode(r); err != nil {
+		return fmt.Errorf("Decode ProtocolExtensionField ID failed: %w", err)
+	}
+	if err = s.Criticality.Decode(r); err != nil {
+		return fmt.Errorf("Decode ProtocolExtensionField Criticality failed: %w", err)
+	}
+	// Read Open Type into ValueBytes
+	if s.ValueBytes, err = r.ReadOpenType(); err != nil {
+		return fmt.Errorf("Decode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
+	}
 	return nil
 }

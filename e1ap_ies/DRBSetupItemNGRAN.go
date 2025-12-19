@@ -42,35 +42,20 @@ func (s *DRBSetupItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode DRBDataForwardingInformationResponse failed: %w", err)
 		}
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.ULUPTransportParameters.Value))
-		for i := 0; i < len(s.ULUPTransportParameters.Value); i++ {
-			itemPointers[i] = &(s.ULUPTransportParameters.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
-			return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
-		}
+	if err = s.ULUPTransportParameters.Encode(w); err != nil {
+		return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.FlowSetupList.Value))
-		for i := 0; i < len(s.FlowSetupList.Value); i++ {
-			itemPointers[i] = &(s.FlowSetupList.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-			return fmt.Errorf("Encode FlowSetupList failed: %w", err)
-		}
+	if err = s.FlowSetupList.Encode(w); err != nil {
+		return fmt.Errorf("Encode FlowSetupList failed: %w", err)
 	}
 	if s.FlowFailedList != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.FlowFailedList.Value))
-			for i := 0; i < len(s.FlowFailedList.Value); i++ {
-				itemPointers[i] = &(s.FlowFailedList.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-				return fmt.Errorf("Encode FlowFailedList failed: %w", err)
-			}
+		if err = s.FlowFailedList.Encode(w); err != nil {
+			return fmt.Errorf("Encode FlowFailedList failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

@@ -32,14 +32,13 @@ func (s *TransportUPLayerAddressesInfoToAddItem) Encode(w *aper.AperWriter) (err
 		return fmt.Errorf("Encode IPSecTransportLayerAddress failed: %w", err)
 	}
 	if s.GTPTransportLayerAddressesToAdd != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.GTPTransportLayerAddressesToAdd.Value))
-			for i := 0; i < len(s.GTPTransportLayerAddressesToAdd.Value); i++ {
-				itemPointers[i] = &(s.GTPTransportLayerAddressesToAdd.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: MaxnoofGTPTLAs}, false); err != nil {
-				return fmt.Errorf("Encode GTPTransportLayerAddressesToAdd failed: %w", err)
-			}
+		if err = s.GTPTransportLayerAddressesToAdd.Encode(w); err != nil {
+			return fmt.Errorf("Encode GTPTransportLayerAddressesToAdd failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

@@ -31,6 +31,11 @@ func (s *EndpointIPAddressAndPort) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(s.PortNumber.Value.Bytes, uint(s.PortNumber.Value.NumBits), &aper.Constraint{Lb: 16, Ub: 16}, false); err != nil {
 		return fmt.Errorf("Encode PortNumber failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

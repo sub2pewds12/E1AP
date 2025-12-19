@@ -28,14 +28,12 @@ func (s *DataForwardingtoEUTRANInformationListItem) Encode(w *aper.AperWriter) (
 	if err = s.DataForwardingTunnelInformation.Encode(w); err != nil {
 		return fmt.Errorf("Encode DataForwardingTunnelInformation failed: %w", err)
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.QOSFlowsToBeForwardedList.Value))
-		for i := 0; i < len(s.QOSFlowsToBeForwardedList.Value); i++ {
-			itemPointers[i] = &(s.QOSFlowsToBeForwardedList.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-			return fmt.Errorf("Encode QOSFlowsToBeForwardedList failed: %w", err)
+	if err = s.QOSFlowsToBeForwardedList.Encode(w); err != nil {
+		return fmt.Errorf("Encode QOSFlowsToBeForwardedList failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

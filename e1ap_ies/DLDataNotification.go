@@ -19,50 +19,37 @@ type DLDataNotification struct {
 // toIes transforms the DLDataNotification struct into a slice of E1APMessageIEs.
 func (msg *DLDataNotification) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUCPUEE1APID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUCPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUUPUEE1APID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUUPUEE1APID.Value,
+		},
+	})
 	if msg.PPI != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDPPI},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 7},
-					ext:   true,
-					Value: msg.PPI.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDPPI},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 7},
+				ext:   true,
+				Value: msg.PPI.Value,
+			},
+		})
 	}
 	if msg.PDUSessionToNotifyList != nil {
 
@@ -75,23 +62,11 @@ func (msg *DLDataNotification) toIes() ([]E1APMessageIE, error) {
 			tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList.Value[i])
 		}
 
-		{
-
-			tmp_PDUSessionToNotifyList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource},
-				ext: false,
-			}
-
-			for i := 0; i < len(msg.PDUSessionToNotifyList.Value); i++ {
-				tmp_PDUSessionToNotifyList.Value = append(tmp_PDUSessionToNotifyList.Value, &msg.PDUSessionToNotifyList.Value[i])
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDPDUSessionToNotifyList},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &tmp_PDUSessionToNotifyList,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDPDUSessionToNotifyList},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       &tmp_PDUSessionToNotifyList,
+		})
 	}
 	var err error
 	return ies, err

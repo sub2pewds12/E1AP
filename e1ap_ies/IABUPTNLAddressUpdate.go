@@ -17,21 +17,16 @@ type IABUPTNLAddressUpdate struct {
 // toIes transforms the IABUPTNLAddressUpdate struct into a slice of E1APMessageIEs.
 func (msg *IABUPTNLAddressUpdate) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 	if msg.DLUPTNLAddressToUpdateList != nil {
 
 		tmp_DLUPTNLAddressToUpdateList := Sequence[aper.IE]{
@@ -43,23 +38,11 @@ func (msg *IABUPTNLAddressUpdate) toIes() ([]E1APMessageIE, error) {
 			tmp_DLUPTNLAddressToUpdateList.Value = append(tmp_DLUPTNLAddressToUpdateList.Value, &msg.DLUPTNLAddressToUpdateList.Value[i])
 		}
 
-		{
-
-			tmp_DLUPTNLAddressToUpdateList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
-				ext: false,
-			}
-
-			for i := 0; i < len(msg.DLUPTNLAddressToUpdateList.Value); i++ {
-				tmp_DLUPTNLAddressToUpdateList.Value = append(tmp_DLUPTNLAddressToUpdateList.Value, &msg.DLUPTNLAddressToUpdateList.Value[i])
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDDLUPTNLAddressToUpdateList},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &tmp_DLUPTNLAddressToUpdateList,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDDLUPTNLAddressToUpdateList},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       &tmp_DLUPTNLAddressToUpdateList,
+		})
 	}
 	var err error
 	return ies, err

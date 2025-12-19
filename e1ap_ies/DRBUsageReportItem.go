@@ -40,6 +40,11 @@ func (s *DRBUsageReportItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.UsageCountDL.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false); err != nil {
 		return fmt.Errorf("Encode UsageCountDL failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

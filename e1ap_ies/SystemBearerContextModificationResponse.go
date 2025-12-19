@@ -70,31 +70,31 @@ func (s *SystemBearerContextModificationResponse) Decode(r *aper.AperReader) (er
 	if choice, err = r.ReadChoice(4, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.DRBSetupModListEUTRAN = new(DRBSetupModListEUTRAN)
 		if err = s.DRBSetupModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBSetupModListEUTRAN failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.DRBFailedModListEUTRAN = new(DRBFailedModListEUTRAN)
 		if err = s.DRBFailedModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBFailedModListEUTRAN failed: %w", err)
 		}
-	case 2:
+	case 3:
 		s.DRBModifiedListEUTRAN = new(DRBModifiedListEUTRAN)
 		if err = s.DRBModifiedListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBModifiedListEUTRAN failed: %w", err)
 		}
-	case 3:
+	case 4:
 		s.DRBFailedToModifyListEUTRAN = new(DRBFailedToModifyListEUTRAN)
 		if err = s.DRBFailedToModifyListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
-	case 4:
+	case 5:
 		s.RetainabilityMeasurementsInfo = new(RetainabilityMeasurementsInfo)
 		if err = s.RetainabilityMeasurementsInfo.Decode(r); err != nil {
 			return fmt.Errorf("Decode RetainabilityMeasurementsInfo failed: %w", err)

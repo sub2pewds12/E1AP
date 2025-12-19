@@ -21,95 +21,71 @@ type ResourceStatusRequest struct {
 // toIes transforms the ResourceStatusRequest struct into a slice of E1APMessageIEs.
 func (msg *ResourceStatusRequest) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 1, Ub: 4095},
-					ext:   true,
-					Value: msg.GNBCUCPMeasurementID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPMeasurementID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 1, Ub: 4095},
+			ext:   true,
+			Value: msg.GNBCUCPMeasurementID.Value,
+		},
+	})
 	if msg.GNBCUUPMeasurementID != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPMeasurementID},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 1, Ub: 4095},
-					ext:   true,
-					Value: msg.GNBCUUPMeasurementID.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPMeasurementID},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 1, Ub: 4095},
+				ext:   true,
+				Value: msg.GNBCUUPMeasurementID.Value,
+			},
+		})
 	}
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDRegistrationRequest},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 1},
-					ext:   true,
-					Value: msg.RegistrationRequest.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDRegistrationRequest},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &ENUMERATED{
+			c:     aper.Constraint{Lb: 0, Ub: 1},
+			ext:   true,
+			Value: msg.RegistrationRequest.Value,
+		},
+	})
 	if msg.ReportCharacteristics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDReportCharacteristics},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &BITSTRING{
-					c:     aper.Constraint{Lb: 36, Ub: 36},
-					ext:   false,
-					Value: msg.ReportCharacteristics.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDReportCharacteristics},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &BITSTRING{
+				c:     aper.Constraint{Lb: 36, Ub: 36},
+				ext:   false,
+				Value: msg.ReportCharacteristics.Value,
+			},
+		})
 	}
 	if msg.ReportingPeriodicity != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDReportingPeriodicity},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 15},
-					ext:   true,
-					Value: msg.ReportingPeriodicity.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDReportingPeriodicity},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 15},
+				ext:   true,
+				Value: msg.ReportingPeriodicity.Value,
+			},
+		})
 	}
 	var err error
 	return ies, err

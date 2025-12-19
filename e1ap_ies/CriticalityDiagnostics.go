@@ -41,17 +41,17 @@ func (s *CriticalityDiagnostics) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.ProcedureCode != nil {
-		if err = w.WriteInteger(int64(s.ProcedureCode.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+		if err = w.WriteInteger(int64((*s.ProcedureCode).Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 			return fmt.Errorf("Encode ProcedureCode failed: %w", err)
 		}
 	}
 	if s.TriggeringMessage != nil {
-		if err = s.TriggeringMessage.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.TriggeringMessage).Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 			return fmt.Errorf("Encode TriggeringMessage failed: %w", err)
 		}
 	}
 	if s.ProcedureCriticality != nil {
-		if err = s.ProcedureCriticality.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.ProcedureCriticality).Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 			return fmt.Errorf("Encode ProcedureCriticality failed: %w", err)
 		}
 	}
@@ -59,14 +59,13 @@ func (s *CriticalityDiagnostics) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode TransactionID failed: %w", err)
 	}
 	if s.IEsCriticalityDiagnostics != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.IEsCriticalityDiagnostics.Value))
-			for i := 0; i < len(s.IEsCriticalityDiagnostics.Value); i++ {
-				itemPointers[i] = &(s.IEsCriticalityDiagnostics.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
-				return fmt.Errorf("Encode IEsCriticalityDiagnostics failed: %w", err)
-			}
+		if err = s.IEsCriticalityDiagnostics.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEsCriticalityDiagnostics failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

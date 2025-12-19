@@ -40,23 +40,28 @@ func (s *GBRQosInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.ERABMaximumBitrateDL != nil {
-		if err = w.WriteInteger(int64(s.ERABMaximumBitrateDL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.ERABMaximumBitrateDL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABMaximumBitrateDL failed: %w", err)
 		}
 	}
 	if s.ERABMaximumBitrateUL != nil {
-		if err = w.WriteInteger(int64(s.ERABMaximumBitrateUL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.ERABMaximumBitrateUL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABMaximumBitrateUL failed: %w", err)
 		}
 	}
 	if s.ERABGuaranteedBitrateDL != nil {
-		if err = w.WriteInteger(int64(s.ERABGuaranteedBitrateDL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.ERABGuaranteedBitrateDL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABGuaranteedBitrateDL failed: %w", err)
 		}
 	}
 	if s.ERABGuaranteedBitrateUL != nil {
-		if err = w.WriteInteger(int64(s.ERABGuaranteedBitrateUL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.ERABGuaranteedBitrateUL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode ERABGuaranteedBitrateUL failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

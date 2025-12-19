@@ -27,6 +27,11 @@ func (s *FirstDLCount) Encode(w *aper.AperWriter) (err error) {
 	if err = s.FirstDLCountVal.Encode(w); err != nil {
 		return fmt.Errorf("Encode FirstDLCountVal failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

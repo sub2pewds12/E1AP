@@ -18,31 +18,23 @@ type IABUPTNLAddressUpdateAcknowledge struct {
 // toIes transforms the IABUPTNLAddressUpdateAcknowledge struct into a slice of E1APMessageIEs.
 func (msg *IABUPTNLAddressUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 	if msg.CriticalityDiagnostics != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.CriticalityDiagnostics,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDCriticalityDiagnostics},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.CriticalityDiagnostics,
+		})
 	}
 	if msg.ULUPTNLAddressToUpdateList != nil {
 
@@ -55,23 +47,11 @@ func (msg *IABUPTNLAddressUpdateAcknowledge) toIes() ([]E1APMessageIE, error) {
 			tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList.Value[i])
 		}
 
-		{
-
-			tmp_ULUPTNLAddressToUpdateList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAddresses},
-				ext: false,
-			}
-
-			for i := 0; i < len(msg.ULUPTNLAddressToUpdateList.Value); i++ {
-				tmp_ULUPTNLAddressToUpdateList.Value = append(tmp_ULUPTNLAddressToUpdateList.Value, &msg.ULUPTNLAddressToUpdateList.Value[i])
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDULUPTNLAddressToUpdateList},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       &tmp_ULUPTNLAddressToUpdateList,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDULUPTNLAddressToUpdateList},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       &tmp_ULUPTNLAddressToUpdateList,
+		})
 	}
 	var err error
 	return ies, err

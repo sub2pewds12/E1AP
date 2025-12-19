@@ -27,6 +27,11 @@ func (s *GTPTLAItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(s.GTPTransportLayerAddresses.Value.Bytes, uint(s.GTPTransportLayerAddresses.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode GTPTransportLayerAddresses failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

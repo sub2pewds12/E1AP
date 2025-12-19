@@ -28,14 +28,12 @@ func (s *PDUSessionToNotifyItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
 		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.QOSFlowList.Value))
-		for i := 0; i < len(s.QOSFlowList.Value); i++ {
-			itemPointers[i] = &(s.QOSFlowList.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-			return fmt.Errorf("Encode QOSFlowList failed: %w", err)
+	if err = s.QOSFlowList.Encode(w); err != nil {
+		return fmt.Errorf("Encode QOSFlowList failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

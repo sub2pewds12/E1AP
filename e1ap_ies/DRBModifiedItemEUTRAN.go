@@ -50,14 +50,13 @@ func (s *DRBModifiedItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.ULUPTransportParameters != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.ULUPTransportParameters.Value))
-			for i := 0; i < len(s.ULUPTransportParameters.Value); i++ {
-				itemPointers[i] = &(s.ULUPTransportParameters.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
-				return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
-			}
+		if err = s.ULUPTransportParameters.Encode(w); err != nil {
+			return fmt.Errorf("Encode ULUPTransportParameters failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

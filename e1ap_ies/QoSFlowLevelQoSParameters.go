@@ -57,23 +57,28 @@ func (s *QoSFlowLevelQoSParameters) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.ReflectiveQOSAttribute != nil {
-		if err = s.ReflectiveQOSAttribute.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.ReflectiveQOSAttribute).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode ReflectiveQOSAttribute failed: %w", err)
 		}
 	}
 	if s.AdditionalQOSInformation != nil {
-		if err = s.AdditionalQOSInformation.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.AdditionalQOSInformation).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode AdditionalQOSInformation failed: %w", err)
 		}
 	}
 	if s.PagingPolicyIndicator != nil {
-		if err = w.WriteInteger(int64(s.PagingPolicyIndicator.Value), &aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PagingPolicyIndicator).Value), &aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
 			return fmt.Errorf("Encode PagingPolicyIndicator failed: %w", err)
 		}
 	}
 	if s.ReflectiveQOSIndicator != nil {
-		if err = s.ReflectiveQOSIndicator.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.ReflectiveQOSIndicator).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode ReflectiveQOSIndicator failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

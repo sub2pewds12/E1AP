@@ -29,11 +29,16 @@ func (s *EUTRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err e
 	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
 		return fmt.Errorf("Encode PriorityLevel failed: %w", err)
 	}
-	if err = s.PreEmptionCapability.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.PreEmptionCapability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode PreEmptionCapability failed: %w", err)
 	}
-	if err = s.PreEmptionVulnerability.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.PreEmptionVulnerability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
 		return fmt.Errorf("Encode PreEmptionVulnerability failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

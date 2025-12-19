@@ -27,6 +27,11 @@ func (s *NPNSupportInfoSNPN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(s.NID.Value.Bytes, uint(s.NID.Value.NumBits), &aper.Constraint{Lb: 44, Ub: 44}, false); err != nil {
 		return fmt.Errorf("Encode NID failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

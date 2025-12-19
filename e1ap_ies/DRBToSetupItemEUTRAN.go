@@ -61,35 +61,27 @@ func (s *DRBToSetupItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 			return fmt.Errorf("Encode DataForwardingInformationRequest failed: %w", err)
 		}
 	}
-
-	{
-		itemPointers := make([]aper.AperMarshaller, len(s.CellGroupInformation.Value))
-		for i := 0; i < len(s.CellGroupInformation.Value); i++ {
-			itemPointers[i] = &(s.CellGroupInformation.Value[i])
-		}
-		if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-			return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
-		}
+	if err = s.CellGroupInformation.Encode(w); err != nil {
+		return fmt.Errorf("Encode CellGroupInformation failed: %w", err)
 	}
 	if s.DLUPParameters != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DLUPParameters.Value))
-			for i := 0; i < len(s.DLUPParameters.Value); i++ {
-				itemPointers[i] = &(s.DLUPParameters.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
-				return fmt.Errorf("Encode DLUPParameters failed: %w", err)
-			}
+		if err = s.DLUPParameters.Encode(w); err != nil {
+			return fmt.Errorf("Encode DLUPParameters failed: %w", err)
 		}
 	}
 	if s.DRBInactivityTimer != nil {
-		if err = w.WriteInteger(int64(s.DRBInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.DRBInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode DRBInactivityTimer failed: %w", err)
 		}
 	}
 	if s.ExistingAllocatedS1DLUPTNLInfo != nil {
 		if err = s.ExistingAllocatedS1DLUPTNLInfo.Encode(w); err != nil {
 			return fmt.Errorf("Encode ExistingAllocatedS1DLUPTNLInfo failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

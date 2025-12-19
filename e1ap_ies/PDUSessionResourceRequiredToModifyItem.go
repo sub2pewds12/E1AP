@@ -45,25 +45,18 @@ func (s *PDUSessionResourceRequiredToModifyItem) Encode(w *aper.AperWriter) (err
 		}
 	}
 	if s.DRBRequiredToModifyListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBRequiredToModifyListNGRAN.Value))
-			for i := 0; i < len(s.DRBRequiredToModifyListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBRequiredToModifyListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBRequiredToModifyListNGRAN failed: %w", err)
-			}
+		if err = s.DRBRequiredToModifyListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBRequiredToModifyListNGRAN failed: %w", err)
 		}
 	}
 	if s.DRBRequiredToRemoveListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBRequiredToRemoveListNGRAN.Value))
-			for i := 0; i < len(s.DRBRequiredToRemoveListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBRequiredToRemoveListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBRequiredToRemoveListNGRAN failed: %w", err)
-			}
+		if err = s.DRBRequiredToRemoveListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBRequiredToRemoveListNGRAN failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

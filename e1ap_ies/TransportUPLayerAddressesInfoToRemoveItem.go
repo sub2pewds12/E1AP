@@ -32,14 +32,13 @@ func (s *TransportUPLayerAddressesInfoToRemoveItem) Encode(w *aper.AperWriter) (
 		return fmt.Errorf("Encode IPSecTransportLayerAddress failed: %w", err)
 	}
 	if s.GTPTransportLayerAddressesToRemove != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.GTPTransportLayerAddressesToRemove.Value))
-			for i := 0; i < len(s.GTPTransportLayerAddressesToRemove.Value); i++ {
-				itemPointers[i] = &(s.GTPTransportLayerAddressesToRemove.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: MaxnoofGTPTLAs}, false); err != nil {
-				return fmt.Errorf("Encode GTPTransportLayerAddressesToRemove failed: %w", err)
-			}
+		if err = s.GTPTransportLayerAddressesToRemove.Encode(w); err != nil {
+			return fmt.Errorf("Encode GTPTransportLayerAddressesToRemove failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

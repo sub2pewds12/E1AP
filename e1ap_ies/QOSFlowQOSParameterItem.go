@@ -36,8 +36,13 @@ func (s *QOSFlowQOSParameterItem) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode QoSFlowLevelQoSParameters failed: %w", err)
 	}
 	if s.QoSFlowMappingIndication != nil {
-		if err = s.QoSFlowMappingIndication.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.QoSFlowMappingIndication).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 			return fmt.Errorf("Encode QoSFlowMappingIndication failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

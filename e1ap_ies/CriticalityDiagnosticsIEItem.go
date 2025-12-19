@@ -18,13 +18,13 @@ func (s *CriticalityDiagnosticsIEItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(false); err != nil {
 		return fmt.Errorf("Encode extensibility bool failed: %w", err)
 	}
-	if err = s.IECriticality.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.IECriticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode IECriticality failed: %w", err)
 	}
 	if err = w.WriteInteger(int64(s.IEID.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false); err != nil {
 		return fmt.Errorf("Encode IEID failed: %w", err)
 	}
-	if err = s.TypeOfError.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.TypeOfError.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
 		return fmt.Errorf("Encode TypeOfError failed: %w", err)
 	}
 	return nil

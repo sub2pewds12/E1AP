@@ -32,13 +32,18 @@ func (s *ExtendedGNBCUUPName) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.GNBCUUPNameVisibleString != nil {
-		if err = w.WriteOctetString([]byte(s.GNBCUUPNameVisibleString.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = s.GNBCUUPNameVisibleString.Encode(w); err != nil {
 			return fmt.Errorf("Encode GNBCUUPNameVisibleString failed: %w", err)
 		}
 	}
 	if s.GNBCUUPNameUTF8String != nil {
-		if err = w.WriteOctetString([]byte(s.GNBCUUPNameUTF8String.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = s.GNBCUUPNameUTF8String.Encode(w); err != nil {
 			return fmt.Errorf("Encode GNBCUUPNameUTF8String failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

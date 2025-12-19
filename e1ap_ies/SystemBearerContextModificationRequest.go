@@ -70,33 +70,33 @@ func (s *SystemBearerContextModificationRequest) Decode(r *aper.AperReader) (err
 	if choice, err = r.ReadChoice(4, true); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.DRBToSetupModListEUTRAN = new(DRBToSetupModListEUTRAN)
 		if err = s.DRBToSetupModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBToSetupModListEUTRAN failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.DRBToModifyListEUTRAN = new(DRBToModifyListEUTRAN)
 		if err = s.DRBToModifyListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBToModifyListEUTRAN failed: %w", err)
 		}
-	case 2:
+	case 3:
 		s.DRBToRemoveListEUTRAN = new(DRBToRemoveListEUTRAN)
 		if err = s.DRBToRemoveListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBToRemoveListEUTRAN failed: %w", err)
 		}
-	case 3:
+	case 4:
 		s.SubscriberProfileIDforRFP = new(SubscriberProfileIDforRFP)
 		var val int64
 		if val, err = r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
 			return fmt.Errorf("Decode SubscriberProfileIDforRFP failed: %w", err)
 		}
 		s.SubscriberProfileIDforRFP.Value = aper.Integer(val)
-	case 4:
+	case 5:
 		s.AdditionalRRMPriorityIndex = new(AdditionalRRMPriorityIndex)
 		if err = s.AdditionalRRMPriorityIndex.Decode(r); err != nil {
 			return fmt.Errorf("Decode AdditionalRRMPriorityIndex failed: %w", err)

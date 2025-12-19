@@ -31,6 +31,11 @@ func (s *NRCGI) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(s.NRCellIdentity.Value.Bytes, uint(s.NRCellIdentity.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false); err != nil {
 		return fmt.Errorf("Encode NRCellIdentity failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 

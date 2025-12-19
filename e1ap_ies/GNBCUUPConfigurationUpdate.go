@@ -23,50 +23,37 @@ type GNBCUUPConfigurationUpdate struct {
 // toIes transforms the GNBCUUPConfigurationUpdate struct into a slice of E1APMessageIEs.
 func (msg *GNBCUUPConfigurationUpdate) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 68719476735},
-					ext:   false,
-					Value: msg.GNBCUUPID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 68719476735},
+			ext:   false,
+			Value: msg.GNBCUUPID.Value,
+		},
+	})
 	if msg.GNBCUUPName != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPName},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 0, Ub: 0},
-					ext:   false,
-					Value: msg.GNBCUUPName.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPName},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &OCTETSTRING{
+				c:     aper.Constraint{Lb: 0, Ub: 0},
+				ext:   false,
+				Value: msg.GNBCUUPName.Value,
+			},
+		})
 	}
 	if msg.SupportedPLMNs != nil {
 
@@ -79,38 +66,23 @@ func (msg *GNBCUUPConfigurationUpdate) toIes() ([]E1APMessageIE, error) {
 			tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
 		}
 
-		{
-
-			tmp_SupportedPLMNs := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs},
-				ext: false,
-			}
-
-			for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
-				tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value:       &tmp_SupportedPLMNs,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value:       &tmp_SupportedPLMNs,
+		})
 	}
 	if msg.GNBCUUPCapacity != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPCapacity},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   false,
-					Value: msg.GNBCUUPCapacity.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPCapacity},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &INTEGER{
+				c:     aper.Constraint{Lb: 0, Ub: 255},
+				ext:   false,
+				Value: msg.GNBCUUPCapacity.Value,
+			},
+		})
 	}
 	if msg.GNBCUUPTNLAToRemoveList != nil {
 
@@ -123,45 +95,27 @@ func (msg *GNBCUUPConfigurationUpdate) toIes() ([]E1APMessageIE, error) {
 			tmp_GNBCUUPTNLAToRemoveList.Value = append(tmp_GNBCUUPTNLAToRemoveList.Value, &msg.GNBCUUPTNLAToRemoveList.Value[i])
 		}
 
-		{
-
-			tmp_GNBCUUPTNLAToRemoveList := Sequence[aper.IE]{
-				c:   aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations},
-				ext: false,
-			}
-
-			for i := 0; i < len(msg.GNBCUUPTNLAToRemoveList.Value); i++ {
-				tmp_GNBCUUPTNLAToRemoveList.Value = append(tmp_GNBCUUPTNLAToRemoveList.Value, &msg.GNBCUUPTNLAToRemoveList.Value[i])
-			}
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPTNLAToRemoveList},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value:       &tmp_GNBCUUPTNLAToRemoveList,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPTNLAToRemoveList},
+			Criticality: Criticality{Value: CriticalityReject},
+			Value:       &tmp_GNBCUUPTNLAToRemoveList,
+		})
 	}
 	if msg.TransportLayerAddressInfo != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.TransportLayerAddressInfo,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.TransportLayerAddressInfo,
+		})
 	}
 	if msg.ExtendedGNBCUUPName != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUUPName},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.ExtendedGNBCUUPName,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUUPName},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.ExtendedGNBCUUPName,
+		})
 	}
 	var err error
 	return ies, err

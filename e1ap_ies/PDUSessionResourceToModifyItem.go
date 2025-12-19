@@ -73,7 +73,7 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 		}
 	}
 	if s.PDUSessionResourceDLAMBR != nil {
-		if err = w.WriteInteger(int64(s.PDUSessionResourceDLAMBR.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PDUSessionResourceDLAMBR).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionResourceDLAMBR failed: %w", err)
 		}
 	}
@@ -93,46 +93,33 @@ func (s *PDUSessionResourceToModifyItem) Encode(w *aper.AperWriter) (err error) 
 		}
 	}
 	if s.PDUSessionInactivityTimer != nil {
-		if err = w.WriteInteger(int64(s.PDUSessionInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PDUSessionInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
 	if s.NetworkInstance != nil {
-		if err = w.WriteInteger(int64(s.NetworkInstance.Value), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.NetworkInstance).Value), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
 			return fmt.Errorf("Encode NetworkInstance failed: %w", err)
 		}
 	}
 	if s.DRBToSetupListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBToSetupListNGRAN.Value))
-			for i := 0; i < len(s.DRBToSetupListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBToSetupListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBToSetupListNGRAN failed: %w", err)
-			}
+		if err = s.DRBToSetupListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBToSetupListNGRAN failed: %w", err)
 		}
 	}
 	if s.DRBToModifyListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBToModifyListNGRAN.Value))
-			for i := 0; i < len(s.DRBToModifyListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBToModifyListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBToModifyListNGRAN failed: %w", err)
-			}
+		if err = s.DRBToModifyListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBToModifyListNGRAN failed: %w", err)
 		}
 	}
 	if s.DRBToRemoveListNGRAN != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DRBToRemoveListNGRAN.Value))
-			for i := 0; i < len(s.DRBToRemoveListNGRAN.Value); i++ {
-				itemPointers[i] = &(s.DRBToRemoveListNGRAN.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return fmt.Errorf("Encode DRBToRemoveListNGRAN failed: %w", err)
-			}
+		if err = s.DRBToRemoveListNGRAN.Encode(w); err != nil {
+			return fmt.Errorf("Encode DRBToRemoveListNGRAN failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

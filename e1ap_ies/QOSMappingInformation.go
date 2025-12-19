@@ -28,12 +28,12 @@ func (s *QOSMappingInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
 	}
 	if s.Dscp != nil {
-		if err = w.WriteBitString(s.Dscp.Value.Bytes, uint(s.Dscp.Value.NumBits), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
+		if err = w.WriteBitString((*s.Dscp).Value.Bytes, uint((*s.Dscp).Value.NumBits), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
 			return fmt.Errorf("Encode Dscp failed: %w", err)
 		}
 	}
 	if s.FlowLabel != nil {
-		if err = w.WriteBitString(s.FlowLabel.Value.Bytes, uint(s.FlowLabel.Value.NumBits), &aper.Constraint{Lb: 20, Ub: 20}, false); err != nil {
+		if err = w.WriteBitString((*s.FlowLabel).Value.Bytes, uint((*s.FlowLabel).Value.NumBits), &aper.Constraint{Lb: 20, Ub: 20}, false); err != nil {
 			return fmt.Errorf("Encode FlowLabel failed: %w", err)
 		}
 	}

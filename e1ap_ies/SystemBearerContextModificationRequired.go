@@ -52,16 +52,16 @@ func (s *SystemBearerContextModificationRequired) Decode(r *aper.AperReader) (er
 	if choice, err = r.ReadChoice(1, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.DRBRequiredToModifyListEUTRAN = new(DRBRequiredToModifyListEUTRAN)
 		if err = s.DRBRequiredToModifyListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBRequiredToModifyListEUTRAN failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.DRBRequiredToRemoveListEUTRAN = new(DRBRequiredToRemoveListEUTRAN)
 		if err = s.DRBRequiredToRemoveListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBRequiredToRemoveListEUTRAN failed: %w", err)

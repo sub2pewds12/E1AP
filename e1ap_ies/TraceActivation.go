@@ -33,11 +33,16 @@ func (s *TraceActivation) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBitString(s.InterfacesToTrace.Value.Bytes, uint(s.InterfacesToTrace.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
 		return fmt.Errorf("Encode InterfacesToTrace failed: %w", err)
 	}
-	if err = s.TraceDepth.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.TraceDepth.Value), aper.Constraint{Lb: 0, Ub: 5}, true); err != nil {
 		return fmt.Errorf("Encode TraceDepth failed: %w", err)
 	}
 	if err = w.WriteBitString(s.TraceCollectionEntityIPAddress.Value.Bytes, uint(s.TraceCollectionEntityIPAddress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
 		return fmt.Errorf("Encode TraceCollectionEntityIPAddress failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

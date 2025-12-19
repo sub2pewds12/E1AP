@@ -44,23 +44,28 @@ func (s *AlternativeQoSParaSetItem) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode AlternativeQoSParameterIndex failed: %w", err)
 	}
 	if s.GuaranteedFlowBitRateDL != nil {
-		if err = w.WriteInteger(int64(s.GuaranteedFlowBitRateDL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateDL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode GuaranteedFlowBitRateDL failed: %w", err)
 		}
 	}
 	if s.GuaranteedFlowBitRateUL != nil {
-		if err = w.WriteInteger(int64(s.GuaranteedFlowBitRateUL.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateUL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
 			return fmt.Errorf("Encode GuaranteedFlowBitRateUL failed: %w", err)
 		}
 	}
 	if s.PacketDelayBudget != nil {
-		if err = w.WriteInteger(int64(s.PacketDelayBudget.Value), &aper.Constraint{Lb: 0, Ub: 1023}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.PacketDelayBudget).Value), &aper.Constraint{Lb: 0, Ub: 1023}, true); err != nil {
 			return fmt.Errorf("Encode PacketDelayBudget failed: %w", err)
 		}
 	}
 	if s.PacketErrorRate != nil {
 		if err = s.PacketErrorRate.Encode(w); err != nil {
 			return fmt.Errorf("Encode PacketErrorRate failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

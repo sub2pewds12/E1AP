@@ -32,8 +32,13 @@ func (s *TSCTrafficInformation) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode Periodicity failed: %w", err)
 	}
 	if s.BurstArrivalTime != nil {
-		if err = w.WriteOctetString([]byte(s.BurstArrivalTime.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = w.WriteOctetString([]byte((*s.BurstArrivalTime).Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Encode BurstArrivalTime failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

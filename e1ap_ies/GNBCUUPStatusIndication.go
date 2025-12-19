@@ -17,36 +17,26 @@ type GNBCUUPStatusIndication struct {
 // toIes transforms the GNBCUUPStatusIndication struct into a slice of E1APMessageIEs.
 func (msg *GNBCUUPStatusIndication) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPOverloadInformation},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 1},
-					ext:   false,
-					Value: msg.GNBCUUPOverloadInformation.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPOverloadInformation},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &ENUMERATED{
+			c:     aper.Constraint{Lb: 0, Ub: 1},
+			ext:   false,
+			Value: msg.GNBCUUPOverloadInformation.Value,
+		},
+	})
 	var err error
 	return ies, err
 }

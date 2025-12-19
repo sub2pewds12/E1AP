@@ -37,29 +37,22 @@ func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode DRBID failed: %w", err)
 	}
 	if s.GNBCUUPCellGroupRelatedConfiguration != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.GNBCUUPCellGroupRelatedConfiguration.Value))
-			for i := 0; i < len(s.GNBCUUPCellGroupRelatedConfiguration.Value); i++ {
-				itemPointers[i] = &(s.GNBCUUPCellGroupRelatedConfiguration.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
-				return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
-			}
+		if err = s.GNBCUUPCellGroupRelatedConfiguration.Encode(w); err != nil {
+			return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
 		}
 	}
 	if s.FlowToRemove != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.FlowToRemove.Value))
-			for i := 0; i < len(s.FlowToRemove.Value); i++ {
-				itemPointers[i] = &(s.FlowToRemove.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-				return fmt.Errorf("Encode FlowToRemove failed: %w", err)
-			}
+		if err = s.FlowToRemove.Encode(w); err != nil {
+			return fmt.Errorf("Encode FlowToRemove failed: %w", err)
 		}
 	}
 	if err = s.Cause.Encode(w); err != nil {
 		return fmt.Errorf("Encode Cause failed: %w", err)
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

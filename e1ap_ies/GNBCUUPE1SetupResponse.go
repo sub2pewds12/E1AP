@@ -19,57 +19,43 @@ type GNBCUUPE1SetupResponse struct {
 // toIes transforms the GNBCUUPE1SetupResponse struct into a slice of E1APMessageIEs.
 func (msg *GNBCUUPE1SetupResponse) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 255},
-					ext:   true,
-					Value: msg.TransactionID.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 255},
+			ext:   true,
+			Value: msg.TransactionID.Value,
+		},
+	})
 	if msg.GNBCUCPName != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPName},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 0, Ub: 0},
-					ext:   false,
-					Value: msg.GNBCUCPName.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPName},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &OCTETSTRING{
+				c:     aper.Constraint{Lb: 0, Ub: 0},
+				ext:   false,
+				Value: msg.GNBCUCPName.Value,
+			},
+		})
 	}
 	if msg.TransportLayerAddressInfo != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.TransportLayerAddressInfo,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDTransportLayerAddressInfo},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.TransportLayerAddressInfo,
+		})
 	}
 	if msg.ExtendedGNBCUCPName != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUCPName},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value:       msg.ExtendedGNBCUCPName,
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDExtendedGNBCUCPName},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value:       msg.ExtendedGNBCUCPName,
+		})
 	}
 	var err error
 	return ies, err

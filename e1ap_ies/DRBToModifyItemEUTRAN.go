@@ -92,7 +92,7 @@ func (s *DRBToModifyItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.PDCPSNStatusRequest != nil {
-		if err = s.PDCPSNStatusRequest.Encode(w); err != nil {
+		if err = w.WriteEnumerate(uint64((*s.PDCPSNStatusRequest).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
 			return fmt.Errorf("Encode PDCPSNStatusRequest failed: %w", err)
 		}
 	}
@@ -102,52 +102,33 @@ func (s *DRBToModifyItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
 		}
 	}
 	if s.DLUPParameters != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.DLUPParameters.Value))
-			for i := 0; i < len(s.DLUPParameters.Value); i++ {
-				itemPointers[i] = &(s.DLUPParameters.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofUPParameters}, false); err != nil {
-				return fmt.Errorf("Encode DLUPParameters failed: %w", err)
-			}
+		if err = s.DLUPParameters.Encode(w); err != nil {
+			return fmt.Errorf("Encode DLUPParameters failed: %w", err)
 		}
 	}
 	if s.CellGroupToAdd != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupToAdd.Value))
-			for i := 0; i < len(s.CellGroupToAdd.Value); i++ {
-				itemPointers[i] = &(s.CellGroupToAdd.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-				return fmt.Errorf("Encode CellGroupToAdd failed: %w", err)
-			}
+		if err = s.CellGroupToAdd.Encode(w); err != nil {
+			return fmt.Errorf("Encode CellGroupToAdd failed: %w", err)
 		}
 	}
 	if s.CellGroupToModify != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupToModify.Value))
-			for i := 0; i < len(s.CellGroupToModify.Value); i++ {
-				itemPointers[i] = &(s.CellGroupToModify.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-				return fmt.Errorf("Encode CellGroupToModify failed: %w", err)
-			}
+		if err = s.CellGroupToModify.Encode(w); err != nil {
+			return fmt.Errorf("Encode CellGroupToModify failed: %w", err)
 		}
 	}
 	if s.CellGroupToRemove != nil {
-		{
-			itemPointers := make([]aper.AperMarshaller, len(s.CellGroupToRemove.Value))
-			for i := 0; i < len(s.CellGroupToRemove.Value); i++ {
-				itemPointers[i] = &(s.CellGroupToRemove.Value[i])
-			}
-			if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofCellGroups}, false); err != nil {
-				return fmt.Errorf("Encode CellGroupToRemove failed: %w", err)
-			}
+		if err = s.CellGroupToRemove.Encode(w); err != nil {
+			return fmt.Errorf("Encode CellGroupToRemove failed: %w", err)
 		}
 	}
 	if s.DRBInactivityTimer != nil {
-		if err = w.WriteInteger(int64(s.DRBInactivityTimer.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.WriteInteger(int64((*s.DRBInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
 			return fmt.Errorf("Encode DRBInactivityTimer failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

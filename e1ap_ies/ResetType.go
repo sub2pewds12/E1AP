@@ -58,21 +58,21 @@ func (s *ResetType) Decode(r *aper.AperReader) (err error) {
 	if choice, err = r.ReadChoice(2, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.E1Interface = new(ResetAll)
 		if err = s.E1Interface.Decode(r); err != nil {
 			return fmt.Errorf("Decode E1Interface failed: %w", err)
 		}
-	case 1:
+	case 2:
 		s.PartOfE1Interface = new(UEAssociatedLogicalE1ConnectionListRes)
 		if err = s.PartOfE1Interface.Decode(r); err != nil {
 			return fmt.Errorf("Decode PartOfE1Interface failed: %w", err)
 		}
-	case 2:
+	case 3:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
 			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)

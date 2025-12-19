@@ -46,11 +46,11 @@ func (s *SystemGNBCUUPCounterCheckRequest) Decode(r *aper.AperReader) (err error
 	if choice, err = r.ReadChoice(0, false); err != nil {
 		return fmt.Errorf("Read choice index failed: %w", err)
 	}
-	s.Choice = choice + 1 // Convert from 0-based wire format to 1-based constant format
+	s.Choice = choice // Choice is 1-based from ReadChoice
 
 	// 2. Decode the selected member.
-	switch s.Choice {
-	case 0:
+	switch choice {
+	case 1:
 		s.DRBsSubjectToCounterCheckListEUTRAN = new(DRBsSubjectToCounterCheckListEUTRAN)
 		if err = s.DRBsSubjectToCounterCheckListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("Decode DRBsSubjectToCounterCheckListEUTRAN failed: %w", err)

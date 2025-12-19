@@ -1,7 +1,6 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/lvdund/ngap/aper"
@@ -22,18 +21,11 @@ func (s *ProtocolIEField) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.ID.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false); err != nil {
 		return fmt.Errorf("Encode ID failed: %w", err)
 	}
-	if err = s.Criticality.Encode(w); err != nil {
+	if err = w.WriteEnumerate(uint64(s.Criticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
 		return fmt.Errorf("Encode Criticality failed: %w", err)
 	}
-
-	{
-		var buf bytes.Buffer
-		if err = s.Value.Encode(aper.NewWriter(&buf)); err != nil {
-			return fmt.Errorf("Encode Value (OpenType) failed: %w", err)
-		}
-		if err = w.WriteOpenType(buf.Bytes()); err != nil {
-			return fmt.Errorf("Encode Value as OpenType failed: %w", err)
-		}
+	if err = s.Value.Encode(w); err != nil {
+		return fmt.Errorf("Encode Value failed: %w", err)
 	}
 	return nil
 }

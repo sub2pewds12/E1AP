@@ -32,8 +32,13 @@ func (s *UPSecuritykey) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode EncryptionKey failed: %w", err)
 	}
 	if s.IntegrityProtectionKey != nil {
-		if err = w.WriteOctetString([]byte(s.IntegrityProtectionKey.Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
+		if err = w.WriteOctetString([]byte((*s.IntegrityProtectionKey).Value), &aper.Constraint{Lb: 0, Ub: 0}, false); err != nil {
 			return fmt.Errorf("Encode IntegrityProtectionKey failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

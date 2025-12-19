@@ -21,95 +21,69 @@ type CellTrafficTrace struct {
 // toIes transforms the CellTrafficTrace struct into a slice of E1APMessageIEs.
 func (msg *CellTrafficTrace) toIes() ([]E1APMessageIE, error) {
 	ies := make([]E1APMessageIE, 0)
-	{
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUCPUEE1APID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUCPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
+		Criticality: Criticality{Value: CriticalityReject},
+		Value: &INTEGER{
+			c:     aper.Constraint{Lb: 0, Ub: 4294967295},
+			ext:   false,
+			Value: msg.GNBCUUPUEE1APID.Value,
+		},
+	})
 
-		{
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTraceID},
+		Criticality: Criticality{Value: CriticalityIgnore},
+		Value: &OCTETSTRING{
+			c:     aper.Constraint{Lb: 8, Ub: 8},
+			ext:   false,
+			Value: msg.TraceID.Value,
+		},
+	})
 
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
-				Criticality: Criticality{Value: CriticalityReject},
-				Value: &INTEGER{
-					c:     aper.Constraint{Lb: 0, Ub: 4294967295},
-					ext:   false,
-					Value: msg.GNBCUUPUEE1APID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTraceID},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 8, Ub: 8},
-					ext:   false,
-					Value: msg.TraceID.Value,
-				},
-			})
-		}
-	}
-	{
-
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDTraceCollectionEntityIPAddress},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &BITSTRING{
-					c:     aper.Constraint{Lb: 1, Ub: 160},
-					ext:   false,
-					Value: msg.TraceCollectionEntityIPAddress.Value,
-				},
-			})
-		}
-	}
+	ies = append(ies, E1APMessageIE{
+		Id:          ProtocolIEID{Value: ProtocolIEIDTraceCollectionEntityIPAddress},
+		Criticality: Criticality{Value: CriticalityIgnore},
+		Value: &BITSTRING{
+			c:     aper.Constraint{Lb: 1, Ub: 160},
+			ext:   false,
+			Value: msg.TraceCollectionEntityIPAddress.Value,
+		},
+	})
 	if msg.PrivacyIndicator != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDPrivacyIndicator},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &ENUMERATED{
-					c:     aper.Constraint{Lb: 0, Ub: 1},
-					ext:   true,
-					Value: msg.PrivacyIndicator.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDPrivacyIndicator},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &ENUMERATED{
+				c:     aper.Constraint{Lb: 0, Ub: 1},
+				ext:   true,
+				Value: msg.PrivacyIndicator.Value,
+			},
+		})
 	}
 	if msg.URIaddress != nil {
 
-		{
-
-			ies = append(ies, E1APMessageIE{
-				Id:          ProtocolIEID{Value: ProtocolIEIDURIaddress},
-				Criticality: Criticality{Value: CriticalityIgnore},
-				Value: &OCTETSTRING{
-					c:     aper.Constraint{Lb: 0, Ub: 0},
-					ext:   false,
-					Value: msg.URIaddress.Value,
-				},
-			})
-		}
+		ies = append(ies, E1APMessageIE{
+			Id:          ProtocolIEID{Value: ProtocolIEIDURIaddress},
+			Criticality: Criticality{Value: CriticalityIgnore},
+			Value: &OCTETSTRING{
+				c:     aper.Constraint{Lb: 0, Ub: 0},
+				ext:   false,
+				Value: msg.URIaddress.Value,
+			},
+		})
 	}
 	var err error
 	return ies, err

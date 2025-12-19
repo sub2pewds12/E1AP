@@ -1,6 +1,7 @@
 package e1ap_ies
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/lvdund/ngap/aper"
@@ -15,14 +16,89 @@ type SupportedPLMNsItemExtensions struct {
 
 // Encode implements the aper.AperMarshaller interface.
 func (s *SupportedPLMNsItemExtensions) Encode(w *aper.AperWriter) error {
-	// TODO: Implement the complex APER extension container encoding logic.
-	// This involves creating a bitmap of present extensions and encoding each one as an open type.
-	return fmt.Errorf("Encode not yet implemented for SupportedPLMNsItemExtensions")
+	var extensions []*ProtocolExtensionField
+
+	if s.NPNSupportInfo != nil {
+		extensions = append(extensions, &ProtocolExtensionField{
+			Id:             ProtocolIEID{Value: ProtocolIEIDNPNSupportInfo},
+			Criticality:    Criticality{Value: CriticalityReject},
+			ExtensionValue: s.NPNSupportInfo,
+		})
+	}
+
+	if s.ExtendedSliceSupportList != nil {
+		extensions = append(extensions, &ProtocolExtensionField{
+			Id:             ProtocolIEID{Value: ProtocolIEIDExtendedSliceSupportList},
+			Criticality:    Criticality{Value: CriticalityReject},
+			ExtensionValue: s.ExtendedSliceSupportList,
+		})
+	}
+
+	if s.ExtendedNRCGISupportList != nil {
+		extensions = append(extensions, &ProtocolExtensionField{
+			Id:             ProtocolIEID{Value: ProtocolIEIDExtendedNRCGISupportList},
+			Criticality:    Criticality{Value: CriticalityIgnore},
+			ExtensionValue: s.ExtendedNRCGISupportList,
+		})
+	}
+
+	if len(extensions) > 0 {
+		itemPointers := make([]aper.AperMarshaller, len(extensions))
+		for i := 0; i < len(extensions); i++ {
+			itemPointers[i] = extensions[i]
+		}
+		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+			return fmt.Errorf("Encode extension container failed: %w", err)
+		}
+	} else {
+		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+			return fmt.Errorf("Encode empty extension container failed: %w", err)
+		}
+	}
+	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *SupportedPLMNsItemExtensions) Decode(r *aper.AperReader) error {
-	// TODO: Implement the complex APER extension container decoding logic.
-	// This involves reading a bitmap and then decoding each present extension as an open type.
-	return fmt.Errorf("Decode not yet implemented for SupportedPLMNsItemExtensions")
+	var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
+	decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {
+		var item ProtocolExtensionField
+		if err := item.Decode(r); err != nil {
+			return nil, err
+		}
+		ptr := &item
+		return &ptr, nil
+	}
+
+	var extensions []*ProtocolExtensionField
+	var err error
+	if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
+		return fmt.Errorf("Decode extension container failed: %w", err)
+	}
+
+	for _, ext := range extensions {
+		switch ext.Id.Value {
+
+		case ProtocolIEIDNPNSupportInfo:
+			s.NPNSupportInfo = new(NPNSupportInfo)
+			if err := s.NPNSupportInfo.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+				return fmt.Errorf("Decode extension NPNSupportInfo failed: %w", err)
+			}
+
+		case ProtocolIEIDExtendedSliceSupportList:
+			s.ExtendedSliceSupportList = new(ExtendedSliceSupportList)
+			if err := s.ExtendedSliceSupportList.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+				return fmt.Errorf("Decode extension ExtendedSliceSupportList failed: %w", err)
+			}
+
+		case ProtocolIEIDExtendedNRCGISupportList:
+			s.ExtendedNRCGISupportList = new(ExtendedNRCGISupportList)
+			if err := s.ExtendedNRCGISupportList.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+				return fmt.Errorf("Decode extension ExtendedNRCGISupportList failed: %w", err)
+			}
+		default:
+			// Unknown extension, ignore
+		}
+	}
+	return nil
 }

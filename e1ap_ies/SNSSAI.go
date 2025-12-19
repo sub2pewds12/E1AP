@@ -32,8 +32,13 @@ func (s *SNSSAI) Encode(w *aper.AperWriter) (err error) {
 		return fmt.Errorf("Encode SST failed: %w", err)
 	}
 	if s.SD != nil {
-		if err = w.WriteOctetString([]byte(s.SD.Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
+		if err = w.WriteOctetString([]byte((*s.SD).Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
 			return fmt.Errorf("Encode SD failed: %w", err)
+		}
+	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil

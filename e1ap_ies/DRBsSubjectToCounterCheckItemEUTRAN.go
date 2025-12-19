@@ -35,6 +35,11 @@ func (s *DRBsSubjectToCounterCheckItemEUTRAN) Encode(w *aper.AperWriter) (err er
 	if err = s.PDCPDLCount.Encode(w); err != nil {
 		return fmt.Errorf("Encode PDCPDLCount failed: %w", err)
 	}
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+		}
+	}
 	return nil
 }
 
