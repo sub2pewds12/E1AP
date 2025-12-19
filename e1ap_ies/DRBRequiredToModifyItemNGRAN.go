@@ -18,7 +18,7 @@ type DRBRequiredToModifyItemNGRAN struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.GNBCUUPCellGroupRelatedConfiguration != nil {
@@ -31,27 +31,27 @@ func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 		optionalityBitmap[0] |= 1 << 5
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
-		return fmt.Errorf("Encode DRBID failed: %w", err)
+		return fmt.Errorf("encode DRBID failed: %w", err)
 	}
 	if s.GNBCUUPCellGroupRelatedConfiguration != nil {
 		if err = s.GNBCUUPCellGroupRelatedConfiguration.Encode(w); err != nil {
-			return fmt.Errorf("Encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
+			return fmt.Errorf("encode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
 		}
 	}
 	if s.FlowToRemove != nil {
 		if err = s.FlowToRemove.Encode(w); err != nil {
-			return fmt.Errorf("Encode FlowToRemove failed: %w", err)
+			return fmt.Errorf("encode FlowToRemove failed: %w", err)
 		}
 	}
 	if err = s.Cause.Encode(w); err != nil {
-		return fmt.Errorf("Encode Cause failed: %w", err)
+		return fmt.Errorf("encode Cause failed: %w", err)
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -59,36 +59,37 @@ func (s *DRBRequiredToModifyItemNGRAN) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *DRBRequiredToModifyItemNGRAN) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if err = s.DRBID.Decode(r); err != nil {
-		return fmt.Errorf("Decode DRBID failed: %w", err)
+		return fmt.Errorf("decode DRBID failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.GNBCUUPCellGroupRelatedConfiguration = new(GNBCUUPCellGroupRelatedConfiguration)
 		if err = s.GNBCUUPCellGroupRelatedConfiguration.Decode(r); err != nil {
-			return fmt.Errorf("Decode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
+			return fmt.Errorf("decode GNBCUUPCellGroupRelatedConfiguration failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.FlowToRemove = new(QOSFlowList)
 		if err = s.FlowToRemove.Decode(r); err != nil {
-			return fmt.Errorf("Decode FlowToRemove failed: %w", err)
+			return fmt.Errorf("decode FlowToRemove failed: %w", err)
 		}
 	}
 	if err = s.Cause.Decode(r); err != nil {
-		return fmt.Errorf("Decode Cause failed: %w", err)
+		return fmt.Errorf("decode Cause failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for DRBRequiredToModifyItemNGRAN */

@@ -22,7 +22,7 @@ func (s *TransportUPLayerAddressesInfoToRemoveList) Encode(w *aper.AperWriter) (
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
 	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofTLAs}, false); err != nil {
-		return fmt.Errorf("WriteSequenceOf for TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
+		return fmt.Errorf("writeSequenceOf for TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *TransportUPLayerAddressesInfoToRemoveList) Decode(r *aper.AperReader) (
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []TransportUPLayerAddressesInfoToRemoveItem // <--- FIX: Removed the '*'
 	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofTLAs}, false); err != nil {
-		return fmt.Errorf("ReadSequenceOf for TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
+		return fmt.Errorf("readSequenceOf for TransportUPLayerAddressesInfoToRemoveList failed: %w", err)
 	}
 
 	// 3. Assign the decoded slice of values directly.

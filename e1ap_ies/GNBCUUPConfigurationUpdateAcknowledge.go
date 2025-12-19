@@ -44,8 +44,7 @@ func (msg *GNBCUUPConfigurationUpdateAcknowledge) toIes() ([]E1APMessageIE, erro
 			Value:       msg.TransportLayerAddressInfo,
 		})
 	}
-	var err error
-	return ies, err
+	return ies, nil
 }
 
 // Encode implements the aper.AperMarshaller interface for GNBCUUPConfigurationUpdateAcknowledge.
@@ -59,10 +58,10 @@ func (msg *GNBCUUPConfigurationUpdateAcknowledge) Encode(w io.Writer) error {
 }
 
 // Decode implements the aper.AperUnmarshaller interface for GNBCUUPConfigurationUpdateAcknowledge.
-func (msg *GNBCUUPConfigurationUpdateAcknowledge) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+func (msg *GNBCUUPConfigurationUpdateAcknowledge) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("GNBCUUPConfigurationUpdateAcknowledge: %w", err)
+			err = fmt.Errorf("decode GNBCUUPConfigurationUpdateAcknowledge failed: %w", err)
 		}
 	}()
 
@@ -74,14 +73,16 @@ func (msg *GNBCUUPConfigurationUpdateAcknowledge) Decode(buf []byte) (err error,
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
 		return
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDTransactionID}]; !ok {
-		err = fmt.Errorf("mandatory field TransactionID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field TransactionID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
@@ -102,20 +103,20 @@ type GNBCUUPConfigurationUpdateAcknowledgeDecoder struct {
 }
 
 func (decoder *GNBCUUPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	var id int64
-	var c uint64
-	var buf []byte
-	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
 	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
-	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
-	if buf, err = r.ReadOpenType(); err != nil {
+	buf, err := r.ReadOpenType()
+	if err != nil {
 		return nil, err
 	}
 
@@ -132,32 +133,27 @@ func (decoder *GNBCUUPConfigurationUpdateAcknowledgeDecoder) decodeIE(r *aper.Ap
 	case ProtocolIEIDTransactionID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+			if err != nil {
+				return nil, fmt.Errorf("decode TransactionID failed: %w", err)
 			}
 			msg.TransactionID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDCriticalityDiagnostics:
 		msg.CriticalityDiagnostics = new(CriticalityDiagnostics)
 		if err = msg.CriticalityDiagnostics.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("Decode CriticalityDiagnostics failed: %w", err)
+			return nil, fmt.Errorf("decode CriticalityDiagnostics failed: %w", err)
 		}
 	case ProtocolIEIDTransportLayerAddressInfo:
 		msg.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
 		if err = msg.TransportLayerAddressInfo.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("Decode TransportLayerAddressInfo failed: %w", err)
+			return nil, fmt.Errorf("decode TransportLayerAddressInfo failed: %w", err)
 		}
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
-			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
-				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
-				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
-			})
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{

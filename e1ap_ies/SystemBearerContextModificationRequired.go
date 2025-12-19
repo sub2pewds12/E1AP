@@ -32,11 +32,11 @@ func (s *SystemBearerContextModificationRequired) Encode(w *aper.AperWriter) (er
 	switch s.Choice {
 	case SystemBearerContextModificationRequiredPresentDRBRequiredToModifyListEUTRAN:
 		if err = s.DRBRequiredToModifyListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBRequiredToModifyListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBRequiredToModifyListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationRequiredPresentDRBRequiredToRemoveListEUTRAN:
 		if err = s.DRBRequiredToRemoveListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBRequiredToRemoveListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBRequiredToRemoveListEUTRAN failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of SystemBearerContextModificationRequired with unknown choice value %d", s.Choice)
@@ -48,9 +48,9 @@ func (s *SystemBearerContextModificationRequired) Encode(w *aper.AperWriter) (er
 func (s *SystemBearerContextModificationRequired) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(1, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(1, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -59,15 +59,15 @@ func (s *SystemBearerContextModificationRequired) Decode(r *aper.AperReader) (er
 	case 1:
 		s.DRBRequiredToModifyListEUTRAN = new(DRBRequiredToModifyListEUTRAN)
 		if err = s.DRBRequiredToModifyListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBRequiredToModifyListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBRequiredToModifyListEUTRAN failed: %w", err)
 		}
 	case 2:
 		s.DRBRequiredToRemoveListEUTRAN = new(DRBRequiredToRemoveListEUTRAN)
 		if err = s.DRBRequiredToRemoveListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBRequiredToRemoveListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBRequiredToRemoveListEUTRAN failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of SystemBearerContextModificationRequired with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemBearerContextModificationRequired with unknown choice index %d", choice)
 	}
 	return nil
 }

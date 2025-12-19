@@ -41,7 +41,7 @@ func E1apDecode(buf []byte) (pdu E1AP_PDU, diagnostics []e1ap_ies.CriticalityDia
 		return
 	}
 
-	if err, diagnostics = message.Decode(containerBytes); err != nil {
+	if diagnostics, err = message.Decode(containerBytes); err != nil {
 		return
 	}
 

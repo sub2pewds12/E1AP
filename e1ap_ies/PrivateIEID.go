@@ -32,11 +32,11 @@ func (s *PrivateIEID) Encode(w *aper.AperWriter) (err error) {
 	switch s.Choice {
 	case PrivateIEIDPresentLocal:
 		if err = s.Local.Encode(w); err != nil {
-			return fmt.Errorf("Encode Local failed: %w", err)
+			return fmt.Errorf("encode Local failed: %w", err)
 		}
 	case PrivateIEIDPresentGlobal:
 		if err = w.WriteOctetString([]byte(*s.Global), nil, false); err != nil {
-			return fmt.Errorf("Encode Global failed: %w", err)
+			return fmt.Errorf("encode Global failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of PrivateIEID with unknown choice value %d", s.Choice)
@@ -48,9 +48,9 @@ func (s *PrivateIEID) Encode(w *aper.AperWriter) (err error) {
 func (s *PrivateIEID) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(1, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(1, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -59,17 +59,17 @@ func (s *PrivateIEID) Decode(r *aper.AperReader) (err error) {
 	case 1:
 		s.Local = new(INTEGER)
 		if err = s.Local.Decode(r); err != nil {
-			return fmt.Errorf("Decode Local failed: %w", err)
+			return fmt.Errorf("decode Local failed: %w", err)
 		}
 	case 2:
-		var val []byte
-		if val, err = r.ReadOctetString(nil, false); err != nil {
-			return fmt.Errorf("Decode Global failed: %w", err)
+		val, err := r.ReadOctetString(nil, false)
+		if err != nil {
+			return fmt.Errorf("decode Global failed: %w", err)
 		}
 		tmpStr := string(val)
 		s.Global = &tmpStr
 	default:
-		return fmt.Errorf("Decode choice of PrivateIEID with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of PrivateIEID with unknown choice index %d", choice)
 	}
 	return nil
 }

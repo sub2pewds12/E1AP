@@ -18,7 +18,7 @@ type GBRQosInformation struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *GBRQosInformation) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.ERABMaximumBitrateDL != nil {
@@ -37,31 +37,31 @@ func (s *GBRQosInformation) Encode(w *aper.AperWriter) (err error) {
 		optionalityBitmap[0] |= 1 << 3
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(5), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if s.ERABMaximumBitrateDL != nil {
 		if err = w.WriteInteger(int64((*s.ERABMaximumBitrateDL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-			return fmt.Errorf("Encode ERABMaximumBitrateDL failed: %w", err)
+			return fmt.Errorf("encode ERABMaximumBitrateDL failed: %w", err)
 		}
 	}
 	if s.ERABMaximumBitrateUL != nil {
 		if err = w.WriteInteger(int64((*s.ERABMaximumBitrateUL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-			return fmt.Errorf("Encode ERABMaximumBitrateUL failed: %w", err)
+			return fmt.Errorf("encode ERABMaximumBitrateUL failed: %w", err)
 		}
 	}
 	if s.ERABGuaranteedBitrateDL != nil {
 		if err = w.WriteInteger(int64((*s.ERABGuaranteedBitrateDL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-			return fmt.Errorf("Encode ERABGuaranteedBitrateDL failed: %w", err)
+			return fmt.Errorf("encode ERABGuaranteedBitrateDL failed: %w", err)
 		}
 	}
 	if s.ERABGuaranteedBitrateUL != nil {
 		if err = w.WriteInteger(int64((*s.ERABGuaranteedBitrateUL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-			return fmt.Errorf("Encode ERABGuaranteedBitrateUL failed: %w", err)
+			return fmt.Errorf("encode ERABGuaranteedBitrateUL failed: %w", err)
 		}
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -69,42 +69,43 @@ func (s *GBRQosInformation) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *GBRQosInformation) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 5, Ub: 5}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.ERABMaximumBitrateDL = new(BitRate)
 		if err = s.ERABMaximumBitrateDL.Decode(r); err != nil {
-			return fmt.Errorf("Decode ERABMaximumBitrateDL failed: %w", err)
+			return fmt.Errorf("decode ERABMaximumBitrateDL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.ERABMaximumBitrateUL = new(BitRate)
 		if err = s.ERABMaximumBitrateUL.Decode(r); err != nil {
-			return fmt.Errorf("Decode ERABMaximumBitrateUL failed: %w", err)
+			return fmt.Errorf("decode ERABMaximumBitrateUL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.ERABGuaranteedBitrateDL = new(BitRate)
 		if err = s.ERABGuaranteedBitrateDL.Decode(r); err != nil {
-			return fmt.Errorf("Decode ERABGuaranteedBitrateDL failed: %w", err)
+			return fmt.Errorf("decode ERABGuaranteedBitrateDL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.ERABGuaranteedBitrateUL = new(BitRate)
 		if err = s.ERABGuaranteedBitrateUL.Decode(r); err != nil {
-			return fmt.Errorf("Decode ERABGuaranteedBitrateUL failed: %w", err)
+			return fmt.Errorf("decode ERABGuaranteedBitrateUL failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for GBRQosInformation */

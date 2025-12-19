@@ -57,11 +57,11 @@ func (s *PDUSessionResourceToSetupItemExtensions) Encode(w *aper.AperWriter) err
 			itemPointers[i] = extensions[i]
 		}
 		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-			return fmt.Errorf("Encode extension container failed: %w", err)
+			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
 		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-			return fmt.Errorf("Encode empty extension container failed: %w", err)
+			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
 	return nil
@@ -69,20 +69,17 @@ func (s *PDUSessionResourceToSetupItemExtensions) Encode(w *aper.AperWriter) err
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *PDUSessionResourceToSetupItemExtensions) Decode(r *aper.AperReader) error {
-	var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
-	decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {
-		var item ProtocolExtensionField
+	decoder := func(r *aper.AperReader) (**ProtocolExtensionField, error) {
+		item := new(ProtocolExtensionField)
 		if err := item.Decode(r); err != nil {
 			return nil, err
 		}
-		ptr := &item
-		return &ptr, nil
+		return &item, nil
 	}
 
-	var extensions []*ProtocolExtensionField
-	var err error
-	if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-		return fmt.Errorf("Decode extension container failed: %w", err)
+	extensions, err := aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false)
+	if err != nil {
+		return fmt.Errorf("decode extension container failed: %w", err)
 	}
 
 	for _, ext := range extensions {
@@ -91,25 +88,25 @@ func (s *PDUSessionResourceToSetupItemExtensions) Decode(r *aper.AperReader) err
 		case ProtocolIEIDCommonNetworkInstance:
 			s.CommonNetworkInstance = new(CommonNetworkInstance)
 			if err := s.CommonNetworkInstance.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension CommonNetworkInstance failed: %w", err)
+				return fmt.Errorf("decode extension CommonNetworkInstance failed: %w", err)
 			}
 
 		case ProtocolIEIDRedundantNGULUPTNLInformation:
 			s.RedundantNGULUPTNLInformation = new(UPTNLInformation)
 			if err := s.RedundantNGULUPTNLInformation.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension RedundantNGULUPTNLInformation failed: %w", err)
+				return fmt.Errorf("decode extension RedundantNGULUPTNLInformation failed: %w", err)
 			}
 
 		case ProtocolIEIDRedundantCommonNetworkInstance:
 			s.RedundantCommonNetworkInstance = new(CommonNetworkInstance)
 			if err := s.RedundantCommonNetworkInstance.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension RedundantCommonNetworkInstance failed: %w", err)
+				return fmt.Errorf("decode extension RedundantCommonNetworkInstance failed: %w", err)
 			}
 
 		case ProtocolIEIDRedundantPDUSessionInformation:
 			s.RedundantPDUSessionInformation = new(RedundantPDUSessionInformation)
 			if err := s.RedundantPDUSessionInformation.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension RedundantPDUSessionInformation failed: %w", err)
+				return fmt.Errorf("decode extension RedundantPDUSessionInformation failed: %w", err)
 			}
 		default:
 			// Unknown extension, ignore

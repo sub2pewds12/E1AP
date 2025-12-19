@@ -18,14 +18,14 @@ func encodeMessage(w io.Writer, present uint8, procedureCode ProcedureCode, crit
 	defer aw.Close() 
 
 	if err = aw.WriteChoice(uint64(present) + 1, 2, false); err != nil {
-		return fmt.Errorf("Encode PDU Choice failed: %w", err)
+		return fmt.Errorf("encode PDU Choice failed: %w", err)
 	}
 
 	if err = procedureCode.Encode(aw); err != nil {
-		return fmt.Errorf("Encode ProcedureCode failed: %w", err)
+		return fmt.Errorf("encode ProcedureCode failed: %w", err)
 	}
 	if err = criticality.Encode(aw); err != nil {
-		return fmt.Errorf("Encode Criticality failed: %w", err)
+		return fmt.Errorf("encode Criticality failed: %w", err)
 	}
 
 	var buf bytes.Buffer
@@ -37,14 +37,14 @@ func encodeMessage(w io.Writer, present uint8, procedureCode ProcedureCode, crit
 	}
 
 	if err = aper.WriteSequenceOf(ieMarshallers, ieWriter, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return fmt.Errorf("Encode IEs into buffer failed: %w", err)
+		return fmt.Errorf("encode IEs into buffer failed: %w", err)
 	}
 	if err = ieWriter.Close(); err != nil {
-		return fmt.Errorf("Close IE buffer writer failed: %w", err)
+		return fmt.Errorf("close IE buffer writer failed: %w", err)
 	}
 
 	if err = aw.WriteOpenType(buf.Bytes()); err != nil {
-		return fmt.Errorf("Encode OpenType failed: %w", err)
+		return fmt.Errorf("encode OpenType failed: %w", err)
 	}
 
 	return nil 

@@ -32,11 +32,11 @@ func (s *NPNContextInfo) Encode(w *aper.AperWriter) (err error) {
 	switch s.Choice {
 	case NPNContextInfoPresentSNPN:
 		if err = s.SNPN.Encode(w); err != nil {
-			return fmt.Errorf("Encode SNPN failed: %w", err)
+			return fmt.Errorf("encode SNPN failed: %w", err)
 		}
 	case NPNContextInfoPresentChoiceExtension:
 		if err = s.ChoiceExtension.Encode(w); err != nil {
-			return fmt.Errorf("Encode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of NPNContextInfo with unknown choice value %d", s.Choice)
@@ -48,9 +48,9 @@ func (s *NPNContextInfo) Encode(w *aper.AperWriter) (err error) {
 func (s *NPNContextInfo) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(1, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(1, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -59,15 +59,15 @@ func (s *NPNContextInfo) Decode(r *aper.AperReader) (err error) {
 	case 1:
 		s.SNPN = new(NPNContextInfoSNPN)
 		if err = s.SNPN.Decode(r); err != nil {
-			return fmt.Errorf("Decode SNPN failed: %w", err)
+			return fmt.Errorf("decode SNPN failed: %w", err)
 		}
 	case 2:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
-			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of NPNContextInfo with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of NPNContextInfo with unknown choice index %d", choice)
 	}
 	return nil
 }

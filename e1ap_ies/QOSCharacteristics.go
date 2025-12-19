@@ -34,15 +34,15 @@ func (s *QOSCharacteristics) Encode(w *aper.AperWriter) (err error) {
 	switch s.Choice {
 	case QOSCharacteristicsPresentNonDynamic5QI:
 		if err = s.NonDynamic5QI.Encode(w); err != nil {
-			return fmt.Errorf("Encode NonDynamic5QI failed: %w", err)
+			return fmt.Errorf("encode NonDynamic5QI failed: %w", err)
 		}
 	case QOSCharacteristicsPresentDynamic5QI:
 		if err = s.Dynamic5QI.Encode(w); err != nil {
-			return fmt.Errorf("Encode Dynamic5QI failed: %w", err)
+			return fmt.Errorf("encode Dynamic5QI failed: %w", err)
 		}
 	case QOSCharacteristicsPresentChoiceExtension:
 		if err = s.ChoiceExtension.Encode(w); err != nil {
-			return fmt.Errorf("Encode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of QOSCharacteristics with unknown choice value %d", s.Choice)
@@ -54,9 +54,9 @@ func (s *QOSCharacteristics) Encode(w *aper.AperWriter) (err error) {
 func (s *QOSCharacteristics) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(2, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(2, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -65,20 +65,20 @@ func (s *QOSCharacteristics) Decode(r *aper.AperReader) (err error) {
 	case 1:
 		s.NonDynamic5QI = new(NonDynamic5QIDescriptor)
 		if err = s.NonDynamic5QI.Decode(r); err != nil {
-			return fmt.Errorf("Decode NonDynamic5QI failed: %w", err)
+			return fmt.Errorf("decode NonDynamic5QI failed: %w", err)
 		}
 	case 2:
 		s.Dynamic5QI = new(Dynamic5QIDescriptor)
 		if err = s.Dynamic5QI.Decode(r); err != nil {
-			return fmt.Errorf("Decode Dynamic5QI failed: %w", err)
+			return fmt.Errorf("decode Dynamic5QI failed: %w", err)
 		}
 	case 3:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
-			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of QOSCharacteristics with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of QOSCharacteristics with unknown choice index %d", choice)
 	}
 	return nil
 }

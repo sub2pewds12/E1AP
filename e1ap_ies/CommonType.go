@@ -23,22 +23,26 @@ type E1APMessageIE struct {
 func (ie *E1APMessageIE) Encode(w *aper.AperWriter) error {
 	// 1. Encode the ID
 	if err := w.WriteInteger(int64(ie.Id.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return fmt.Errorf("Encode IE ID failed: %w", err)
+		return fmt.Errorf("encode IE ID failed: %w", err)
 	}
 
 	// 2. Encode the Criticality
 	if err := ie.Criticality.Encode(w); err != nil {
-		return fmt.Errorf("Encode IE Criticality failed: %w", err)
+		return fmt.Errorf("encode IE Criticality failed: %w", err)
 	}
 
 	// 3. Encode the Value as an Open Type
 	var buf bytes.Buffer
-	if err := ie.Value.Encode(aper.NewWriter(&buf)); err != nil {
-		return fmt.Errorf("Encode IE Value failed: %w", err)
+	ieWriter := aper.NewWriter(&buf)
+	if err := ie.Value.Encode(ieWriter); err != nil {
+		return fmt.Errorf("encode IE Value failed: %w", err)
+	}
+	if err := ieWriter.Close(); err != nil {
+		return fmt.Errorf("close IE Value writer failed: %w", err)
 	}
 
 	if err := w.WriteOpenType(buf.Bytes()); err != nil {
-		return fmt.Errorf("Encode IE Value as OpenType failed: %w", err)
+		return fmt.Errorf("encode IE Value as OpenType failed: %w", err)
 	}
 
 	return nil
@@ -207,7 +211,7 @@ func (s *Sequence[T]) Encode(w *aper.AperWriter) (err error) {
 func (s *Sequence[T]) Decode(r *aper.AperReader) (err error) {
 	// This function now has the correct signature but is a placeholder.
 	// Decoding of lists will be handled specially inside the decodeIE switch case.
-	return fmt.Errorf("Decode for generic Sequence[T] should not be called directly. Use the specific list decoder logic.")
+	return fmt.Errorf("decode for generic Sequence[T] should not be called directly. Use the specific list decoder logic")
 }
 
 type ProtocolExtensionContainer struct {
@@ -239,18 +243,22 @@ type ProtocolExtensionField struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *ProtocolExtensionField) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteInteger(int64(s.Id.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
-		return fmt.Errorf("Encode ProtocolExtensionField ID failed: %w", err)
+		return fmt.Errorf("encode ProtocolExtensionField ID failed: %w", err)
 	}
 	if err = s.Criticality.Encode(w); err != nil {
-		return fmt.Errorf("Encode ProtocolExtensionField Criticality failed: %w", err)
+		return fmt.Errorf("encode ProtocolExtensionField Criticality failed: %w", err)
 	}
 	// Encode ExtensionValue as Open Type
 	var buf bytes.Buffer
-	if err = s.ExtensionValue.Encode(aper.NewWriter(&buf)); err != nil {
-		return fmt.Errorf("Encode ProtocolExtensionField ExtensionValue failed: %w", err)
+	extWriter := aper.NewWriter(&buf)
+	if err = s.ExtensionValue.Encode(extWriter); err != nil {
+		return fmt.Errorf("encode ProtocolExtensionField ExtensionValue failed: %w", err)
+	}
+	if err = extWriter.Close(); err != nil {
+		return fmt.Errorf("close ProtocolExtensionField writer failed: %w", err)
 	}
 	if err = w.WriteOpenType(buf.Bytes()); err != nil {
-		return fmt.Errorf("Encode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
+		return fmt.Errorf("encode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
 	}
 	return nil
 }
@@ -258,14 +266,14 @@ func (s *ProtocolExtensionField) Encode(w *aper.AperWriter) (err error) {
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ProtocolExtensionField) Decode(r *aper.AperReader) (err error) {
 	if err = s.Id.Decode(r); err != nil {
-		return fmt.Errorf("Decode ProtocolExtensionField ID failed: %w", err)
+		return fmt.Errorf("decode ProtocolExtensionField ID failed: %w", err)
 	}
 	if err = s.Criticality.Decode(r); err != nil {
-		return fmt.Errorf("Decode ProtocolExtensionField Criticality failed: %w", err)
+		return fmt.Errorf("decode ProtocolExtensionField Criticality failed: %w", err)
 	}
 	// Read Open Type into ValueBytes
 	if s.ValueBytes, err = r.ReadOpenType(); err != nil {
-		return fmt.Errorf("Decode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
+		return fmt.Errorf("decode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
 	}
 	return nil
 }

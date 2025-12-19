@@ -23,7 +23,7 @@ type PDUSessionResourceToSetupModItem struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.PDUSessionResourceAMBR != nil {
@@ -39,44 +39,44 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 		optionalityBitmap[0] |= 1 << 4
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-		return fmt.Errorf("Encode PDUSessionID failed: %w", err)
+		return fmt.Errorf("encode PDUSessionID failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.PDUSessionType.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
-		return fmt.Errorf("Encode PDUSessionType failed: %w", err)
+		return fmt.Errorf("encode PDUSessionType failed: %w", err)
 	}
 	if err = s.SNSSAI.Encode(w); err != nil {
-		return fmt.Errorf("Encode SNSSAI failed: %w", err)
+		return fmt.Errorf("encode SNSSAI failed: %w", err)
 	}
 	if err = s.SecurityIndication.Encode(w); err != nil {
-		return fmt.Errorf("Encode SecurityIndication failed: %w", err)
+		return fmt.Errorf("encode SecurityIndication failed: %w", err)
 	}
 	if s.PDUSessionResourceAMBR != nil {
 		if err = w.WriteInteger(int64((*s.PDUSessionResourceAMBR).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
-			return fmt.Errorf("Encode PDUSessionResourceAMBR failed: %w", err)
+			return fmt.Errorf("encode PDUSessionResourceAMBR failed: %w", err)
 		}
 	}
 	if err = s.NGULUPTNLInformation.Encode(w); err != nil {
-		return fmt.Errorf("Encode NGULUPTNLInformation failed: %w", err)
+		return fmt.Errorf("encode NGULUPTNLInformation failed: %w", err)
 	}
 	if s.PDUSessionDataForwardingInformationRequest != nil {
 		if err = s.PDUSessionDataForwardingInformationRequest.Encode(w); err != nil {
-			return fmt.Errorf("Encode PDUSessionDataForwardingInformationRequest failed: %w", err)
+			return fmt.Errorf("encode PDUSessionDataForwardingInformationRequest failed: %w", err)
 		}
 	}
 	if s.PDUSessionInactivityTimer != nil {
 		if err = w.WriteInteger(int64((*s.PDUSessionInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
-			return fmt.Errorf("Encode PDUSessionInactivityTimer failed: %w", err)
+			return fmt.Errorf("encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
 	if err = s.DRBToSetupModListNGRAN.Encode(w); err != nil {
-		return fmt.Errorf("Encode DRBToSetupModListNGRAN failed: %w", err)
+		return fmt.Errorf("encode DRBToSetupModListNGRAN failed: %w", err)
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -84,54 +84,55 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *PDUSessionResourceToSetupModItem) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if err = s.PDUSessionID.Decode(r); err != nil {
-		return fmt.Errorf("Decode PDUSessionID failed: %w", err)
+		return fmt.Errorf("decode PDUSessionID failed: %w", err)
 	}
 	if err = s.PDUSessionType.Decode(r); err != nil {
-		return fmt.Errorf("Decode PDUSessionType failed: %w", err)
+		return fmt.Errorf("decode PDUSessionType failed: %w", err)
 	}
 	if err = s.SNSSAI.Decode(r); err != nil {
-		return fmt.Errorf("Decode SNSSAI failed: %w", err)
+		return fmt.Errorf("decode SNSSAI failed: %w", err)
 	}
 	if err = s.SecurityIndication.Decode(r); err != nil {
-		return fmt.Errorf("Decode SecurityIndication failed: %w", err)
+		return fmt.Errorf("decode SecurityIndication failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.PDUSessionResourceAMBR = new(BitRate)
 		if err = s.PDUSessionResourceAMBR.Decode(r); err != nil {
-			return fmt.Errorf("Decode PDUSessionResourceAMBR failed: %w", err)
+			return fmt.Errorf("decode PDUSessionResourceAMBR failed: %w", err)
 		}
 	}
 	if err = s.NGULUPTNLInformation.Decode(r); err != nil {
-		return fmt.Errorf("Decode NGULUPTNLInformation failed: %w", err)
+		return fmt.Errorf("decode NGULUPTNLInformation failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.PDUSessionDataForwardingInformationRequest = new(DataForwardingInformationRequest)
 		if err = s.PDUSessionDataForwardingInformationRequest.Decode(r); err != nil {
-			return fmt.Errorf("Decode PDUSessionDataForwardingInformationRequest failed: %w", err)
+			return fmt.Errorf("decode PDUSessionDataForwardingInformationRequest failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.PDUSessionInactivityTimer = new(InactivityTimer)
 		if err = s.PDUSessionInactivityTimer.Decode(r); err != nil {
-			return fmt.Errorf("Decode PDUSessionInactivityTimer failed: %w", err)
+			return fmt.Errorf("decode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
 	if err = s.DRBToSetupModListNGRAN.Decode(r); err != nil {
-		return fmt.Errorf("Decode DRBToSetupModListNGRAN failed: %w", err)
+		return fmt.Errorf("decode DRBToSetupModListNGRAN failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.IEExtensions = new(PDUSessionResourceToSetupModItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for PDUSessionResourceToSetupModItem */

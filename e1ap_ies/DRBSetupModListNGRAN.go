@@ -22,7 +22,7 @@ func (s *DRBSetupModListNGRAN) Encode(w *aper.AperWriter) (err error) {
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
 	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-		return fmt.Errorf("WriteSequenceOf for DRBSetupModListNGRAN failed: %w", err)
+		return fmt.Errorf("writeSequenceOf for DRBSetupModListNGRAN failed: %w", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *DRBSetupModListNGRAN) Decode(r *aper.AperReader) (err error) {
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []DRBSetupModItemNGRAN // <--- FIX: Removed the '*'
 	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-		return fmt.Errorf("ReadSequenceOf for DRBSetupModListNGRAN failed: %w", err)
+		return fmt.Errorf("readSequenceOf for DRBSetupModListNGRAN failed: %w", err)
 	}
 
 	// 3. Assign the decoded slice of values directly.

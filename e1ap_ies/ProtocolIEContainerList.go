@@ -13,17 +13,18 @@ type ProtocolIEContainerList struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *ProtocolIEContainerList) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ProtocolIEContainerList) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
+	_ = isExtensible
 	if isExtensible { /* TODO: Implement extension skipping for ProtocolIEContainerList */
 	}
 	return nil

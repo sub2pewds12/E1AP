@@ -30,11 +30,11 @@ func (s *QOSFlowItemExtensions) Encode(w *aper.AperWriter) error {
 			itemPointers[i] = extensions[i]
 		}
 		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-			return fmt.Errorf("Encode extension container failed: %w", err)
+			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
 		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-			return fmt.Errorf("Encode empty extension container failed: %w", err)
+			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
 	return nil
@@ -42,20 +42,17 @@ func (s *QOSFlowItemExtensions) Encode(w *aper.AperWriter) error {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *QOSFlowItemExtensions) Decode(r *aper.AperReader) error {
-	var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
-	decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {
-		var item ProtocolExtensionField
+	decoder := func(r *aper.AperReader) (**ProtocolExtensionField, error) {
+		item := new(ProtocolExtensionField)
 		if err := item.Decode(r); err != nil {
 			return nil, err
 		}
-		ptr := &item
-		return &ptr, nil
+		return &item, nil
 	}
 
-	var extensions []*ProtocolExtensionField
-	var err error
-	if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-		return fmt.Errorf("Decode extension container failed: %w", err)
+	extensions, err := aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false)
+	if err != nil {
+		return fmt.Errorf("decode extension container failed: %w", err)
 	}
 
 	for _, ext := range extensions {
@@ -64,7 +61,7 @@ func (s *QOSFlowItemExtensions) Decode(r *aper.AperReader) error {
 		case ProtocolIEIDQoSFlowMappingIndication:
 			s.QoSFlowMappingIndication = new(QOSFlowMappingIndication)
 			if err := s.QoSFlowMappingIndication.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension QoSFlowMappingIndication failed: %w", err)
+				return fmt.Errorf("decode extension QoSFlowMappingIndication failed: %w", err)
 			}
 		default:
 			// Unknown extension, ignore

@@ -22,7 +22,7 @@ func (s *DataForwardingtoNGRANQoSFlowInformationList) Encode(w *aper.AperWriter)
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
 	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-		return fmt.Errorf("WriteSequenceOf for DataForwardingtoNGRANQoSFlowInformationList failed: %w", err)
+		return fmt.Errorf("writeSequenceOf for DataForwardingtoNGRANQoSFlowInformationList failed: %w", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *DataForwardingtoNGRANQoSFlowInformationList) Decode(r *aper.AperReader)
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []DataForwardingtoNGRANQoSFlowInformationListItem // <--- FIX: Removed the '*'
 	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofQoSFlows}, false); err != nil {
-		return fmt.Errorf("ReadSequenceOf for DataForwardingtoNGRANQoSFlowInformationList failed: %w", err)
+		return fmt.Errorf("readSequenceOf for DataForwardingtoNGRANQoSFlowInformationList failed: %w", err)
 	}
 
 	// 3. Assign the decoded slice of values directly.

@@ -16,34 +16,35 @@ type CriticalityDiagnosticsIEItem struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *CriticalityDiagnosticsIEItem) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.IECriticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Encode IECriticality failed: %w", err)
+		return fmt.Errorf("encode IECriticality failed: %w", err)
 	}
 	if err = w.WriteInteger(int64(s.IEID.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false); err != nil {
-		return fmt.Errorf("Encode IEID failed: %w", err)
+		return fmt.Errorf("encode IEID failed: %w", err)
 	}
 	if err = w.WriteEnumerate(uint64(s.TypeOfError.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("Encode TypeOfError failed: %w", err)
+		return fmt.Errorf("encode TypeOfError failed: %w", err)
 	}
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *CriticalityDiagnosticsIEItem) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
+	_ = isExtensible
 	if err = s.IECriticality.Decode(r); err != nil {
-		return fmt.Errorf("Decode IECriticality failed: %w", err)
+		return fmt.Errorf("decode IECriticality failed: %w", err)
 	}
 	if err = s.IEID.Decode(r); err != nil {
-		return fmt.Errorf("Decode IEID failed: %w", err)
+		return fmt.Errorf("decode IEID failed: %w", err)
 	}
 	if err = s.TypeOfError.Decode(r); err != nil {
-		return fmt.Errorf("Decode TypeOfError failed: %w", err)
+		return fmt.Errorf("decode TypeOfError failed: %w", err)
 	}
 	if isExtensible { /* TODO: Implement extension skipping for CriticalityDiagnosticsIEItem */
 	}

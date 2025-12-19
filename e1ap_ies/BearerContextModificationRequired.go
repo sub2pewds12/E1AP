@@ -44,8 +44,7 @@ func (msg *BearerContextModificationRequired) toIes() ([]E1APMessageIE, error) {
 		Criticality: Criticality{Value: CriticalityReject},
 		Value:       &msg.SystemBearerContextModificationRequired,
 	})
-	var err error
-	return ies, err
+	return ies, nil
 }
 
 // Encode implements the aper.AperMarshaller interface for BearerContextModificationRequired.
@@ -59,10 +58,10 @@ func (msg *BearerContextModificationRequired) Encode(w io.Writer) error {
 }
 
 // Decode implements the aper.AperUnmarshaller interface for BearerContextModificationRequired.
-func (msg *BearerContextModificationRequired) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+func (msg *BearerContextModificationRequired) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("BearerContextModificationRequired: %w", err)
+			err = fmt.Errorf("decode BearerContextModificationRequired failed: %w", err)
 		}
 	}()
 
@@ -74,14 +73,16 @@ func (msg *BearerContextModificationRequired) Decode(buf []byte) (err error, dia
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
 		return
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID}]; !ok {
-		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
@@ -90,7 +91,9 @@ func (msg *BearerContextModificationRequired) Decode(buf []byte) (err error, dia
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID}]; !ok {
-		err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
@@ -99,7 +102,9 @@ func (msg *BearerContextModificationRequired) Decode(buf []byte) (err error, dia
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDSystemBearerContextModificationRequired}]; !ok {
-		err = fmt.Errorf("mandatory field SystemBearerContextModificationRequired is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field SystemBearerContextModificationRequired is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDSystemBearerContextModificationRequired},
@@ -120,20 +125,20 @@ type BearerContextModificationRequiredDecoder struct {
 }
 
 func (decoder *BearerContextModificationRequiredDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	var id int64
-	var c uint64
-	var buf []byte
-	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
 	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
-	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
-	if buf, err = r.ReadOpenType(); err != nil {
+	buf, err := r.ReadOpenType()
+	if err != nil {
 		return nil, err
 	}
 
@@ -150,35 +155,30 @@ func (decoder *BearerContextModificationRequiredDecoder) decodeIE(r *aper.AperRe
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUCPUEE1APID failed: %w", err)
 			}
 			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUUPUEE1APID failed: %w", err)
 			}
 			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDSystemBearerContextModificationRequired:
 		if err = msg.SystemBearerContextModificationRequired.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("Decode SystemBearerContextModificationRequired failed: %w", err)
+			return nil, fmt.Errorf("decode SystemBearerContextModificationRequired failed: %w", err)
 		}
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
-			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
-				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
-				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
-			})
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{

@@ -22,7 +22,7 @@ func (s *DRBMeasurementResultsInformationList) Encode(w *aper.AperWriter) (err e
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
 	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-		return fmt.Errorf("WriteSequenceOf for DRBMeasurementResultsInformationList failed: %w", err)
+		return fmt.Errorf("writeSequenceOf for DRBMeasurementResultsInformationList failed: %w", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *DRBMeasurementResultsInformationList) Decode(r *aper.AperReader) (err e
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []DRBMeasurementResultsInformationItem // <--- FIX: Removed the '*'
 	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-		return fmt.Errorf("ReadSequenceOf for DRBMeasurementResultsInformationList failed: %w", err)
+		return fmt.Errorf("readSequenceOf for DRBMeasurementResultsInformationList failed: %w", err)
 	}
 
 	// 3. Assign the decoded slice of values directly.

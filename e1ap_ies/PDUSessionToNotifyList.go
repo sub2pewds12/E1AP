@@ -22,7 +22,7 @@ func (s *PDUSessionToNotifyList) Encode(w *aper.AperWriter) (err error) {
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
 	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource}, false); err != nil {
-		return fmt.Errorf("WriteSequenceOf for PDUSessionToNotifyList failed: %w", err)
+		return fmt.Errorf("writeSequenceOf for PDUSessionToNotifyList failed: %w", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *PDUSessionToNotifyList) Decode(r *aper.AperReader) (err error) {
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []PDUSessionToNotifyItem // <--- FIX: Removed the '*'
 	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource}, false); err != nil {
-		return fmt.Errorf("ReadSequenceOf for PDUSessionToNotifyList failed: %w", err)
+		return fmt.Errorf("readSequenceOf for PDUSessionToNotifyList failed: %w", err)
 	}
 
 	// 3. Assign the decoded slice of values directly.

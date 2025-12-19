@@ -38,23 +38,23 @@ func (s *SystemBearerContextModificationResponse) Encode(w *aper.AperWriter) (er
 	switch s.Choice {
 	case SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN:
 		if err = s.DRBSetupModListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBSetupModListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBSetupModListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBFailedModListEUTRAN:
 		if err = s.DRBFailedModListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBFailedModListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBFailedModListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBModifiedListEUTRAN:
 		if err = s.DRBModifiedListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBModifiedListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBModifiedListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBFailedToModifyListEUTRAN:
 		if err = s.DRBFailedToModifyListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBFailedToModifyListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentRetainabilityMeasurementsInfo:
 		if err = s.RetainabilityMeasurementsInfo.Encode(w); err != nil {
-			return fmt.Errorf("Encode RetainabilityMeasurementsInfo failed: %w", err)
+			return fmt.Errorf("encode RetainabilityMeasurementsInfo failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of SystemBearerContextModificationResponse with unknown choice value %d", s.Choice)
@@ -66,9 +66,9 @@ func (s *SystemBearerContextModificationResponse) Encode(w *aper.AperWriter) (er
 func (s *SystemBearerContextModificationResponse) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(4, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(4, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -77,30 +77,30 @@ func (s *SystemBearerContextModificationResponse) Decode(r *aper.AperReader) (er
 	case 1:
 		s.DRBSetupModListEUTRAN = new(DRBSetupModListEUTRAN)
 		if err = s.DRBSetupModListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBSetupModListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBSetupModListEUTRAN failed: %w", err)
 		}
 	case 2:
 		s.DRBFailedModListEUTRAN = new(DRBFailedModListEUTRAN)
 		if err = s.DRBFailedModListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBFailedModListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBFailedModListEUTRAN failed: %w", err)
 		}
 	case 3:
 		s.DRBModifiedListEUTRAN = new(DRBModifiedListEUTRAN)
 		if err = s.DRBModifiedListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBModifiedListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBModifiedListEUTRAN failed: %w", err)
 		}
 	case 4:
 		s.DRBFailedToModifyListEUTRAN = new(DRBFailedToModifyListEUTRAN)
 		if err = s.DRBFailedToModifyListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBFailedToModifyListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
 	case 5:
 		s.RetainabilityMeasurementsInfo = new(RetainabilityMeasurementsInfo)
 		if err = s.RetainabilityMeasurementsInfo.Decode(r); err != nil {
-			return fmt.Errorf("Decode RetainabilityMeasurementsInfo failed: %w", err)
+			return fmt.Errorf("decode RetainabilityMeasurementsInfo failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of SystemBearerContextModificationResponse with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemBearerContextModificationResponse with unknown choice index %d", choice)
 	}
 	return nil
 }

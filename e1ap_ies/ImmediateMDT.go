@@ -18,7 +18,7 @@ type ImmediateMDT struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *ImmediateMDT) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.MeasurementFour != nil {
@@ -34,29 +34,29 @@ func (s *ImmediateMDT) Encode(w *aper.AperWriter) (err error) {
 		optionalityBitmap[0] |= 1 << 4
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if err = w.WriteBitString(s.MeasurementsToActivate.Value.Bytes, uint(s.MeasurementsToActivate.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false); err != nil {
-		return fmt.Errorf("Encode MeasurementsToActivate failed: %w", err)
+		return fmt.Errorf("encode MeasurementsToActivate failed: %w", err)
 	}
 	if s.MeasurementFour != nil {
 		if err = s.MeasurementFour.Encode(w); err != nil {
-			return fmt.Errorf("Encode MeasurementFour failed: %w", err)
+			return fmt.Errorf("encode MeasurementFour failed: %w", err)
 		}
 	}
 	if s.MeasurementSix != nil {
 		if err = s.MeasurementSix.Encode(w); err != nil {
-			return fmt.Errorf("Encode MeasurementSix failed: %w", err)
+			return fmt.Errorf("encode MeasurementSix failed: %w", err)
 		}
 	}
 	if s.MeasurementSeven != nil {
 		if err = s.MeasurementSeven.Encode(w); err != nil {
-			return fmt.Errorf("Encode MeasurementSeven failed: %w", err)
+			return fmt.Errorf("encode MeasurementSeven failed: %w", err)
 		}
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -64,39 +64,40 @@ func (s *ImmediateMDT) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *ImmediateMDT) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if err = s.MeasurementsToActivate.Decode(r); err != nil {
-		return fmt.Errorf("Decode MeasurementsToActivate failed: %w", err)
+		return fmt.Errorf("decode MeasurementsToActivate failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.MeasurementFour = new(M4Configuration)
 		if err = s.MeasurementFour.Decode(r); err != nil {
-			return fmt.Errorf("Decode MeasurementFour failed: %w", err)
+			return fmt.Errorf("decode MeasurementFour failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.MeasurementSix = new(M6Configuration)
 		if err = s.MeasurementSix.Decode(r); err != nil {
-			return fmt.Errorf("Decode MeasurementSix failed: %w", err)
+			return fmt.Errorf("decode MeasurementSix failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.MeasurementSeven = new(M7Configuration)
 		if err = s.MeasurementSeven.Decode(r); err != nil {
-			return fmt.Errorf("Decode MeasurementSeven failed: %w", err)
+			return fmt.Errorf("decode MeasurementSeven failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for ImmediateMDT */

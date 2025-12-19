@@ -17,7 +17,7 @@ type UplinkOnlyROHC struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *UplinkOnlyROHC) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.ContinueROHC != nil {
@@ -27,22 +27,22 @@ func (s *UplinkOnlyROHC) Encode(w *aper.AperWriter) (err error) {
 		optionalityBitmap[0] |= 1 << 6
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if err = w.WriteInteger(int64(s.MaxCID.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true); err != nil {
-		return fmt.Errorf("Encode MaxCID failed: %w", err)
+		return fmt.Errorf("encode MaxCID failed: %w", err)
 	}
 	if err = w.WriteInteger(int64(s.ROHCProfiles.Value), &aper.Constraint{Lb: 0, Ub: 511}, true); err != nil {
-		return fmt.Errorf("Encode ROHCProfiles failed: %w", err)
+		return fmt.Errorf("encode ROHCProfiles failed: %w", err)
 	}
 	if s.ContinueROHC != nil {
 		if err = w.WriteEnumerate(uint64((*s.ContinueROHC).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("Encode ContinueROHC failed: %w", err)
+			return fmt.Errorf("encode ContinueROHC failed: %w", err)
 		}
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -50,30 +50,31 @@ func (s *UplinkOnlyROHC) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *UplinkOnlyROHC) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if err = s.MaxCID.Decode(r); err != nil {
-		return fmt.Errorf("Decode MaxCID failed: %w", err)
+		return fmt.Errorf("decode MaxCID failed: %w", err)
 	}
 	if err = s.ROHCProfiles.Decode(r); err != nil {
-		return fmt.Errorf("Decode ROHCProfiles failed: %w", err)
+		return fmt.Errorf("decode ROHCProfiles failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.ContinueROHC = new(UplinkOnlyROHCContinueROHC)
 		if err = s.ContinueROHC.Decode(r); err != nil {
-			return fmt.Errorf("Decode ContinueROHC failed: %w", err)
+			return fmt.Errorf("decode ContinueROHC failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for UplinkOnlyROHC */

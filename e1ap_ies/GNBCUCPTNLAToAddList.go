@@ -22,7 +22,7 @@ func (s *GNBCUCPTNLAToAddList) Encode(w *aper.AperWriter) (err error) {
 
 	// 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
 	if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations}, false); err != nil {
-		return fmt.Errorf("WriteSequenceOf for GNBCUCPTNLAToAddList failed: %w", err)
+		return fmt.Errorf("writeSequenceOf for GNBCUCPTNLAToAddList failed: %w", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *GNBCUCPTNLAToAddList) Decode(r *aper.AperReader) (err error) {
 	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
 	var decodedItems []GNBCUCPTNLAToAddItem // <--- FIX: Removed the '*'
 	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations}, false); err != nil {
-		return fmt.Errorf("ReadSequenceOf for GNBCUCPTNLAToAddList failed: %w", err)
+		return fmt.Errorf("readSequenceOf for GNBCUCPTNLAToAddList failed: %w", err)
 	}
 
 	// 3. Assign the decoded slice of values directly.

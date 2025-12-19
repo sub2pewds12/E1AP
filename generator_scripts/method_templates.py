@@ -111,7 +111,7 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
                 }}"""
 
         elif isinstance(asn1_def, ListDefinition):
-            tmp_var_name = f"tmp_{field_name}"
+            tmp_var_name = f"tmp{field_name}"
             min_val_str = asn1_def.min_val if asn1_def.min_val is not None else "0"
             if not min_val_str.isdigit(): min_val_str = pascal_case_converter(min_val_str)
             max_val_str = asn1_def.max_val if asn1_def.max_val is not None else "0"
@@ -120,7 +120,6 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
             _, of_type_def = go_type_resolver(asn1_def.of_type)
             loop_body = ""
             wrapper_type = None
-
             
             if isinstance(of_type_def, IntegerDefinition) and not isinstance(of_type_def, StringDefinition):
                 wrapper_type = "INTEGER"
@@ -226,8 +225,7 @@ def _generate_to_ies(go_name: str, item: SequenceDefinition, parser: ASN1Parser)
 func (msg *{go_name}) toIes() ([]E1APMessageIE, error) {{
 	ies := make([]E1APMessageIE, 0)
     {full_body}
-	var err error
-	return ies, err
+	return ies, nil
 }}"""
     return final_func
 
@@ -378,11 +376,11 @@ func (s *{go_name}) Encode(w *aper.AperWriter) error {{
             itemPointers[i] = extensions[i]
         }}
         if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
-            return fmt.Errorf("Encode extension container failed: %w", err)
+            return fmt.Errorf("encode extension container failed: %w", err)
         }}
     }} else {{
          if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
-            return fmt.Errorf("Encode empty extension container failed: %w", err)
+            return fmt.Errorf("encode empty extension container failed: %w", err)
         }}
     }}
     return nil
@@ -399,41 +397,38 @@ func (s *{go_name}) Encode(w *aper.AperWriter) error {{
         case {id_const}:
             s.{field_name} = new({type_name})
             if err := s.{field_name}.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {{
-                return fmt.Errorf("Decode extension {field_name} failed: %w", err)
+                return fmt.Errorf("decode extension {field_name} failed: %w", err)
             }}""")
 
     decode_switch = "\n".join(decode_cases)
 
-    decode_func = f"""
+    decode_code = f"""
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *{go_name}) Decode(r *aper.AperReader) error {{
-    var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
-    decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {{
-        var item ProtocolExtensionField
-        if err := item.Decode(r); err != nil {{
-            return nil, err
-        }}
-        ptr := &item
-        return &ptr, nil
-    }}
+	decoder := func(r *aper.AperReader) (**ProtocolExtensionField, error) {{
+		item := new(ProtocolExtensionField)
+		if err := item.Decode(r); err != nil {{
+			return nil, err
+		}}
+		return &item, nil
+	}}
 
-    var extensions []*ProtocolExtensionField
-    var err error
-    if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false); err != nil {{
-        return fmt.Errorf("Decode extension container failed: %w", err)
-    }}
+	extensions, err := aper.ReadSequenceOf(decoder, r, &aper.Constraint{{Lb: 1, Ub: MaxProtocolExtensions}}, false)
+	if err != nil {{
+		return fmt.Errorf("decode extension container failed: %w", err)
+	}}
 
-    for _, ext := range extensions {{
-        switch ext.Id.Value {{
-        {decode_switch}
-        default:
-            // Unknown extension, ignore
-        }}
-    }}
-    return nil
+	for _, ext := range extensions {{
+		switch ext.Id.Value {{
+{decode_switch}
+		default:
+			// Unknown extension, ignore
+		}}
+	}}
+	return nil
 }}"""
 
-    return f"{encode_func}\n{decode_func}", required_imports
+    return f"{encode_func}\n{decode_code}", required_imports
 
 
 def render_list_methods(
@@ -467,7 +462,7 @@ def render_list_methods(
 
     // 2. Call the generic WriteSequenceOf helper with the slice of interfaces.
     if err = aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {is_extensible}); err != nil {{
-        return fmt.Errorf("WriteSequenceOf for {go_name} failed: %w", err)
+        return fmt.Errorf("writeSequenceOf for {go_name} failed: %w", err)
     }}"""
 
     decode_body = f"""
@@ -484,7 +479,7 @@ def render_list_methods(
     //    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
     var decodedItems []{of_type_go_name} // <--- FIX: Removed the '*'
     if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {is_extensible}); err != nil {{
-        return fmt.Errorf("ReadSequenceOf for {go_name} failed: %w", err)
+        return fmt.Errorf("readSequenceOf for {go_name} failed: %w", err)
     }}
 
     // 3. Assign the decoded slice of values directly.
@@ -534,7 +529,7 @@ def _generate_direct_encode_call(
             if max_val and max_val[0].islower(): max_val = max_val[0].upper() + max_val[1:]
         print(f"DEBUG: field={field_name}, final max_val='{max_val}'")
 
-        return f'if err = w.WriteInteger(int64({value_accessor}.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+        return f'if err = w.WriteInteger(int64({value_accessor}.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("encode {field_name} failed: %w", err) }}'
     elif isinstance(asn1_def, EnumDefinition):
         if is_optional:
             value_accessor = f"(*{value_accessor})"
@@ -542,17 +537,17 @@ def _generate_direct_encode_call(
         num_enums = len(asn1_def.enum_values)
         upper_bound = num_enums - 1 if num_enums > 0 else 0
 
-        return f'if err = w.WriteEnumerate(uint64({value_accessor}.Value), aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+        return f'if err = w.WriteEnumerate(uint64({value_accessor}.Value), aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("encode {field_name} failed: %w", err) }}'
     elif isinstance(asn1_def, StringDefinition):
         if is_optional:
             value_accessor = f"(*{value_accessor})"
         if asn1_def.string_type == "BIT STRING":
-             return f'if err = w.WriteBitString({value_accessor}.Value.Bytes, uint({value_accessor}.Value.NumBits), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+             return f'if err = w.WriteBitString({value_accessor}.Value.Bytes, uint({value_accessor}.Value.NumBits), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("encode {field_name} failed: %w", err) }}'
         else:
-             return f'if err = w.WriteOctetString([]byte({value_accessor}.Value), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+             return f'if err = w.WriteOctetString([]byte({value_accessor}.Value), &aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{ return fmt.Errorf("encode {field_name} failed: %w", err) }}'
 
     else:
-        return f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+        return f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("encode {field_name} failed: %w", err) }}'
 
 
 def _generate_direct_decode_call(
@@ -580,7 +575,7 @@ def _generate_sequence_encode_body(item: SequenceDefinition, parser: ASN1Parser)
 
     is_struct_extensible = item.is_extensible
     encode_parts.append(
-        f'if err = w.WriteBool({str(is_struct_extensible).lower()}); err != nil {{ return fmt.Errorf("Encode extensibility bool failed: %w", err) }}'
+        f'if err = w.WriteBool({str(is_struct_extensible).lower()}); err != nil {{ return fmt.Errorf("encode extensibility bool failed: %w", err) }}'
     )
 
     optional_fields = [
@@ -598,7 +593,7 @@ def _generate_sequence_encode_body(item: SequenceDefinition, parser: ASN1Parser)
                 f"if s.{opt_field_name} != nil {{ optionalityBitmap[{byte_index}] |= 1 << {bit_index} }}"
             )
         encode_parts.append(
-            f'if err = w.WriteBitString(optionalityBitmap[:], uint({num_optional}), &aper.Constraint{{Lb: {num_optional}, Ub: {num_optional}}}, false); err != nil {{ return fmt.Errorf("Encode optionality bitmap failed: %w", err) }}'
+            f'if err = w.WriteBitString(optionalityBitmap[:], uint({num_optional}), &aper.Constraint{{Lb: {num_optional}, Ub: {num_optional}}}, false); err != nil {{ return fmt.Errorf("encode optionality bitmap failed: %w", err) }}'
         )
 
     for ie in item.ies:
@@ -614,7 +609,7 @@ def _generate_sequence_encode_body(item: SequenceDefinition, parser: ASN1Parser)
         is_optional = ie.presence in ["optional", "conditional"]
         
         if ie.type == "ProtocolExtensionContainer":
-             encode_call = f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("Encode {field_name} failed: %w", err) }}'
+             encode_call = f'if err = s.{field_name}.Encode(w); err != nil {{ return fmt.Errorf("encode {field_name} failed: %w", err) }}'
         else:
              encode_call = _generate_direct_encode_call(field_name, ie, asn1_def, parser, is_struct_extensible)
         
@@ -634,17 +629,17 @@ def _generate_sequence_decode_body(
     pascal_case_converter = parser.pascal_case_converter
     decode_parts = []
     decode_parts.append(
-        'var isExtensible bool\n\tif isExtensible, err = r.ReadBool(); err != nil { return fmt.Errorf("Read extensibility bool failed: %w", err) }'
+        'isExtensible, err := r.ReadBool()\n\tif err != nil { return fmt.Errorf("read extensibility bool failed: %w", err) }'
     )
+    decode_parts.append('_ = isExtensible')
 
     optional_fields = [
         ie for ie in item.ies if ie.presence in ["optional", "conditional"]
     ]
     num_optional = len(optional_fields)
     if num_optional > 0:
-        decode_parts.append("var optionalityBitmap []byte")
         decode_parts.append(
-            f'if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{{Lb: {num_optional}, Ub: {num_optional}}}, false); err != nil {{ return fmt.Errorf("Read optionality bitmap failed: %w", err) }}'
+            f'optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{{Lb: {num_optional}, Ub: {num_optional}}}, false)\n\tif err != nil {{ return fmt.Errorf("read optionality bitmap failed: %w", err) }}'
         )
 
     opt_idx = 0
@@ -669,7 +664,7 @@ def _generate_sequence_decode_body(
 
                 extension_go_type = f"{go_name}Extensions"
 
-                decode_statement = f'if err = s.{field_name}.Decode(r); err != nil {{ return fmt.Errorf("Decode {field_name} failed: %w", err) }}'
+                decode_statement = f'if err = s.{field_name}.Decode(r); err != nil {{ return fmt.Errorf("decode {field_name} failed: %w", err) }}'
                 decode_call = (
                     f"s.{field_name} = new({extension_go_type})\n\t\t{decode_statement}"
                 )
@@ -721,7 +716,7 @@ def _generate_choice_encode_body(
         if base_go_type == "string":
             encode_call = f"""
         if err = w.WriteOctetString([]byte(*s.{choice_name}), nil, false); err != nil {{
-            return fmt.Errorf("Encode {choice_name} failed: %w", err)
+            return fmt.Errorf("encode {choice_name} failed: %w", err)
         }}"""
         elif isinstance(concrete_def, IntegerDefinition):
             min_val = parser.pascal_case_converter(str(getattr(concrete_def, 'min_val', '0')))
@@ -729,12 +724,12 @@ def _generate_choice_encode_body(
             choice_is_extensible = str(getattr(concrete_def, 'is_extensible', False)).lower()
             encode_call = f"""
         if err = w.WriteInteger(int64(s.{choice_name}.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {choice_is_extensible}); err != nil {{
-            return fmt.Errorf("Encode {choice_name} failed: %w", err)
+            return fmt.Errorf("encode {choice_name} failed: %w", err)
         }}"""
         else:
             encode_call = f"""
         if err = s.{choice_name}.Encode(w); err != nil {{
-            return fmt.Errorf("Encode {choice_name} failed: %w", err)
+            return fmt.Errorf("encode {choice_name} failed: %w", err)
         }}"""
         
         encode_switch_cases.append(f"case {const_name}:{encode_call}")
@@ -779,9 +774,9 @@ def _generate_choice_decode_body(
         if base_go_type == "string":
             
             alloc_and_decode = f"""
-        var val []byte
-        if val, err = r.ReadOctetString(nil, false); err != nil {{
-            return fmt.Errorf("Decode {choice_name} failed: %w", err)
+        val, err := r.ReadOctetString(nil, false)
+        if err != nil {{
+            return fmt.Errorf("decode {choice_name} failed: %w", err)
         }}
         tmpStr := string(val)
         s.{choice_name} = &tmpStr"""
@@ -792,9 +787,9 @@ def _generate_choice_decode_body(
             is_extensible = str(getattr(concrete_def, 'is_extensible', False)).lower()
             alloc_and_decode = f"""
         s.{choice_name} = new({base_go_type})
-        var val int64
-        if val, err = r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible}); err != nil {{
-            return fmt.Errorf("Decode {choice_name} failed: %w", err)
+        val, err := r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        if err != nil {{
+            return fmt.Errorf("decode {choice_name} failed: %w", err)
         }}
         s.{choice_name}.Value = aper.Integer(val)"""
         else:
@@ -802,7 +797,7 @@ def _generate_choice_decode_body(
             alloc_and_decode = f"""
         s.{choice_name} = new({base_go_type})
         if err = s.{choice_name}.Decode(r); err != nil {{
-            return fmt.Errorf("Decode {choice_name} failed: %w", err)
+            return fmt.Errorf("decode {choice_name} failed: %w", err)
         }}"""
         
         
@@ -812,9 +807,9 @@ def _generate_choice_decode_body(
 
     return f"""
     // 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-    var choice uint64
-    if choice, err = r.ReadChoice({ub_choices}, {is_extensible}); err != nil {{
-        return fmt.Errorf("Read choice index failed: %w", err)
+    choice, err := r.ReadChoice({ub_choices}, {is_extensible})
+    if err != nil {{
+        return fmt.Errorf("read choice index failed: %w", err)
     }}
     s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -822,7 +817,7 @@ def _generate_choice_decode_body(
     switch choice {{
     {decode_switch_body}
     default:
-        return fmt.Errorf("Decode choice of {go_name} with unknown choice index %d", choice)
+        return fmt.Errorf("decode choice of {go_name} with unknown choice index %d", choice)
     }}"""
 
 
@@ -842,9 +837,9 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
             assignment = f"msg.{field_name} = new({go_type}); msg.{field_name}.Value = aper.Integer(val)"
         return f"""
         {{
-            var val int64
-            if val, err = ieR.ReadInteger(&aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()}); err != nil {{
-                 return nil, fmt.Errorf("Decode {field_name} failed: %w", err)
+            val, err := ieR.ReadInteger(&aper.Constraint{{Lb: {asn1_def.min_val or 0}, Ub: {asn1_def.max_val or 0}}}, {str(is_extensible).lower()})
+            if err != nil {{
+                 return nil, fmt.Errorf("decode {field_name} failed: %w", err)
             }}
             {assignment}
         }}"""
@@ -854,9 +849,9 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
         upper_bound = num_enums - 1 if num_enums > 0 else 0
         decode_block = f"""
         {{
-            var val uint64
-            if val, err = ieR.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(is_extensible).lower()}); err != nil {{
-                return nil, fmt.Errorf("Decode {field_name} failed: %w", err)
+            val, err := ieR.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(is_extensible).lower()})
+            if err != nil {{
+                return nil, fmt.Errorf("decode {field_name} failed: %w", err)
             }}
             msg.{field_name}.Value = aper.Enumerated(val)
         }}"""
@@ -876,9 +871,9 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
                 assignment = f"msg.{field_name} = new({go_type}); msg.{field_name}.Value = val"
             return f"""
             {{
-                var val aper.BitString
+                val := aper.BitString{{}}
                 if val.Bytes, val.NumBits, err = ieR.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
-                    return nil, fmt.Errorf("Decode {field_name} failed: %w", err)
+                    return nil, fmt.Errorf("decode {field_name} failed: %w", err)
                 }}
                 {assignment}
             }}"""
@@ -888,9 +883,9 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
                 assignment = f"msg.{field_name} = new({go_type}); msg.{field_name}.Value = aper.OctetString(val)"
             return f"""
             {{
-                var val []byte
-                if val, err = ieR.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
-                    return nil, fmt.Errorf("Decode {field_name} failed: %w", err)
+                val, err := ieR.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext})
+                if err != nil {{
+                    return nil, fmt.Errorf("decode {field_name} failed: %w", err)
                 }}
                 {assignment}
             }}"""
@@ -914,8 +909,8 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
         item_decoder_body = ""
         if isinstance(of_type_def, IntegerDefinition):
             item_decoder_body = f"""
-                var val int64
-                if val, err = r.ReadInteger(&aper.Constraint{{Lb: {of_type_def.min_val or 0}, Ub: {of_type_def.max_val or 0}}}, {str(getattr(of_type_def, 'is_extensible', False)).lower()}); err != nil {{
+                val, err := r.ReadInteger(&aper.Constraint{{Lb: {of_type_def.min_val or 0}, Ub: {of_type_def.max_val or 0}}}, {str(getattr(of_type_def, 'is_extensible', False)).lower()})
+                if err != nil {{
                     return nil, err
                 }}
                 item := {of_type_go_name}(val)
@@ -927,8 +922,8 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
             upper_bound = num_enums - 1 if num_enums > 0 else 0
             item_decoder_body = f"""
                 item := new({of_type_go_name})
-                var val uint64
-                if val, err = r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(getattr(of_type_def, 'is_extensible', False)).lower()}); err != nil {{
+                val, err := r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: {upper_bound}}}, {str(getattr(of_type_def, 'is_extensible', False)).lower()})
+                if err != nil {{
                     return nil, err
                 }}
                 item.Value = aper.Enumerated(val)
@@ -941,16 +936,16 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
 
             if "BIT STRING" in of_type_def.name.upper():
                  item_decoder_body = f"""
-                 var val aper.BitString
-                 if val.Bytes, val.NumBits, err = r.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
+                 bytes, numBits, err := r.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext})
+                 if err != nil {{
                      return nil, err
                  }}
-                 item := {of_type_go_name}(val)
+                 item := {of_type_go_name}(aper.BitString{{Bytes: bytes, NumBits: numBits}})
                  return &item, nil"""
             else: 
                 item_decoder_body = f"""
-                var val []byte
-                if val, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext}); err != nil {{
+                val, err := r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {ext})
+                if err != nil {{
                     return nil, err
                 }}
                 item := {of_type_go_name}(val)
@@ -979,16 +974,16 @@ def _generate_pdu_decode_call(field_name, go_type, ie, asn1_def, parser):
             itemDecoder := func(r *aper.AperReader) (*{of_type_go_name}, error) {{
                 {item_decoder_body}
             }}
-            var decodedItems []{of_type_go_name}
-            if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {is_extensible}); err != nil {{
-                return nil, fmt.Errorf("Decode {field_name} failed: %w", err)
+            decodedItems, err := aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{{Lb: {min_val_str}, Ub: {max_val_str}}}, {is_extensible})
+            if err != nil {{
+                return nil, fmt.Errorf("decode {field_name} failed: %w", err)
             }}
             {assignment}
         }}"""
 
         
     else: 
-        decode_statement = f'if err = msg.{field_name}.Decode(ieR); err != nil {{ return nil, fmt.Errorf("Decode {field_name} failed: %w", err) }}'
+        decode_statement = f'if err = msg.{field_name}.Decode(ieR); err != nil {{ return nil, fmt.Errorf("decode {field_name} failed: %w", err) }}'
         if is_optional:
              return f'msg.{field_name} = new({go_type});\n\t\t{decode_statement}'
         return decode_statement
@@ -1071,7 +1066,9 @@ def _generate_pdu_decode(go_name: str, item: SequenceDefinition, parser: ASN1Par
             field_name = pascal_case_converter(ie.ie)
             validation_parts.append(f"""
     if _, ok := decoder.list[ProtocolIEID{{Value: {ie_id_const}}}]; !ok {{
-		err = fmt.Errorf("mandatory field {field_name} is missing")
+		if err == nil {{
+			err = fmt.Errorf("mandatory field {field_name} is missing")
+		}}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{{
 			IECriticality: Criticality{{Value: CriticalityReject}},
 			IEID:          ProtocolIEID{{Value: {ie_id_const}}},
@@ -1088,10 +1085,10 @@ def _generate_pdu_decode(go_name: str, item: SequenceDefinition, parser: ASN1Par
     
     return f"""
 // Decode implements the aper.AperUnmarshaller interface for {go_name}.
-func (msg *{go_name}) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {{
+func (msg *{go_name}) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {{
 	defer func() {{
 		if err != nil {{
-			err = fmt.Errorf("{go_name}: %w", err)
+			err = fmt.Errorf("decode {go_name} failed: %w", err)
 		}}
 	}}()
 
@@ -1103,7 +1100,7 @@ func (msg *{go_name}) Decode(buf []byte) (err error, diagList []CriticalityDiagn
 	}}
 	
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{{Lb: 0, Ub: 65535}}, false); err != nil {{
+	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{{Lb: 0, Ub: 65535}}, false); err != nil {{
 		return
 	}}
 
@@ -1146,12 +1143,7 @@ def _generate_decoder_helper(go_name: str, item: SequenceDefinition, parser: ASN
         switch msgIe.Criticality.Value {{
         case CriticalityReject:
             // If an unknown IE is critical, the PDU cannot be processed.
-            err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
-            decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{{
-                IECriticality: msgIe.Criticality,
-                IEID:          msgIe.Id,
-                TypeOfError:   TypeOfError{{Value: TypeOfErrorNotUnderstood}},
-            }})
+            return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
         case CriticalityNotify:
             // Per 3GPP TS 38.463 Section 10.3, report and proceed.
             decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{{
@@ -1177,20 +1169,20 @@ type {decoder_name} struct {{
 }}
 
 func (decoder *{decoder_name}) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {{
-	var id int64
-	var c uint64
-	var buf []byte
-	if id, err = r.ReadInteger(&aper.Constraint{{Lb: 0, Ub: 65535}}, false); err != nil {{
+	id, err := r.ReadInteger(&aper.Constraint{{Lb: 0, Ub: 65535}}, false)
+	if err != nil {{
 		return nil, err
 	}}
 	msgIe = new(E1APMessageIE)
 	msgIe.Id = ProtocolIEID{{Value: aper.Integer(id)}}
-	if c, err = r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: 2}}, false); err != nil {{
+	c, err := r.ReadEnumerate(aper.Constraint{{Lb: 0, Ub: 2}}, false)
+	if err != nil {{
 		return nil, err
 	}}
 	msgIe.Criticality = Criticality{{Value: aper.Enumerated(c)}}
 
-	if buf, err = r.ReadOpenType(); err != nil {{
+	buf, err := r.ReadOpenType()
+	if err != nil {{
 		return nil, err
 	}}
 
@@ -1220,7 +1212,7 @@ def _generate_internal_decode_call(field_name, go_type, ie, asn1_def, parser):
     is_optional = ie.presence in ["optional", "conditional"]
 
     
-    decode_statement = f'if err = s.{field_name}.Decode(r); err != nil {{ return fmt.Errorf("Decode {field_name} failed: %w", err) }}'
+    decode_statement = f'if err = s.{field_name}.Decode(r); err != nil {{ return fmt.Errorf("decode {field_name} failed: %w", err) }}'
     if is_optional:
          return f's.{field_name} = new({go_type});\n\t\t{decode_statement}'
     return decode_statement

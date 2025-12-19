@@ -40,23 +40,22 @@ func (msg *GNBCUCPMeasurementResultsInformation) toIes() ([]E1APMessageIE, error
 	})
 	{
 
-		tmp_DRBMeasurementResultsInformationList := Sequence[aper.IE]{
+		tmpDRBMeasurementResultsInformationList := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 1, Ub: MaxnoofDRBs},
 			ext: false,
 		}
 
 		for i := 0; i < len(msg.DRBMeasurementResultsInformationList.Value); i++ {
-			tmp_DRBMeasurementResultsInformationList.Value = append(tmp_DRBMeasurementResultsInformationList.Value, &msg.DRBMeasurementResultsInformationList.Value[i])
+			tmpDRBMeasurementResultsInformationList.Value = append(tmpDRBMeasurementResultsInformationList.Value, &msg.DRBMeasurementResultsInformationList.Value[i])
 		}
 
 		ies = append(ies, E1APMessageIE{
 			Id:          ProtocolIEID{Value: ProtocolIEIDDRBMeasurementResultsInformationList},
 			Criticality: Criticality{Value: CriticalityIgnore},
-			Value:       &tmp_DRBMeasurementResultsInformationList,
+			Value:       &tmpDRBMeasurementResultsInformationList,
 		})
 	}
-	var err error
-	return ies, err
+	return ies, nil
 }
 
 // Encode implements the aper.AperMarshaller interface for GNBCUCPMeasurementResultsInformation.
@@ -70,10 +69,10 @@ func (msg *GNBCUCPMeasurementResultsInformation) Encode(w io.Writer) error {
 }
 
 // Decode implements the aper.AperUnmarshaller interface for GNBCUCPMeasurementResultsInformation.
-func (msg *GNBCUCPMeasurementResultsInformation) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+func (msg *GNBCUCPMeasurementResultsInformation) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("GNBCUCPMeasurementResultsInformation: %w", err)
+			err = fmt.Errorf("decode GNBCUCPMeasurementResultsInformation failed: %w", err)
 		}
 	}()
 
@@ -85,14 +84,16 @@ func (msg *GNBCUCPMeasurementResultsInformation) Decode(buf []byte) (err error, 
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
 		return
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID}]; !ok {
-		err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field GNBCUCPUEE1APID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUCPUEE1APID},
@@ -101,7 +102,9 @@ func (msg *GNBCUCPMeasurementResultsInformation) Decode(buf []byte) (err error, 
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID}]; !ok {
-		err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field GNBCUUPUEE1APID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPUEE1APID},
@@ -110,7 +113,9 @@ func (msg *GNBCUCPMeasurementResultsInformation) Decode(buf []byte) (err error, 
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDDRBMeasurementResultsInformationList}]; !ok {
-		err = fmt.Errorf("mandatory field DRBMeasurementResultsInformationList is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field DRBMeasurementResultsInformationList is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDDRBMeasurementResultsInformationList},
@@ -131,20 +136,20 @@ type GNBCUCPMeasurementResultsInformationDecoder struct {
 }
 
 func (decoder *GNBCUCPMeasurementResultsInformationDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	var id int64
-	var c uint64
-	var buf []byte
-	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
 	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
-	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
-	if buf, err = r.ReadOpenType(); err != nil {
+	buf, err := r.ReadOpenType()
+	if err != nil {
 		return nil, err
 	}
 
@@ -161,18 +166,18 @@ func (decoder *GNBCUCPMeasurementResultsInformationDecoder) decodeIE(r *aper.Ape
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUCPUEE1APID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUCPUEE1APID failed: %w", err)
 			}
 			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUUPUEE1APID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUUPUEE1APID failed: %w", err)
 			}
 			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
 		}
@@ -187,9 +192,9 @@ func (decoder *GNBCUCPMeasurementResultsInformationDecoder) decodeIE(r *aper.Ape
 				}
 				return item, nil
 			}
-			var decodedItems []DRBMeasurementResultsInformationItem
-			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false); err != nil {
-				return nil, fmt.Errorf("Decode DRBMeasurementResultsInformationList failed: %w", err)
+			decodedItems, err := aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode DRBMeasurementResultsInformationList failed: %w", err)
 			}
 			msg.DRBMeasurementResultsInformationList.Value = decodedItems
 		}
@@ -197,12 +202,7 @@ func (decoder *GNBCUCPMeasurementResultsInformationDecoder) decodeIE(r *aper.Ape
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
-			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
-				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
-				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
-			})
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{

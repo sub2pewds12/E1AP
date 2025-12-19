@@ -16,7 +16,7 @@ type QOSParametersSupportList struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *QOSParametersSupportList) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.EUTRANQOSSupportList != nil {
@@ -29,21 +29,21 @@ func (s *QOSParametersSupportList) Encode(w *aper.AperWriter) (err error) {
 		optionalityBitmap[0] |= 1 << 5
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if s.EUTRANQOSSupportList != nil {
 		if err = s.EUTRANQOSSupportList.Encode(w); err != nil {
-			return fmt.Errorf("Encode EUTRANQOSSupportList failed: %w", err)
+			return fmt.Errorf("encode EUTRANQOSSupportList failed: %w", err)
 		}
 	}
 	if s.NGRANQOSSupportList != nil {
 		if err = s.NGRANQOSSupportList.Encode(w); err != nil {
-			return fmt.Errorf("Encode NGRANQOSSupportList failed: %w", err)
+			return fmt.Errorf("encode NGRANQOSSupportList failed: %w", err)
 		}
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -51,30 +51,31 @@ func (s *QOSParametersSupportList) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *QOSParametersSupportList) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.EUTRANQOSSupportList = new(EUTRANQOSSupportList)
 		if err = s.EUTRANQOSSupportList.Decode(r); err != nil {
-			return fmt.Errorf("Decode EUTRANQOSSupportList failed: %w", err)
+			return fmt.Errorf("decode EUTRANQOSSupportList failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.NGRANQOSSupportList = new(NGRANQOSSupportList)
 		if err = s.NGRANQOSSupportList.Decode(r); err != nil {
-			return fmt.Errorf("Decode NGRANQOSSupportList failed: %w", err)
+			return fmt.Errorf("decode NGRANQOSSupportList failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for QOSParametersSupportList */

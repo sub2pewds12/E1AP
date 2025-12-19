@@ -30,7 +30,7 @@ func (s *SystemGNBCUUPCounterCheckRequest) Encode(w *aper.AperWriter) (err error
 	switch s.Choice {
 	case SystemGNBCUUPCounterCheckRequestPresentDRBsSubjectToCounterCheckListEUTRAN:
 		if err = s.DRBsSubjectToCounterCheckListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBsSubjectToCounterCheckListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBsSubjectToCounterCheckListEUTRAN failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of SystemGNBCUUPCounterCheckRequest with unknown choice value %d", s.Choice)
@@ -42,9 +42,9 @@ func (s *SystemGNBCUUPCounterCheckRequest) Encode(w *aper.AperWriter) (err error
 func (s *SystemGNBCUUPCounterCheckRequest) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(0, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(0, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -53,10 +53,10 @@ func (s *SystemGNBCUUPCounterCheckRequest) Decode(r *aper.AperReader) (err error
 	case 1:
 		s.DRBsSubjectToCounterCheckListEUTRAN = new(DRBsSubjectToCounterCheckListEUTRAN)
 		if err = s.DRBsSubjectToCounterCheckListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBsSubjectToCounterCheckListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBsSubjectToCounterCheckListEUTRAN failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of SystemGNBCUUPCounterCheckRequest with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemGNBCUUPCounterCheckRequest with unknown choice index %d", choice)
 	}
 	return nil
 }

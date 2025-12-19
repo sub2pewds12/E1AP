@@ -17,7 +17,7 @@ type MessageEncoder interface {
 }
 
 type MessageUnmarshaller interface {
-	Decode([]byte) (error, []e1ap_ies.CriticalityDiagnosticsIEItem)
+	Decode([]byte) ([]e1ap_ies.CriticalityDiagnosticsIEItem, error)
 }
 
 type E1AP_PDU struct {

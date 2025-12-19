@@ -16,7 +16,7 @@ type SNSSAI struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *SNSSAI) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	var optionalityBitmap [1]byte
 	if s.SD != nil {
@@ -26,19 +26,19 @@ func (s *SNSSAI) Encode(w *aper.AperWriter) (err error) {
 		optionalityBitmap[0] |= 1 << 6
 	}
 	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Encode optionality bitmap failed: %w", err)
+		return fmt.Errorf("encode optionality bitmap failed: %w", err)
 	}
 	if err = w.WriteOctetString([]byte(s.SST.Value), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("Encode SST failed: %w", err)
+		return fmt.Errorf("encode SST failed: %w", err)
 	}
 	if s.SD != nil {
 		if err = w.WriteOctetString([]byte((*s.SD).Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-			return fmt.Errorf("Encode SD failed: %w", err)
+			return fmt.Errorf("encode SD failed: %w", err)
 		}
 	}
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
-			return fmt.Errorf("Encode IEExtensions failed: %w", err)
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
 	return nil
@@ -46,27 +46,28 @@ func (s *SNSSAI) Encode(w *aper.AperWriter) (err error) {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *SNSSAI) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
-	var optionalityBitmap []byte
-	if optionalityBitmap, _, err = r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("Read optionality bitmap failed: %w", err)
+	_ = isExtensible
+	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
+	if err != nil {
+		return fmt.Errorf("read optionality bitmap failed: %w", err)
 	}
 	if err = s.SST.Decode(r); err != nil {
-		return fmt.Errorf("Decode SST failed: %w", err)
+		return fmt.Errorf("decode SST failed: %w", err)
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
 		s.SD = new(SNSSAISD)
 		if err = s.SD.Decode(r); err != nil {
-			return fmt.Errorf("Decode SD failed: %w", err)
+			return fmt.Errorf("decode SD failed: %w", err)
 		}
 	}
 	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
 		s.IEExtensions = new(ProtocolExtensionContainer)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+			return fmt.Errorf("decode IEExtensions failed: %w", err)
 		}
 	}
 	if isExtensible { /* TODO: Implement extension skipping for SNSSAI */

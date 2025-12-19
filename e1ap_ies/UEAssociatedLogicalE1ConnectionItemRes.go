@@ -14,22 +14,23 @@ type UEAssociatedLogicalE1ConnectionItemRes struct {
 // Encode implements the aper.AperMarshaller interface.
 func (s *UEAssociatedLogicalE1ConnectionItemRes) Encode(w *aper.AperWriter) (err error) {
 	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("Encode extensibility bool failed: %w", err)
+		return fmt.Errorf("encode extensibility bool failed: %w", err)
 	}
 	if err = s.UEAssociatedLogicalE1ConnectionItem.Encode(w); err != nil {
-		return fmt.Errorf("Encode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
+		return fmt.Errorf("encode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
 	}
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *UEAssociatedLogicalE1ConnectionItemRes) Decode(r *aper.AperReader) (err error) {
-	var isExtensible bool
-	if isExtensible, err = r.ReadBool(); err != nil {
-		return fmt.Errorf("Read extensibility bool failed: %w", err)
+	isExtensible, err := r.ReadBool()
+	if err != nil {
+		return fmt.Errorf("read extensibility bool failed: %w", err)
 	}
+	_ = isExtensible
 	if err = s.UEAssociatedLogicalE1ConnectionItem.Decode(r); err != nil {
-		return fmt.Errorf("Decode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
+		return fmt.Errorf("decode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
 	}
 	if isExtensible { /* TODO: Implement extension skipping for UEAssociatedLogicalE1ConnectionItemRes */
 	}

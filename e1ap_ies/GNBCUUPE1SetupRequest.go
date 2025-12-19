@@ -67,19 +67,19 @@ func (msg *GNBCUUPE1SetupRequest) toIes() ([]E1APMessageIE, error) {
 	})
 	{
 
-		tmp_SupportedPLMNs := Sequence[aper.IE]{
+		tmpSupportedPLMNs := Sequence[aper.IE]{
 			c:   aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs},
 			ext: false,
 		}
 
 		for i := 0; i < len(msg.SupportedPLMNs.Value); i++ {
-			tmp_SupportedPLMNs.Value = append(tmp_SupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
+			tmpSupportedPLMNs.Value = append(tmpSupportedPLMNs.Value, &msg.SupportedPLMNs.Value[i])
 		}
 
 		ies = append(ies, E1APMessageIE{
 			Id:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
 			Criticality: Criticality{Value: CriticalityReject},
-			Value:       &tmp_SupportedPLMNs,
+			Value:       &tmpSupportedPLMNs,
 		})
 	}
 	if msg.GNBCUUPCapacity != nil {
@@ -110,8 +110,7 @@ func (msg *GNBCUUPE1SetupRequest) toIes() ([]E1APMessageIE, error) {
 			Value:       msg.ExtendedGNBCUUPName,
 		})
 	}
-	var err error
-	return ies, err
+	return ies, nil
 }
 
 // Encode implements the aper.AperMarshaller interface for GNBCUUPE1SetupRequest.
@@ -125,10 +124,10 @@ func (msg *GNBCUUPE1SetupRequest) Encode(w io.Writer) error {
 }
 
 // Decode implements the aper.AperUnmarshaller interface for GNBCUUPE1SetupRequest.
-func (msg *GNBCUUPE1SetupRequest) Decode(buf []byte) (err error, diagList []CriticalityDiagnosticsIEItem) {
+func (msg *GNBCUUPE1SetupRequest) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("GNBCUUPE1SetupRequest: %w", err)
+			err = fmt.Errorf("decode GNBCUUPE1SetupRequest failed: %w", err)
 		}
 	}()
 
@@ -140,14 +139,16 @@ func (msg *GNBCUUPE1SetupRequest) Decode(buf []byte) (err error, diagList []Crit
 	}
 
 	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf[E1APMessageIE](decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
 		return
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDTransactionID}]; !ok {
-		err = fmt.Errorf("mandatory field TransactionID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field TransactionID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDTransactionID},
@@ -156,7 +157,9 @@ func (msg *GNBCUUPE1SetupRequest) Decode(buf []byte) (err error, diagList []Crit
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDGNBCUUPID}]; !ok {
-		err = fmt.Errorf("mandatory field GNBCUUPID is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field GNBCUUPID is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDGNBCUUPID},
@@ -165,7 +168,9 @@ func (msg *GNBCUUPE1SetupRequest) Decode(buf []byte) (err error, diagList []Crit
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDCNSupport}]; !ok {
-		err = fmt.Errorf("mandatory field CNSupport is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field CNSupport is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDCNSupport},
@@ -174,7 +179,9 @@ func (msg *GNBCUUPE1SetupRequest) Decode(buf []byte) (err error, diagList []Crit
 	}
 
 	if _, ok := decoder.list[ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs}]; !ok {
-		err = fmt.Errorf("mandatory field SupportedPLMNs is missing")
+		if err == nil {
+			err = fmt.Errorf("mandatory field SupportedPLMNs is missing")
+		}
 		diagList = append(diagList, CriticalityDiagnosticsIEItem{
 			IECriticality: Criticality{Value: CriticalityReject},
 			IEID:          ProtocolIEID{Value: ProtocolIEIDSupportedPLMNs},
@@ -195,20 +202,20 @@ type GNBCUUPE1SetupRequestDecoder struct {
 }
 
 func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	var id int64
-	var c uint64
-	var buf []byte
-	if id, err = r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
 	msgIe.Id = ProtocolIEID{Value: aper.Integer(id)}
-	if c, err = r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	if err != nil {
 		return nil, err
 	}
 	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
 
-	if buf, err = r.ReadOpenType(); err != nil {
+	buf, err := r.ReadOpenType()
+	if err != nil {
 		return nil, err
 	}
 
@@ -225,32 +232,32 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 	case ProtocolIEIDTransactionID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
-				return nil, fmt.Errorf("Decode TransactionID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+			if err != nil {
+				return nil, fmt.Errorf("decode TransactionID failed: %w", err)
 			}
 			msg.TransactionID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDGNBCUUPID:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUUPID failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUUPID failed: %w", err)
 			}
 			msg.GNBCUUPID.Value = aper.Integer(val)
 		}
 	case ProtocolIEIDGNBCUUPName:
 		msg.GNBCUUPName = new(GNBCUUPName)
 		if err = msg.GNBCUUPName.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("Decode GNBCUUPName failed: %w", err)
+			return nil, fmt.Errorf("decode GNBCUUPName failed: %w", err)
 		}
 	case ProtocolIEIDCNSupport:
 
 		{
-			var val uint64
-			if val, err = ieR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-				return nil, fmt.Errorf("Decode CNSupport failed: %w", err)
+			val, err := ieR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+			if err != nil {
+				return nil, fmt.Errorf("decode CNSupport failed: %w", err)
 			}
 			msg.CNSupport.Value = aper.Enumerated(val)
 		}
@@ -265,18 +272,18 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 				}
 				return item, nil
 			}
-			var decodedItems []SupportedPLMNsItem
-			if decodedItems, err = aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs}, false); err != nil {
-				return nil, fmt.Errorf("Decode SupportedPLMNs failed: %w", err)
+			decodedItems, err := aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode SupportedPLMNs failed: %w", err)
 			}
 			msg.SupportedPLMNs.Value = decodedItems
 		}
 	case ProtocolIEIDGNBCUUPCapacity:
 
 		{
-			var val int64
-			if val, err = ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-				return nil, fmt.Errorf("Decode GNBCUUPCapacity failed: %w", err)
+			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUUPCapacity failed: %w", err)
 			}
 			msg.GNBCUUPCapacity = new(GNBCUUPCapacity)
 			msg.GNBCUUPCapacity.Value = aper.Integer(val)
@@ -284,23 +291,18 @@ func (decoder *GNBCUUPE1SetupRequestDecoder) decodeIE(r *aper.AperReader) (msgIe
 	case ProtocolIEIDTransportLayerAddressInfo:
 		msg.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
 		if err = msg.TransportLayerAddressInfo.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("Decode TransportLayerAddressInfo failed: %w", err)
+			return nil, fmt.Errorf("decode TransportLayerAddressInfo failed: %w", err)
 		}
 	case ProtocolIEIDExtendedGNBCUUPName:
 		msg.ExtendedGNBCUUPName = new(ExtendedGNBCUUPName)
 		if err = msg.ExtendedGNBCUUPName.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("Decode ExtendedGNBCUUPName failed: %w", err)
+			return nil, fmt.Errorf("decode ExtendedGNBCUUPName failed: %w", err)
 		}
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
 			// If an unknown IE is critical, the PDU cannot be processed.
-			err = fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
-			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
-				IECriticality: msgIe.Criticality,
-				IEID:          msgIe.Id,
-				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
-			})
+			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.Id.Value)
 		case CriticalityNotify:
 			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{

@@ -57,11 +57,11 @@ func (s *DRBToSetupItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 			itemPointers[i] = extensions[i]
 		}
 		if err := aper.WriteSequenceOf(itemPointers, w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-			return fmt.Errorf("Encode extension container failed: %w", err)
+			return fmt.Errorf("encode extension container failed: %w", err)
 		}
 	} else {
 		if err := aper.WriteSequenceOf([]aper.AperMarshaller(nil), w, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-			return fmt.Errorf("Encode empty extension container failed: %w", err)
+			return fmt.Errorf("encode empty extension container failed: %w", err)
 		}
 	}
 	return nil
@@ -69,20 +69,17 @@ func (s *DRBToSetupItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 
 // Decode implements the aper.AperUnmarshaller interface.
 func (s *DRBToSetupItemNGRANExtensions) Decode(r *aper.AperReader) error {
-	var decoder func(*aper.AperReader) (**ProtocolExtensionField, error)
-	decoder = func(r *aper.AperReader) (**ProtocolExtensionField, error) {
-		var item ProtocolExtensionField
+	decoder := func(r *aper.AperReader) (**ProtocolExtensionField, error) {
+		item := new(ProtocolExtensionField)
 		if err := item.Decode(r); err != nil {
 			return nil, err
 		}
-		ptr := &item
-		return &ptr, nil
+		return &item, nil
 	}
 
-	var extensions []*ProtocolExtensionField
-	var err error
-	if extensions, err = aper.ReadSequenceOf[*ProtocolExtensionField](decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false); err != nil {
-		return fmt.Errorf("Decode extension container failed: %w", err)
+	extensions, err := aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false)
+	if err != nil {
+		return fmt.Errorf("decode extension container failed: %w", err)
 	}
 
 	for _, ext := range extensions {
@@ -91,25 +88,25 @@ func (s *DRBToSetupItemNGRANExtensions) Decode(r *aper.AperReader) error {
 		case ProtocolIEIDDRBQOS:
 			s.DRBQOS = new(QoSFlowLevelQoSParameters)
 			if err := s.DRBQOS.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension DRBQOS failed: %w", err)
+				return fmt.Errorf("decode extension DRBQOS failed: %w", err)
 			}
 
 		case ProtocolIEIDDAPSRequestInfo:
 			s.DAPSRequestInfo = new(DAPSRequestInfo)
 			if err := s.DAPSRequestInfo.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension DAPSRequestInfo failed: %w", err)
+				return fmt.Errorf("decode extension DAPSRequestInfo failed: %w", err)
 			}
 
 		case ProtocolIEIDIgnoreMappingRuleIndication:
 			s.IgnoreMappingRuleIndication = new(IgnoreMappingRuleIndication)
 			if err := s.IgnoreMappingRuleIndication.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension IgnoreMappingRuleIndication failed: %w", err)
+				return fmt.Errorf("decode extension IgnoreMappingRuleIndication failed: %w", err)
 			}
 
 		case ProtocolIEIDQoSFlowsDRBRemapping:
 			s.QoSFlowsDRBRemapping = new(QOSFlowsDRBRemapping)
 			if err := s.QoSFlowsDRBRemapping.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
-				return fmt.Errorf("Decode extension QoSFlowsDRBRemapping failed: %w", err)
+				return fmt.Errorf("decode extension QoSFlowsDRBRemapping failed: %w", err)
 			}
 		default:
 			// Unknown extension, ignore

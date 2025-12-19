@@ -34,15 +34,15 @@ func (s *ResetType) Encode(w *aper.AperWriter) (err error) {
 	switch s.Choice {
 	case ResetTypePresentE1Interface:
 		if err = s.E1Interface.Encode(w); err != nil {
-			return fmt.Errorf("Encode E1Interface failed: %w", err)
+			return fmt.Errorf("encode E1Interface failed: %w", err)
 		}
 	case ResetTypePresentPartOfE1Interface:
 		if err = s.PartOfE1Interface.Encode(w); err != nil {
-			return fmt.Errorf("Encode PartOfE1Interface failed: %w", err)
+			return fmt.Errorf("encode PartOfE1Interface failed: %w", err)
 		}
 	case ResetTypePresentChoiceExtension:
 		if err = s.ChoiceExtension.Encode(w); err != nil {
-			return fmt.Errorf("Encode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of ResetType with unknown choice value %d", s.Choice)
@@ -54,9 +54,9 @@ func (s *ResetType) Encode(w *aper.AperWriter) (err error) {
 func (s *ResetType) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(2, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(2, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -65,20 +65,20 @@ func (s *ResetType) Decode(r *aper.AperReader) (err error) {
 	case 1:
 		s.E1Interface = new(ResetAll)
 		if err = s.E1Interface.Decode(r); err != nil {
-			return fmt.Errorf("Decode E1Interface failed: %w", err)
+			return fmt.Errorf("decode E1Interface failed: %w", err)
 		}
 	case 2:
 		s.PartOfE1Interface = new(UEAssociatedLogicalE1ConnectionListRes)
 		if err = s.PartOfE1Interface.Decode(r); err != nil {
-			return fmt.Errorf("Decode PartOfE1Interface failed: %w", err)
+			return fmt.Errorf("decode PartOfE1Interface failed: %w", err)
 		}
 	case 3:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
-			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of ResetType with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of ResetType with unknown choice index %d", choice)
 	}
 	return nil
 }

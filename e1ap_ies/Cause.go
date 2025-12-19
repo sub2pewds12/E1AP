@@ -38,23 +38,23 @@ func (s *Cause) Encode(w *aper.AperWriter) (err error) {
 	switch s.Choice {
 	case CausePresentRadioNetwork:
 		if err = s.RadioNetwork.Encode(w); err != nil {
-			return fmt.Errorf("Encode RadioNetwork failed: %w", err)
+			return fmt.Errorf("encode RadioNetwork failed: %w", err)
 		}
 	case CausePresentTransport:
 		if err = s.Transport.Encode(w); err != nil {
-			return fmt.Errorf("Encode Transport failed: %w", err)
+			return fmt.Errorf("encode Transport failed: %w", err)
 		}
 	case CausePresentProtocol:
 		if err = s.Protocol.Encode(w); err != nil {
-			return fmt.Errorf("Encode Protocol failed: %w", err)
+			return fmt.Errorf("encode Protocol failed: %w", err)
 		}
 	case CausePresentMisc:
 		if err = s.Misc.Encode(w); err != nil {
-			return fmt.Errorf("Encode Misc failed: %w", err)
+			return fmt.Errorf("encode Misc failed: %w", err)
 		}
 	case CausePresentChoiceExtension:
 		if err = s.ChoiceExtension.Encode(w); err != nil {
-			return fmt.Errorf("Encode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of Cause with unknown choice value %d", s.Choice)
@@ -66,9 +66,9 @@ func (s *Cause) Encode(w *aper.AperWriter) (err error) {
 func (s *Cause) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(4, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(4, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -77,30 +77,30 @@ func (s *Cause) Decode(r *aper.AperReader) (err error) {
 	case 1:
 		s.RadioNetwork = new(CauseRadioNetwork)
 		if err = s.RadioNetwork.Decode(r); err != nil {
-			return fmt.Errorf("Decode RadioNetwork failed: %w", err)
+			return fmt.Errorf("decode RadioNetwork failed: %w", err)
 		}
 	case 2:
 		s.Transport = new(CauseTransport)
 		if err = s.Transport.Decode(r); err != nil {
-			return fmt.Errorf("Decode Transport failed: %w", err)
+			return fmt.Errorf("decode Transport failed: %w", err)
 		}
 	case 3:
 		s.Protocol = new(CauseProtocol)
 		if err = s.Protocol.Decode(r); err != nil {
-			return fmt.Errorf("Decode Protocol failed: %w", err)
+			return fmt.Errorf("decode Protocol failed: %w", err)
 		}
 	case 4:
 		s.Misc = new(CauseMisc)
 		if err = s.Misc.Decode(r); err != nil {
-			return fmt.Errorf("Decode Misc failed: %w", err)
+			return fmt.Errorf("decode Misc failed: %w", err)
 		}
 	case 5:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
-			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of Cause with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of Cause with unknown choice index %d", choice)
 	}
 	return nil
 }

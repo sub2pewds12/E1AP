@@ -30,7 +30,7 @@ func (s *SystemBearerContextModificationConfirm) Encode(w *aper.AperWriter) (err
 	switch s.Choice {
 	case SystemBearerContextModificationConfirmPresentDRBConfirmModifiedListEUTRAN:
 		if err = s.DRBConfirmModifiedListEUTRAN.Encode(w); err != nil {
-			return fmt.Errorf("Encode DRBConfirmModifiedListEUTRAN failed: %w", err)
+			return fmt.Errorf("encode DRBConfirmModifiedListEUTRAN failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of SystemBearerContextModificationConfirm with unknown choice value %d", s.Choice)
@@ -42,9 +42,9 @@ func (s *SystemBearerContextModificationConfirm) Encode(w *aper.AperWriter) (err
 func (s *SystemBearerContextModificationConfirm) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(0, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(0, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -53,10 +53,10 @@ func (s *SystemBearerContextModificationConfirm) Decode(r *aper.AperReader) (err
 	case 1:
 		s.DRBConfirmModifiedListEUTRAN = new(DRBConfirmModifiedListEUTRAN)
 		if err = s.DRBConfirmModifiedListEUTRAN.Decode(r); err != nil {
-			return fmt.Errorf("Decode DRBConfirmModifiedListEUTRAN failed: %w", err)
+			return fmt.Errorf("decode DRBConfirmModifiedListEUTRAN failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of SystemBearerContextModificationConfirm with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemBearerContextModificationConfirm with unknown choice index %d", choice)
 	}
 	return nil
 }

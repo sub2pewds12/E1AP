@@ -34,15 +34,15 @@ func (s *EarlyForwardingCOUNTInfo) Encode(w *aper.AperWriter) (err error) {
 	switch s.Choice {
 	case EarlyForwardingCOUNTInfoPresentFirstDLCount:
 		if err = s.FirstDLCount.Encode(w); err != nil {
-			return fmt.Errorf("Encode FirstDLCount failed: %w", err)
+			return fmt.Errorf("encode FirstDLCount failed: %w", err)
 		}
 	case EarlyForwardingCOUNTInfoPresentDLDiscardingCount:
 		if err = s.DLDiscardingCount.Encode(w); err != nil {
-			return fmt.Errorf("Encode DLDiscardingCount failed: %w", err)
+			return fmt.Errorf("encode DLDiscardingCount failed: %w", err)
 		}
 	case EarlyForwardingCOUNTInfoPresentChoiceExtension:
 		if err = s.ChoiceExtension.Encode(w); err != nil {
-			return fmt.Errorf("Encode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
 	default:
 		return fmt.Errorf("Encode choice of EarlyForwardingCOUNTInfo with unknown choice value %d", s.Choice)
@@ -54,9 +54,9 @@ func (s *EarlyForwardingCOUNTInfo) Encode(w *aper.AperWriter) (err error) {
 func (s *EarlyForwardingCOUNTInfo) Decode(r *aper.AperReader) (err error) {
 
 	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	var choice uint64
-	if choice, err = r.ReadChoice(2, false); err != nil {
-		return fmt.Errorf("Read choice index failed: %w", err)
+	choice, err := r.ReadChoice(2, false)
+	if err != nil {
+		return fmt.Errorf("read choice index failed: %w", err)
 	}
 	s.Choice = choice // Choice is 1-based from ReadChoice
 
@@ -65,20 +65,20 @@ func (s *EarlyForwardingCOUNTInfo) Decode(r *aper.AperReader) (err error) {
 	case 1:
 		s.FirstDLCount = new(FirstDLCount)
 		if err = s.FirstDLCount.Decode(r); err != nil {
-			return fmt.Errorf("Decode FirstDLCount failed: %w", err)
+			return fmt.Errorf("decode FirstDLCount failed: %w", err)
 		}
 	case 2:
 		s.DLDiscardingCount = new(DLDiscarding)
 		if err = s.DLDiscardingCount.Decode(r); err != nil {
-			return fmt.Errorf("Decode DLDiscardingCount failed: %w", err)
+			return fmt.Errorf("decode DLDiscardingCount failed: %w", err)
 		}
 	case 3:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
-			return fmt.Errorf("Decode ChoiceExtension failed: %w", err)
+			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("Decode choice of EarlyForwardingCOUNTInfo with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of EarlyForwardingCOUNTInfo with unknown choice index %d", choice)
 	}
 	return nil
 }
