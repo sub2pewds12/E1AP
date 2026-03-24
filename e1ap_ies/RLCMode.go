@@ -1,34 +1,37 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // RLCMode is a generated ENUMERATED type.
 type RLCMode struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	RLCModeRlcTm                 aper.Enumerated = 0
-	RLCModeRlcAm                 aper.Enumerated = 1
-	RLCModeRlcUmBidirectional    aper.Enumerated = 2
-	RLCModeRlcUmUnidirectionalUl aper.Enumerated = 3
-	RLCModeRlcUmUnidirectionalDl aper.Enumerated = 4
+	RLCModeRlcTm                 int64 = 0
+	RLCModeRlcAm                 int64 = 1
+	RLCModeRlcUmBidirectional    int64 = 2
+	RLCModeRlcUmUnidirectionalUl int64 = 3
+	RLCModeRlcUmUnidirectionalDl int64 = 4
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *RLCMode) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 4}, true)
+// Encode implements the MessageEncoder interface for RLCMode.
+func (e *RLCMode) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *RLCMode) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for RLCMode.
+func (e *RLCMode) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 4}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

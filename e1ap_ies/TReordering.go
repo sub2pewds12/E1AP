@@ -1,65 +1,68 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // TReordering is a generated ENUMERATED type.
 type TReordering struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	TReorderingMs0    aper.Enumerated = 0
-	TReorderingMs1    aper.Enumerated = 1
-	TReorderingMs2    aper.Enumerated = 2
-	TReorderingMs4    aper.Enumerated = 3
-	TReorderingMs5    aper.Enumerated = 4
-	TReorderingMs8    aper.Enumerated = 5
-	TReorderingMs10   aper.Enumerated = 6
-	TReorderingMs15   aper.Enumerated = 7
-	TReorderingMs20   aper.Enumerated = 8
-	TReorderingMs30   aper.Enumerated = 9
-	TReorderingMs40   aper.Enumerated = 10
-	TReorderingMs50   aper.Enumerated = 11
-	TReorderingMs60   aper.Enumerated = 12
-	TReorderingMs80   aper.Enumerated = 13
-	TReorderingMs100  aper.Enumerated = 14
-	TReorderingMs120  aper.Enumerated = 15
-	TReorderingMs140  aper.Enumerated = 16
-	TReorderingMs160  aper.Enumerated = 17
-	TReorderingMs180  aper.Enumerated = 18
-	TReorderingMs200  aper.Enumerated = 19
-	TReorderingMs220  aper.Enumerated = 20
-	TReorderingMs240  aper.Enumerated = 21
-	TReorderingMs260  aper.Enumerated = 22
-	TReorderingMs280  aper.Enumerated = 23
-	TReorderingMs300  aper.Enumerated = 24
-	TReorderingMs500  aper.Enumerated = 25
-	TReorderingMs750  aper.Enumerated = 26
-	TReorderingMs1000 aper.Enumerated = 27
-	TReorderingMs1250 aper.Enumerated = 28
-	TReorderingMs1500 aper.Enumerated = 29
-	TReorderingMs1750 aper.Enumerated = 30
-	TReorderingMs2000 aper.Enumerated = 31
-	TReorderingMs2250 aper.Enumerated = 32
-	TReorderingMs2500 aper.Enumerated = 33
-	TReorderingMs2750 aper.Enumerated = 34
-	TReorderingMs3000 aper.Enumerated = 35
+	TReorderingMs0    int64 = 0
+	TReorderingMs1    int64 = 1
+	TReorderingMs2    int64 = 2
+	TReorderingMs4    int64 = 3
+	TReorderingMs5    int64 = 4
+	TReorderingMs8    int64 = 5
+	TReorderingMs10   int64 = 6
+	TReorderingMs15   int64 = 7
+	TReorderingMs20   int64 = 8
+	TReorderingMs30   int64 = 9
+	TReorderingMs40   int64 = 10
+	TReorderingMs50   int64 = 11
+	TReorderingMs60   int64 = 12
+	TReorderingMs80   int64 = 13
+	TReorderingMs100  int64 = 14
+	TReorderingMs120  int64 = 15
+	TReorderingMs140  int64 = 16
+	TReorderingMs160  int64 = 17
+	TReorderingMs180  int64 = 18
+	TReorderingMs200  int64 = 19
+	TReorderingMs220  int64 = 20
+	TReorderingMs240  int64 = 21
+	TReorderingMs260  int64 = 22
+	TReorderingMs280  int64 = 23
+	TReorderingMs300  int64 = 24
+	TReorderingMs500  int64 = 25
+	TReorderingMs750  int64 = 26
+	TReorderingMs1000 int64 = 27
+	TReorderingMs1250 int64 = 28
+	TReorderingMs1500 int64 = 29
+	TReorderingMs1750 int64 = 30
+	TReorderingMs2000 int64 = 31
+	TReorderingMs2250 int64 = 32
+	TReorderingMs2500 int64 = 33
+	TReorderingMs2750 int64 = 34
+	TReorderingMs3000 int64 = 35
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *TReordering) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 35}, true)
+// Encode implements the MessageEncoder interface for TReordering.
+func (e *TReordering) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 36), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *TReordering) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for TReordering.
+func (e *TReordering) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 35}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 36), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

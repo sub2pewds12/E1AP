@@ -3,49 +3,85 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDUSessionResourceToSetupModItem is a generated SEQUENCE type.
 type PDUSessionResourceToSetupModItem struct {
-	PDUSessionID                               PDUSessionID                                `aper:"lb:0,ub:255,mandatory,ext"`
-	PDUSessionType                             PDUSessionType                              `aper:"mandatory,ext"`
-	SNSSAI                                     SNSSAI                                      `aper:"mandatory,ext"`
-	SecurityIndication                         SecurityIndication                          `aper:"mandatory,ext"`
-	PDUSessionResourceAMBR                     *BitRate                                    `aper:"lb:0,ub:4000000000000,optional,ext"`
-	NGULUPTNLInformation                       UPTNLInformation                            `aper:"mandatory,ext"`
-	PDUSessionDataForwardingInformationRequest *DataForwardingInformationRequest           `aper:"optional,ext"`
-	PDUSessionInactivityTimer                  *InactivityTimer                            `aper:"lb:1,ub:7200,optional,ext"`
-	DRBToSetupModListNGRAN                     DRBToSetupModListNGRAN                      `aper:"lb:1,ub:MaxnoofDRBs,mandatory,ext"`
-	IEExtensions                               *PDUSessionResourceToSetupModItemExtensions `aper:"optional,ext"`
+	PDUSessionID                               PDUSessionID
+	PDUSessionType                             PDUSessionType
+	SNSSAI                                     SNSSAI
+	SecurityIndication                         SecurityIndication
+	PDUSessionResourceAMBR                     *BitRate
+	NGULUPTNLInformation                       UPTNLInformation
+	PDUSessionDataForwardingInformationRequest *DataForwardingInformationRequest
+	PDUSessionInactivityTimer                  *InactivityTimer
+	DRBToSetupModListNGRAN                     DRBToSetupModListNGRAN
+	IEExtensions                               *PDUSessionResourceToSetupModItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *PDUSessionResourceToSetupModItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pDU-Session-ID", Optional: false},
+			per.ComponentInfo{Name: "pDU-Session-Type", Optional: false},
+			per.ComponentInfo{Name: "sNSSAI", Optional: false},
+			per.ComponentInfo{Name: "securityIndication", Optional: false},
+			per.ComponentInfo{Name: "pDU-Session-Resource-AMBR", Optional: true},
+			per.ComponentInfo{Name: "nG-UL-UP-TNL-Information", Optional: false},
+			per.ComponentInfo{Name: "pDU-Session-Data-Forwarding-Information-Request", Optional: true},
+			per.ComponentInfo{Name: "pDU-Session-Inactivity-Timer", Optional: true},
+			per.ComponentInfo{Name: "dRB-To-Setup-Mod-List-NG-RAN", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.PDUSessionResourceAMBR != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDUSessionDataForwardingInformationRequest != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDUSessionInactivityTimer != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+
+	if err = w.EncodeInteger(int64(s.PDUSessionID.Value), per.Constrained(0, 255)); err != nil {
 		return fmt.Errorf("encode PDUSessionID failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PDUSessionType.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
-		return fmt.Errorf("encode PDUSessionType failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.PDUSessionType.Value), enumC); err != nil {
+			return fmt.Errorf("encode PDUSessionType failed: %w", err)
+		}
 	}
 	if err = s.SNSSAI.Encode(w); err != nil {
 		return fmt.Errorf("encode SNSSAI failed: %w", err)
@@ -53,89 +89,141 @@ func (s *PDUSessionResourceToSetupModItem) Encode(w *aper.AperWriter) (err error
 	if err = s.SecurityIndication.Encode(w); err != nil {
 		return fmt.Errorf("encode SecurityIndication failed: %w", err)
 	}
+
 	if s.PDUSessionResourceAMBR != nil {
-		if err = w.WriteInteger(int64((*s.PDUSessionResourceAMBR).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.PDUSessionResourceAMBR).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode PDUSessionResourceAMBR failed: %w", err)
 		}
 	}
 	if err = s.NGULUPTNLInformation.Encode(w); err != nil {
 		return fmt.Errorf("encode NGULUPTNLInformation failed: %w", err)
 	}
+
 	if s.PDUSessionDataForwardingInformationRequest != nil {
 		if err = s.PDUSessionDataForwardingInformationRequest.Encode(w); err != nil {
 			return fmt.Errorf("encode PDUSessionDataForwardingInformationRequest failed: %w", err)
 		}
 	}
+
 	if s.PDUSessionInactivityTimer != nil {
-		if err = w.WriteInteger(int64((*s.PDUSessionInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.PDUSessionInactivityTimer).Value), per.ConstrainedExtensible(1, 7200)); err != nil {
 			return fmt.Errorf("encode PDUSessionInactivityTimer failed: %w", err)
 		}
 	}
 	if err = s.DRBToSetupModListNGRAN.Encode(w); err != nil {
 		return fmt.Errorf("encode DRBToSetupModListNGRAN failed: %w", err)
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *PDUSessionResourceToSetupModItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *PDUSessionResourceToSetupModItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pDU-Session-ID", Optional: false},
+			per.ComponentInfo{Name: "pDU-Session-Type", Optional: false},
+			per.ComponentInfo{Name: "sNSSAI", Optional: false},
+			per.ComponentInfo{Name: "securityIndication", Optional: false},
+			per.ComponentInfo{Name: "pDU-Session-Resource-AMBR", Optional: true},
+			per.ComponentInfo{Name: "nG-UL-UP-TNL-Information", Optional: false},
+			per.ComponentInfo{Name: "pDU-Session-Data-Forwarding-Information-Request", Optional: true},
+			per.ComponentInfo{Name: "pDU-Session-Inactivity-Timer", Optional: true},
+			per.ComponentInfo{Name: "dRB-To-Setup-Mod-List-NG-RAN", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.PDUSessionID.Decode(r); err != nil {
-		return fmt.Errorf("decode PDUSessionID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.PDUSessionType.Decode(r); err != nil {
-		return fmt.Errorf("decode PDUSessionType failed: %w", err)
+
+	{
+		val, err := r.DecodeInteger(per.Constrained(0, 255))
+		if err != nil {
+			return fmt.Errorf("decode PDUSessionID failed: %w", err)
+		}
+		s.PDUSessionID.Value = val
+	}
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode PDUSessionType failed: %w", err)
+		}
+		s.PDUSessionType.Value = val
 	}
 	if err = s.SNSSAI.Decode(r); err != nil {
-		return fmt.Errorf("decode SNSSAI failed: %w", err)
+		return fmt.Errorf("Decode SNSSAI failed: %w", err)
 	}
 	if err = s.SecurityIndication.Decode(r); err != nil {
-		return fmt.Errorf("decode SecurityIndication failed: %w", err)
+		return fmt.Errorf("Decode SecurityIndication failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.PDUSessionResourceAMBR = new(BitRate)
-		if err = s.PDUSessionResourceAMBR.Decode(r); err != nil {
-			return fmt.Errorf("decode PDUSessionResourceAMBR failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode PDUSessionResourceAMBR failed: %w", err)
+			}
+			s.PDUSessionResourceAMBR.Value = val
 		}
 	}
 	if err = s.NGULUPTNLInformation.Decode(r); err != nil {
-		return fmt.Errorf("decode NGULUPTNLInformation failed: %w", err)
+		return fmt.Errorf("Decode NGULUPTNLInformation failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(6) {
 		s.PDUSessionDataForwardingInformationRequest = new(DataForwardingInformationRequest)
 		if err = s.PDUSessionDataForwardingInformationRequest.Decode(r); err != nil {
-			return fmt.Errorf("decode PDUSessionDataForwardingInformationRequest failed: %w", err)
+			return fmt.Errorf("Decode PDUSessionDataForwardingInformationRequest failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(7) {
 		s.PDUSessionInactivityTimer = new(InactivityTimer)
-		if err = s.PDUSessionInactivityTimer.Decode(r); err != nil {
-			return fmt.Errorf("decode PDUSessionInactivityTimer failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 7200))
+			if err != nil {
+				return fmt.Errorf("decode PDUSessionInactivityTimer failed: %w", err)
+			}
+			s.PDUSessionInactivityTimer.Value = val
 		}
 	}
 	if err = s.DRBToSetupModListNGRAN.Decode(r); err != nil {
-		return fmt.Errorf("decode DRBToSetupModListNGRAN failed: %w", err)
+		return fmt.Errorf("Decode DRBToSetupModListNGRAN failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(9) {
 		s.IEExtensions = new(PDUSessionResourceToSetupModItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for PDUSessionResourceToSetupModItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

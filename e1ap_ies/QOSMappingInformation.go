@@ -3,67 +3,113 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // QOSMappingInformation is a generated SEQUENCE type.
 type QOSMappingInformation struct {
-	Dscp      *QOSMappingInformationDscp      `aper:"lb:6,ub:6,optional,ext"`
-	FlowLabel *QOSMappingInformationFlowLabel `aper:"lb:20,ub:20,optional,ext"`
+	Dscp      *QOSMappingInformationDscp
+	FlowLabel *QOSMappingInformationFlowLabel
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *QOSMappingInformation) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *QOSMappingInformation) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dscp", Optional: true},
+			per.ComponentInfo{Name: "flow-label", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.Dscp != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.FlowLabel != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if s.Dscp != nil {
-		if err = w.WriteBitString((*s.Dscp).Value.Bytes, uint((*s.Dscp).Value.NumBits), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
+		if err = w.EncodeBitString((*s.Dscp).Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(6), Max: int64Ptr(6)}); err != nil {
 			return fmt.Errorf("encode Dscp failed: %w", err)
 		}
 	}
+
 	if s.FlowLabel != nil {
-		if err = w.WriteBitString((*s.FlowLabel).Value.Bytes, uint((*s.FlowLabel).Value.NumBits), &aper.Constraint{Lb: 20, Ub: 20}, false); err != nil {
+		if err = w.EncodeBitString((*s.FlowLabel).Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(20), Max: int64Ptr(20)}); err != nil {
 			return fmt.Errorf("encode FlowLabel failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *QOSMappingInformation) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *QOSMappingInformation) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dscp", Optional: true},
+			per.ComponentInfo{Name: "flow-label", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
+	if seqDecoder.IsComponentPresent(0) {
 		s.Dscp = new(QOSMappingInformationDscp)
-		if err = s.Dscp.Decode(r); err != nil {
-			return fmt.Errorf("decode Dscp failed: %w", err)
+
+		{
+			val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(6), Max: int64Ptr(6)})
+			if err != nil {
+				return fmt.Errorf("decode Dscp failed: %w", err)
+			}
+			s.Dscp.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.FlowLabel = new(QOSMappingInformationFlowLabel)
-		if err = s.FlowLabel.Decode(r); err != nil {
-			return fmt.Errorf("decode FlowLabel failed: %w", err)
+
+		{
+			val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(20), Max: int64Ptr(20)})
+			if err != nil {
+				return fmt.Errorf("decode FlowLabel failed: %w", err)
+			}
+			s.FlowLabel.Value = val
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for QOSMappingInformation */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

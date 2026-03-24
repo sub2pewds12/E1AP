@@ -1,34 +1,37 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDUSessionType is a generated ENUMERATED type.
 type PDUSessionType struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	PDUSessionTypeIpv4         aper.Enumerated = 0
-	PDUSessionTypeIpv6         aper.Enumerated = 1
-	PDUSessionTypeIpv4v6       aper.Enumerated = 2
-	PDUSessionTypeEthernet     aper.Enumerated = 3
-	PDUSessionTypeUnstructured aper.Enumerated = 4
+	PDUSessionTypeIpv4         int64 = 0
+	PDUSessionTypeIpv6         int64 = 1
+	PDUSessionTypeIpv4v6       int64 = 2
+	PDUSessionTypeEthernet     int64 = 3
+	PDUSessionTypeUnstructured int64 = 4
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *PDUSessionType) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 4}, true)
+// Encode implements the MessageEncoder interface for PDUSessionType.
+func (e *PDUSessionType) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *PDUSessionType) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for PDUSessionType.
+func (e *PDUSessionType) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 4}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

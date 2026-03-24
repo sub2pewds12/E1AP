@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // ActivityInformation is a generated CHOICE type.
@@ -24,29 +24,45 @@ const (
 )
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *ActivityInformation) Encode(w *aper.AperWriter) (err error) {
+func (s *ActivityInformation) Encode(w *per.Encoder) (err error) {
 
-	// 1. Write the choice index.
-	// fmt.Printf("--- GO DEBUG: Encoding CHOICE ActivityInformation | Choice: %d, UpperBound: 3, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
-	if err = w.WriteChoice(uint64(s.Choice), 3, false); err != nil {
-		return fmt.Errorf("Encode choice index failed for ActivityInformation: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "dRB-Activity-List", Tag: 0},
+			per.AlternativeInfo{Name: "pDU-Session-Resource-Activity-List", Tag: 0},
+			per.AlternativeInfo{Name: "uE-Activity", Tag: 0},
+			per.AlternativeInfo{Name: "choice-extension", Tag: 0},
+		},
 	}
+	choiceEncoder := w.NewChoiceEncoder(c)
 
-	// 2. Encode the selected member.
 	switch s.Choice {
 	case ActivityInformationPresentDRBActivityList:
+		if err = choiceEncoder.EncodeChoice(0, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBActivityList.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBActivityList failed: %w", err)
 		}
 	case ActivityInformationPresentPDUSessionResourceActivityList:
+		if err = choiceEncoder.EncodeChoice(1, false, nil); err != nil {
+			return err
+		}
 		if err = s.PDUSessionResourceActivityList.Encode(w); err != nil {
 			return fmt.Errorf("encode PDUSessionResourceActivityList failed: %w", err)
 		}
 	case ActivityInformationPresentUEActivity:
+		if err = choiceEncoder.EncodeChoice(2, false, nil); err != nil {
+			return err
+		}
 		if err = s.UEActivity.Encode(w); err != nil {
 			return fmt.Errorf("encode UEActivity failed: %w", err)
 		}
 	case ActivityInformationPresentChoiceExtension:
+		if err = choiceEncoder.EncodeChoice(3, false, nil); err != nil {
+			return err
+		}
 		if err = s.ChoiceExtension.Encode(w); err != nil {
 			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
@@ -57,39 +73,53 @@ func (s *ActivityInformation) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *ActivityInformation) Decode(r *aper.AperReader) (err error) {
+func (s *ActivityInformation) Decode(r *per.Decoder) (err error) {
 
-	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	choice, err := r.ReadChoice(3, false)
-	if err != nil {
-		return fmt.Errorf("read choice index failed: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "dRB-Activity-List", Tag: 0},
+			per.AlternativeInfo{Name: "pDU-Session-Resource-Activity-List", Tag: 0},
+			per.AlternativeInfo{Name: "uE-Activity", Tag: 0},
+			per.AlternativeInfo{Name: "choice-extension", Tag: 0},
+		},
 	}
-	s.Choice = choice // Choice is 1-based from ReadChoice
+	choiceDecoder := r.NewChoiceDecoder(c)
 
-	// 2. Decode the selected member.
-	switch choice {
-	case 1:
+	choiceIndex, isExtension, _, err := choiceDecoder.DecodeChoice()
+	if err != nil {
+		return fmt.Errorf("decode choice index failed: %w", err)
+	}
+
+	if isExtension {
+		return fmt.Errorf("extension choices are not fully supported yet")
+	}
+
+	s.Choice = uint64(choiceIndex + 1) // 1-based internal Choice enum
+
+	switch choiceIndex {
+	case 0:
 		s.DRBActivityList = new(DRBActivityList)
 		if err = s.DRBActivityList.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBActivityList failed: %w", err)
 		}
-	case 2:
+	case 1:
 		s.PDUSessionResourceActivityList = new(PDUSessionResourceActivityList)
 		if err = s.PDUSessionResourceActivityList.Decode(r); err != nil {
 			return fmt.Errorf("decode PDUSessionResourceActivityList failed: %w", err)
 		}
-	case 3:
+	case 2:
 		s.UEActivity = new(UEActivity)
 		if err = s.UEActivity.Decode(r); err != nil {
 			return fmt.Errorf("decode UEActivity failed: %w", err)
 		}
-	case 4:
+	case 3:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
 			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("decode choice of ActivityInformation with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of ActivityInformation with unknown choice index %d", choiceIndex)
 	}
 	return nil
 }

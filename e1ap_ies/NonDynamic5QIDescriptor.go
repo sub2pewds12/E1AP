@@ -3,104 +3,177 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // NonDynamic5QIDescriptor is a generated SEQUENCE type.
 type NonDynamic5QIDescriptor struct {
-	FiveQI             NonDynamic5QIDescriptorFiveQI      `aper:"lb:0,ub:255,mandatory,ext"`
-	QoSPriorityLevel   *QoSPriorityLevel                  `aper:"lb:0,ub:127,optional,ext"`
-	AveragingWindow    *AveragingWindow                   `aper:"lb:0,ub:4095,optional,ext"`
-	MaxDataBurstVolume *MaxDataBurstVolume                `aper:"lb:0,ub:4095,optional,ext"`
-	IEExtensions       *NonDynamic5QIDescriptorExtensions `aper:"optional,ext"`
+	FiveQI             NonDynamic5QIDescriptorFiveQI
+	QoSPriorityLevel   *QoSPriorityLevel
+	AveragingWindow    *AveragingWindow
+	MaxDataBurstVolume *MaxDataBurstVolume
+	IEExtensions       *NonDynamic5QIDescriptorExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *NonDynamic5QIDescriptor) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *NonDynamic5QIDescriptor) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "fiveQI", Optional: false},
+			per.ComponentInfo{Name: "qoSPriorityLevel", Optional: true},
+			per.ComponentInfo{Name: "averagingWindow", Optional: true},
+			per.ComponentInfo{Name: "maxDataBurstVolume", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.QoSPriorityLevel != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.AveragingWindow != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.MaxDataBurstVolume != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.FiveQI.Value), &aper.Constraint{Lb: 0, Ub: 255}, true); err != nil {
+
+	if err = w.EncodeInteger(int64(s.FiveQI.Value), per.ConstrainedExtensible(0, 255)); err != nil {
 		return fmt.Errorf("encode FiveQI failed: %w", err)
 	}
+
 	if s.QoSPriorityLevel != nil {
-		if err = w.WriteInteger(int64((*s.QoSPriorityLevel).Value), &aper.Constraint{Lb: 0, Ub: 127}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.QoSPriorityLevel).Value), per.ConstrainedExtensible(0, 127)); err != nil {
 			return fmt.Errorf("encode QoSPriorityLevel failed: %w", err)
 		}
 	}
+
 	if s.AveragingWindow != nil {
-		if err = w.WriteInteger(int64((*s.AveragingWindow).Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.AveragingWindow).Value), per.ConstrainedExtensible(0, 4095)); err != nil {
 			return fmt.Errorf("encode AveragingWindow failed: %w", err)
 		}
 	}
+
 	if s.MaxDataBurstVolume != nil {
-		if err = w.WriteInteger(int64((*s.MaxDataBurstVolume).Value), &aper.Constraint{Lb: 0, Ub: 4095}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.MaxDataBurstVolume).Value), per.ConstrainedExtensible(0, 4095)); err != nil {
 			return fmt.Errorf("encode MaxDataBurstVolume failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *NonDynamic5QIDescriptor) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *NonDynamic5QIDescriptor) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "fiveQI", Optional: false},
+			per.ComponentInfo{Name: "qoSPriorityLevel", Optional: true},
+			per.ComponentInfo{Name: "averagingWindow", Optional: true},
+			per.ComponentInfo{Name: "maxDataBurstVolume", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.FiveQI.Decode(r); err != nil {
-		return fmt.Errorf("decode FiveQI failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 255))
+		if err != nil {
+			return fmt.Errorf("decode FiveQI failed: %w", err)
+		}
+		s.FiveQI.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.QoSPriorityLevel = new(QoSPriorityLevel)
-		if err = s.QoSPriorityLevel.Decode(r); err != nil {
-			return fmt.Errorf("decode QoSPriorityLevel failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 127))
+			if err != nil {
+				return fmt.Errorf("decode QoSPriorityLevel failed: %w", err)
+			}
+			s.QoSPriorityLevel.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.AveragingWindow = new(AveragingWindow)
-		if err = s.AveragingWindow.Decode(r); err != nil {
-			return fmt.Errorf("decode AveragingWindow failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4095))
+			if err != nil {
+				return fmt.Errorf("decode AveragingWindow failed: %w", err)
+			}
+			s.AveragingWindow.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.MaxDataBurstVolume = new(MaxDataBurstVolume)
-		if err = s.MaxDataBurstVolume.Decode(r); err != nil {
-			return fmt.Errorf("decode MaxDataBurstVolume failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4095))
+			if err != nil {
+				return fmt.Errorf("decode MaxDataBurstVolume failed: %w", err)
+			}
+			s.MaxDataBurstVolume.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.IEExtensions = new(NonDynamic5QIDescriptorExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for NonDynamic5QIDescriptor */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

@@ -3,74 +3,117 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DRBBStatusTransfer is a generated SEQUENCE type.
 type DRBBStatusTransfer struct {
-	ReceiveStatusofPDCPSDU *DRBBStatusTransferReceiveStatusofPDCPSDU `aper:"lb:1,ub:131072,optional,ext"`
-	CountValue             PDCPCount                                 `aper:"mandatory,ext"`
-	IEExtension            *ProtocolExtensionContainer               `aper:"optional,ext"`
+	ReceiveStatusofPDCPSDU *DRBBStatusTransferReceiveStatusofPDCPSDU
+	CountValue             PDCPCount
+	IEExtension            *DRBBStatusTransferExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *DRBBStatusTransfer) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *DRBBStatusTransfer) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "receiveStatusofPDCPSDU", Optional: true},
+			per.ComponentInfo{Name: "countValue", Optional: false},
+			per.ComponentInfo{Name: "iE-Extension", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.ReceiveStatusofPDCPSDU != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtension != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if s.ReceiveStatusofPDCPSDU != nil {
-		if err = w.WriteBitString((*s.ReceiveStatusofPDCPSDU).Value.Bytes, uint((*s.ReceiveStatusofPDCPSDU).Value.NumBits), &aper.Constraint{Lb: 1, Ub: 131072}, false); err != nil {
+		if err = w.EncodeBitString((*s.ReceiveStatusofPDCPSDU).Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(131072)}); err != nil {
 			return fmt.Errorf("encode ReceiveStatusofPDCPSDU failed: %w", err)
 		}
 	}
 	if err = s.CountValue.Encode(w); err != nil {
 		return fmt.Errorf("encode CountValue failed: %w", err)
 	}
+
 	if s.IEExtension != nil {
 		if err = s.IEExtension.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtension failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBBStatusTransfer) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *DRBBStatusTransfer) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "receiveStatusofPDCPSDU", Optional: true},
+			per.ComponentInfo{Name: "countValue", Optional: false},
+			per.ComponentInfo{Name: "iE-Extension", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
+	if seqDecoder.IsComponentPresent(0) {
 		s.ReceiveStatusofPDCPSDU = new(DRBBStatusTransferReceiveStatusofPDCPSDU)
-		if err = s.ReceiveStatusofPDCPSDU.Decode(r); err != nil {
-			return fmt.Errorf("decode ReceiveStatusofPDCPSDU failed: %w", err)
+
+		{
+			val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(131072)})
+			if err != nil {
+				return fmt.Errorf("decode ReceiveStatusofPDCPSDU failed: %w", err)
+			}
+			s.ReceiveStatusofPDCPSDU.Value = val
 		}
 	}
 	if err = s.CountValue.Decode(r); err != nil {
-		return fmt.Errorf("decode CountValue failed: %w", err)
+		return fmt.Errorf("Decode CountValue failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.IEExtension = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtension = new(DRBBStatusTransferExtensions)
 		if err = s.IEExtension.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtension failed: %w", err)
+			return fmt.Errorf("Decode IEExtension failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for DRBBStatusTransfer */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

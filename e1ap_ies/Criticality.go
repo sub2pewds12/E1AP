@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // Criticality is a generated ENUMERATED type.
 type Criticality struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	CriticalityReject aper.Enumerated = 0
-	CriticalityIgnore aper.Enumerated = 1
-	CriticalityNotify aper.Enumerated = 2
+	CriticalityReject int64 = 0
+	CriticalityIgnore int64 = 1
+	CriticalityNotify int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *Criticality) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, false)
+// Encode implements the MessageEncoder interface for Criticality.
+func (e *Criticality) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *Criticality) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for Criticality.
+func (e *Criticality) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	c := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

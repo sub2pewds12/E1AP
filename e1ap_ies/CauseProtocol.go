@@ -1,36 +1,39 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // CauseProtocol is a generated ENUMERATED type.
 type CauseProtocol struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	CauseProtocolTransferSyntaxError                          aper.Enumerated = 0
-	CauseProtocolAbstractSyntaxErrorReject                    aper.Enumerated = 1
-	CauseProtocolAbstractSyntaxErrorIgnoreAndNotify           aper.Enumerated = 2
-	CauseProtocolMessageNotCompatibleWithReceiverState        aper.Enumerated = 3
-	CauseProtocolSemanticError                                aper.Enumerated = 4
-	CauseProtocolAbstractSyntaxErrorFalselyConstructedMessage aper.Enumerated = 5
-	CauseProtocolUnspecified                                  aper.Enumerated = 6
+	CauseProtocolTransferSyntaxError                          int64 = 0
+	CauseProtocolAbstractSyntaxErrorReject                    int64 = 1
+	CauseProtocolAbstractSyntaxErrorIgnoreAndNotify           int64 = 2
+	CauseProtocolMessageNotCompatibleWithReceiverState        int64 = 3
+	CauseProtocolSemanticError                                int64 = 4
+	CauseProtocolAbstractSyntaxErrorFalselyConstructedMessage int64 = 5
+	CauseProtocolUnspecified                                  int64 = 6
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *CauseProtocol) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 6}, true)
+// Encode implements the MessageEncoder interface for CauseProtocol.
+func (e *CauseProtocol) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 7), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *CauseProtocol) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for CauseProtocol.
+func (e *CauseProtocol) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 6}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 7), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

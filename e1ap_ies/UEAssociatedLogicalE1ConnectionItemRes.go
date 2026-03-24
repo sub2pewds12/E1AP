@@ -1,38 +1,49 @@
 package e1ap_ies
 
 import (
-	"fmt"
-
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // UEAssociatedLogicalE1ConnectionItemRes is a generated SEQUENCE type.
 type UEAssociatedLogicalE1ConnectionItemRes struct {
-	UEAssociatedLogicalE1ConnectionItem UEAssociatedLogicalE1ConnectionItem `aper:"mandatory"`
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *UEAssociatedLogicalE1ConnectionItemRes) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *UEAssociatedLogicalE1ConnectionItemRes) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible:     false,
+		RootComponents: []per.ComponentInfo{},
 	}
-	if err = s.UEAssociatedLogicalE1ConnectionItem.Encode(w); err != nil {
-		return fmt.Errorf("encode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
 	}
+
+	optionalBitmap := make([]bool, 0)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *UEAssociatedLogicalE1ConnectionItemRes) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *UEAssociatedLogicalE1ConnectionItemRes) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible:     false,
+		RootComponents: []per.ComponentInfo{},
 	}
-	_ = isExtensible
-	if err = s.UEAssociatedLogicalE1ConnectionItem.Decode(r); err != nil {
-		return fmt.Errorf("decode UEAssociatedLogicalE1ConnectionItem failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if isExtensible { /* TODO: Implement extension skipping for UEAssociatedLogicalE1ConnectionItemRes */
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
+
 	return nil
 }

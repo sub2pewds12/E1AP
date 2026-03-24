@@ -3,30 +3,46 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // NPNContextInfoSNPN is a generated SEQUENCE type.
 type NPNContextInfoSNPN struct {
-	NID          NID                         `aper:"lb:44,ub:44,mandatory"`
-	IEExtensions *ProtocolExtensionContainer `aper:"optional"`
+	NID          NID
+	IEExtensions *NPNContextInfoSNPNExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *NPNContextInfoSNPN) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *NPNContextInfoSNPN) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "nID", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteBitString(s.NID.Value.Bytes, uint(s.NID.Value.NumBits), &aper.Constraint{Lb: 44, Ub: 44}, false); err != nil {
+
+	if err = w.EncodeBitString(s.NID.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(44), Max: int64Ptr(44)}); err != nil {
 		return fmt.Errorf("encode NID failed: %w", err)
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
@@ -36,26 +52,37 @@ func (s *NPNContextInfoSNPN) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *NPNContextInfoSNPN) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *NPNContextInfoSNPN) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "nID", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.NID.Decode(r); err != nil {
-		return fmt.Errorf("decode NID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
-		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(44), Max: int64Ptr(44)})
+		if err != nil {
+			return fmt.Errorf("decode NID failed: %w", err)
 		}
+		s.NID.Value = val
 	}
-	if isExtensible { /* TODO: Implement extension skipping for NPNContextInfoSNPN */
+
+	if seqDecoder.IsComponentPresent(1) {
+		s.IEExtensions = new(NPNContextInfoSNPNExtensions)
+		if err = s.IEExtensions.Decode(r); err != nil {
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

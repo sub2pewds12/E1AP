@@ -131,7 +131,7 @@ class GoCodeGenerator:
             return type_name, None
 
         if type_name == "ANY":
-            return "aper.OctetString", self.definitions.get("OCTET STRING")
+            return "[]byte", self.definitions.get("OCTET STRING")
 
         container_mappings = {
             "ProtocolExtensionContainer": "ProtocolExtensionContainer",
@@ -157,42 +157,39 @@ class GoCodeGenerator:
         while isinstance(definition, AliasDefinition):
             next_type_name = definition.alias_of
             
-            
             if next_type_name in visited:
                 logger.warning(f"Circular alias dependency detected for '{type_name}' at '{next_type_name}'. Breaking.")
-                
                 return self._standard_string(next_type_name), None
             visited.add(next_type_name)
 
-            
             next_def = self.definitions.get(next_type_name)
             if not next_def:
                 logger.warning(f"Alias '{next_type_name}' for type '{definition.name}' not found. Breaking chain.")
-                
                 return self._standard_string(next_type_name), None
-            
-            
             definition = next_def
 
         if isinstance(definition, (IntegerDefinition, ConstantDefinition)):
-            return "aper.Integer", definition
+            return "int64", definition
         
         elif (
             isinstance(definition, StringDefinition)
             and definition.string_type == "BIT STRING"
         ):
-            return "aper.BitString", definition
+            return "per.BitString", definition
         
         elif isinstance(definition, StringDefinition):
-            return "aper.OctetString", definition
+            return "[]byte", definition
         
         elif isinstance(definition, BuiltinDefinition):
             if definition.name in ["VisibleString", "PrintableString", "UTF8String"]:
-                return "aper.OctetString", self.definitions.get("OCTET STRING")
+                return "[]byte", self.definitions.get("OCTET STRING")
             if definition.name == "OBJECT IDENTIFIER":
                 return "string", definition
             if definition.name == "NULL":
                 return "bool", definition
+            if definition.name == "BOOLEAN":
+                return "bool", definition
+
         elif isinstance(
             definition,
             (EnumDefinition, SequenceDefinition, ChoiceDefinition, ListDefinition),
@@ -280,8 +277,13 @@ class GoCodeGenerator:
             return
 
         integer_consts, proc_code_consts, protocol_ie_consts = [], [], []
-        proc_code_type_name = "aper.Integer"
-        protocol_ie_id_type_name = "aper.Integer"
+        
+        # Add a placeholder for ProcedureCodeUNKNOWN if it's not present
+        proc_code_consts.append(("ProcedureCodeUNKNOWN", "255"))
+        
+        proc_code_type_name = "int64"
+        protocol_ie_id_type_name = "int64"
+
 
         for item in constant_items:
             
@@ -360,7 +362,7 @@ class GoCodeGenerator:
             logger.info("No simple types found to generate in common file.")
             return
 
-        go_code = 'package e1ap_ies\n\nimport (\n\t"fmt"\n\t"io"\n\t"math"\n\t"github.com/lvdund/ngap/aper"\n)\n\n'
+        go_code = 'package e1ap_ies\n\nimport (\n\t"github.com/lvdund/asn1go/per"\n)\n\nfunc int64Ptr(v int64) *int64 { return &v }\n\n'
 
         sorted_items = sorted(simple_items, key=lambda x: self._standard_string(x.name))
         total_count = 0
@@ -372,73 +374,80 @@ class GoCodeGenerator:
             encode_logic = ""
             decode_logic = ""
             
-            
             if isinstance(item, IntegerDefinition) or (isinstance(item, AliasDefinition) and "INTEGER" in item.alias_of.upper()):
-                underlying_type = "aper.Integer"
+                underlying_type = "int64"
                 
                 min_val_attr = getattr(item, 'min_val', None)
-                min_val = self._format_go_value(str(min_val_attr) if min_val_attr is not None else '0')
-
-                
                 max_val_attr = getattr(item, 'max_val', None)
-                max_val_str = str(max_val_attr) if max_val_attr is not None else '0'
-                if max_val_str == "18446744073709551615":
-                    max_val = "math.MaxInt64"
-                else:
-                    max_val = self._format_go_value(max_val_str)
-                
                 is_extensible = str(getattr(item, 'is_extensible', False)).lower()
 
-                encode_logic = f"return w.WriteInteger(int64(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
-                decode_logic = f"""
-            val, err := r.ReadInteger(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
-            if err != nil {{
-            return err
-            }}
-            s.Value = aper.Integer(val)
-            return nil"""
+                min_v = str(min_val_attr) if str(min_val_attr).isdigit() else self._standard_string(str(min_val_attr))
+                
+                if max_val_attr is None:
+                    constraint_code = f"per.SemiConstrained({min_v})"
+                else:
+                    max_v = str(max_val_attr) if str(max_val_attr).isdigit() else self._standard_string(str(max_val_attr))
+                    is_max_huge = str(max_val_attr).isdigit() and int(str(max_val_attr)) > 9223372036854775807
+                    
+                    if is_max_huge:
+                        constraint_code = "per.Unconstrained()"
+                    elif is_extensible == "true":
+                        constraint_code = f"per.ConstrainedExtensible({min_v}, {max_v})"
+                    else:
+                        constraint_code = f"per.Constrained({min_v}, {max_v})"
 
-            
+                encode_logic = f"return w.EncodeInteger(s.Value, {constraint_code})"
+                decode_block = f"""
+            val, err := r.DecodeInteger({constraint_code})
+            if err != nil {{
+                return err
+            }}
+            s.Value = val
+            return nil"""
+                decode_logic = decode_block
+
             elif isinstance(item, StringDefinition) or (isinstance(item, AliasDefinition) and "STRING" in item.alias_of.upper()):
                 min_val_attr = getattr(item, 'min_val', None)
-                min_val = self._format_go_value(str(min_val_attr) if min_val_attr is not None else '0')
                 max_val_attr = getattr(item, 'max_val', None)
-                max_val = self._format_go_value(str(max_val_attr) if max_val_attr is not None else '0')
                 is_extensible = str(getattr(item, 'is_extensible', False)).lower()
 
+                min_val = min_val_attr if min_val_attr is not None else 0
+                max_val = max_val_attr if max_val_attr is not None else 0
+                
+                min_str = f"int64Ptr({min_val})" if str(min_val).isdigit() else f"int64Ptr({self._standard_string(str(min_val))})"
+                
+                if max_val is not None and str(max_val).isdigit() and int(str(max_val)) > 9223372036854775807:
+                     max_str = "nil" # Unconstrained
+                elif max_val is not None:
+                     max_str = f"int64Ptr({max_val})" if str(max_val).isdigit() else f"int64Ptr({self._standard_string(str(max_val))})"
+                else:
+                     max_str = "nil"
+
+                constraint_code = f"per.SizeConstraints{{Extensible: {is_extensible}, Min: {min_str}, Max: {max_str}}}"
                 string_type_name = item.string_type if isinstance(item, StringDefinition) else item.alias_of
                 
-                
                 if "BIT STRING" in string_type_name.upper():
-                    underlying_type = "aper.BitString"
-                    encode_logic = f"return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
-                    
+                    underlying_type = "per.BitString"
+                    encode_logic = f"return w.EncodeBitString(s.Value, {constraint_code})"
                     decode_logic = f"""
         var err error
-        var numBits uint
-        s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
-        if err == nil {{
-            s.Value.NumBits = uint64(numBits)
-        }}
+        s.Value, err = r.DecodeBitString({constraint_code})
         return err"""
                 
                 else: 
-                    underlying_type = "aper.OctetString"
-                    encode_logic = f"return w.WriteOctetString([]byte(s.Value), &aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})"
-                    
+                    underlying_type = "[]byte"
+                    encode_logic = f"return w.EncodeOctetString(s.Value, {constraint_code})"
                     decode_logic = f"""
         var err error
-        s.Value, err = r.ReadOctetString(&aper.Constraint{{Lb: {min_val}, Ub: {max_val}}}, {is_extensible})
+        s.Value, err = r.DecodeOctetString({constraint_code})
         return err"""
         
             if underlying_type:
                 total_count += 1
                 go_code += self._generate_header_comment(item, go_name)
                 go_code += f"type {go_name} struct {{\n\tValue {underlying_type}\n}}\n\n"
-                go_code += f"// Encode implements the aper.AperMarshaller interface.\n"
-                go_code += f"func (s *{go_name}) Encode(w *aper.AperWriter) error {{\n\t{encode_logic}\n}}\n\n"
-                go_code += f"// Decode implements the aper.AperUnmarshaller interface.\n"
-                go_code += f"func (s *{go_name}) Decode(r *aper.AperReader) error {{\n\t{decode_logic}\n}}\n\n"
+                go_code += f"func (s *{go_name}) Encode(w *per.Encoder) error {{\n\t{encode_logic}\n}}\n\n"
+                go_code += f"func (s *{go_name}) Decode(r *per.Decoder) error {{\n\t{decode_logic}\n}}\n\n"
                     
         if total_count > 0:
             file_path = os.path.join(self.output_dir, "e1ap_common_types.go")
@@ -449,120 +458,106 @@ class GoCodeGenerator:
         logger.info(f"SUCCESS: Wrote {total_count} common type definitions to 'e1ap_common_types.go'.")
 
     def _generate_complex_type_files(self, complex_items: List[Any]):
-       """Generates a dedicated file for each complex type using a robust two-pass strategy."""
-       if not complex_items:
-           logger.info("No complex types found to generate individual files for.")
-           return
+        """Generates a dedicated file for each complex type using a robust two-pass strategy."""
+        if not complex_items:
+            logger.info("No complex types found to generate individual files for.")
+            return
 
+        type_counts = {"SEQUENCE": 0, "CHOICE": 0, "ENUMERATED": 0, "LIST": 0}
 
-       type_counts = {"SEQUENCE": 0, "CHOICE": 0, "ENUMERATED": 0, "LIST": 0}
-        
-       files_to_write = {}
-
-       logger.info(
-           "Complex types pass 1: Generating SEQUENCE, CHOICE, and ENUMERATED files..."
-       )
-       for item in complex_items:
-           if isinstance(item, SequenceDefinition):
-                for member in item.ies:
-                    if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
+        logger.info(
+            "Complex types: Mapping specialized extensions and generating files..."
+        )
+        # Pass 1: Handle specialized extensions and update member types
+        for item in complex_items:
+            if isinstance(item, SequenceDefinition):
+                 for member in item.ies:
+                     if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
                         extension_set_name = member.extension_set_name
                         extension_set = self.parser.extension_sets.get(extension_set_name)
                         
-                        if extension_set:
-                            
-                            ext_go_name = self._standard_string(item.name) + "Extensions"
-                            ext_filename = ext_go_name + ".go"
-                            ext_filepath = os.path.join(self.output_dir, ext_filename)
+                        ext_go_name = self._standard_string(item.name) + "Extensions"
+                        # Update the member type in the sequence definition to the specialized type
+                        member.type = ext_go_name
+                        member.presence = "optional"
+                        member.is_extension_container = True
+                        
+                        # Generate the extension file immediately
+                        safe_extension_set = extension_set if extension_set is not None else []
+                        ext_struct_code = render_extension_struct_only(
+                            go_name=ext_go_name,
+                            extension_set=safe_extension_set,
+                            pascal_case_converter=self._standard_string,
+                        )
+                        ext_method_code, ext_imports = render_extension_methods(ext_go_name, safe_extension_set, self.parser)
+                        
+                        ext_file_content = f"package e1ap_ies\n\n"
+                        if ext_imports:
+                            ext_file_content += "import (\n"
+                            for imp in sorted(list(ext_imports)):
+                                ext_file_content += f'\t"{imp}"\n'
+                            ext_file_content += ")\n\n"
+                        ext_file_content += f"{ext_struct_code}\n\n{ext_method_code}"
+                        
+                        ext_filename = ext_go_name + ".go"
+                        ext_filepath = os.path.join(self.output_dir, ext_filename)
+                        with open(ext_filepath, "w", encoding="utf-8") as f:
+                            f.write(ext_file_content)
+                        self.generated_files.add(ext_filename)
+                        logger.info(f"SUCCESS: Wrote type-safe extensions file to '{ext_filename}'.")
 
-                            
-                            ext_struct_code = render_extension_struct_only(
-                                go_name=ext_go_name,
-                                extension_set=extension_set,
-                                pascal_case_converter=self._standard_string,
-                            )
-                            
-                            
-                            ext_method_code, ext_imports = render_extension_methods(ext_go_name, extension_set, self.parser)
-                            
-                            
-                            ext_file_content = "package e1ap_ies\n\n"
-                            if ext_imports:
-                                ext_file_content += "import (\n"
-                                for imp in sorted(list(ext_imports)):
-                                    ext_file_content += f'\t"{imp}"\n'
-                                ext_file_content += ")\n\n"
-                            ext_file_content += f"{ext_struct_code}\n\n{ext_method_code}"
+        # Pass 2: Generate the actual type files
+        for item in complex_items:
+            go_name = self._standard_string(item.name)
+            if go_name in ["InitiatingMessage", "SuccessfulOutcome", "UnsuccessfulOutcome", "E1APPDU"]:
+                logger.info(f"Skipping generation for abstract PDU wrapper: {go_name}")
+                continue
 
-                            
-                            with open(ext_filepath, "w", encoding="utf-8") as f:
-                                f.write(ext_file_content)
+            filename = go_name + ".go"
+            file_path = os.path.join(self.output_dir, filename)
+            
+            struct_code = self._generate_struct_for_item(item)
+            method_code, required_imports = "", set()
+            
+            is_pdu = item.name in self.message_to_procedure_map
+            
+            if is_pdu:
+                method_code, pdu_imports = render_pdu_methods(go_name, item, self.parser, self.message_to_procedure_map, self.procedures)
+                required_imports.update(pdu_imports)
+            elif isinstance(item, (SequenceDefinition, ChoiceDefinition)):
+                method_code, internal_imports = render_internal_struct_methods(go_name, item, self.parser)
+                required_imports.update(internal_imports)
+            elif isinstance(item, EnumDefinition):
+                method_code, enum_imports = render_enum_methods(go_name, item)
+                required_imports.update(enum_imports)
+            elif isinstance(item, ListDefinition): 
+                method_code, list_imports = render_list_methods(go_name, item, self.parser)
+                required_imports.update(list_imports)
+            
+            file_content = "package e1ap_ies\n\n"
+            if required_imports:
+                file_content += "import (\n"
+                for imp in sorted(list(required_imports)):
+                    file_content += f'\t"{imp}"\n'
+                file_content += ")\n\n"
+            file_content += f"{struct_code}\n\n{method_code}"
+            
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(file_content)
+            
+            self.generated_files.add(filename)
+            item_type_str = type(item).__name__.replace("Definition", "").upper()
+            if item_type_str in type_counts:
+                type_counts[item_type_str] += 1
+        
+        total_complex_count = sum(type_counts.values())
+        if total_complex_count > 0:
+            for def_type, count in type_counts.items():
+                if count > 0:
+                    logger.info(
+                        f"SUCCESS: Wrote {count} {def_type} definitions to individual files."
+                    )
 
-                            self.generated_files.add(ext_filename)
-                            logger.info(f"SUCCESS: Wrote type-safe extensions file to '{ext_filename}'.")
-                            
-                            
-                            break
-
-
-           if isinstance(item, (SequenceDefinition, ChoiceDefinition, EnumDefinition, ListDefinition)):
-               go_name = self._standard_string(item.name)
-               if go_name in ["InitiatingMessage", "SuccessfulOutcome", "UnsuccessfulOutcome", "E1APPDU"]:
-                   logger.info(f"Skipping generation for abstract PDU wrapper: {go_name}")
-                   continue
-               filename = go_name + ".go"
-               file_path = os.path.join(self.output_dir, filename)
-              
-               
-               
-               struct_code = self._generate_struct_for_item(item)
-              
-               
-               method_code, required_imports = "", set()
-               pdu_suffixes = [
-                   "Request", "Response", "Failure", "Command", "Complete",
-                   "Indication", "Acknowledge", "Setup", "Transfer", "Notification",
-                   "PDU" 
-               ]
-               is_pdu = item.name in self.message_to_procedure_map
-              
-               if is_pdu:
-                   method_code, pdu_imports = render_pdu_methods(go_name, item, self.parser, self.message_to_procedure_map, self.procedures)
-                   required_imports.update(pdu_imports)
-               elif isinstance(item, (SequenceDefinition, ChoiceDefinition)):
-                   method_code, internal_imports = render_internal_struct_methods(go_name, item, self.parser)
-                   required_imports.update(internal_imports)
-               elif isinstance(item, EnumDefinition):
-                   method_code, enum_imports = render_enum_methods(go_name, item)
-                   required_imports.update(enum_imports)
-               elif isinstance(item, ListDefinition): 
-                   method_code, list_imports = render_list_methods(go_name, item, self.parser)
-                   required_imports.update(list_imports)
-              
-               
-               file_content = "package e1ap_ies\n\n"
-               if required_imports:
-                   file_content += "import (\n"
-                   for imp in sorted(list(required_imports)):
-                       file_content += f'\t"{imp}"\n'
-                   file_content += ")\n\n"
-               file_content += f"{struct_code}\n\n{method_code}"
-              
-               with open(file_path, "w", encoding="utf-8") as f:
-                   f.write(file_content)
-              
-               self.generated_files.add(filename)
-               item_type_str = type(item).__name__.replace("Definition", "").upper()
-               if item_type_str in type_counts:
-                   type_counts[item_type_str] += 1
-          
-       total_complex_count = sum(type_counts.values())
-       if total_complex_count > 0:
-           for def_type, count in type_counts.items():
-               if count > 0:
-                   logger.info(
-                       f"SUCCESS: Wrote {count} {def_type} definitions to individual files."
-                   )
 
     def _generate_struct_for_item(self, item: Any) -> str:
         go_name = self._standard_string(item.name)

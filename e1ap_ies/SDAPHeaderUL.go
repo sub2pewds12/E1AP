@@ -1,31 +1,34 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // SDAPHeaderUL is a generated ENUMERATED type.
 type SDAPHeaderUL struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	SDAPHeaderULPresent aper.Enumerated = 0
-	SDAPHeaderULAbsent  aper.Enumerated = 1
+	SDAPHeaderULPresent int64 = 0
+	SDAPHeaderULAbsent  int64 = 1
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *SDAPHeaderUL) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, true)
+// Encode implements the MessageEncoder interface for SDAPHeaderUL.
+func (e *SDAPHeaderUL) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *SDAPHeaderUL) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for SDAPHeaderUL.
+func (e *SDAPHeaderUL) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

@@ -3,208 +3,406 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDCPConfiguration is a generated SEQUENCE type.
 type PDCPConfiguration struct {
-	PDCPSNSizeUL          PDCPSNSize                   `aper:"mandatory,ext"`
-	PDCPSNSizeDL          PDCPSNSize                   `aper:"mandatory,ext"`
-	RLCMode               RLCMode                      `aper:"mandatory,ext"`
-	ROHCParameters        *ROHCParameters              `aper:"optional,ext"`
-	TReorderingTimer      *TReorderingTimer            `aper:"optional,ext"`
-	DiscardTimer          *DiscardTimer                `aper:"optional,ext"`
-	ULDataSplitThreshold  *ULDataSplitThreshold        `aper:"optional,ext"`
-	PDCPDuplication       *PDCPDuplication             `aper:"optional,ext"`
-	PDCPReestablishment   *PDCPReestablishment         `aper:"optional,ext"`
-	PDCPDataRecovery      *PDCPDataRecovery            `aper:"optional,ext"`
-	DuplicationActivation *DuplicationActivation       `aper:"optional,ext"`
-	OutOfOrderDelivery    *OutOfOrderDelivery          `aper:"optional,ext"`
-	IEExtensions          *PDCPConfigurationExtensions `aper:"optional,ext"`
+	PDCPSNSizeUL          PDCPSNSize
+	PDCPSNSizeDL          PDCPSNSize
+	RLCMode               RLCMode
+	ROHCParameters        *ROHCParameters
+	TReorderingTimer      *TReorderingTimer
+	DiscardTimer          *DiscardTimer
+	ULDataSplitThreshold  *ULDataSplitThreshold
+	PDCPDuplication       *PDCPDuplication
+	PDCPReestablishment   *PDCPReestablishment
+	PDCPDataRecovery      *PDCPDataRecovery
+	DuplicationActivation *DuplicationActivation
+	OutOfOrderDelivery    *OutOfOrderDelivery
+	IEExtensions          *PDCPConfigurationExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *PDCPConfiguration) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *PDCPConfiguration) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pDCP-SN-Size-UL", Optional: false},
+			per.ComponentInfo{Name: "pDCP-SN-Size-DL", Optional: false},
+			per.ComponentInfo{Name: "rLC-Mode", Optional: false},
+			per.ComponentInfo{Name: "rOHC-Parameters", Optional: true},
+			per.ComponentInfo{Name: "t-ReorderingTimer", Optional: true},
+			per.ComponentInfo{Name: "discardTimer", Optional: true},
+			per.ComponentInfo{Name: "uLDataSplitThreshold", Optional: true},
+			per.ComponentInfo{Name: "pDCP-Duplication", Optional: true},
+			per.ComponentInfo{Name: "pDCP-Reestablishment", Optional: true},
+			per.ComponentInfo{Name: "pDCP-DataRecovery", Optional: true},
+			per.ComponentInfo{Name: "duplication-Activation", Optional: true},
+			per.ComponentInfo{Name: "outOfOrderDelivery", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [2]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.ROHCParameters != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.TReorderingTimer != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DiscardTimer != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.ULDataSplitThreshold != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDCPDuplication != nil {
-		optionalityBitmap[0] |= 1 << 3
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDCPReestablishment != nil {
-		optionalityBitmap[0] |= 1 << 2
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDCPDataRecovery != nil {
-		optionalityBitmap[0] |= 1 << 1
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DuplicationActivation != nil {
-		optionalityBitmap[0] |= 1 << 0
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.OutOfOrderDelivery != nil {
-		optionalityBitmap[1] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[1] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(10), &aper.Constraint{Lb: 10, Ub: 10}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteEnumerate(uint64(s.PDCPSNSizeUL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("encode PDCPSNSizeUL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.PDCPSNSizeUL.Value), enumC); err != nil {
+			return fmt.Errorf("encode PDCPSNSizeUL failed: %w", err)
+		}
 	}
-	if err = w.WriteEnumerate(uint64(s.PDCPSNSizeDL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("encode PDCPSNSizeDL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.PDCPSNSizeDL.Value), enumC); err != nil {
+			return fmt.Errorf("encode PDCPSNSizeDL failed: %w", err)
+		}
 	}
-	if err = w.WriteEnumerate(uint64(s.RLCMode.Value), aper.Constraint{Lb: 0, Ub: 4}, true); err != nil {
-		return fmt.Errorf("encode RLCMode failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.RLCMode.Value), enumC); err != nil {
+			return fmt.Errorf("encode RLCMode failed: %w", err)
+		}
 	}
+
 	if s.ROHCParameters != nil {
 		if err = s.ROHCParameters.Encode(w); err != nil {
 			return fmt.Errorf("encode ROHCParameters failed: %w", err)
 		}
 	}
+
 	if s.TReorderingTimer != nil {
 		if err = s.TReorderingTimer.Encode(w); err != nil {
 			return fmt.Errorf("encode TReorderingTimer failed: %w", err)
 		}
 	}
+
 	if s.DiscardTimer != nil {
-		if err = w.WriteEnumerate(uint64((*s.DiscardTimer).Value), aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
-			return fmt.Errorf("encode DiscardTimer failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 16), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.DiscardTimer).Value), enumC); err != nil {
+				return fmt.Errorf("encode DiscardTimer failed: %w", err)
+			}
 		}
 	}
+
 	if s.ULDataSplitThreshold != nil {
-		if err = w.WriteEnumerate(uint64((*s.ULDataSplitThreshold).Value), aper.Constraint{Lb: 0, Ub: 23}, true); err != nil {
-			return fmt.Errorf("encode ULDataSplitThreshold failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 24), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.ULDataSplitThreshold).Value), enumC); err != nil {
+				return fmt.Errorf("encode ULDataSplitThreshold failed: %w", err)
+			}
 		}
 	}
+
 	if s.PDCPDuplication != nil {
-		if err = w.WriteEnumerate(uint64((*s.PDCPDuplication).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode PDCPDuplication failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.PDCPDuplication).Value), enumC); err != nil {
+				return fmt.Errorf("encode PDCPDuplication failed: %w", err)
+			}
 		}
 	}
+
 	if s.PDCPReestablishment != nil {
-		if err = w.WriteEnumerate(uint64((*s.PDCPReestablishment).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode PDCPReestablishment failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.PDCPReestablishment).Value), enumC); err != nil {
+				return fmt.Errorf("encode PDCPReestablishment failed: %w", err)
+			}
 		}
 	}
+
 	if s.PDCPDataRecovery != nil {
-		if err = w.WriteEnumerate(uint64((*s.PDCPDataRecovery).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode PDCPDataRecovery failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.PDCPDataRecovery).Value), enumC); err != nil {
+				return fmt.Errorf("encode PDCPDataRecovery failed: %w", err)
+			}
 		}
 	}
+
 	if s.DuplicationActivation != nil {
-		if err = w.WriteEnumerate(uint64((*s.DuplicationActivation).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("encode DuplicationActivation failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.DuplicationActivation).Value), enumC); err != nil {
+				return fmt.Errorf("encode DuplicationActivation failed: %w", err)
+			}
 		}
 	}
+
 	if s.OutOfOrderDelivery != nil {
-		if err = w.WriteEnumerate(uint64((*s.OutOfOrderDelivery).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode OutOfOrderDelivery failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.OutOfOrderDelivery).Value), enumC); err != nil {
+				return fmt.Errorf("encode OutOfOrderDelivery failed: %w", err)
+			}
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *PDCPConfiguration) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *PDCPConfiguration) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pDCP-SN-Size-UL", Optional: false},
+			per.ComponentInfo{Name: "pDCP-SN-Size-DL", Optional: false},
+			per.ComponentInfo{Name: "rLC-Mode", Optional: false},
+			per.ComponentInfo{Name: "rOHC-Parameters", Optional: true},
+			per.ComponentInfo{Name: "t-ReorderingTimer", Optional: true},
+			per.ComponentInfo{Name: "discardTimer", Optional: true},
+			per.ComponentInfo{Name: "uLDataSplitThreshold", Optional: true},
+			per.ComponentInfo{Name: "pDCP-Duplication", Optional: true},
+			per.ComponentInfo{Name: "pDCP-Reestablishment", Optional: true},
+			per.ComponentInfo{Name: "pDCP-DataRecovery", Optional: true},
+			per.ComponentInfo{Name: "duplication-Activation", Optional: true},
+			per.ComponentInfo{Name: "outOfOrderDelivery", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 10, Ub: 10}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.PDCPSNSizeUL.Decode(r); err != nil {
-		return fmt.Errorf("decode PDCPSNSizeUL failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.PDCPSNSizeDL.Decode(r); err != nil {
-		return fmt.Errorf("decode PDCPSNSizeDL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode PDCPSNSizeUL failed: %w", err)
+		}
+		s.PDCPSNSizeUL.Value = val
 	}
-	if err = s.RLCMode.Decode(r); err != nil {
-		return fmt.Errorf("decode RLCMode failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode PDCPSNSizeDL failed: %w", err)
+		}
+		s.PDCPSNSizeDL.Value = val
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 5), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode RLCMode failed: %w", err)
+		}
+		s.RLCMode.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.ROHCParameters = new(ROHCParameters)
 		if err = s.ROHCParameters.Decode(r); err != nil {
-			return fmt.Errorf("decode ROHCParameters failed: %w", err)
+			return fmt.Errorf("Decode ROHCParameters failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.TReorderingTimer = new(TReorderingTimer)
 		if err = s.TReorderingTimer.Decode(r); err != nil {
-			return fmt.Errorf("decode TReorderingTimer failed: %w", err)
+			return fmt.Errorf("Decode TReorderingTimer failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(5) {
 		s.DiscardTimer = new(DiscardTimer)
-		if err = s.DiscardTimer.Decode(r); err != nil {
-			return fmt.Errorf("decode DiscardTimer failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 16), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode DiscardTimer failed: %w", err)
+			}
+			s.DiscardTimer.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(6) {
 		s.ULDataSplitThreshold = new(ULDataSplitThreshold)
-		if err = s.ULDataSplitThreshold.Decode(r); err != nil {
-			return fmt.Errorf("decode ULDataSplitThreshold failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 24), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode ULDataSplitThreshold failed: %w", err)
+			}
+			s.ULDataSplitThreshold.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
+
+	if seqDecoder.IsComponentPresent(7) {
 		s.PDCPDuplication = new(PDCPDuplication)
-		if err = s.PDCPDuplication.Decode(r); err != nil {
-			return fmt.Errorf("decode PDCPDuplication failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode PDCPDuplication failed: %w", err)
+			}
+			s.PDCPDuplication.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
+
+	if seqDecoder.IsComponentPresent(8) {
 		s.PDCPReestablishment = new(PDCPReestablishment)
-		if err = s.PDCPReestablishment.Decode(r); err != nil {
-			return fmt.Errorf("decode PDCPReestablishment failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode PDCPReestablishment failed: %w", err)
+			}
+			s.PDCPReestablishment.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {
+
+	if seqDecoder.IsComponentPresent(9) {
 		s.PDCPDataRecovery = new(PDCPDataRecovery)
-		if err = s.PDCPDataRecovery.Decode(r); err != nil {
-			return fmt.Errorf("decode PDCPDataRecovery failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode PDCPDataRecovery failed: %w", err)
+			}
+			s.PDCPDataRecovery.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<0) > 0 {
+
+	if seqDecoder.IsComponentPresent(10) {
 		s.DuplicationActivation = new(DuplicationActivation)
-		if err = s.DuplicationActivation.Decode(r); err != nil {
-			return fmt.Errorf("decode DuplicationActivation failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode DuplicationActivation failed: %w", err)
+			}
+			s.DuplicationActivation.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<7) > 0 {
+
+	if seqDecoder.IsComponentPresent(11) {
 		s.OutOfOrderDelivery = new(OutOfOrderDelivery)
-		if err = s.OutOfOrderDelivery.Decode(r); err != nil {
-			return fmt.Errorf("decode OutOfOrderDelivery failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode OutOfOrderDelivery failed: %w", err)
+			}
+			s.OutOfOrderDelivery.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(12) {
 		s.IEExtensions = new(PDCPConfigurationExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for PDCPConfiguration */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

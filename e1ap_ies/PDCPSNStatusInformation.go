@@ -3,66 +3,101 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDCPSNStatusInformation is a generated SEQUENCE type.
 type PDCPSNStatusInformation struct {
-	PdcpStatusTransferUL DRBBStatusTransfer          `aper:"mandatory,ext"`
-	PdcpStatusTransferDL PDCPCount                   `aper:"mandatory,ext"`
-	IEExtension          *ProtocolExtensionContainer `aper:"optional,ext"`
+	PdcpStatusTransferUL DRBBStatusTransfer
+	PdcpStatusTransferDL PDCPCount
+	IEExtension          *PDCPSNStatusInformationExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *PDCPSNStatusInformation) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *PDCPSNStatusInformation) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pdcpStatusTransfer-UL", Optional: false},
+			per.ComponentInfo{Name: "pdcpStatusTransfer-DL", Optional: false},
+			per.ComponentInfo{Name: "iE-Extension", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtension != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if err = s.PdcpStatusTransferUL.Encode(w); err != nil {
 		return fmt.Errorf("encode PdcpStatusTransferUL failed: %w", err)
 	}
 	if err = s.PdcpStatusTransferDL.Encode(w); err != nil {
 		return fmt.Errorf("encode PdcpStatusTransferDL failed: %w", err)
 	}
+
 	if s.IEExtension != nil {
 		if err = s.IEExtension.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtension failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *PDCPSNStatusInformation) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *PDCPSNStatusInformation) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pdcpStatusTransfer-UL", Optional: false},
+			per.ComponentInfo{Name: "pdcpStatusTransfer-DL", Optional: false},
+			per.ComponentInfo{Name: "iE-Extension", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
 	if err = s.PdcpStatusTransferUL.Decode(r); err != nil {
-		return fmt.Errorf("decode PdcpStatusTransferUL failed: %w", err)
+		return fmt.Errorf("Decode PdcpStatusTransferUL failed: %w", err)
 	}
 	if err = s.PdcpStatusTransferDL.Decode(r); err != nil {
-		return fmt.Errorf("decode PdcpStatusTransferDL failed: %w", err)
+		return fmt.Errorf("Decode PdcpStatusTransferDL failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtension = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtension = new(PDCPSNStatusInformationExtensions)
 		if err = s.IEExtension.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtension failed: %w", err)
+			return fmt.Errorf("Decode IEExtension failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for PDCPSNStatusInformation */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

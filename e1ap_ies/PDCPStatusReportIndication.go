@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDCPStatusReportIndication is a generated ENUMERATED type.
 type PDCPStatusReportIndication struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	PDCPStatusReportIndicationDownlink aper.Enumerated = 0
-	PDCPStatusReportIndicationUplink   aper.Enumerated = 1
-	PDCPStatusReportIndicationBoth     aper.Enumerated = 2
+	PDCPStatusReportIndicationDownlink int64 = 0
+	PDCPStatusReportIndicationUplink   int64 = 1
+	PDCPStatusReportIndicationBoth     int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *PDCPStatusReportIndication) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
+// Encode implements the MessageEncoder interface for PDCPStatusReportIndication.
+func (e *PDCPStatusReportIndication) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *PDCPStatusReportIndication) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for PDCPStatusReportIndication.
+func (e *PDCPStatusReportIndication) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

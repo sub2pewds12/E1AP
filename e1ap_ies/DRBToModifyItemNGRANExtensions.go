@@ -1,10 +1,9 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DRBToModifyItemNGRANExtensions is a generated type-safe wrapper for extensions.
@@ -17,8 +16,7 @@ type DRBToModifyItemNGRANExtensions struct {
 	EarlyDataForwardingIndicator     *EarlyDataForwardingIndicator
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
+func (s *DRBToModifyItemNGRANExtensions) Encode(w *per.Encoder) error {
 	var extensions []*ProtocolExtensionField
 
 	if s.OldQoSFlowMapULendmarkerexpected != nil {
@@ -70,41 +68,39 @@ func (s *DRBToModifyItemNGRANExtensions) Encode(w *aper.AperWriter) error {
 	}
 
 	if len(extensions) > 0 {
-		tmp := Sequence[*ProtocolExtensionField]{
-			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
-			ext: false,
+		c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxProtocolExtensions)}
+		if err := w.EncodeLengthDeterminant(int64(len(extensions)), c); err != nil {
+			return fmt.Errorf("encode extension container length failed: %w", err)
 		}
-		for i := 0; i < len(extensions); i++ {
-			tmp.Value = append(tmp.Value, extensions[i])
-		}
-		if err := tmp.Encode(w); err != nil {
-			return fmt.Errorf("encode extension container failed: %w", err)
+		for _, ext := range extensions {
+			if err := ext.Encode(w); err != nil {
+				return fmt.Errorf("encode extension failed: %w", err)
+			}
 		}
 	} else {
-		tmp := Sequence[*ProtocolExtensionField]{
-			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
-			ext: false,
-		}
-		if err := tmp.Encode(w); err != nil {
-			return fmt.Errorf("encode empty extension container failed: %w", err)
+		// empty extension container
+		c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxProtocolExtensions)}
+		if err := w.EncodeLengthDeterminant(0, c); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBToModifyItemNGRANExtensions) Decode(r *aper.AperReader) error {
-	decoder := func(r *aper.AperReader) (**ProtocolExtensionField, error) {
-		item := new(ProtocolExtensionField)
-		if err := item.Decode(r); err != nil {
-			return nil, err
-		}
-		return &item, nil
+func (s *DRBToModifyItemNGRANExtensions) Decode(r *per.Decoder) error {
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxProtocolExtensions)}
+	length, err := r.DecodeLengthDeterminant(c)
+	if err != nil {
+		return fmt.Errorf("decode extension container length failed: %w", err)
 	}
 
-	extensions, err := aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false)
-	if err != nil {
-		return fmt.Errorf("decode extension container failed: %w", err)
+	extensions := make([]*ProtocolExtensionField, length)
+	for i := int64(0); i < length; i++ {
+		ext := new(ProtocolExtensionField)
+		if err := ext.Decode(r); err != nil {
+			return fmt.Errorf("decode extension failed: %w", err)
+		}
+		extensions[i] = ext
 	}
 
 	for _, ext := range extensions {
@@ -112,37 +108,37 @@ func (s *DRBToModifyItemNGRANExtensions) Decode(r *aper.AperReader) error {
 
 		case ProtocolIEIDOldQoSFlowMapULendmarkerexpected:
 			s.OldQoSFlowMapULendmarkerexpected = new(QOSFlowList)
-			if err := s.OldQoSFlowMapULendmarkerexpected.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.OldQoSFlowMapULendmarkerexpected.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension OldQoSFlowMapULendmarkerexpected failed: %w", err)
 			}
 
 		case ProtocolIEIDDRBQOS:
 			s.DRBQOS = new(QoSFlowLevelQoSParameters)
-			if err := s.DRBQOS.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.DRBQOS.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension DRBQOS failed: %w", err)
 			}
 
 		case ProtocolIEIDEarlyForwardingCOUNTReq:
 			s.EarlyForwardingCOUNTReq = new(EarlyForwardingCOUNTReq)
-			if err := s.EarlyForwardingCOUNTReq.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.EarlyForwardingCOUNTReq.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension EarlyForwardingCOUNTReq failed: %w", err)
 			}
 
 		case ProtocolIEIDEarlyForwardingCOUNTInfo:
 			s.EarlyForwardingCOUNTInfo = new(EarlyForwardingCOUNTInfo)
-			if err := s.EarlyForwardingCOUNTInfo.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.EarlyForwardingCOUNTInfo.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension EarlyForwardingCOUNTInfo failed: %w", err)
 			}
 
 		case ProtocolIEIDDAPSRequestInfo:
 			s.DAPSRequestInfo = new(DAPSRequestInfo)
-			if err := s.DAPSRequestInfo.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.DAPSRequestInfo.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension DAPSRequestInfo failed: %w", err)
 			}
 
 		case ProtocolIEIDEarlyDataForwardingIndicator:
 			s.EarlyDataForwardingIndicator = new(EarlyDataForwardingIndicator)
-			if err := s.EarlyDataForwardingIndicator.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.EarlyDataForwardingIndicator.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension EarlyDataForwardingIndicator failed: %w", err)
 			}
 		default:

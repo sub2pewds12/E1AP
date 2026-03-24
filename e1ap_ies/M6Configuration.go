@@ -3,66 +3,119 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // M6Configuration is a generated SEQUENCE type.
 type M6Configuration struct {
-	M6reportInterval M6reportInterval            `aper:"mandatory,ext"`
-	M6LinksToLog     LinksToLog                  `aper:"mandatory,ext"`
-	IEExtensions     *ProtocolExtensionContainer `aper:"optional,ext"`
+	M6reportInterval M6reportInterval
+	M6LinksToLog     LinksToLog
+	IEExtensions     *M6ConfigurationExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *M6Configuration) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *M6Configuration) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "m6report-Interval", Optional: false},
+			per.ComponentInfo{Name: "m6-links-to-log", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteEnumerate(uint64(s.M6reportInterval.Value), aper.Constraint{Lb: 0, Ub: 13}, true); err != nil {
-		return fmt.Errorf("encode M6reportInterval failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 14), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.M6reportInterval.Value), enumC); err != nil {
+			return fmt.Errorf("encode M6reportInterval failed: %w", err)
+		}
 	}
-	if err = w.WriteEnumerate(uint64(s.M6LinksToLog.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-		return fmt.Errorf("encode M6LinksToLog failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.M6LinksToLog.Value), enumC); err != nil {
+			return fmt.Errorf("encode M6LinksToLog failed: %w", err)
+		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *M6Configuration) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *M6Configuration) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "m6report-Interval", Optional: false},
+			per.ComponentInfo{Name: "m6-links-to-log", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.M6reportInterval.Decode(r); err != nil {
-		return fmt.Errorf("decode M6reportInterval failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.M6LinksToLog.Decode(r); err != nil {
-		return fmt.Errorf("decode M6LinksToLog failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 14), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode M6reportInterval failed: %w", err)
+		}
+		s.M6reportInterval.Value = val
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode M6LinksToLog failed: %w", err)
+		}
+		s.M6LinksToLog.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(M6ConfigurationExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for M6Configuration */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

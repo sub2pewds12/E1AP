@@ -1,1968 +1,1732 @@
 package e1ap_ies
 
 import (
-	"math"
-
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
+
+func int64Ptr(v int64) *int64 { return &v }
 
 // AdditionalRRMPriorityIndex From: 9_4_5_Information_Element_Definitions.txt:126
 type AdditionalRRMPriorityIndex struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *AdditionalRRMPriorityIndex) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 32, Ub: 32}, false)
+func (s *AdditionalRRMPriorityIndex) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(32), Max: int64Ptr(32)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *AdditionalRRMPriorityIndex) Decode(r *aper.AperReader) error {
+func (s *AdditionalRRMPriorityIndex) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 32, Ub: 32}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(32), Max: int64Ptr(32)})
 	return err
 }
 
 // AlternativeQoSParaSetItemAlternativeQoSParameterIndex From: unknown:-1
 type AlternativeQoSParaSetItemAlternativeQoSParameterIndex struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 8}, true)
+func (s *AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 8))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Decode(r *aper.AperReader) error {
+func (s *AlternativeQoSParaSetItemAlternativeQoSParameterIndex) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 8))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // AveragingWindow From: unknown:-1
 type AveragingWindow struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *AveragingWindow) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true)
+func (s *AveragingWindow) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *AveragingWindow) Decode(r *aper.AperReader) error {
+func (s *AveragingWindow) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // BitRate From: 9_4_5_Information_Element_Definitions.txt:154
 type BitRate struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *BitRate) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true)
+func (s *BitRate) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 4000000000000))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *BitRate) Decode(r *aper.AperReader) error {
+func (s *BitRate) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4000000000000}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // BurstArrivalTime From: unknown:-1
 type BurstArrivalTime struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *BurstArrivalTime) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+func (s *BurstArrivalTime) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *BurstArrivalTime) Decode(r *aper.AperReader) error {
+func (s *BurstArrivalTime) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 	return err
 }
 
 // CellGroupID From: 9_4_5_Information_Element_Definitions.txt:252
 type CellGroupID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *CellGroupID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 3}, true)
+func (s *CellGroupID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 3))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *CellGroupID) Decode(r *aper.AperReader) error {
+func (s *CellGroupID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 3}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 3))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // CommonNetworkInstance From: 9_4_5_Information_Element_Definitions.txt:273
 type CommonNetworkInstance struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *CommonNetworkInstance) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+func (s *CommonNetworkInstance) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *CommonNetworkInstance) Decode(r *aper.AperReader) error {
+func (s *CommonNetworkInstance) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 	return err
 }
 
 // DRBBStatusTransferReceiveStatusofPDCPSDU From: 9_4_5_Information_Element_Definitions.txt:1747
 type DRBBStatusTransferReceiveStatusofPDCPSDU struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 131072}, false)
+func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(131072)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Decode(r *aper.AperReader) error {
+func (s *DRBBStatusTransferReceiveStatusofPDCPSDU) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 131072}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(131072)})
 	return err
 }
 
 // DRBID From: 9_4_5_Information_Element_Definitions.txt:586
 type DRBID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 32}, true)
+func (s *DRBID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 32))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBID) Decode(r *aper.AperReader) error {
+func (s *DRBID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 32))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // DRBMeasurementResultsInformationItemULD1Result From: unknown:-1
 type DRBMeasurementResultsInformationItemULD1Result struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBMeasurementResultsInformationItemULD1Result) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 10000}, true)
+func (s *DRBMeasurementResultsInformationItemULD1Result) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 10000))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBMeasurementResultsInformationItemULD1Result) Decode(r *aper.AperReader) error {
+func (s *DRBMeasurementResultsInformationItemULD1Result) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 10000}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 10000))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // DRBUsageReportItemEndTimeStamp From: unknown:-1
 type DRBUsageReportItemEndTimeStamp struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBUsageReportItemEndTimeStamp) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+func (s *DRBUsageReportItemEndTimeStamp) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBUsageReportItemEndTimeStamp) Decode(r *aper.AperReader) error {
+func (s *DRBUsageReportItemEndTimeStamp) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 	return err
 }
 
 // DRBUsageReportItemStartTimeStamp From: unknown:-1
 type DRBUsageReportItemStartTimeStamp struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBUsageReportItemStartTimeStamp) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+func (s *DRBUsageReportItemStartTimeStamp) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBUsageReportItemStartTimeStamp) Decode(r *aper.AperReader) error {
+func (s *DRBUsageReportItemStartTimeStamp) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 	return err
 }
 
 // DRBUsageReportItemUsageCountDL From: unknown:-1
 type DRBUsageReportItemUsageCountDL struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBUsageReportItemUsageCountDL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+func (s *DRBUsageReportItemUsageCountDL) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Unconstrained())
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBUsageReportItemUsageCountDL) Decode(r *aper.AperReader) error {
+func (s *DRBUsageReportItemUsageCountDL) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+	val, err := r.DecodeInteger(per.Unconstrained())
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // DRBUsageReportItemUsageCountUL From: unknown:-1
 type DRBUsageReportItemUsageCountUL struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *DRBUsageReportItemUsageCountUL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+func (s *DRBUsageReportItemUsageCountUL) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Unconstrained())
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBUsageReportItemUsageCountUL) Decode(r *aper.AperReader) error {
+func (s *DRBUsageReportItemUsageCountUL) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+	val, err := r.DecodeInteger(per.Unconstrained())
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // Dynamic5QIDescriptorFiveQI From: 9_4_5_Information_Element_Definitions.txt:1001
 type Dynamic5QIDescriptorFiveQI struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *Dynamic5QIDescriptorFiveQI) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, true)
+func (s *Dynamic5QIDescriptorFiveQI) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *Dynamic5QIDescriptorFiveQI) Decode(r *aper.AperReader) error {
+func (s *Dynamic5QIDescriptorFiveQI) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // EncryptionKey From: 9_4_5_Information_Element_Definitions.txt:1079
 type EncryptionKey struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *EncryptionKey) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+func (s *EncryptionKey) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *EncryptionKey) Decode(r *aper.AperReader) error {
+func (s *EncryptionKey) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 	return err
 }
 
 // ExtendedPacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1099
 type ExtendedPacketDelayBudget struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ExtendedPacketDelayBudget) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 65535}, true)
+func (s *ExtendedPacketDelayBudget) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 65535))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ExtendedPacketDelayBudget) Decode(r *aper.AperReader) error {
+func (s *ExtendedPacketDelayBudget) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 65535}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 65535))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // GNBCUCPName From: 9_4_5_Information_Element_Definitions.txt:1144
 type GNBCUCPName struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUCPName) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+func (s *GNBCUCPName) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUCPName) Decode(r *aper.AperReader) error {
+func (s *GNBCUCPName) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 	return err
 }
 
 // GNBCUCPNameUTF8String From: unknown:-1
 type GNBCUCPNameUTF8String struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUCPNameUTF8String) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+func (s *GNBCUCPNameUTF8String) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUCPNameUTF8String) Decode(r *aper.AperReader) error {
+func (s *GNBCUCPNameUTF8String) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 	return err
 }
 
 // GNBCUCPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1157
 type GNBCUCPNameVisibleString struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUCPNameVisibleString) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+func (s *GNBCUCPNameVisibleString) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUCPNameVisibleString) Decode(r *aper.AperReader) error {
+func (s *GNBCUCPNameVisibleString) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 	return err
 }
 
 // GNBCUCPUEE1APID From: unknown:-1
 type GNBCUCPUEE1APID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUCPUEE1APID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+func (s *GNBCUCPUEE1APID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 4294967295))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUCPUEE1APID) Decode(r *aper.AperReader) error {
+func (s *GNBCUCPUEE1APID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 4294967295))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // GNBCUUPCapacity From: unknown:-1
 type GNBCUUPCapacity struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPCapacity) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+func (s *GNBCUUPCapacity) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPCapacity) Decode(r *aper.AperReader) error {
+func (s *GNBCUUPCapacity) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // GNBCUUPID From: 9_4_5_Information_Element_Definitions.txt:1179
 type GNBCUUPID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+func (s *GNBCUUPID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 68719476735))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPID) Decode(r *aper.AperReader) error {
+func (s *GNBCUUPID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 68719476735))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // GNBCUUPName From: unknown:-1
 type GNBCUUPName struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPName) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+func (s *GNBCUUPName) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPName) Decode(r *aper.AperReader) error {
+func (s *GNBCUUPName) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 	return err
 }
 
 // GNBCUUPNameUTF8String From: unknown:-1
 type GNBCUUPNameUTF8String struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPNameUTF8String) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+func (s *GNBCUUPNameUTF8String) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPNameUTF8String) Decode(r *aper.AperReader) error {
+func (s *GNBCUUPNameUTF8String) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 	return err
 }
 
 // GNBCUUPNameVisibleString From: 9_4_5_Information_Element_Definitions.txt:1194
 type GNBCUUPNameVisibleString struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPNameVisibleString) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 150}, false)
+func (s *GNBCUUPNameVisibleString) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPNameVisibleString) Decode(r *aper.AperReader) error {
+func (s *GNBCUUPNameVisibleString) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 150}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(150)})
 	return err
 }
 
 // GNBCUUPUEE1APID From: unknown:-1
 type GNBCUUPUEE1APID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPUEE1APID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+func (s *GNBCUUPUEE1APID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 4294967295))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPUEE1APID) Decode(r *aper.AperReader) error {
+func (s *GNBCUUPUEE1APID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 4294967295))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // GNBDUID From: unknown:-1
 type GNBDUID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GNBDUID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+func (s *GNBDUID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 68719476735))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBDUID) Decode(r *aper.AperReader) error {
+func (s *GNBDUID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 68719476735))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // GTPTEID From: 9_4_5_Information_Element_Definitions.txt:1289
 type GTPTEID struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *GTPTEID) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+func (s *GTPTEID) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *GTPTEID) Decode(r *aper.AperReader) error {
+func (s *GTPTEID) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 	return err
 }
 
 // HFN From: unknown:-1
 type HFN struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *HFN) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+func (s *HFN) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 4294967295))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *HFN) Decode(r *aper.AperReader) error {
+func (s *HFN) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 4294967295))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // HWCapacityIndicatorAvailableThroughput From: unknown:-1
 type HWCapacityIndicatorAvailableThroughput struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *HWCapacityIndicatorAvailableThroughput) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 100}, true)
+func (s *HWCapacityIndicatorAvailableThroughput) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 100))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *HWCapacityIndicatorAvailableThroughput) Decode(r *aper.AperReader) error {
+func (s *HWCapacityIndicatorAvailableThroughput) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 100))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // HWCapacityIndicatorOfferedThroughput From: unknown:-1
 type HWCapacityIndicatorOfferedThroughput struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *HWCapacityIndicatorOfferedThroughput) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 16777216}, true)
+func (s *HWCapacityIndicatorOfferedThroughput) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 16777216))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *HWCapacityIndicatorOfferedThroughput) Decode(r *aper.AperReader) error {
+func (s *HWCapacityIndicatorOfferedThroughput) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 16777216}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 16777216))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // InactivityTimer From: 9_4_5_Information_Element_Definitions.txt:1364
 type InactivityTimer struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *InactivityTimer) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 7200}, true)
+func (s *InactivityTimer) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 7200))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *InactivityTimer) Decode(r *aper.AperReader) error {
+func (s *InactivityTimer) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 7200}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 7200))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // IntegrityProtectionKey From: 9_4_5_Information_Element_Definitions.txt:1356
 type IntegrityProtectionKey struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *IntegrityProtectionKey) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+func (s *IntegrityProtectionKey) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *IntegrityProtectionKey) Decode(r *aper.AperReader) error {
+func (s *IntegrityProtectionKey) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 	return err
 }
 
 // InterfacesToTrace From: unknown:-1
 type InterfacesToTrace struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *InterfacesToTrace) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false)
+func (s *InterfacesToTrace) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *InterfacesToTrace) Decode(r *aper.AperReader) error {
+func (s *InterfacesToTrace) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 	return err
 }
 
 // M7period From: 9_4_5_Information_Element_Definitions.txt:1478
 type M7period struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *M7period) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 60}, true)
+func (s *M7period) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 60))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *M7period) Decode(r *aper.AperReader) error {
+func (s *M7period) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 60}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 60))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // MRDCDataUsageReportItemEndTimeStamp From: unknown:-1
 type MRDCDataUsageReportItemEndTimeStamp struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MRDCDataUsageReportItemEndTimeStamp) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+func (s *MRDCDataUsageReportItemEndTimeStamp) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MRDCDataUsageReportItemEndTimeStamp) Decode(r *aper.AperReader) error {
+func (s *MRDCDataUsageReportItemEndTimeStamp) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 	return err
 }
 
 // MRDCDataUsageReportItemStartTimeStamp From: unknown:-1
 type MRDCDataUsageReportItemStartTimeStamp struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MRDCDataUsageReportItemStartTimeStamp) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 4, Ub: 4}, false)
+func (s *MRDCDataUsageReportItemStartTimeStamp) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MRDCDataUsageReportItemStartTimeStamp) Decode(r *aper.AperReader) error {
+func (s *MRDCDataUsageReportItemStartTimeStamp) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 4, Ub: 4}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
 	return err
 }
 
 // MRDCDataUsageReportItemUsageCountDL From: unknown:-1
 type MRDCDataUsageReportItemUsageCountDL struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MRDCDataUsageReportItemUsageCountDL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+func (s *MRDCDataUsageReportItemUsageCountDL) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Unconstrained())
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MRDCDataUsageReportItemUsageCountDL) Decode(r *aper.AperReader) error {
+func (s *MRDCDataUsageReportItemUsageCountDL) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+	val, err := r.DecodeInteger(per.Unconstrained())
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // MRDCDataUsageReportItemUsageCountUL From: unknown:-1
 type MRDCDataUsageReportItemUsageCountUL struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MRDCDataUsageReportItemUsageCountUL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+func (s *MRDCDataUsageReportItemUsageCountUL) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Unconstrained())
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MRDCDataUsageReportItemUsageCountUL) Decode(r *aper.AperReader) error {
+func (s *MRDCDataUsageReportItemUsageCountUL) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: math.MaxInt64}, false)
+	val, err := r.DecodeInteger(per.Unconstrained())
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // MaxCIDEHCDL From: unknown:-1
 type MaxCIDEHCDL struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MaxCIDEHCDL) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 32767}, true)
+func (s *MaxCIDEHCDL) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 32767))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MaxCIDEHCDL) Decode(r *aper.AperReader) error {
+func (s *MaxCIDEHCDL) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 32767}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 32767))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // MaxDataBurstVolume From: 9_4_5_Information_Element_Definitions.txt:1395
 type MaxDataBurstVolume struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MaxDataBurstVolume) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 4095}, true)
+func (s *MaxDataBurstVolume) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MaxDataBurstVolume) Decode(r *aper.AperReader) error {
+func (s *MaxDataBurstVolume) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // MaxPacketLossRate From: 9_4_5_Information_Element_Definitions.txt:1413
 type MaxPacketLossRate struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MaxPacketLossRate) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 1000}, true)
+func (s *MaxPacketLossRate) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 1000))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MaxPacketLossRate) Decode(r *aper.AperReader) error {
+func (s *MaxPacketLossRate) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1000}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 1000))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // MeasurementsToActivate From: 9_4_5_Information_Element_Definitions.txt:1505
 type MeasurementsToActivate struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *MeasurementsToActivate) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 8, Ub: 8}, false)
+func (s *MeasurementsToActivate) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *MeasurementsToActivate) Decode(r *aper.AperReader) error {
+func (s *MeasurementsToActivate) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 8, Ub: 8}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 	return err
 }
 
 // NID From: 9_4_5_Information_Element_Definitions.txt:1539
 type NID struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *NID) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 44, Ub: 44}, false)
+func (s *NID) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(44), Max: int64Ptr(44)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *NID) Decode(r *aper.AperReader) error {
+func (s *NID) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 44, Ub: 44}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(44), Max: int64Ptr(44)})
 	return err
 }
 
 // NRCellIdentity From: 9_4_5_Information_Element_Definitions.txt:1592
 type NRCellIdentity struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *NRCellIdentity) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false)
+func (s *NRCellIdentity) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(36), Max: int64Ptr(36)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *NRCellIdentity) Decode(r *aper.AperReader) error {
+func (s *NRCellIdentity) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(36), Max: int64Ptr(36)})
 	return err
 }
 
 // NetworkInstance From: unknown:-1
 type NetworkInstance struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *NetworkInstance) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 256}, true)
+func (s *NetworkInstance) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 256))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *NetworkInstance) Decode(r *aper.AperReader) error {
+func (s *NetworkInstance) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 256))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // NonDynamic5QIDescriptorFiveQI From: unknown:-1
 type NonDynamic5QIDescriptorFiveQI struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *NonDynamic5QIDescriptorFiveQI) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, true)
+func (s *NonDynamic5QIDescriptorFiveQI) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *NonDynamic5QIDescriptorFiveQI) Decode(r *aper.AperReader) error {
+func (s *NonDynamic5QIDescriptorFiveQI) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // NumberOfTunnels From: unknown:-1
 type NumberOfTunnels struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *NumberOfTunnels) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4}, true)
+func (s *NumberOfTunnels) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *NumberOfTunnels) Decode(r *aper.AperReader) error {
+func (s *NumberOfTunnels) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PDCPSN From: 9_4_5_Information_Element_Definitions.txt:1721
 type PDCPSN struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PDCPSN) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 262143}, false)
+func (s *PDCPSN) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 262143))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PDCPSN) Decode(r *aper.AperReader) error {
+func (s *PDCPSN) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 262143}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 262143))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PDUSessionID From: 9_4_5_Information_Element_Definitions.txt:1758
 type PDUSessionID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PDUSessionID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+func (s *PDUSessionID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PDUSessionID) Decode(r *aper.AperReader) error {
+func (s *PDUSessionID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PERExponent From: unknown:-1
 type PERExponent struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PERExponent) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 9}, true)
+func (s *PERExponent) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 9))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PERExponent) Decode(r *aper.AperReader) error {
+func (s *PERExponent) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 9}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 9))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PERScalar From: 9_4_5_Information_Element_Definitions.txt:1649
 type PERScalar struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PERScalar) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 9}, true)
+func (s *PERScalar) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 9))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PERScalar) Decode(r *aper.AperReader) error {
+func (s *PERScalar) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 9}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 9))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PLMNIdentity From: 9_4_5_Information_Element_Definitions.txt:2018
 type PLMNIdentity struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PLMNIdentity) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 3, Ub: 3}, false)
+func (s *PLMNIdentity) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(3), Max: int64Ptr(3)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PLMNIdentity) Decode(r *aper.AperReader) error {
+func (s *PLMNIdentity) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(3), Max: int64Ptr(3)})
 	return err
 }
 
 // PPI From: unknown:-1
 type PPI struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PPI) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 7}, true)
+func (s *PPI) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 7))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PPI) Decode(r *aper.AperReader) error {
+func (s *PPI) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 7}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 7))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PacketDelayBudget From: 9_4_5_Information_Element_Definitions.txt:1636
 type PacketDelayBudget struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PacketDelayBudget) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 1023}, true)
+func (s *PacketDelayBudget) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 1023))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PacketDelayBudget) Decode(r *aper.AperReader) error {
+func (s *PacketDelayBudget) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 1023}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 1023))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // Periodicity From: 9_4_5_Information_Element_Definitions.txt:2409
 type Periodicity struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *Periodicity) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 640000}, true)
+func (s *Periodicity) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 640000))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *Periodicity) Decode(r *aper.AperReader) error {
+func (s *Periodicity) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 640000}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 640000))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PortNumber From: unknown:-1
 type PortNumber struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PortNumber) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 16, Ub: 16}, false)
+func (s *PortNumber) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(16), Max: int64Ptr(16)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PortNumber) Decode(r *aper.AperReader) error {
+func (s *PortNumber) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 16, Ub: 16}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(16), Max: int64Ptr(16)})
 	return err
 }
 
 // PriorityLevel From: unknown:-1
 type PriorityLevel struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PriorityLevel) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 15}, false)
+func (s *PriorityLevel) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 15))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PriorityLevel) Decode(r *aper.AperReader) error {
+func (s *PriorityLevel) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 15}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 15))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // PrivateIEIDLocal From: unknown:-1
 type PrivateIEIDLocal struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *PrivateIEIDLocal) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: MaxPrivateIEs}, false)
+func (s *PrivateIEIDLocal) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, MaxPrivateIEs))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *PrivateIEIDLocal) Decode(r *aper.AperReader) error {
+func (s *PrivateIEIDLocal) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxPrivateIEs}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, MaxPrivateIEs))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ProcedureCode From: 9_4_6_Common_Definitions.txt:43
 type ProcedureCode struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ProcedureCode) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+func (s *ProcedureCode) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ProcedureCode) Decode(r *aper.AperReader) error {
+func (s *ProcedureCode) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ProtocolExtensionID From: unknown:-1
 type ProtocolExtensionID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ProtocolExtensionID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolExtensions}, false)
+func (s *ProtocolExtensionID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, MaxProtocolExtensions))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ProtocolExtensionID) Decode(r *aper.AperReader) error {
+func (s *ProtocolExtensionID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxProtocolExtensions}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, MaxProtocolExtensions))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ProtocolIEID From: unknown:-1
 type ProtocolIEID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ProtocolIEID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false)
+func (s *ProtocolIEID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, MaxProtocolIEs))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ProtocolIEID) Decode(r *aper.AperReader) error {
+func (s *ProtocolIEID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, MaxProtocolIEs))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // QCI From: 9_4_5_Information_Element_Definitions.txt:2044
 type QCI struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QCI) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, false)
+func (s *QCI) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QCI) Decode(r *aper.AperReader) error {
+func (s *QCI) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // QOSFlowIdentifier From: 9_4_5_Information_Element_Definitions.txt:2056
 type QOSFlowIdentifier struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QOSFlowIdentifier) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 63}, false)
+func (s *QOSFlowIdentifier) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.Constrained(0, 63))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QOSFlowIdentifier) Decode(r *aper.AperReader) error {
+func (s *QOSFlowIdentifier) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 63}, false)
+	val, err := r.DecodeInteger(per.Constrained(0, 63))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // QOSFlowRemovedItemQOSFlowAccumulatedSessionTime From: unknown:-1
 type QOSFlowRemovedItemQOSFlowAccumulatedSessionTime struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 5, Ub: 5}, false)
+func (s *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(5), Max: int64Ptr(5)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Decode(r *aper.AperReader) error {
+func (s *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 5, Ub: 5}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(5), Max: int64Ptr(5)})
 	return err
 }
 
 // QOSMappingInformationDscp From: 9_4_5_Information_Element_Definitions.txt:2180
 type QOSMappingInformationDscp struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QOSMappingInformationDscp) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 6, Ub: 6}, false)
+func (s *QOSMappingInformationDscp) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(6), Max: int64Ptr(6)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QOSMappingInformationDscp) Decode(r *aper.AperReader) error {
+func (s *QOSMappingInformationDscp) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(6), Max: int64Ptr(6)})
 	return err
 }
 
 // QOSMappingInformationFlowLabel From: 9_4_5_Information_Element_Definitions.txt:2180
 type QOSMappingInformationFlowLabel struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QOSMappingInformationFlowLabel) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 20, Ub: 20}, false)
+func (s *QOSMappingInformationFlowLabel) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(20), Max: int64Ptr(20)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QOSMappingInformationFlowLabel) Decode(r *aper.AperReader) error {
+func (s *QOSMappingInformationFlowLabel) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 20, Ub: 20}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(20), Max: int64Ptr(20)})
 	return err
 }
 
 // QoSFlowLevelQoSParametersPagingPolicyIndicator From: 9_4_5_Information_Element_Definitions.txt:2131
 type QoSFlowLevelQoSParametersPagingPolicyIndicator struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QoSFlowLevelQoSParametersPagingPolicyIndicator) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 8}, true)
+func (s *QoSFlowLevelQoSParametersPagingPolicyIndicator) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 8))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QoSFlowLevelQoSParametersPagingPolicyIndicator) Decode(r *aper.AperReader) error {
+func (s *QoSFlowLevelQoSParametersPagingPolicyIndicator) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 8}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 8))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // QoSPriorityLevel From: 9_4_5_Information_Element_Definitions.txt:2112
 type QoSPriorityLevel struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QoSPriorityLevel) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 127}, true)
+func (s *QoSPriorityLevel) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 127))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QoSPriorityLevel) Decode(r *aper.AperReader) error {
+func (s *QoSPriorityLevel) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 127}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 127))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // QosMonitoringReportingFrequency From: unknown:-1
 type QosMonitoringReportingFrequency struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *QosMonitoringReportingFrequency) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 1800}, true)
+func (s *QosMonitoringReportingFrequency) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 1800))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *QosMonitoringReportingFrequency) Decode(r *aper.AperReader) error {
+func (s *QosMonitoringReportingFrequency) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 1800}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 1800))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // RANUEID From: 9_4_5_Information_Element_Definitions.txt:2200
 type RANUEID struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *RANUEID) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 8, Ub: 8}, false)
+func (s *RANUEID) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *RANUEID) Decode(r *aper.AperReader) error {
+func (s *RANUEID) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 	return err
 }
 
 // ROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2258
 type ROHCMaxCID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ROHCMaxCID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true)
+func (s *ROHCMaxCID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 16383))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ROHCMaxCID) Decode(r *aper.AperReader) error {
+func (s *ROHCMaxCID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16383}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16383))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2258
 type ROHCROHCProfiles struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ROHCROHCProfiles) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 511}, true)
+func (s *ROHCROHCProfiles) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 511))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ROHCROHCProfiles) Decode(r *aper.AperReader) error {
+func (s *ROHCROHCProfiles) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 511}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 511))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ReportCharacteristics From: 9_4_5_Information_Element_Definitions.txt:2231
 type ReportCharacteristics struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ReportCharacteristics) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false)
+func (s *ReportCharacteristics) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(36), Max: int64Ptr(36)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ReportCharacteristics) Decode(r *aper.AperReader) error {
+func (s *ReportCharacteristics) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 36, Ub: 36}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(36), Max: int64Ptr(36)})
 	return err
 }
 
 // ResourceStatusFailureIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusFailureIEsIDGNBCUCPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusFailureIEsIDGNBCUCPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusFailureIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusFailureIEsIDGNBCUUPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusFailureIEsIDGNBCUUPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusRequestIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusRequestIEsIDGNBCUCPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusRequestIEsIDGNBCUCPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusRequestIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusRequestIEsIDGNBCUUPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusRequestIEsIDGNBCUUPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusResponseIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusResponseIEsIDGNBCUCPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusResponseIEsIDGNBCUCPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusResponseIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusResponseIEsIDGNBCUUPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusResponseIEsIDGNBCUUPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusUpdateIEsIDGNBCUCPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusUpdateIEsIDGNBCUCPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusUpdateIEsIDGNBCUCPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // ResourceStatusUpdateIEsIDGNBCUUPMeasurementID From: inline_in_ie_set:-1
 type ResourceStatusUpdateIEsIDGNBCUUPMeasurementID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 4095}, true)
+func (s *ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 4095))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Decode(r *aper.AperReader) error {
+func (s *ResourceStatusUpdateIEsIDGNBCUUPMeasurementID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 4095}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 4095))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // SNSSAISD From: 9_4_5_Information_Element_Definitions.txt:2328
 type SNSSAISD struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *SNSSAISD) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 3, Ub: 3}, false)
+func (s *SNSSAISD) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(3), Max: int64Ptr(3)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *SNSSAISD) Decode(r *aper.AperReader) error {
+func (s *SNSSAISD) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 3, Ub: 3}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(3), Max: int64Ptr(3)})
 	return err
 }
 
 // SNSSAISST From: 9_4_5_Information_Element_Definitions.txt:2328
 type SNSSAISST struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *SNSSAISST) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 1, Ub: 1}, false)
+func (s *SNSSAISST) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(1)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *SNSSAISST) Decode(r *aper.AperReader) error {
+func (s *SNSSAISST) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 1, Ub: 1}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(1)})
 	return err
 }
 
 // SubscriberProfileIDforRFP From: 9_4_5_Information_Element_Definitions.txt:2363
 type SubscriberProfileIDforRFP struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *SubscriberProfileIDforRFP) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 1, Ub: 256}, true)
+func (s *SubscriberProfileIDforRFP) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(1, 256))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *SubscriberProfileIDforRFP) Decode(r *aper.AperReader) error {
+func (s *SubscriberProfileIDforRFP) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 256))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorDLTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorDLTNLAvailableCapacity struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 100}, true)
+func (s *TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 100))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Decode(r *aper.AperReader) error {
+func (s *TNLAvailableCapacityIndicatorDLTNLAvailableCapacity) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 100))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorDLTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorDLTNLOfferedCapacity struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16777216}, true)
+func (s *TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 16777216))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Decode(r *aper.AperReader) error {
+func (s *TNLAvailableCapacityIndicatorDLTNLOfferedCapacity) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16777216}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16777216))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorULTNLAvailableCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorULTNLAvailableCapacity struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 100}, true)
+func (s *TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 100))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Decode(r *aper.AperReader) error {
+func (s *TNLAvailableCapacityIndicatorULTNLAvailableCapacity) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 100}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 100))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // TNLAvailableCapacityIndicatorULTNLOfferedCapacity From: 9_4_5_Information_Element_Definitions.txt:2376
 type TNLAvailableCapacityIndicatorULTNLOfferedCapacity struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16777216}, true)
+func (s *TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 16777216))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Decode(r *aper.AperReader) error {
+func (s *TNLAvailableCapacityIndicatorULTNLOfferedCapacity) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16777216}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16777216))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // TraceID From: 9_4_5_Information_Element_Definitions.txt:2438
 type TraceID struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TraceID) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 8, Ub: 8}, false)
+func (s *TraceID) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TraceID) Decode(r *aper.AperReader) error {
+func (s *TraceID) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 8, Ub: 8}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(8), Max: int64Ptr(8)})
 	return err
 }
 
 // TransactionID From: unknown:-1
 type TransactionID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TransactionID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 255}, true)
+func (s *TransactionID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 255))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TransactionID) Decode(r *aper.AperReader) error {
+func (s *TransactionID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 255))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // TransportLayerAddress From: unknown:-1
 type TransportLayerAddress struct {
-	Value aper.BitString
+	Value per.BitString
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *TransportLayerAddress) Encode(w *aper.AperWriter) error {
-	return w.WriteBitString(s.Value.Bytes, uint(s.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false)
+func (s *TransportLayerAddress) Encode(w *per.Encoder) error {
+	return w.EncodeBitString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *TransportLayerAddress) Decode(r *aper.AperReader) error {
+func (s *TransportLayerAddress) Decode(r *per.Decoder) error {
 
 	var err error
-	var numBits uint
-	s.Value.Bytes, numBits, err = r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 160}, false)
-	if err == nil {
-		s.Value.NumBits = uint64(numBits)
-	}
+	s.Value, err = r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)})
 	return err
 }
 
 // URIaddress From: 9_4_5_Information_Element_Definitions.txt:2582
 type URIaddress struct {
-	Value aper.OctetString
+	Value []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *URIaddress) Encode(w *aper.AperWriter) error {
-	return w.WriteOctetString([]byte(s.Value), &aper.Constraint{Lb: 0, Ub: 0}, false)
+func (s *URIaddress) Encode(w *per.Encoder) error {
+	return w.EncodeOctetString(s.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *URIaddress) Decode(r *aper.AperReader) error {
+func (s *URIaddress) Decode(r *per.Decoder) error {
 
 	var err error
-	s.Value, err = r.ReadOctetString(&aper.Constraint{Lb: 0, Ub: 0}, false)
+	s.Value, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
 	return err
 }
 
 // UplinkOnlyROHCMaxCID From: 9_4_5_Information_Element_Definitions.txt:2571
 type UplinkOnlyROHCMaxCID struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *UplinkOnlyROHCMaxCID) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true)
+func (s *UplinkOnlyROHCMaxCID) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 16383))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *UplinkOnlyROHCMaxCID) Decode(r *aper.AperReader) error {
+func (s *UplinkOnlyROHCMaxCID) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 16383}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16383))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }
 
 // UplinkOnlyROHCROHCProfiles From: 9_4_5_Information_Element_Definitions.txt:2571
 type UplinkOnlyROHCROHCProfiles struct {
-	Value aper.Integer
+	Value int64
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *UplinkOnlyROHCROHCProfiles) Encode(w *aper.AperWriter) error {
-	return w.WriteInteger(int64(s.Value), &aper.Constraint{Lb: 0, Ub: 511}, true)
+func (s *UplinkOnlyROHCROHCProfiles) Encode(w *per.Encoder) error {
+	return w.EncodeInteger(s.Value, per.ConstrainedExtensible(0, 511))
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *UplinkOnlyROHCROHCProfiles) Decode(r *aper.AperReader) error {
+func (s *UplinkOnlyROHCROHCProfiles) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 511}, true)
+	val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 511))
 	if err != nil {
 		return err
 	}
-	s.Value = aper.Integer(val)
+	s.Value = val
 	return nil
 }

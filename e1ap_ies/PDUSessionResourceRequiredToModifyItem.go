@@ -3,104 +3,162 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDUSessionResourceRequiredToModifyItem is a generated SEQUENCE type.
 type PDUSessionResourceRequiredToModifyItem struct {
-	PDUSessionID                 PDUSessionID                                      `aper:"lb:0,ub:255,mandatory,ext"`
-	NGDLUPTNLInformation         *UPTNLInformation                                 `aper:"optional,ext"`
-	DRBRequiredToModifyListNGRAN *DRBRequiredToModifyListNGRAN                     `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
-	DRBRequiredToRemoveListNGRAN *DRBRequiredToRemoveListNGRAN                     `aper:"lb:1,ub:MaxnoofDRBs,optional,ext"`
-	IEExtensions                 *PDUSessionResourceRequiredToModifyItemExtensions `aper:"optional,ext"`
+	PDUSessionID                 PDUSessionID
+	NGDLUPTNLInformation         *UPTNLInformation
+	DRBRequiredToModifyListNGRAN *DRBRequiredToModifyListNGRAN
+	DRBRequiredToRemoveListNGRAN *DRBRequiredToRemoveListNGRAN
+	IEExtensions                 *PDUSessionResourceRequiredToModifyItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *PDUSessionResourceRequiredToModifyItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *PDUSessionResourceRequiredToModifyItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pDU-Session-ID", Optional: false},
+			per.ComponentInfo{Name: "nG-DL-UP-TNL-Information", Optional: true},
+			per.ComponentInfo{Name: "dRB-Required-To-Modify-List-NG-RAN", Optional: true},
+			per.ComponentInfo{Name: "dRB-Required-To-Remove-List-NG-RAN", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.NGDLUPTNLInformation != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DRBRequiredToModifyListNGRAN != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DRBRequiredToRemoveListNGRAN != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.PDUSessionID.Value), &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+
+	if err = w.EncodeInteger(int64(s.PDUSessionID.Value), per.Constrained(0, 255)); err != nil {
 		return fmt.Errorf("encode PDUSessionID failed: %w", err)
 	}
+
 	if s.NGDLUPTNLInformation != nil {
 		if err = s.NGDLUPTNLInformation.Encode(w); err != nil {
 			return fmt.Errorf("encode NGDLUPTNLInformation failed: %w", err)
 		}
 	}
+
 	if s.DRBRequiredToModifyListNGRAN != nil {
 		if err = s.DRBRequiredToModifyListNGRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBRequiredToModifyListNGRAN failed: %w", err)
 		}
 	}
+
 	if s.DRBRequiredToRemoveListNGRAN != nil {
 		if err = s.DRBRequiredToRemoveListNGRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBRequiredToRemoveListNGRAN failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *PDUSessionResourceRequiredToModifyItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *PDUSessionResourceRequiredToModifyItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pDU-Session-ID", Optional: false},
+			per.ComponentInfo{Name: "nG-DL-UP-TNL-Information", Optional: true},
+			per.ComponentInfo{Name: "dRB-Required-To-Modify-List-NG-RAN", Optional: true},
+			per.ComponentInfo{Name: "dRB-Required-To-Remove-List-NG-RAN", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.PDUSessionID.Decode(r); err != nil {
-		return fmt.Errorf("decode PDUSessionID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.Constrained(0, 255))
+		if err != nil {
+			return fmt.Errorf("decode PDUSessionID failed: %w", err)
+		}
+		s.PDUSessionID.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.NGDLUPTNLInformation = new(UPTNLInformation)
 		if err = s.NGDLUPTNLInformation.Decode(r); err != nil {
-			return fmt.Errorf("decode NGDLUPTNLInformation failed: %w", err)
+			return fmt.Errorf("Decode NGDLUPTNLInformation failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.DRBRequiredToModifyListNGRAN = new(DRBRequiredToModifyListNGRAN)
 		if err = s.DRBRequiredToModifyListNGRAN.Decode(r); err != nil {
-			return fmt.Errorf("decode DRBRequiredToModifyListNGRAN failed: %w", err)
+			return fmt.Errorf("Decode DRBRequiredToModifyListNGRAN failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.DRBRequiredToRemoveListNGRAN = new(DRBRequiredToRemoveListNGRAN)
 		if err = s.DRBRequiredToRemoveListNGRAN.Decode(r); err != nil {
-			return fmt.Errorf("decode DRBRequiredToRemoveListNGRAN failed: %w", err)
+			return fmt.Errorf("Decode DRBRequiredToRemoveListNGRAN failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.IEExtensions = new(PDUSessionResourceRequiredToModifyItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for PDUSessionResourceRequiredToModifyItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

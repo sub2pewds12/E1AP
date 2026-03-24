@@ -3,66 +3,110 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DLUPTNLAddressToUpdateItem is a generated SEQUENCE type.
 type DLUPTNLAddressToUpdateItem struct {
-	OldTNLAdress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ext"`
-	NewTNLAdress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ext"`
-	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
+	OldTNLAdress TransportLayerAddress
+	NewTNLAdress TransportLayerAddress
+	IEExtensions *DLUPTNLAddressToUpdateItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *DLUPTNLAddressToUpdateItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *DLUPTNLAddressToUpdateItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "oldTNLAdress", Optional: false},
+			per.ComponentInfo{Name: "newTNLAdress", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteBitString(s.OldTNLAdress.Value.Bytes, uint(s.OldTNLAdress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+
+	if err = w.EncodeBitString(s.OldTNLAdress.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)}); err != nil {
 		return fmt.Errorf("encode OldTNLAdress failed: %w", err)
 	}
-	if err = w.WriteBitString(s.NewTNLAdress.Value.Bytes, uint(s.NewTNLAdress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+	if err = w.EncodeBitString(s.NewTNLAdress.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)}); err != nil {
 		return fmt.Errorf("encode NewTNLAdress failed: %w", err)
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *DLUPTNLAddressToUpdateItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *DLUPTNLAddressToUpdateItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "oldTNLAdress", Optional: false},
+			per.ComponentInfo{Name: "newTNLAdress", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.OldTNLAdress.Decode(r); err != nil {
-		return fmt.Errorf("decode OldTNLAdress failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.NewTNLAdress.Decode(r); err != nil {
-		return fmt.Errorf("decode NewTNLAdress failed: %w", err)
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)})
+		if err != nil {
+			return fmt.Errorf("decode OldTNLAdress failed: %w", err)
+		}
+		s.OldTNLAdress.Value = val
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)})
+		if err != nil {
+			return fmt.Errorf("decode NewTNLAdress failed: %w", err)
+		}
+		s.NewTNLAdress.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(DLUPTNLAddressToUpdateItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for DLUPTNLAddressToUpdateItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

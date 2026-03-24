@@ -1,31 +1,34 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // MaxIPrate is a generated ENUMERATED type.
 type MaxIPrate struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	MaxIPrateBitrate64kbs aper.Enumerated = 0
-	MaxIPrateMaxUErate    aper.Enumerated = 1
+	MaxIPrateBitrate64kbs int64 = 0
+	MaxIPrateMaxUErate    int64 = 1
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *MaxIPrate) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, true)
+// Encode implements the MessageEncoder interface for MaxIPrate.
+func (e *MaxIPrate) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *MaxIPrate) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for MaxIPrate.
+func (e *MaxIPrate) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

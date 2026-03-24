@@ -3,48 +3,74 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // EHCParameters is a generated SEQUENCE type.
 type EHCParameters struct {
-	EhcCommon    EHCCommonParameters         `aper:"mandatory"`
-	EhcDownlink  *EHCDownlinkParameters      `aper:"optional"`
-	EhcUplink    *EHCUplinkParameters        `aper:"optional"`
-	IEExtensions *ProtocolExtensionContainer `aper:"optional"`
+	EhcCommon    EHCCommonParameters
+	EhcDownlink  *EHCDownlinkParameters
+	EhcUplink    *EHCUplinkParameters
+	IEExtensions *EHCParametersExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *EHCParameters) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *EHCParameters) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "ehc-Common", Optional: false},
+			per.ComponentInfo{Name: "ehc-Downlink", Optional: true},
+			per.ComponentInfo{Name: "ehc-Uplink", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.EhcDownlink != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.EhcUplink != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if err = s.EhcCommon.Encode(w); err != nil {
 		return fmt.Errorf("encode EhcCommon failed: %w", err)
 	}
+
 	if s.EhcDownlink != nil {
 		if err = s.EhcDownlink.Encode(w); err != nil {
 			return fmt.Errorf("encode EhcDownlink failed: %w", err)
 		}
 	}
+
 	if s.EhcUplink != nil {
 		if err = s.EhcUplink.Encode(w); err != nil {
 			return fmt.Errorf("encode EhcUplink failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
@@ -54,38 +80,49 @@ func (s *EHCParameters) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *EHCParameters) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *EHCParameters) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "ehc-Common", Optional: false},
+			per.ComponentInfo{Name: "ehc-Downlink", Optional: true},
+			per.ComponentInfo{Name: "ehc-Uplink", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
 	if err = s.EhcCommon.Decode(r); err != nil {
-		return fmt.Errorf("decode EhcCommon failed: %w", err)
+		return fmt.Errorf("Decode EhcCommon failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.EhcDownlink = new(EHCDownlinkParameters)
 		if err = s.EhcDownlink.Decode(r); err != nil {
-			return fmt.Errorf("decode EhcDownlink failed: %w", err)
+			return fmt.Errorf("Decode EhcDownlink failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.EhcUplink = new(EHCUplinkParameters)
 		if err = s.EhcUplink.Decode(r); err != nil {
-			return fmt.Errorf("decode EhcUplink failed: %w", err)
+			return fmt.Errorf("Decode EhcUplink failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(3) {
+		s.IEExtensions = new(EHCParametersExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
-	}
-	if isExtensible { /* TODO: Implement extension skipping for EHCParameters */
 	}
 	return nil
 }

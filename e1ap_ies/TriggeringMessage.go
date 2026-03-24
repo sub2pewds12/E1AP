@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // TriggeringMessage is a generated ENUMERATED type.
 type TriggeringMessage struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	TriggeringMessageInitiatingMessage   aper.Enumerated = 0
-	TriggeringMessageSuccessfulOutcome   aper.Enumerated = 1
-	TriggeringMessageUnsuccessfulOutcome aper.Enumerated = 2
+	TriggeringMessageInitiatingMessage   int64 = 0
+	TriggeringMessageSuccessfulOutcome   int64 = 1
+	TriggeringMessageUnsuccessfulOutcome int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *TriggeringMessage) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, false)
+// Encode implements the MessageEncoder interface for TriggeringMessage.
+func (e *TriggeringMessage) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *TriggeringMessage) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for TriggeringMessage.
+func (e *TriggeringMessage) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	c := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

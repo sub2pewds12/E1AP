@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // SystemBearerContextSetupRequest is a generated CHOICE type.
@@ -22,25 +22,37 @@ const (
 )
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *SystemBearerContextSetupRequest) Encode(w *aper.AperWriter) (err error) {
+func (s *SystemBearerContextSetupRequest) Encode(w *per.Encoder) (err error) {
 
-	// 1. Write the choice index.
-	// fmt.Printf("--- GO DEBUG: Encoding CHOICE SystemBearerContextSetupRequest | Choice: %d, UpperBound: 2, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
-	if err = w.WriteChoice(uint64(s.Choice), 2, false); err != nil {
-		return fmt.Errorf("Encode choice index failed for SystemBearerContextSetupRequest: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "DRB-To-Setup-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "SubscriberProfileIDforRFP", Tag: 0},
+			per.AlternativeInfo{Name: "AdditionalRRMPriorityIndex", Tag: 0},
+		},
 	}
+	choiceEncoder := w.NewChoiceEncoder(c)
 
-	// 2. Encode the selected member.
 	switch s.Choice {
 	case SystemBearerContextSetupRequestPresentDRBToSetupListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(0, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBToSetupListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBToSetupListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextSetupRequestPresentSubscriberProfileIDforRFP:
-		if err = w.WriteInteger(int64(s.SubscriberProfileIDforRFP.Value), &aper.Constraint{Lb: 1, Ub: 256}, true); err != nil {
+		if err = choiceEncoder.EncodeChoice(1, false, nil); err != nil {
+			return err
+		}
+		if err = w.EncodeInteger(int64(s.SubscriberProfileIDforRFP.Value), per.ConstrainedExtensible(1, 256)); err != nil {
 			return fmt.Errorf("encode SubscriberProfileIDforRFP failed: %w", err)
 		}
 	case SystemBearerContextSetupRequestPresentAdditionalRRMPriorityIndex:
+		if err = choiceEncoder.EncodeChoice(2, false, nil); err != nil {
+			return err
+		}
 		if err = s.AdditionalRRMPriorityIndex.Encode(w); err != nil {
 			return fmt.Errorf("encode AdditionalRRMPriorityIndex failed: %w", err)
 		}
@@ -51,36 +63,49 @@ func (s *SystemBearerContextSetupRequest) Encode(w *aper.AperWriter) (err error)
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *SystemBearerContextSetupRequest) Decode(r *aper.AperReader) (err error) {
+func (s *SystemBearerContextSetupRequest) Decode(r *per.Decoder) (err error) {
 
-	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	choice, err := r.ReadChoice(2, true)
-	if err != nil {
-		return fmt.Errorf("read choice index failed: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "DRB-To-Setup-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "SubscriberProfileIDforRFP", Tag: 0},
+			per.AlternativeInfo{Name: "AdditionalRRMPriorityIndex", Tag: 0},
+		},
 	}
-	s.Choice = choice // Choice is 1-based from ReadChoice
+	choiceDecoder := r.NewChoiceDecoder(c)
 
-	// 2. Decode the selected member.
-	switch choice {
-	case 1:
+	choiceIndex, isExtension, _, err := choiceDecoder.DecodeChoice()
+	if err != nil {
+		return fmt.Errorf("decode choice index failed: %w", err)
+	}
+
+	if isExtension {
+		return fmt.Errorf("extension choices are not fully supported yet")
+	}
+
+	s.Choice = uint64(choiceIndex + 1) // 1-based internal Choice enum
+
+	switch choiceIndex {
+	case 0:
 		s.DRBToSetupListEUTRAN = new(DRBToSetupListEUTRAN)
 		if err = s.DRBToSetupListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBToSetupListEUTRAN failed: %w", err)
 		}
-	case 2:
+	case 1:
 		s.SubscriberProfileIDforRFP = new(SubscriberProfileIDforRFP)
-		val, err := r.ReadInteger(&aper.Constraint{Lb: 1, Ub: 256}, true)
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 256))
 		if err != nil {
 			return fmt.Errorf("decode SubscriberProfileIDforRFP failed: %w", err)
 		}
-		s.SubscriberProfileIDforRFP.Value = aper.Integer(val)
-	case 3:
+		s.SubscriberProfileIDforRFP.Value = val
+	case 2:
 		s.AdditionalRRMPriorityIndex = new(AdditionalRRMPriorityIndex)
 		if err = s.AdditionalRRMPriorityIndex.Decode(r); err != nil {
 			return fmt.Errorf("decode AdditionalRRMPriorityIndex failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("decode choice of SystemBearerContextSetupRequest with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemBearerContextSetupRequest with unknown choice index %d", choiceIndex)
 	}
 	return nil
 }

@@ -1,23 +1,22 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // GNBCUUPConfigurationUpdate is a generated SEQUENCE type.
 type GNBCUUPConfigurationUpdate struct {
-	TransactionID             TransactionID              `aper:"lb:0,ub:255,mandatory,ext"`
-	GNBCUUPID                 GNBCUUPID                  `aper:"lb:0,ub:68719476735,mandatory,ext"`
-	GNBCUUPName               *GNBCUUPName               `aper:"optional,ext"`
-	SupportedPLMNs            *SupportedPLMNsList        `aper:"lb:1,ub:MaxnoofSPLMNs,optional,ext"`
-	GNBCUUPCapacity           *GNBCUUPCapacity           `aper:"lb:0,ub:255,optional,ext"`
-	GNBCUUPTNLAToRemoveList   *GNBCUUPTNLAToRemoveList   `aper:"ub:MaxnoofTNLAssociations,optional,ext"`
-	TransportLayerAddressInfo *TransportLayerAddressInfo `aper:"optional,ext"`
-	ExtendedGNBCUUPName       *ExtendedGNBCUUPName       `aper:"optional,ext"`
+	TransactionID             TransactionID
+	GNBCUUPID                 GNBCUUPID
+	GNBCUUPName               *GNBCUUPName
+	SupportedPLMNs            *SupportedPLMNsList
+	GNBCUUPCapacity           *GNBCUUPCapacity
+	GNBCUUPTNLAToRemoveList   *GNBCUUPTNLAToRemoveList
+	TransportLayerAddressInfo *TransportLayerAddressInfo
+	ExtendedGNBCUUPName       *ExtendedGNBCUUPName
 }
 
 // toIes transforms the GNBCUUPConfigurationUpdate struct into a slice of E1APMessageIEs.
@@ -86,34 +85,62 @@ func (msg *GNBCUUPConfigurationUpdate) toIes() ([]E1APMessageIE, error) {
 	return ies, nil
 }
 
-// Encode implements the aper.AperMarshaller interface for GNBCUUPConfigurationUpdate.
-func (msg *GNBCUUPConfigurationUpdate) Encode(w io.Writer) error {
+func (msg *GNBCUUPConfigurationUpdate) EncodeWithEncoder(e *per.Encoder) (err error) {
 	ies, err := msg.toIes()
 	if err != nil {
-		return fmt.Errorf("could not convert GNBCUUPConfigurationUpdate to IEs: %w", err)
+		return err
 	}
 
-	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeGNBCUUPConfigurationUpdate}, Criticality{Value: CriticalityReject}, ies)
+	sizeC := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	if err = e.EncodeLengthDeterminant(int64(len(ies)), sizeC); err != nil {
+		return fmt.Errorf("encode IE count failed: %w", err)
+	}
+	for i := range ies {
+		if err = ies[i].Encode(e); err != nil {
+			return fmt.Errorf("encode IE %d failed: %w", i, err)
+		}
+	}
+	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface for GNBCUUPConfigurationUpdate.
-func (msg *GNBCUUPConfigurationUpdate) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
+func (msg *GNBCUUPConfigurationUpdate) Encode(w io.Writer) error {
+	e := per.NewEncoder(per.APER)
+	if err := msg.EncodeWithEncoder(e); err != nil {
+		return err
+	}
+	_, err := w.Write(e.Bytes())
+	return err
+}
+
+// Decode implements the MessageUnmarshaller interface for GNBCUUPConfigurationUpdate.
+func (msg *GNBCUUPConfigurationUpdate) Decode(data []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
+	r := per.NewDecoder(data, per.APER)
+	return msg.DecodeFromDecoder(r)
+}
+
+func (msg *GNBCUUPConfigurationUpdate) DecodeFromDecoder(r *per.Decoder) (diagList []CriticalityDiagnosticsIEItem, err error) {
+
 	defer func() {
 		if err != nil {
 			err = fmt.Errorf("decode GNBCUUPConfigurationUpdate failed: %w", err)
 		}
 	}()
 
-	r := aper.NewReader(bytes.NewReader(buf))
-
 	decoder := GNBCUUPConfigurationUpdateDecoder{
 		msg:  msg,
 		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
-	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	length, err := r.DecodeLengthDeterminant(c)
+	if err != nil {
 		return
+	}
+
+	for i := int64(0); i < length; i++ {
+		if _, err = decoder.decodeIE(r); err != nil {
+			return
+		}
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
@@ -152,20 +179,22 @@ type GNBCUUPConfigurationUpdateDecoder struct {
 	list     map[ProtocolIEID]*E1APMessageIE
 }
 
-func (decoder *GNBCUUPConfigurationUpdateDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+func (decoder *GNBCUUPConfigurationUpdateDecoder) decodeIE(r *per.Decoder) (msgIe *E1APMessageIE, err error) {
+	id, err := r.DecodeInteger(per.Constrained(0, 65535))
 	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
-	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	msgIe.ID = ProtocolIEID{Value: id}
+
+	enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3)}
+	c, err := r.DecodeEnumerated(enumC)
 	if err != nil {
 		return nil, err
 	}
-	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
+	msgIe.Criticality = Criticality{Value: c}
 
-	buf, err := r.ReadOpenType()
+	buf, err := r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: nil, Max: nil})
 	if err != nil {
 		return nil, err
 	}
@@ -176,106 +205,122 @@ func (decoder *GNBCUUPConfigurationUpdateDecoder) decodeIE(r *aper.AperReader) (
 	}
 	decoder.list[ieId] = msgIe
 
-	ieR := aper.NewReader(bytes.NewReader(buf))
+	ieR := per.NewDecoder(buf, per.APER)
 	msg := decoder.msg
 
 	switch msgIe.ID.Value {
 	case ProtocolIEIDTransactionID:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, true)
+			val, err := ieR.DecodeInteger(per.ConstrainedExtensible(0, 255))
 			if err != nil {
 				return nil, fmt.Errorf("decode TransactionID failed: %w", err)
 			}
-			msg.TransactionID.Value = aper.Integer(val)
+			msg.TransactionID.Value = val
 		}
 	case ProtocolIEIDGNBCUUPID:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 68719476735}, false)
+			val, err := ieR.DecodeInteger(per.Constrained(0, 68719476735))
 			if err != nil {
 				return nil, fmt.Errorf("decode GNBCUUPID failed: %w", err)
 			}
-			msg.GNBCUUPID.Value = aper.Integer(val)
+			msg.GNBCUUPID.Value = val
 		}
 	case ProtocolIEIDGNBCUUPName:
-		msg.GNBCUUPName = new(GNBCUUPName)
-		if err = msg.GNBCUUPName.Decode(ieR); err != nil {
-			return nil, fmt.Errorf("decode GNBCUUPName failed: %w", err)
-		}
-	case ProtocolIEIDSupportedPLMNs:
 
 		{
-			itemDecoder := func(r *aper.AperReader) (*SupportedPLMNsItem, error) {
+			val, err := ieR.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(0)})
+			if err != nil {
+				return nil, fmt.Errorf("decode GNBCUUPName failed: %w", err)
+			}
+			msg.GNBCUUPName = new(GNBCUUPName)
+			msg.GNBCUUPName.Value = val
+		}
+	case ProtocolIEIDSupportedPLMNs:
+		msg.SupportedPLMNs = new(SupportedPLMNsList)
 
+		{
+			itemDecoder := func(r *per.Decoder) (*SupportedPLMNsItem, error) {
 				item := new(SupportedPLMNsItem)
 				if err := item.Decode(r); err != nil {
 					return nil, err
 				}
 				return item, nil
 			}
-			decodedItems, err := aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofSPLMNs}, false)
-			if err != nil {
-				return nil, fmt.Errorf("decode SupportedPLMNs failed: %w", err)
-			}
 
-			msg.SupportedPLMNs = new(SupportedPLMNsList)
-			msg.SupportedPLMNs.Value = decodedItems
+			c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxnoofSPLMNs)}
+			length, err := ieR.DecodeLengthDeterminant(c)
+			if err != nil {
+				return nil, fmt.Errorf("decode struct list length failed: %w", err)
+			}
+			for i := int64(0); i < length; i++ {
+				item, err := itemDecoder(ieR)
+				if err != nil {
+					return nil, fmt.Errorf("decode item failed: %w", err)
+				}
+				msg.SupportedPLMNs.Value = append(msg.SupportedPLMNs.Value, *item)
+			}
 		}
 	case ProtocolIEIDGNBCUUPCapacity:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+			val, err := ieR.DecodeInteger(per.Constrained(0, 255))
 			if err != nil {
 				return nil, fmt.Errorf("decode GNBCUUPCapacity failed: %w", err)
 			}
 			msg.GNBCUUPCapacity = new(GNBCUUPCapacity)
-			msg.GNBCUUPCapacity.Value = aper.Integer(val)
+			msg.GNBCUUPCapacity.Value = val
 		}
 	case ProtocolIEIDGNBCUUPTNLAToRemoveList:
+		msg.GNBCUUPTNLAToRemoveList = new(GNBCUUPTNLAToRemoveList)
 
 		{
-			itemDecoder := func(r *aper.AperReader) (*GNBCUUPTNLAToRemoveItem, error) {
-
+			itemDecoder := func(r *per.Decoder) (*GNBCUUPTNLAToRemoveItem, error) {
 				item := new(GNBCUUPTNLAToRemoveItem)
 				if err := item.Decode(r); err != nil {
 					return nil, err
 				}
 				return item, nil
 			}
-			decodedItems, err := aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 0, Ub: MaxnoofTNLAssociations}, false)
-			if err != nil {
-				return nil, fmt.Errorf("decode GNBCUUPTNLAToRemoveList failed: %w", err)
-			}
 
-			msg.GNBCUUPTNLAToRemoveList = new(GNBCUUPTNLAToRemoveList)
-			msg.GNBCUUPTNLAToRemoveList.Value = decodedItems
+			c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxnoofTNLAssociations)}
+			length, err := ieR.DecodeLengthDeterminant(c)
+			if err != nil {
+				return nil, fmt.Errorf("decode struct list length failed: %w", err)
+			}
+			for i := int64(0); i < length; i++ {
+				item, err := itemDecoder(ieR)
+				if err != nil {
+					return nil, fmt.Errorf("decode item failed: %w", err)
+				}
+				msg.GNBCUUPTNLAToRemoveList.Value = append(msg.GNBCUUPTNLAToRemoveList.Value, *item)
+			}
 		}
 	case ProtocolIEIDTransportLayerAddressInfo:
 		msg.TransportLayerAddressInfo = new(TransportLayerAddressInfo)
+
 		if err = msg.TransportLayerAddressInfo.Decode(ieR); err != nil {
 			return nil, fmt.Errorf("decode TransportLayerAddressInfo failed: %w", err)
 		}
 	case ProtocolIEIDExtendedGNBCUUPName:
 		msg.ExtendedGNBCUUPName = new(ExtendedGNBCUUPName)
+
 		if err = msg.ExtendedGNBCUUPName.Decode(ieR); err != nil {
 			return nil, fmt.Errorf("decode ExtendedGNBCUUPName failed: %w", err)
 		}
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
-			// If an unknown IE is critical, the PDU cannot be processed.
 			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
-			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
 				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:
-			// Ignore and proceed.
 		}
 	}
-	return msgIe, nil // Return the populated msgIe and a nil error
+	return msgIe, nil
 }

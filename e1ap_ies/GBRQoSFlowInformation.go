@@ -3,142 +3,243 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // GBRQoSFlowInformation is a generated SEQUENCE type.
 type GBRQoSFlowInformation struct {
-	MaxFlowBitRateDownlink        *BitRate                         `aper:"lb:0,ub:4000000000000,optional,ext"`
-	MaxFlowBitRateUplink          *BitRate                         `aper:"lb:0,ub:4000000000000,optional,ext"`
-	GuaranteedFlowBitRateDownlink *BitRate                         `aper:"lb:0,ub:4000000000000,optional,ext"`
-	GuaranteedFlowBitRateUplink   *BitRate                         `aper:"lb:0,ub:4000000000000,optional,ext"`
-	MaxPacketLossRateDownlink     *MaxPacketLossRate               `aper:"lb:0,ub:1000,optional,ext"`
-	MaxPacketLossRateUplink       *MaxPacketLossRate               `aper:"lb:0,ub:1000,optional,ext"`
-	IEExtensions                  *GBRQoSFlowInformationExtensions `aper:"optional,ext"`
+	MaxFlowBitRateDownlink        *BitRate
+	MaxFlowBitRateUplink          *BitRate
+	GuaranteedFlowBitRateDownlink *BitRate
+	GuaranteedFlowBitRateUplink   *BitRate
+	MaxPacketLossRateDownlink     *MaxPacketLossRate
+	MaxPacketLossRateUplink       *MaxPacketLossRate
+	IEExtensions                  *GBRQoSFlowInformationExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *GBRQoSFlowInformation) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *GBRQoSFlowInformation) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "maxFlowBitRateDownlink", Optional: true},
+			per.ComponentInfo{Name: "maxFlowBitRateUplink", Optional: true},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateDownlink", Optional: true},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateUplink", Optional: true},
+			per.ComponentInfo{Name: "maxPacketLossRateDownlink", Optional: true},
+			per.ComponentInfo{Name: "maxPacketLossRateUplink", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.MaxFlowBitRateDownlink != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.MaxFlowBitRateUplink != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.GuaranteedFlowBitRateDownlink != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.GuaranteedFlowBitRateUplink != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.MaxPacketLossRateDownlink != nil {
-		optionalityBitmap[0] |= 1 << 3
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.MaxPacketLossRateUplink != nil {
-		optionalityBitmap[0] |= 1 << 2
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 1
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(7), &aper.Constraint{Lb: 7, Ub: 7}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if s.MaxFlowBitRateDownlink != nil {
-		if err = w.WriteInteger(int64((*s.MaxFlowBitRateDownlink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.MaxFlowBitRateDownlink).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode MaxFlowBitRateDownlink failed: %w", err)
 		}
 	}
+
 	if s.MaxFlowBitRateUplink != nil {
-		if err = w.WriteInteger(int64((*s.MaxFlowBitRateUplink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.MaxFlowBitRateUplink).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode MaxFlowBitRateUplink failed: %w", err)
 		}
 	}
+
 	if s.GuaranteedFlowBitRateDownlink != nil {
-		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateDownlink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.GuaranteedFlowBitRateDownlink).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode GuaranteedFlowBitRateDownlink failed: %w", err)
 		}
 	}
+
 	if s.GuaranteedFlowBitRateUplink != nil {
-		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateUplink).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.GuaranteedFlowBitRateUplink).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode GuaranteedFlowBitRateUplink failed: %w", err)
 		}
 	}
+
 	if s.MaxPacketLossRateDownlink != nil {
-		if err = w.WriteInteger(int64((*s.MaxPacketLossRateDownlink).Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.MaxPacketLossRateDownlink).Value), per.ConstrainedExtensible(0, 1000)); err != nil {
 			return fmt.Errorf("encode MaxPacketLossRateDownlink failed: %w", err)
 		}
 	}
+
 	if s.MaxPacketLossRateUplink != nil {
-		if err = w.WriteInteger(int64((*s.MaxPacketLossRateUplink).Value), &aper.Constraint{Lb: 0, Ub: 1000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.MaxPacketLossRateUplink).Value), per.ConstrainedExtensible(0, 1000)); err != nil {
 			return fmt.Errorf("encode MaxPacketLossRateUplink failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *GBRQoSFlowInformation) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *GBRQoSFlowInformation) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "maxFlowBitRateDownlink", Optional: true},
+			per.ComponentInfo{Name: "maxFlowBitRateUplink", Optional: true},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateDownlink", Optional: true},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateUplink", Optional: true},
+			per.ComponentInfo{Name: "maxPacketLossRateDownlink", Optional: true},
+			per.ComponentInfo{Name: "maxPacketLossRateUplink", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 7, Ub: 7}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
+	if seqDecoder.IsComponentPresent(0) {
 		s.MaxFlowBitRateDownlink = new(BitRate)
-		if err = s.MaxFlowBitRateDownlink.Decode(r); err != nil {
-			return fmt.Errorf("decode MaxFlowBitRateDownlink failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode MaxFlowBitRateDownlink failed: %w", err)
+			}
+			s.MaxFlowBitRateDownlink.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.MaxFlowBitRateUplink = new(BitRate)
-		if err = s.MaxFlowBitRateUplink.Decode(r); err != nil {
-			return fmt.Errorf("decode MaxFlowBitRateUplink failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode MaxFlowBitRateUplink failed: %w", err)
+			}
+			s.MaxFlowBitRateUplink.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.GuaranteedFlowBitRateDownlink = new(BitRate)
-		if err = s.GuaranteedFlowBitRateDownlink.Decode(r); err != nil {
-			return fmt.Errorf("decode GuaranteedFlowBitRateDownlink failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode GuaranteedFlowBitRateDownlink failed: %w", err)
+			}
+			s.GuaranteedFlowBitRateDownlink.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.GuaranteedFlowBitRateUplink = new(BitRate)
-		if err = s.GuaranteedFlowBitRateUplink.Decode(r); err != nil {
-			return fmt.Errorf("decode GuaranteedFlowBitRateUplink failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode GuaranteedFlowBitRateUplink failed: %w", err)
+			}
+			s.GuaranteedFlowBitRateUplink.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.MaxPacketLossRateDownlink = new(MaxPacketLossRate)
-		if err = s.MaxPacketLossRateDownlink.Decode(r); err != nil {
-			return fmt.Errorf("decode MaxPacketLossRateDownlink failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 1000))
+			if err != nil {
+				return fmt.Errorf("decode MaxPacketLossRateDownlink failed: %w", err)
+			}
+			s.MaxPacketLossRateDownlink.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
+
+	if seqDecoder.IsComponentPresent(5) {
 		s.MaxPacketLossRateUplink = new(MaxPacketLossRate)
-		if err = s.MaxPacketLossRateUplink.Decode(r); err != nil {
-			return fmt.Errorf("decode MaxPacketLossRateUplink failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 1000))
+			if err != nil {
+				return fmt.Errorf("decode MaxPacketLossRateUplink failed: %w", err)
+			}
+			s.MaxPacketLossRateUplink.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {
+
+	if seqDecoder.IsComponentPresent(6) {
 		s.IEExtensions = new(GBRQoSFlowInformationExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for GBRQoSFlowInformation */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

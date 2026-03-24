@@ -1,31 +1,34 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // QOSFlowsDRBRemapping is a generated ENUMERATED type.
 type QOSFlowsDRBRemapping struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	QOSFlowsDRBRemappingUpdate              aper.Enumerated = 0
-	QOSFlowsDRBRemappingSourceConfiguration aper.Enumerated = 1
+	QOSFlowsDRBRemappingUpdate              int64 = 0
+	QOSFlowsDRBRemappingSourceConfiguration int64 = 1
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *QOSFlowsDRBRemapping) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 1}, true)
+// Encode implements the MessageEncoder interface for QOSFlowsDRBRemapping.
+func (e *QOSFlowsDRBRemapping) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *QOSFlowsDRBRemapping) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for QOSFlowsDRBRemapping.
+func (e *QOSFlowsDRBRemapping) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 1}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

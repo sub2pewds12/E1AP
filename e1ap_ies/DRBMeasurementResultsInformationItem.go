@@ -3,74 +3,123 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DRBMeasurementResultsInformationItem is a generated SEQUENCE type.
 type DRBMeasurementResultsInformationItem struct {
-	DRBID        DRBID                                           `aper:"lb:1,ub:32,mandatory,ext"`
-	ULD1Result   *DRBMeasurementResultsInformationItemULD1Result `aper:"lb:0,ub:10000,optional,ext"`
-	IEExtensions *ProtocolExtensionContainer                     `aper:"optional,ext"`
+	DRBID        DRBID
+	ULD1Result   *DRBMeasurementResultsInformationItemULD1Result
+	IEExtensions *DRBMeasurementResultsInformationItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *DRBMeasurementResultsInformationItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *DRBMeasurementResultsInformationItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dRB-ID", Optional: false},
+			per.ComponentInfo{Name: "uL-D1-Result", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.ULD1Result != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+
+	if err = w.EncodeInteger(int64(s.DRBID.Value), per.ConstrainedExtensible(1, 32)); err != nil {
 		return fmt.Errorf("encode DRBID failed: %w", err)
 	}
+
 	if s.ULD1Result != nil {
-		if err = w.WriteInteger(int64((*s.ULD1Result).Value), &aper.Constraint{Lb: 0, Ub: 10000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.ULD1Result).Value), per.ConstrainedExtensible(0, 10000)); err != nil {
 			return fmt.Errorf("encode ULD1Result failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBMeasurementResultsInformationItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *DRBMeasurementResultsInformationItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dRB-ID", Optional: false},
+			per.ComponentInfo{Name: "uL-D1-Result", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.DRBID.Decode(r); err != nil {
-		return fmt.Errorf("decode DRBID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 32))
+		if err != nil {
+			return fmt.Errorf("decode DRBID failed: %w", err)
+		}
+		s.DRBID.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.ULD1Result = new(DRBMeasurementResultsInformationItemULD1Result)
-		if err = s.ULD1Result.Decode(r); err != nil {
-			return fmt.Errorf("decode ULD1Result failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 10000))
+			if err != nil {
+				return fmt.Errorf("decode ULD1Result failed: %w", err)
+			}
+			s.ULD1Result.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(DRBMeasurementResultsInformationItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for DRBMeasurementResultsInformationItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

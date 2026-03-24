@@ -3,224 +3,353 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DRBToModifyItemEUTRAN is a generated SEQUENCE type.
 type DRBToModifyItemEUTRAN struct {
-	DRBID                     DRBID                       `aper:"lb:1,ub:32,mandatory,ext"`
-	PDCPConfiguration         *PDCPConfiguration          `aper:"optional,ext"`
-	EUTRANQOS                 *EUTRANQOS                  `aper:"optional,ext"`
-	S1ULUPTNLInformation      *UPTNLInformation           `aper:"optional,ext"`
-	DataForwardingInformation *DataForwardingInformation  `aper:"optional,ext"`
-	PDCPSNStatusRequest       *PDCPSNStatusRequest        `aper:"optional,ext"`
-	PDCPSNStatusInformation   *PDCPSNStatusInformation    `aper:"optional,ext"`
-	DLUPParameters            *UPParameters               `aper:"lb:1,ub:MaxnoofUPParameters,optional,ext"`
-	CellGroupToAdd            *CellGroupInformation       `aper:"lb:1,ub:MaxnoofCellGroups,optional,ext"`
-	CellGroupToModify         *CellGroupInformation       `aper:"lb:1,ub:MaxnoofCellGroups,optional,ext"`
-	CellGroupToRemove         *CellGroupInformation       `aper:"lb:1,ub:MaxnoofCellGroups,optional,ext"`
-	DRBInactivityTimer        *InactivityTimer            `aper:"lb:1,ub:7200,optional,ext"`
-	IEExtensions              *ProtocolExtensionContainer `aper:"optional,ext"`
+	DRBID                     DRBID
+	PDCPConfiguration         *PDCPConfiguration
+	EUTRANQOS                 *EUTRANQOS
+	S1ULUPTNLInformation      *UPTNLInformation
+	DataForwardingInformation *DataForwardingInformation
+	PDCPSNStatusRequest       *PDCPSNStatusRequest
+	PDCPSNStatusInformation   *PDCPSNStatusInformation
+	DLUPParameters            *UPParameters
+	CellGroupToAdd            *CellGroupInformation
+	CellGroupToModify         *CellGroupInformation
+	CellGroupToRemove         *CellGroupInformation
+	DRBInactivityTimer        *InactivityTimer
+	IEExtensions              *DRBToModifyItemEUTRANExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *DRBToModifyItemEUTRAN) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *DRBToModifyItemEUTRAN) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dRB-ID", Optional: false},
+			per.ComponentInfo{Name: "pDCP-Configuration", Optional: true},
+			per.ComponentInfo{Name: "eUTRAN-QoS", Optional: true},
+			per.ComponentInfo{Name: "s1-UL-UP-TNL-Information", Optional: true},
+			per.ComponentInfo{Name: "data-Forwarding-Information", Optional: true},
+			per.ComponentInfo{Name: "pDCP-SN-Status-Request", Optional: true},
+			per.ComponentInfo{Name: "pDCP-SN-Status-Information", Optional: true},
+			per.ComponentInfo{Name: "dL-UP-Parameters", Optional: true},
+			per.ComponentInfo{Name: "cell-Group-To-Add", Optional: true},
+			per.ComponentInfo{Name: "cell-Group-To-Modify", Optional: true},
+			per.ComponentInfo{Name: "cell-Group-To-Remove", Optional: true},
+			per.ComponentInfo{Name: "dRB-Inactivity-Timer", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [2]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.PDCPConfiguration != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.EUTRANQOS != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.S1ULUPTNLInformation != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DataForwardingInformation != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDCPSNStatusRequest != nil {
-		optionalityBitmap[0] |= 1 << 3
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PDCPSNStatusInformation != nil {
-		optionalityBitmap[0] |= 1 << 2
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DLUPParameters != nil {
-		optionalityBitmap[0] |= 1 << 1
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.CellGroupToAdd != nil {
-		optionalityBitmap[0] |= 1 << 0
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.CellGroupToModify != nil {
-		optionalityBitmap[1] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.CellGroupToRemove != nil {
-		optionalityBitmap[1] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DRBInactivityTimer != nil {
-		optionalityBitmap[1] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[1] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(12), &aper.Constraint{Lb: 12, Ub: 12}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.DRBID.Value), &aper.Constraint{Lb: 1, Ub: 32}, true); err != nil {
+
+	if err = w.EncodeInteger(int64(s.DRBID.Value), per.ConstrainedExtensible(1, 32)); err != nil {
 		return fmt.Errorf("encode DRBID failed: %w", err)
 	}
+
 	if s.PDCPConfiguration != nil {
 		if err = s.PDCPConfiguration.Encode(w); err != nil {
 			return fmt.Errorf("encode PDCPConfiguration failed: %w", err)
 		}
 	}
+
 	if s.EUTRANQOS != nil {
 		if err = s.EUTRANQOS.Encode(w); err != nil {
 			return fmt.Errorf("encode EUTRANQOS failed: %w", err)
 		}
 	}
+
 	if s.S1ULUPTNLInformation != nil {
 		if err = s.S1ULUPTNLInformation.Encode(w); err != nil {
 			return fmt.Errorf("encode S1ULUPTNLInformation failed: %w", err)
 		}
 	}
+
 	if s.DataForwardingInformation != nil {
 		if err = s.DataForwardingInformation.Encode(w); err != nil {
 			return fmt.Errorf("encode DataForwardingInformation failed: %w", err)
 		}
 	}
+
 	if s.PDCPSNStatusRequest != nil {
-		if err = w.WriteEnumerate(uint64((*s.PDCPSNStatusRequest).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode PDCPSNStatusRequest failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.PDCPSNStatusRequest).Value), enumC); err != nil {
+				return fmt.Errorf("encode PDCPSNStatusRequest failed: %w", err)
+			}
 		}
 	}
+
 	if s.PDCPSNStatusInformation != nil {
 		if err = s.PDCPSNStatusInformation.Encode(w); err != nil {
 			return fmt.Errorf("encode PDCPSNStatusInformation failed: %w", err)
 		}
 	}
+
 	if s.DLUPParameters != nil {
 		if err = s.DLUPParameters.Encode(w); err != nil {
 			return fmt.Errorf("encode DLUPParameters failed: %w", err)
 		}
 	}
+
 	if s.CellGroupToAdd != nil {
 		if err = s.CellGroupToAdd.Encode(w); err != nil {
 			return fmt.Errorf("encode CellGroupToAdd failed: %w", err)
 		}
 	}
+
 	if s.CellGroupToModify != nil {
 		if err = s.CellGroupToModify.Encode(w); err != nil {
 			return fmt.Errorf("encode CellGroupToModify failed: %w", err)
 		}
 	}
+
 	if s.CellGroupToRemove != nil {
 		if err = s.CellGroupToRemove.Encode(w); err != nil {
 			return fmt.Errorf("encode CellGroupToRemove failed: %w", err)
 		}
 	}
+
 	if s.DRBInactivityTimer != nil {
-		if err = w.WriteInteger(int64((*s.DRBInactivityTimer).Value), &aper.Constraint{Lb: 1, Ub: 7200}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.DRBInactivityTimer).Value), per.ConstrainedExtensible(1, 7200)); err != nil {
 			return fmt.Errorf("encode DRBInactivityTimer failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *DRBToModifyItemEUTRAN) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *DRBToModifyItemEUTRAN) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dRB-ID", Optional: false},
+			per.ComponentInfo{Name: "pDCP-Configuration", Optional: true},
+			per.ComponentInfo{Name: "eUTRAN-QoS", Optional: true},
+			per.ComponentInfo{Name: "s1-UL-UP-TNL-Information", Optional: true},
+			per.ComponentInfo{Name: "data-Forwarding-Information", Optional: true},
+			per.ComponentInfo{Name: "pDCP-SN-Status-Request", Optional: true},
+			per.ComponentInfo{Name: "pDCP-SN-Status-Information", Optional: true},
+			per.ComponentInfo{Name: "dL-UP-Parameters", Optional: true},
+			per.ComponentInfo{Name: "cell-Group-To-Add", Optional: true},
+			per.ComponentInfo{Name: "cell-Group-To-Modify", Optional: true},
+			per.ComponentInfo{Name: "cell-Group-To-Remove", Optional: true},
+			per.ComponentInfo{Name: "dRB-Inactivity-Timer", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 12, Ub: 12}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.DRBID.Decode(r); err != nil {
-		return fmt.Errorf("decode DRBID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 32))
+		if err != nil {
+			return fmt.Errorf("decode DRBID failed: %w", err)
+		}
+		s.DRBID.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.PDCPConfiguration = new(PDCPConfiguration)
 		if err = s.PDCPConfiguration.Decode(r); err != nil {
-			return fmt.Errorf("decode PDCPConfiguration failed: %w", err)
+			return fmt.Errorf("Decode PDCPConfiguration failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.EUTRANQOS = new(EUTRANQOS)
 		if err = s.EUTRANQOS.Decode(r); err != nil {
-			return fmt.Errorf("decode EUTRANQOS failed: %w", err)
+			return fmt.Errorf("Decode EUTRANQOS failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.S1ULUPTNLInformation = new(UPTNLInformation)
 		if err = s.S1ULUPTNLInformation.Decode(r); err != nil {
-			return fmt.Errorf("decode S1ULUPTNLInformation failed: %w", err)
+			return fmt.Errorf("Decode S1ULUPTNLInformation failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.DataForwardingInformation = new(DataForwardingInformation)
 		if err = s.DataForwardingInformation.Decode(r); err != nil {
-			return fmt.Errorf("decode DataForwardingInformation failed: %w", err)
+			return fmt.Errorf("Decode DataForwardingInformation failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
+
+	if seqDecoder.IsComponentPresent(5) {
 		s.PDCPSNStatusRequest = new(PDCPSNStatusRequest)
-		if err = s.PDCPSNStatusRequest.Decode(r); err != nil {
-			return fmt.Errorf("decode PDCPSNStatusRequest failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode PDCPSNStatusRequest failed: %w", err)
+			}
+			s.PDCPSNStatusRequest.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
+
+	if seqDecoder.IsComponentPresent(6) {
 		s.PDCPSNStatusInformation = new(PDCPSNStatusInformation)
 		if err = s.PDCPSNStatusInformation.Decode(r); err != nil {
-			return fmt.Errorf("decode PDCPSNStatusInformation failed: %w", err)
+			return fmt.Errorf("Decode PDCPSNStatusInformation failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<1) > 0 {
+
+	if seqDecoder.IsComponentPresent(7) {
 		s.DLUPParameters = new(UPParameters)
 		if err = s.DLUPParameters.Decode(r); err != nil {
-			return fmt.Errorf("decode DLUPParameters failed: %w", err)
+			return fmt.Errorf("Decode DLUPParameters failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<0) > 0 {
+
+	if seqDecoder.IsComponentPresent(8) {
 		s.CellGroupToAdd = new(CellGroupInformation)
 		if err = s.CellGroupToAdd.Decode(r); err != nil {
-			return fmt.Errorf("decode CellGroupToAdd failed: %w", err)
+			return fmt.Errorf("Decode CellGroupToAdd failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<7) > 0 {
+
+	if seqDecoder.IsComponentPresent(9) {
 		s.CellGroupToModify = new(CellGroupInformation)
 		if err = s.CellGroupToModify.Decode(r); err != nil {
-			return fmt.Errorf("decode CellGroupToModify failed: %w", err)
+			return fmt.Errorf("Decode CellGroupToModify failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(10) {
 		s.CellGroupToRemove = new(CellGroupInformation)
 		if err = s.CellGroupToRemove.Decode(r); err != nil {
-			return fmt.Errorf("decode CellGroupToRemove failed: %w", err)
+			return fmt.Errorf("Decode CellGroupToRemove failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(11) {
 		s.DRBInactivityTimer = new(InactivityTimer)
-		if err = s.DRBInactivityTimer.Decode(r); err != nil {
-			return fmt.Errorf("decode DRBInactivityTimer failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 7200))
+			if err != nil {
+				return fmt.Errorf("decode DRBInactivityTimer failed: %w", err)
+			}
+			s.DRBInactivityTimer.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 1 && optionalityBitmap[1]&(1<<4) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(12) {
+		s.IEExtensions = new(DRBToModifyItemEUTRANExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for DRBToModifyItemEUTRAN */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

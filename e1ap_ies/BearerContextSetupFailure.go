@@ -1,19 +1,18 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // BearerContextSetupFailure is a generated SEQUENCE type.
 type BearerContextSetupFailure struct {
-	GNBCUCPUEE1APID        GNBCUCPUEE1APID         `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	GNBCUUPUEE1APID        *GNBCUUPUEE1APID        `aper:"lb:0,ub:4294967295,optional,ext"`
-	Cause                  Cause                   `aper:"mandatory,ext"`
-	CriticalityDiagnostics *CriticalityDiagnostics `aper:"optional,ext"`
+	GNBCUCPUEE1APID        GNBCUCPUEE1APID
+	GNBCUUPUEE1APID        *GNBCUUPUEE1APID
+	Cause                  Cause
+	CriticalityDiagnostics *CriticalityDiagnostics
 }
 
 // toIes transforms the BearerContextSetupFailure struct into a slice of E1APMessageIEs.
@@ -50,34 +49,62 @@ func (msg *BearerContextSetupFailure) toIes() ([]E1APMessageIE, error) {
 	return ies, nil
 }
 
-// Encode implements the aper.AperMarshaller interface for BearerContextSetupFailure.
-func (msg *BearerContextSetupFailure) Encode(w io.Writer) error {
+func (msg *BearerContextSetupFailure) EncodeWithEncoder(e *per.Encoder) (err error) {
 	ies, err := msg.toIes()
 	if err != nil {
-		return fmt.Errorf("could not convert BearerContextSetupFailure to IEs: %w", err)
+		return err
 	}
 
-	return encodeMessage(w, E1apPduUnsuccessfulOutcome, ProcedureCode{Value: ProcedureCodeBearerContextSetup}, Criticality{Value: CriticalityIgnore}, ies)
+	sizeC := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	if err = e.EncodeLengthDeterminant(int64(len(ies)), sizeC); err != nil {
+		return fmt.Errorf("encode IE count failed: %w", err)
+	}
+	for i := range ies {
+		if err = ies[i].Encode(e); err != nil {
+			return fmt.Errorf("encode IE %d failed: %w", i, err)
+		}
+	}
+	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface for BearerContextSetupFailure.
-func (msg *BearerContextSetupFailure) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
+func (msg *BearerContextSetupFailure) Encode(w io.Writer) error {
+	e := per.NewEncoder(per.APER)
+	if err := msg.EncodeWithEncoder(e); err != nil {
+		return err
+	}
+	_, err := w.Write(e.Bytes())
+	return err
+}
+
+// Decode implements the MessageUnmarshaller interface for BearerContextSetupFailure.
+func (msg *BearerContextSetupFailure) Decode(data []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
+	r := per.NewDecoder(data, per.APER)
+	return msg.DecodeFromDecoder(r)
+}
+
+func (msg *BearerContextSetupFailure) DecodeFromDecoder(r *per.Decoder) (diagList []CriticalityDiagnosticsIEItem, err error) {
+
 	defer func() {
 		if err != nil {
 			err = fmt.Errorf("decode BearerContextSetupFailure failed: %w", err)
 		}
 	}()
 
-	r := aper.NewReader(bytes.NewReader(buf))
-
 	decoder := BearerContextSetupFailureDecoder{
 		msg:  msg,
 		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
-	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	length, err := r.DecodeLengthDeterminant(c)
+	if err != nil {
 		return
+	}
+
+	for i := int64(0); i < length; i++ {
+		if _, err = decoder.decodeIE(r); err != nil {
+			return
+		}
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
@@ -116,20 +143,22 @@ type BearerContextSetupFailureDecoder struct {
 	list     map[ProtocolIEID]*E1APMessageIE
 }
 
-func (decoder *BearerContextSetupFailureDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+func (decoder *BearerContextSetupFailureDecoder) decodeIE(r *per.Decoder) (msgIe *E1APMessageIE, err error) {
+	id, err := r.DecodeInteger(per.Constrained(0, 65535))
 	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
-	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	msgIe.ID = ProtocolIEID{Value: id}
+
+	enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3)}
+	c, err := r.DecodeEnumerated(enumC)
 	if err != nil {
 		return nil, err
 	}
-	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
+	msgIe.Criticality = Criticality{Value: c}
 
-	buf, err := r.ReadOpenType()
+	buf, err := r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: nil, Max: nil})
 	if err != nil {
 		return nil, err
 	}
@@ -140,53 +169,52 @@ func (decoder *BearerContextSetupFailureDecoder) decodeIE(r *aper.AperReader) (m
 	}
 	decoder.list[ieId] = msgIe
 
-	ieR := aper.NewReader(bytes.NewReader(buf))
+	ieR := per.NewDecoder(buf, per.APER)
 	msg := decoder.msg
 
 	switch msgIe.ID.Value {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			val, err := ieR.DecodeInteger(per.Unconstrained())
 			if err != nil {
 				return nil, fmt.Errorf("decode GNBCUCPUEE1APID failed: %w", err)
 			}
-			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
+			msg.GNBCUCPUEE1APID.Value = val
 		}
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			val, err := ieR.DecodeInteger(per.Unconstrained())
 			if err != nil {
 				return nil, fmt.Errorf("decode GNBCUUPUEE1APID failed: %w", err)
 			}
 			msg.GNBCUUPUEE1APID = new(GNBCUUPUEE1APID)
-			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
+			msg.GNBCUUPUEE1APID.Value = val
 		}
 	case ProtocolIEIDCause:
+
 		if err = msg.Cause.Decode(ieR); err != nil {
 			return nil, fmt.Errorf("decode Cause failed: %w", err)
 		}
 	case ProtocolIEIDCriticalityDiagnostics:
 		msg.CriticalityDiagnostics = new(CriticalityDiagnostics)
+
 		if err = msg.CriticalityDiagnostics.Decode(ieR); err != nil {
 			return nil, fmt.Errorf("decode CriticalityDiagnostics failed: %w", err)
 		}
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
-			// If an unknown IE is critical, the PDU cannot be processed.
 			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
-			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
 				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:
-			// Ignore and proceed.
 		}
 	}
-	return msgIe, nil // Return the populated msgIe and a nil error
+	return msgIe, nil
 }

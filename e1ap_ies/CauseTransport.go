@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // CauseTransport is a generated ENUMERATED type.
 type CauseTransport struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	CauseTransportUnspecified                  aper.Enumerated = 0
-	CauseTransportTransportResourceUnavailable aper.Enumerated = 1
-	CauseTransportUnknownTNLAddressForIAB      aper.Enumerated = 2
+	CauseTransportUnspecified                  int64 = 0
+	CauseTransportTransportResourceUnavailable int64 = 1
+	CauseTransportUnknownTNLAddressForIAB      int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *CauseTransport) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
+// Encode implements the MessageEncoder interface for CauseTransport.
+func (e *CauseTransport) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *CauseTransport) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for CauseTransport.
+func (e *CauseTransport) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

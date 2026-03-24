@@ -1,30 +1,33 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // UplinkOnlyROHCContinueROHC is a generated ENUMERATED type.
 type UplinkOnlyROHCContinueROHC struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	UplinkOnlyROHCContinueROHCTrue aper.Enumerated = 0
+	UplinkOnlyROHCContinueROHCTrue int64 = 0
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *UplinkOnlyROHCContinueROHC) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 0}, true)
+// Encode implements the MessageEncoder interface for UplinkOnlyROHCContinueROHC.
+func (e *UplinkOnlyROHCContinueROHC) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *UplinkOnlyROHCContinueROHC) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for UplinkOnlyROHCContinueROHC.
+func (e *UplinkOnlyROHCContinueROHC) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 0}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

@@ -3,38 +3,64 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // NGRANAllocationAndRetentionPriority is a generated SEQUENCE type.
 type NGRANAllocationAndRetentionPriority struct {
-	PriorityLevel           PriorityLevel               `aper:"lb:0,ub:15,mandatory"`
-	PreEmptionCapability    PreEmptionCapability        `aper:"mandatory"`
-	PreEmptionVulnerability PreEmptionVulnerability     `aper:"mandatory"`
-	IEExtensions            *ProtocolExtensionContainer `aper:"optional"`
+	PriorityLevel           PriorityLevel
+	PreEmptionCapability    PreEmptionCapability
+	PreEmptionVulnerability PreEmptionVulnerability
+	IEExtensions            *NGRANAllocationAndRetentionPriorityExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *NGRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *NGRANAllocationAndRetentionPriority) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "priorityLevel", Optional: false},
+			per.ComponentInfo{Name: "pre-emptionCapability", Optional: false},
+			per.ComponentInfo{Name: "pre-emptionVulnerability", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.PriorityLevel.Value), &aper.Constraint{Lb: 0, Ub: 15}, false); err != nil {
+
+	if err = w.EncodeInteger(int64(s.PriorityLevel.Value), per.Constrained(0, 15)); err != nil {
 		return fmt.Errorf("encode PriorityLevel failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.PreEmptionCapability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode PreEmptionCapability failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.PreEmptionCapability.Value), enumC); err != nil {
+			return fmt.Errorf("encode PreEmptionCapability failed: %w", err)
+		}
 	}
-	if err = w.WriteEnumerate(uint64(s.PreEmptionVulnerability.Value), aper.Constraint{Lb: 0, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode PreEmptionVulnerability failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.PreEmptionVulnerability.Value), enumC); err != nil {
+			return fmt.Errorf("encode PreEmptionVulnerability failed: %w", err)
+		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
@@ -44,32 +70,57 @@ func (s *NGRANAllocationAndRetentionPriority) Encode(w *aper.AperWriter) (err er
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *NGRANAllocationAndRetentionPriority) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *NGRANAllocationAndRetentionPriority) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "priorityLevel", Optional: false},
+			per.ComponentInfo{Name: "pre-emptionCapability", Optional: false},
+			per.ComponentInfo{Name: "pre-emptionVulnerability", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.PriorityLevel.Decode(r); err != nil {
-		return fmt.Errorf("decode PriorityLevel failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.PreEmptionCapability.Decode(r); err != nil {
-		return fmt.Errorf("decode PreEmptionCapability failed: %w", err)
-	}
-	if err = s.PreEmptionVulnerability.Decode(r); err != nil {
-		return fmt.Errorf("decode PreEmptionVulnerability failed: %w", err)
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
-		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+
+	{
+		val, err := r.DecodeInteger(per.Constrained(0, 15))
+		if err != nil {
+			return fmt.Errorf("decode PriorityLevel failed: %w", err)
 		}
+		s.PriorityLevel.Value = val
 	}
-	if isExtensible { /* TODO: Implement extension skipping for NGRANAllocationAndRetentionPriority */
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode PreEmptionCapability failed: %w", err)
+		}
+		s.PreEmptionCapability.Value = val
+	}
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode PreEmptionVulnerability failed: %w", err)
+		}
+		s.PreEmptionVulnerability.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(3) {
+		s.IEExtensions = new(NGRANAllocationAndRetentionPriorityExtensions)
+		if err = s.IEExtensions.Decode(r); err != nil {
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

@@ -3,66 +3,110 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // GTPTunnel is a generated SEQUENCE type.
 type GTPTunnel struct {
-	TransportLayerAddress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory,ext"`
-	GTPTEID               GTPTEID                     `aper:"lb:4,ub:4,mandatory,ext"`
-	IEExtensions          *ProtocolExtensionContainer `aper:"optional,ext"`
+	TransportLayerAddress TransportLayerAddress
+	GTPTEID               GTPTEID
+	IEExtensions          *GTPTunnelExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *GTPTunnel) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *GTPTunnel) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "transportLayerAddress", Optional: false},
+			per.ComponentInfo{Name: "gTP-TEID", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteBitString(s.TransportLayerAddress.Value.Bytes, uint(s.TransportLayerAddress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+
+	if err = w.EncodeBitString(s.TransportLayerAddress.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)}); err != nil {
 		return fmt.Errorf("encode TransportLayerAddress failed: %w", err)
 	}
-	if err = w.WriteOctetString([]byte(s.GTPTEID.Value), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
+	if err = w.EncodeOctetString([]byte(s.GTPTEID.Value), per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)}); err != nil {
 		return fmt.Errorf("encode GTPTEID failed: %w", err)
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *GTPTunnel) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *GTPTunnel) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "transportLayerAddress", Optional: false},
+			per.ComponentInfo{Name: "gTP-TEID", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.TransportLayerAddress.Decode(r); err != nil {
-		return fmt.Errorf("decode TransportLayerAddress failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.GTPTEID.Decode(r); err != nil {
-		return fmt.Errorf("decode GTPTEID failed: %w", err)
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)})
+		if err != nil {
+			return fmt.Errorf("decode TransportLayerAddress failed: %w", err)
+		}
+		s.TransportLayerAddress.Value = val
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	{
+		val, err := r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(4), Max: int64Ptr(4)})
+		if err != nil {
+			return fmt.Errorf("decode GTPTEID failed: %w", err)
+		}
+		s.GTPTEID.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(GTPTunnelExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for GTPTunnel */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

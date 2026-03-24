@@ -1,11 +1,10 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 const (
@@ -14,44 +13,59 @@ const (
 	E1apPduUnsuccessfulOutcome uint8 = 2
 )
 
-func encodeMessage(w io.Writer, present uint8, procedureCode ProcedureCode, criticality Criticality, ies []E1APMessageIE) (err error) {
-	aw := aper.NewWriter(w)
-	defer aw.Close()
-
-	if err = aw.WriteChoice(uint64(present)+1, 2, false); err != nil {
+func encodeMessage(e *per.Encoder, present uint8, procedureCode ProcedureCode, criticality Criticality, ies []E1APMessageIE) (err error) {
+	// Write choice index for the PDU type
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			{Name: "initiatingMessage", Tag: 0},
+			{Name: "successfulOutcome", Tag: 1},
+			{Name: "unsuccessfulOutcome", Tag: 2},
+		},
+	}
+	choiceEncoder := e.NewChoiceEncoder(c)
+	if err = choiceEncoder.EncodeChoice(int64(present), false, nil); err != nil {
 		return fmt.Errorf("encode PDU Choice failed: %w", err)
 	}
 
-	if err = procedureCode.Encode(aw); err != nil {
+	if err = procedureCode.Encode(e); err != nil {
 		return fmt.Errorf("encode ProcedureCode failed: %w", err)
 	}
-	if err = criticality.Encode(aw); err != nil {
+	if err = criticality.Encode(e); err != nil {
 		return fmt.Errorf("encode Criticality failed: %w", err)
 	}
 
-	var buf bytes.Buffer
-	ieWriter := aper.NewWriter(&buf)
-
-	// Use Sequence[*E1APMessageIE] helper to marshaling IEs
-	tmp := Sequence[*E1APMessageIE]{
-		c:   aper.Constraint{Lb: 0, Ub: 65535},
-		ext: false,
+	ieEncoder := per.NewEncoder(per.APER)
+	sizeC := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	if err = ieEncoder.EncodeLengthDeterminant(int64(len(ies)), sizeC); err != nil {
+		return fmt.Errorf("encode IE count failed: %w", err)
 	}
-
 	for i := range ies {
-		tmp.Value = append(tmp.Value, &ies[i])
+		if err = ies[i].Encode(ieEncoder); err != nil {
+			return fmt.Errorf("encode IE %d failed: %w", i, err)
+		}
 	}
 
-	if err = tmp.Encode(ieWriter); err != nil {
-		return fmt.Errorf("encode IEs into buffer failed: %w", err)
-	}
-	if err = ieWriter.Close(); err != nil {
-		return fmt.Errorf("close IE buffer writer failed: %w", err)
-	}
-
-	if err = aw.WriteOpenType(buf.Bytes()); err != nil {
+	if err = e.EncodeOctetString(ieEncoder.Bytes(), per.SizeConstraints{Extensible: false, Min: nil, Max: nil}); err != nil {
 		return fmt.Errorf("encode OpenType failed: %w", err)
 	}
 
 	return nil
+}
+
+func E1apEncode(w io.Writer, msg MessageEncoder) error {
+	e := per.NewEncoder(per.APER)
+	if err := msg.Encode(e); err != nil {
+		return err
+	}
+	_, err := w.Write(e.Bytes())
+	return err
+}
+
+type MessageEncoder interface {
+	Encode(w *per.Encoder) error
+}
+
+type MessageUnmarshaller interface {
+	Decode(r *per.Decoder) ([]CriticalityDiagnosticsIEItem, error)
 }

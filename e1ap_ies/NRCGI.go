@@ -3,34 +3,51 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // NRCGI is a generated SEQUENCE type.
 type NRCGI struct {
-	PLMNIdentity   PLMNIdentity                `aper:"lb:3,ub:3,mandatory"`
-	NRCellIdentity NRCellIdentity              `aper:"lb:36,ub:36,mandatory"`
-	IEExtensions   *ProtocolExtensionContainer `aper:"optional"`
+	PLMNIdentity   PLMNIdentity
+	NRCellIdentity NRCellIdentity
+	IEExtensions   *NRCGIExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *NRCGI) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *NRCGI) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pLMN-Identity", Optional: false},
+			per.ComponentInfo{Name: "nR-Cell-Identity", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteOctetString([]byte(s.PLMNIdentity.Value), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
+
+	if err = w.EncodeOctetString([]byte(s.PLMNIdentity.Value), per.SizeConstraints{Extensible: false, Min: int64Ptr(3), Max: int64Ptr(3)}); err != nil {
 		return fmt.Errorf("encode PLMNIdentity failed: %w", err)
 	}
-	if err = w.WriteBitString(s.NRCellIdentity.Value.Bytes, uint(s.NRCellIdentity.Value.NumBits), &aper.Constraint{Lb: 36, Ub: 36}, false); err != nil {
+	if err = w.EncodeBitString(s.NRCellIdentity.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(36), Max: int64Ptr(36)}); err != nil {
 		return fmt.Errorf("encode NRCellIdentity failed: %w", err)
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
@@ -40,29 +57,46 @@ func (s *NRCGI) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *NRCGI) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *NRCGI) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "pLMN-Identity", Optional: false},
+			per.ComponentInfo{Name: "nR-Cell-Identity", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.PLMNIdentity.Decode(r); err != nil {
-		return fmt.Errorf("decode PLMNIdentity failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.NRCellIdentity.Decode(r); err != nil {
-		return fmt.Errorf("decode NRCellIdentity failed: %w", err)
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
-		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+
+	{
+		val, err := r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(3), Max: int64Ptr(3)})
+		if err != nil {
+			return fmt.Errorf("decode PLMNIdentity failed: %w", err)
 		}
+		s.PLMNIdentity.Value = val
 	}
-	if isExtensible { /* TODO: Implement extension skipping for NRCGI */
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(36), Max: int64Ptr(36)})
+		if err != nil {
+			return fmt.Errorf("decode NRCellIdentity failed: %w", err)
+		}
+		s.NRCellIdentity.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(NRCGIExtensions)
+		if err = s.IEExtensions.Decode(r); err != nil {
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

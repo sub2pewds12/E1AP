@@ -1,10 +1,9 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // UPParametersItemExtensions is a generated type-safe wrapper for extensions.
@@ -12,8 +11,7 @@ type UPParametersItemExtensions struct {
 	QOSMappingInformation *QOSMappingInformation
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *UPParametersItemExtensions) Encode(w *aper.AperWriter) error {
+func (s *UPParametersItemExtensions) Encode(w *per.Encoder) error {
 	var extensions []*ProtocolExtensionField
 
 	if s.QOSMappingInformation != nil {
@@ -25,41 +23,39 @@ func (s *UPParametersItemExtensions) Encode(w *aper.AperWriter) error {
 	}
 
 	if len(extensions) > 0 {
-		tmp := Sequence[*ProtocolExtensionField]{
-			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
-			ext: false,
+		c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxProtocolExtensions)}
+		if err := w.EncodeLengthDeterminant(int64(len(extensions)), c); err != nil {
+			return fmt.Errorf("encode extension container length failed: %w", err)
 		}
-		for i := 0; i < len(extensions); i++ {
-			tmp.Value = append(tmp.Value, extensions[i])
-		}
-		if err := tmp.Encode(w); err != nil {
-			return fmt.Errorf("encode extension container failed: %w", err)
+		for _, ext := range extensions {
+			if err := ext.Encode(w); err != nil {
+				return fmt.Errorf("encode extension failed: %w", err)
+			}
 		}
 	} else {
-		tmp := Sequence[*ProtocolExtensionField]{
-			c:   aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions},
-			ext: false,
-		}
-		if err := tmp.Encode(w); err != nil {
-			return fmt.Errorf("encode empty extension container failed: %w", err)
+		// empty extension container
+		c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxProtocolExtensions)}
+		if err := w.EncodeLengthDeterminant(0, c); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *UPParametersItemExtensions) Decode(r *aper.AperReader) error {
-	decoder := func(r *aper.AperReader) (**ProtocolExtensionField, error) {
-		item := new(ProtocolExtensionField)
-		if err := item.Decode(r); err != nil {
-			return nil, err
-		}
-		return &item, nil
+func (s *UPParametersItemExtensions) Decode(r *per.Decoder) error {
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxProtocolExtensions)}
+	length, err := r.DecodeLengthDeterminant(c)
+	if err != nil {
+		return fmt.Errorf("decode extension container length failed: %w", err)
 	}
 
-	extensions, err := aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxProtocolExtensions}, false)
-	if err != nil {
-		return fmt.Errorf("decode extension container failed: %w", err)
+	extensions := make([]*ProtocolExtensionField, length)
+	for i := int64(0); i < length; i++ {
+		ext := new(ProtocolExtensionField)
+		if err := ext.Decode(r); err != nil {
+			return fmt.Errorf("decode extension failed: %w", err)
+		}
+		extensions[i] = ext
 	}
 
 	for _, ext := range extensions {
@@ -67,7 +63,7 @@ func (s *UPParametersItemExtensions) Decode(r *aper.AperReader) error {
 
 		case ProtocolIEIDQOSMappingInformation:
 			s.QOSMappingInformation = new(QOSMappingInformation)
-			if err := s.QOSMappingInformation.Decode(aper.NewReader(bytes.NewReader(ext.ValueBytes))); err != nil {
+			if err := s.QOSMappingInformation.Decode(per.NewDecoder(ext.ValueBytes, per.APER)); err != nil {
 				return fmt.Errorf("decode extension QOSMappingInformation failed: %w", err)
 			}
 		default:

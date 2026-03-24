@@ -3,104 +3,192 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // CellGroupInformationItem is a generated SEQUENCE type.
 type CellGroupInformationItem struct {
-	CellGroupID     CellGroupID                         `aper:"lb:0,ub:3,mandatory,ext"`
-	ULConfiguration *ULConfiguration                    `aper:"optional,ext"`
-	DLTXStop        *DLTXStop                           `aper:"optional,ext"`
-	RATType         *RATType                            `aper:"optional,ext"`
-	IEExtensions    *CellGroupInformationItemExtensions `aper:"optional,ext"`
+	CellGroupID     CellGroupID
+	ULConfiguration *ULConfiguration
+	DLTXStop        *DLTXStop
+	RATType         *RATType
+	IEExtensions    *CellGroupInformationItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *CellGroupInformationItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *CellGroupInformationItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "cell-Group-ID", Optional: false},
+			per.ComponentInfo{Name: "uL-Configuration", Optional: true},
+			per.ComponentInfo{Name: "dL-TX-Stop", Optional: true},
+			per.ComponentInfo{Name: "rAT-Type", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.ULConfiguration != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DLTXStop != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.RATType != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(4), &aper.Constraint{Lb: 4, Ub: 4}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.CellGroupID.Value), &aper.Constraint{Lb: 0, Ub: 3}, true); err != nil {
+
+	if err = w.EncodeInteger(int64(s.CellGroupID.Value), per.ConstrainedExtensible(0, 3)); err != nil {
 		return fmt.Errorf("encode CellGroupID failed: %w", err)
 	}
+
 	if s.ULConfiguration != nil {
-		if err = w.WriteEnumerate(uint64((*s.ULConfiguration).Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-			return fmt.Errorf("encode ULConfiguration failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.ULConfiguration).Value), enumC); err != nil {
+				return fmt.Errorf("encode ULConfiguration failed: %w", err)
+			}
 		}
 	}
+
 	if s.DLTXStop != nil {
-		if err = w.WriteEnumerate(uint64((*s.DLTXStop).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("encode DLTXStop failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.DLTXStop).Value), enumC); err != nil {
+				return fmt.Errorf("encode DLTXStop failed: %w", err)
+			}
 		}
 	}
+
 	if s.RATType != nil {
-		if err = w.WriteEnumerate(uint64((*s.RATType).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("encode RATType failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.RATType).Value), enumC); err != nil {
+				return fmt.Errorf("encode RATType failed: %w", err)
+			}
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *CellGroupInformationItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *CellGroupInformationItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "cell-Group-ID", Optional: false},
+			per.ComponentInfo{Name: "uL-Configuration", Optional: true},
+			per.ComponentInfo{Name: "dL-TX-Stop", Optional: true},
+			per.ComponentInfo{Name: "rAT-Type", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 4, Ub: 4}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.CellGroupID.Decode(r); err != nil {
-		return fmt.Errorf("decode CellGroupID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 3))
+		if err != nil {
+			return fmt.Errorf("decode CellGroupID failed: %w", err)
+		}
+		s.CellGroupID.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.ULConfiguration = new(ULConfiguration)
-		if err = s.ULConfiguration.Decode(r); err != nil {
-			return fmt.Errorf("decode ULConfiguration failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode ULConfiguration failed: %w", err)
+			}
+			s.ULConfiguration.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.DLTXStop = new(DLTXStop)
-		if err = s.DLTXStop.Decode(r); err != nil {
-			return fmt.Errorf("decode DLTXStop failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode DLTXStop failed: %w", err)
+			}
+			s.DLTXStop.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.RATType = new(RATType)
-		if err = s.RATType.Decode(r); err != nil {
-			return fmt.Errorf("decode RATType failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode RATType failed: %w", err)
+			}
+			s.RATType.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.IEExtensions = new(CellGroupInformationItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for CellGroupInformationItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

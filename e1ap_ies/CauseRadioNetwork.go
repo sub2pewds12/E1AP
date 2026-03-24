@@ -1,63 +1,66 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // CauseRadioNetwork is a generated ENUMERATED type.
 type CauseRadioNetwork struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	CauseRadioNetworkUnspecified                               aper.Enumerated = 0
-	CauseRadioNetworkUnknownOrAlreadyAllocatedGNBCUCPUeE1APID  aper.Enumerated = 1
-	CauseRadioNetworkUnknownOrAlreadyAllocatedGNBCUUPUeE1APID  aper.Enumerated = 2
-	CauseRadioNetworkUnknownOrInconsistentPairOfUeE1APID       aper.Enumerated = 3
-	CauseRadioNetworkInteractionWithOtherProcedure             aper.Enumerated = 4
-	CauseRadioNetworkPPDCPCountWrapAround                      aper.Enumerated = 5
-	CauseRadioNetworkNotSupportedQCIValue                      aper.Enumerated = 6
-	CauseRadioNetworkNotSupported5QIValue                      aper.Enumerated = 7
-	CauseRadioNetworkEncryptionAlgorithmsNotSupported          aper.Enumerated = 8
-	CauseRadioNetworkIntegrityProtectionAlgorithmsNotSupported aper.Enumerated = 9
-	CauseRadioNetworkUPIntegrityProtectionNotPossible          aper.Enumerated = 10
-	CauseRadioNetworkUPConfidentialityProtectionNotPossible    aper.Enumerated = 11
-	CauseRadioNetworkMultiplePDUSessionIDInstances             aper.Enumerated = 12
-	CauseRadioNetworkUnknownPDUSessionID                       aper.Enumerated = 13
-	CauseRadioNetworkMultipleQOSFlowIDInstances                aper.Enumerated = 14
-	CauseRadioNetworkUnknownQOSFlowID                          aper.Enumerated = 15
-	CauseRadioNetworkMultipleDRBIDInstances                    aper.Enumerated = 16
-	CauseRadioNetworkUnknownDRBID                              aper.Enumerated = 17
-	CauseRadioNetworkInvalidQOSCombination                     aper.Enumerated = 18
-	CauseRadioNetworkProcedureCancelled                        aper.Enumerated = 19
-	CauseRadioNetworkNormalRelease                             aper.Enumerated = 20
-	CauseRadioNetworkNoRadioResourcesAvailable                 aper.Enumerated = 21
-	CauseRadioNetworkActionDesirableForRadioReasons            aper.Enumerated = 22
-	CauseRadioNetworkResourcesNotAvailableForTheSlice          aper.Enumerated = 23
-	CauseRadioNetworkPDCPConfigurationNotSupported             aper.Enumerated = 24
-	CauseRadioNetworkUeDlMaxIPDataRateReason                   aper.Enumerated = 25
-	CauseRadioNetworkUPIntegrityProtectionFailure              aper.Enumerated = 26
-	CauseRadioNetworkReleaseDueToPreEmption                    aper.Enumerated = 27
-	CauseRadioNetworkRsnNotAvailableForTheUP                   aper.Enumerated = 28
-	CauseRadioNetworkNPNNotSupported                           aper.Enumerated = 29
-	CauseRadioNetworkReportCharacteristicEmpty                 aper.Enumerated = 30
-	CauseRadioNetworkExistingMeasurementID                     aper.Enumerated = 31
-	CauseRadioNetworkMeasurementTemporarilyNotAvailable        aper.Enumerated = 32
-	CauseRadioNetworkMeasurementNotSupportedForTheObject       aper.Enumerated = 33
+	CauseRadioNetworkUnspecified                               int64 = 0
+	CauseRadioNetworkUnknownOrAlreadyAllocatedGNBCUCPUeE1APID  int64 = 1
+	CauseRadioNetworkUnknownOrAlreadyAllocatedGNBCUUPUeE1APID  int64 = 2
+	CauseRadioNetworkUnknownOrInconsistentPairOfUeE1APID       int64 = 3
+	CauseRadioNetworkInteractionWithOtherProcedure             int64 = 4
+	CauseRadioNetworkPPDCPCountWrapAround                      int64 = 5
+	CauseRadioNetworkNotSupportedQCIValue                      int64 = 6
+	CauseRadioNetworkNotSupported5QIValue                      int64 = 7
+	CauseRadioNetworkEncryptionAlgorithmsNotSupported          int64 = 8
+	CauseRadioNetworkIntegrityProtectionAlgorithmsNotSupported int64 = 9
+	CauseRadioNetworkUPIntegrityProtectionNotPossible          int64 = 10
+	CauseRadioNetworkUPConfidentialityProtectionNotPossible    int64 = 11
+	CauseRadioNetworkMultiplePDUSessionIDInstances             int64 = 12
+	CauseRadioNetworkUnknownPDUSessionID                       int64 = 13
+	CauseRadioNetworkMultipleQOSFlowIDInstances                int64 = 14
+	CauseRadioNetworkUnknownQOSFlowID                          int64 = 15
+	CauseRadioNetworkMultipleDRBIDInstances                    int64 = 16
+	CauseRadioNetworkUnknownDRBID                              int64 = 17
+	CauseRadioNetworkInvalidQOSCombination                     int64 = 18
+	CauseRadioNetworkProcedureCancelled                        int64 = 19
+	CauseRadioNetworkNormalRelease                             int64 = 20
+	CauseRadioNetworkNoRadioResourcesAvailable                 int64 = 21
+	CauseRadioNetworkActionDesirableForRadioReasons            int64 = 22
+	CauseRadioNetworkResourcesNotAvailableForTheSlice          int64 = 23
+	CauseRadioNetworkPDCPConfigurationNotSupported             int64 = 24
+	CauseRadioNetworkUeDlMaxIPDataRateReason                   int64 = 25
+	CauseRadioNetworkUPIntegrityProtectionFailure              int64 = 26
+	CauseRadioNetworkReleaseDueToPreEmption                    int64 = 27
+	CauseRadioNetworkRsnNotAvailableForTheUP                   int64 = 28
+	CauseRadioNetworkNPNNotSupported                           int64 = 29
+	CauseRadioNetworkReportCharacteristicEmpty                 int64 = 30
+	CauseRadioNetworkExistingMeasurementID                     int64 = 31
+	CauseRadioNetworkMeasurementTemporarilyNotAvailable        int64 = 32
+	CauseRadioNetworkMeasurementNotSupportedForTheObject       int64 = 33
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *CauseRadioNetwork) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 33}, true)
+// Encode implements the MessageEncoder interface for CauseRadioNetwork.
+func (e *CauseRadioNetwork) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 34), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *CauseRadioNetwork) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for CauseRadioNetwork.
+func (e *CauseRadioNetwork) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 33}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 34), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

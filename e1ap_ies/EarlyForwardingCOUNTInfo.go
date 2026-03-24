@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // EarlyForwardingCOUNTInfo is a generated CHOICE type.
@@ -22,25 +22,37 @@ const (
 )
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *EarlyForwardingCOUNTInfo) Encode(w *aper.AperWriter) (err error) {
+func (s *EarlyForwardingCOUNTInfo) Encode(w *per.Encoder) (err error) {
 
-	// 1. Write the choice index.
-	// fmt.Printf("--- GO DEBUG: Encoding CHOICE EarlyForwardingCOUNTInfo | Choice: %d, UpperBound: 2, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
-	if err = w.WriteChoice(uint64(s.Choice), 2, false); err != nil {
-		return fmt.Errorf("Encode choice index failed for EarlyForwardingCOUNTInfo: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "firstDLCount", Tag: 0},
+			per.AlternativeInfo{Name: "dLDiscardingCount", Tag: 0},
+			per.AlternativeInfo{Name: "choice-Extension", Tag: 0},
+		},
 	}
+	choiceEncoder := w.NewChoiceEncoder(c)
 
-	// 2. Encode the selected member.
 	switch s.Choice {
 	case EarlyForwardingCOUNTInfoPresentFirstDLCount:
+		if err = choiceEncoder.EncodeChoice(0, false, nil); err != nil {
+			return err
+		}
 		if err = s.FirstDLCount.Encode(w); err != nil {
 			return fmt.Errorf("encode FirstDLCount failed: %w", err)
 		}
 	case EarlyForwardingCOUNTInfoPresentDLDiscardingCount:
+		if err = choiceEncoder.EncodeChoice(1, false, nil); err != nil {
+			return err
+		}
 		if err = s.DLDiscardingCount.Encode(w); err != nil {
 			return fmt.Errorf("encode DLDiscardingCount failed: %w", err)
 		}
 	case EarlyForwardingCOUNTInfoPresentChoiceExtension:
+		if err = choiceEncoder.EncodeChoice(2, false, nil); err != nil {
+			return err
+		}
 		if err = s.ChoiceExtension.Encode(w); err != nil {
 			return fmt.Errorf("encode ChoiceExtension failed: %w", err)
 		}
@@ -51,34 +63,47 @@ func (s *EarlyForwardingCOUNTInfo) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *EarlyForwardingCOUNTInfo) Decode(r *aper.AperReader) (err error) {
+func (s *EarlyForwardingCOUNTInfo) Decode(r *per.Decoder) (err error) {
 
-	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	choice, err := r.ReadChoice(2, false)
-	if err != nil {
-		return fmt.Errorf("read choice index failed: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "firstDLCount", Tag: 0},
+			per.AlternativeInfo{Name: "dLDiscardingCount", Tag: 0},
+			per.AlternativeInfo{Name: "choice-Extension", Tag: 0},
+		},
 	}
-	s.Choice = choice // Choice is 1-based from ReadChoice
+	choiceDecoder := r.NewChoiceDecoder(c)
 
-	// 2. Decode the selected member.
-	switch choice {
-	case 1:
+	choiceIndex, isExtension, _, err := choiceDecoder.DecodeChoice()
+	if err != nil {
+		return fmt.Errorf("decode choice index failed: %w", err)
+	}
+
+	if isExtension {
+		return fmt.Errorf("extension choices are not fully supported yet")
+	}
+
+	s.Choice = uint64(choiceIndex + 1) // 1-based internal Choice enum
+
+	switch choiceIndex {
+	case 0:
 		s.FirstDLCount = new(FirstDLCount)
 		if err = s.FirstDLCount.Decode(r); err != nil {
 			return fmt.Errorf("decode FirstDLCount failed: %w", err)
 		}
-	case 2:
+	case 1:
 		s.DLDiscardingCount = new(DLDiscarding)
 		if err = s.DLDiscardingCount.Decode(r); err != nil {
 			return fmt.Errorf("decode DLDiscardingCount failed: %w", err)
 		}
-	case 3:
+	case 2:
 		s.ChoiceExtension = new(ProtocolIESingleContainer)
 		if err = s.ChoiceExtension.Decode(r); err != nil {
 			return fmt.Errorf("decode ChoiceExtension failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("decode choice of EarlyForwardingCOUNTInfo with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of EarlyForwardingCOUNTInfo with unknown choice index %d", choiceIndex)
 	}
 	return nil
 }

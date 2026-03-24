@@ -3,81 +3,142 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // ROHC is a generated SEQUENCE type.
 type ROHC struct {
-	MaxCID       ROHCMaxCID                  `aper:"lb:0,ub:16383,mandatory,ext"`
-	ROHCProfiles ROHCROHCProfiles            `aper:"lb:0,ub:511,mandatory,ext"`
-	ContinueROHC *ROHCContinueROHC           `aper:"optional,ext"`
-	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
+	MaxCID       ROHCMaxCID
+	ROHCProfiles ROHCROHCProfiles
+	ContinueROHC *ROHCContinueROHC
+	IEExtensions *ROHCExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *ROHC) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *ROHC) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "maxCID", Optional: false},
+			per.ComponentInfo{Name: "rOHC-Profiles", Optional: false},
+			per.ComponentInfo{Name: "continueROHC", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.ContinueROHC != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.MaxCID.Value), &aper.Constraint{Lb: 0, Ub: 16383}, true); err != nil {
+
+	if err = w.EncodeInteger(int64(s.MaxCID.Value), per.ConstrainedExtensible(0, 16383)); err != nil {
 		return fmt.Errorf("encode MaxCID failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.ROHCProfiles.Value), &aper.Constraint{Lb: 0, Ub: 511}, true); err != nil {
+	if err = w.EncodeInteger(int64(s.ROHCProfiles.Value), per.ConstrainedExtensible(0, 511)); err != nil {
 		return fmt.Errorf("encode ROHCProfiles failed: %w", err)
 	}
+
 	if s.ContinueROHC != nil {
-		if err = w.WriteEnumerate(uint64((*s.ContinueROHC).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode ContinueROHC failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.ContinueROHC).Value), enumC); err != nil {
+				return fmt.Errorf("encode ContinueROHC failed: %w", err)
+			}
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *ROHC) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *ROHC) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "maxCID", Optional: false},
+			per.ComponentInfo{Name: "rOHC-Profiles", Optional: false},
+			per.ComponentInfo{Name: "continueROHC", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.MaxCID.Decode(r); err != nil {
-		return fmt.Errorf("decode MaxCID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.ROHCProfiles.Decode(r); err != nil {
-		return fmt.Errorf("decode ROHCProfiles failed: %w", err)
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16383))
+		if err != nil {
+			return fmt.Errorf("decode MaxCID failed: %w", err)
+		}
+		s.MaxCID.Value = val
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 511))
+		if err != nil {
+			return fmt.Errorf("decode ROHCProfiles failed: %w", err)
+		}
+		s.ROHCProfiles.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.ContinueROHC = new(ROHCContinueROHC)
-		if err = s.ContinueROHC.Decode(r); err != nil {
-			return fmt.Errorf("decode ContinueROHC failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode ContinueROHC failed: %w", err)
+			}
+			s.ContinueROHC.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(3) {
+		s.IEExtensions = new(ROHCExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for ROHC */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

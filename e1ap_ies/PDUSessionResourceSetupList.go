@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // PDUSessionResourceSetupList is a generated LIST type.
@@ -11,43 +11,34 @@ type PDUSessionResourceSetupList struct {
 	Value []PDUSessionResourceSetupItem
 }
 
-func (s *PDUSessionResourceSetupList) Encode(w *aper.AperWriter) (err error) {
+func (s *PDUSessionResourceSetupList) Encode(w *per.Encoder) (err error) {
 
-	tmp := Sequence[aper.IE]{
-		c:   aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource},
-		ext: false,
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxnoofPDUSessionResource)}
+	if err = w.EncodeLengthDeterminant(int64(len(s.Value)), c); err != nil {
+		return fmt.Errorf("encode length determinant failed: %w", err)
 	}
-
 	for i := 0; i < len(s.Value); i++ {
-		tmp.Value = append(tmp.Value, &s.Value[i])
-	}
-
-	if err = tmp.Encode(w); err != nil {
-		err = fmt.Errorf("encode PDUSessionResourceSetupList failed: %w", err)
-		return
+		if err = s.Value[i].Encode(w); err != nil {
+			return fmt.Errorf("encode list item %d failed: %w", i, err)
+		}
 	}
 	return nil
 }
 
-func (s *PDUSessionResourceSetupList) Decode(r *aper.AperReader) (err error) {
+func (s *PDUSessionResourceSetupList) Decode(r *per.Decoder) (err error) {
 
-	// 1. Create a decoder function for the item type.
-	decoder := func(r *aper.AperReader) (*PDUSessionResourceSetupItem, error) {
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxnoofPDUSessionResource)}
+	length, err := r.DecodeLengthDeterminant(c)
+	if err != nil {
+		return fmt.Errorf("decode length determinant failed: %w", err)
+	}
+	s.Value = make([]PDUSessionResourceSetupItem, length)
+	for i := int64(0); i < length; i++ {
 		item := new(PDUSessionResourceSetupItem)
 		if err := item.Decode(r); err != nil {
-			return nil, err
+			return fmt.Errorf("decode list item %d failed: %w", i, err)
 		}
-		return item, nil
+		s.Value[i] = *item
 	}
-
-	// 2. Call the generic ReadSequenceOf helper.
-	//    The variable type `[]AlternativeQoSParaSetItem` now matches the function's return type.
-	var decodedItems []PDUSessionResourceSetupItem // <--- FIX: Removed the '*'
-	if decodedItems, err = aper.ReadSequenceOf(decoder, r, &aper.Constraint{Lb: 1, Ub: MaxnoofPDUSessionResource}, false); err != nil {
-		return fmt.Errorf("readSequenceOf for PDUSessionResourceSetupList failed: %w", err)
-	}
-
-	// 3. Assign the decoded slice of values directly.
-	s.Value = decodedItems
 	return nil
 }

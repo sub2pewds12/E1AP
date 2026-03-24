@@ -3,119 +3,199 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // AlternativeQoSParaSetItem is a generated SEQUENCE type.
 type AlternativeQoSParaSetItem struct {
-	AlternativeQoSParameterIndex AlternativeQoSParaSetItemAlternativeQoSParameterIndex `aper:"lb:1,ub:8,mandatory,ext"`
-	GuaranteedFlowBitRateDL      *BitRate                                              `aper:"lb:0,ub:4000000000000,optional,ext"`
-	GuaranteedFlowBitRateUL      *BitRate                                              `aper:"lb:0,ub:4000000000000,optional,ext"`
-	PacketDelayBudget            *PacketDelayBudget                                    `aper:"lb:0,ub:1023,optional,ext"`
-	PacketErrorRate              *PacketErrorRate                                      `aper:"optional,ext"`
-	IEExtensions                 *ProtocolExtensionContainer                           `aper:"optional,ext"`
+	AlternativeQoSParameterIndex AlternativeQoSParaSetItemAlternativeQoSParameterIndex
+	GuaranteedFlowBitRateDL      *BitRate
+	GuaranteedFlowBitRateUL      *BitRate
+	PacketDelayBudget            *PacketDelayBudget
+	PacketErrorRate              *PacketErrorRate
+	IEExtensions                 *AlternativeQoSParaSetItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *AlternativeQoSParaSetItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *AlternativeQoSParaSetItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "alternativeQoSParameterIndex", Optional: false},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateDL", Optional: true},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateUL", Optional: true},
+			per.ComponentInfo{Name: "packetDelayBudget", Optional: true},
+			per.ComponentInfo{Name: "packetErrorRate", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.GuaranteedFlowBitRateDL != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.GuaranteedFlowBitRateUL != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PacketDelayBudget != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PacketErrorRate != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 3
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(5), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.AlternativeQoSParameterIndex.Value), &aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
+
+	if err = w.EncodeInteger(int64(s.AlternativeQoSParameterIndex.Value), per.ConstrainedExtensible(1, 8)); err != nil {
 		return fmt.Errorf("encode AlternativeQoSParameterIndex failed: %w", err)
 	}
+
 	if s.GuaranteedFlowBitRateDL != nil {
-		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateDL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.GuaranteedFlowBitRateDL).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode GuaranteedFlowBitRateDL failed: %w", err)
 		}
 	}
+
 	if s.GuaranteedFlowBitRateUL != nil {
-		if err = w.WriteInteger(int64((*s.GuaranteedFlowBitRateUL).Value), &aper.Constraint{Lb: 0, Ub: 4000000000000}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.GuaranteedFlowBitRateUL).Value), per.ConstrainedExtensible(0, 4000000000000)); err != nil {
 			return fmt.Errorf("encode GuaranteedFlowBitRateUL failed: %w", err)
 		}
 	}
+
 	if s.PacketDelayBudget != nil {
-		if err = w.WriteInteger(int64((*s.PacketDelayBudget).Value), &aper.Constraint{Lb: 0, Ub: 1023}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.PacketDelayBudget).Value), per.ConstrainedExtensible(0, 1023)); err != nil {
 			return fmt.Errorf("encode PacketDelayBudget failed: %w", err)
 		}
 	}
+
 	if s.PacketErrorRate != nil {
 		if err = s.PacketErrorRate.Encode(w); err != nil {
 			return fmt.Errorf("encode PacketErrorRate failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *AlternativeQoSParaSetItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *AlternativeQoSParaSetItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "alternativeQoSParameterIndex", Optional: false},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateDL", Optional: true},
+			per.ComponentInfo{Name: "guaranteedFlowBitRateUL", Optional: true},
+			per.ComponentInfo{Name: "packetDelayBudget", Optional: true},
+			per.ComponentInfo{Name: "packetErrorRate", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 5, Ub: 5}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.AlternativeQoSParameterIndex.Decode(r); err != nil {
-		return fmt.Errorf("decode AlternativeQoSParameterIndex failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 8))
+		if err != nil {
+			return fmt.Errorf("decode AlternativeQoSParameterIndex failed: %w", err)
+		}
+		s.AlternativeQoSParameterIndex.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.GuaranteedFlowBitRateDL = new(BitRate)
-		if err = s.GuaranteedFlowBitRateDL.Decode(r); err != nil {
-			return fmt.Errorf("decode GuaranteedFlowBitRateDL failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode GuaranteedFlowBitRateDL failed: %w", err)
+			}
+			s.GuaranteedFlowBitRateDL.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.GuaranteedFlowBitRateUL = new(BitRate)
-		if err = s.GuaranteedFlowBitRateUL.Decode(r); err != nil {
-			return fmt.Errorf("decode GuaranteedFlowBitRateUL failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 4000000000000))
+			if err != nil {
+				return fmt.Errorf("decode GuaranteedFlowBitRateUL failed: %w", err)
+			}
+			s.GuaranteedFlowBitRateUL.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.PacketDelayBudget = new(PacketDelayBudget)
-		if err = s.PacketDelayBudget.Decode(r); err != nil {
-			return fmt.Errorf("decode PacketDelayBudget failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 1023))
+			if err != nil {
+				return fmt.Errorf("decode PacketDelayBudget failed: %w", err)
+			}
+			s.PacketDelayBudget.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.PacketErrorRate = new(PacketErrorRate)
 		if err = s.PacketErrorRate.Decode(r); err != nil {
-			return fmt.Errorf("decode PacketErrorRate failed: %w", err)
+			return fmt.Errorf("Decode PacketErrorRate failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(5) {
+		s.IEExtensions = new(AlternativeQoSParaSetItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for AlternativeQoSParaSetItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

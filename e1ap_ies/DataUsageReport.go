@@ -1,18 +1,17 @@
 package e1ap_ies
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DataUsageReport is a generated SEQUENCE type.
 type DataUsageReport struct {
-	GNBCUCPUEE1APID     GNBCUCPUEE1APID     `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	GNBCUUPUEE1APID     GNBCUUPUEE1APID     `aper:"lb:0,ub:4294967295,mandatory,ext"`
-	DataUsageReportList DataUsageReportList `aper:"lb:1,ub:MaxnoofDRBs,mandatory,ext"`
+	GNBCUCPUEE1APID     GNBCUCPUEE1APID
+	GNBCUUPUEE1APID     GNBCUUPUEE1APID
+	DataUsageReportList DataUsageReportList
 }
 
 // toIes transforms the DataUsageReport struct into a slice of E1APMessageIEs.
@@ -39,34 +38,62 @@ func (msg *DataUsageReport) toIes() ([]E1APMessageIE, error) {
 	return ies, nil
 }
 
-// Encode implements the aper.AperMarshaller interface for DataUsageReport.
-func (msg *DataUsageReport) Encode(w io.Writer) error {
+func (msg *DataUsageReport) EncodeWithEncoder(e *per.Encoder) (err error) {
 	ies, err := msg.toIes()
 	if err != nil {
-		return fmt.Errorf("could not convert DataUsageReport to IEs: %w", err)
+		return err
 	}
 
-	return encodeMessage(w, E1apPduInitiatingMessage, ProcedureCode{Value: ProcedureCodeDataUsageReport}, Criticality{Value: CriticalityReject}, ies)
+	sizeC := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	if err = e.EncodeLengthDeterminant(int64(len(ies)), sizeC); err != nil {
+		return fmt.Errorf("encode IE count failed: %w", err)
+	}
+	for i := range ies {
+		if err = ies[i].Encode(e); err != nil {
+			return fmt.Errorf("encode IE %d failed: %w", i, err)
+		}
+	}
+	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface for DataUsageReport.
-func (msg *DataUsageReport) Decode(buf []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
+func (msg *DataUsageReport) Encode(w io.Writer) error {
+	e := per.NewEncoder(per.APER)
+	if err := msg.EncodeWithEncoder(e); err != nil {
+		return err
+	}
+	_, err := w.Write(e.Bytes())
+	return err
+}
+
+// Decode implements the MessageUnmarshaller interface for DataUsageReport.
+func (msg *DataUsageReport) Decode(data []byte) (diagList []CriticalityDiagnosticsIEItem, err error) {
+	r := per.NewDecoder(data, per.APER)
+	return msg.DecodeFromDecoder(r)
+}
+
+func (msg *DataUsageReport) DecodeFromDecoder(r *per.Decoder) (diagList []CriticalityDiagnosticsIEItem, err error) {
+
 	defer func() {
 		if err != nil {
 			err = fmt.Errorf("decode DataUsageReport failed: %w", err)
 		}
 	}()
 
-	r := aper.NewReader(bytes.NewReader(buf))
-
 	decoder := DataUsageReportDecoder{
 		msg:  msg,
 		list: make(map[ProtocolIEID]*E1APMessageIE),
 	}
 
-	// aper.ReadSequenceOf will decode the IEs and call the callback for each one.
-	if _, err = aper.ReadSequenceOf(decoder.decodeIE, r, &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+	c := per.SizeConstraints{Extensible: false, Min: int64Ptr(0), Max: int64Ptr(65535)}
+	length, err := r.DecodeLengthDeterminant(c)
+	if err != nil {
 		return
+	}
+
+	for i := int64(0); i < length; i++ {
+		if _, err = decoder.decodeIE(r); err != nil {
+			return
+		}
 	}
 
 	// After decoding all present IEs, validate that mandatory ones were found.
@@ -116,20 +143,22 @@ type DataUsageReportDecoder struct {
 	list     map[ProtocolIEID]*E1APMessageIE
 }
 
-func (decoder *DataUsageReportDecoder) decodeIE(r *aper.AperReader) (msgIe *E1APMessageIE, err error) {
-	id, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 65535}, false)
+func (decoder *DataUsageReportDecoder) decodeIE(r *per.Decoder) (msgIe *E1APMessageIE, err error) {
+	id, err := r.DecodeInteger(per.Constrained(0, 65535))
 	if err != nil {
 		return nil, err
 	}
 	msgIe = new(E1APMessageIE)
-	msgIe.ID = ProtocolIEID{Value: aper.Integer(id)}
-	c, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	msgIe.ID = ProtocolIEID{Value: id}
+
+	enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3)}
+	c, err := r.DecodeEnumerated(enumC)
 	if err != nil {
 		return nil, err
 	}
-	msgIe.Criticality = Criticality{Value: aper.Enumerated(c)}
+	msgIe.Criticality = Criticality{Value: c}
 
-	buf, err := r.ReadOpenType()
+	buf, err := r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: nil, Max: nil})
 	if err != nil {
 		return nil, err
 	}
@@ -140,60 +169,64 @@ func (decoder *DataUsageReportDecoder) decodeIE(r *aper.AperReader) (msgIe *E1AP
 	}
 	decoder.list[ieId] = msgIe
 
-	ieR := aper.NewReader(bytes.NewReader(buf))
+	ieR := per.NewDecoder(buf, per.APER)
 	msg := decoder.msg
 
 	switch msgIe.ID.Value {
 	case ProtocolIEIDGNBCUCPUEE1APID:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			val, err := ieR.DecodeInteger(per.Unconstrained())
 			if err != nil {
 				return nil, fmt.Errorf("decode GNBCUCPUEE1APID failed: %w", err)
 			}
-			msg.GNBCUCPUEE1APID.Value = aper.Integer(val)
+			msg.GNBCUCPUEE1APID.Value = val
 		}
 	case ProtocolIEIDGNBCUUPUEE1APID:
 
 		{
-			val, err := ieR.ReadInteger(&aper.Constraint{Lb: 0, Ub: 4294967295}, false)
+			val, err := ieR.DecodeInteger(per.Unconstrained())
 			if err != nil {
 				return nil, fmt.Errorf("decode GNBCUUPUEE1APID failed: %w", err)
 			}
-			msg.GNBCUUPUEE1APID.Value = aper.Integer(val)
+			msg.GNBCUUPUEE1APID.Value = val
 		}
 	case ProtocolIEIDDataUsageReportList:
 
 		{
-			itemDecoder := func(r *aper.AperReader) (*DataUsageReportItem, error) {
-
+			itemDecoder := func(r *per.Decoder) (*DataUsageReportItem, error) {
 				item := new(DataUsageReportItem)
 				if err := item.Decode(r); err != nil {
 					return nil, err
 				}
 				return item, nil
 			}
-			decodedItems, err := aper.ReadSequenceOf(itemDecoder, ieR, &aper.Constraint{Lb: 1, Ub: MaxnoofDRBs}, false)
+
+			c := per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(MaxnoofDRBs)}
+			length, err := ieR.DecodeLengthDeterminant(c)
 			if err != nil {
-				return nil, fmt.Errorf("decode DataUsageReportList failed: %w", err)
+				return nil, fmt.Errorf("decode struct list length failed: %w", err)
 			}
-			msg.DataUsageReportList.Value = decodedItems
+			for i := int64(0); i < length; i++ {
+				item, err := itemDecoder(ieR)
+				if err != nil {
+					return nil, fmt.Errorf("decode item failed: %w", err)
+				}
+				msg.DataUsageReportList.Value = append(msg.DataUsageReportList.Value, *item)
+			}
 		}
 	default:
 		switch msgIe.Criticality.Value {
 		case CriticalityReject:
-			// If an unknown IE is critical, the PDU cannot be processed.
 			return nil, fmt.Errorf("not comprehended IE ID %d (criticality: reject)", msgIe.ID.Value)
 		case CriticalityNotify:
-			// Per 3GPP TS 38.463 Section 10.3, report and proceed.
 			decoder.diagList = append(decoder.diagList, CriticalityDiagnosticsIEItem{
 				IECriticality: msgIe.Criticality,
 				IEID:          msgIe.ID,
 				TypeOfError:   TypeOfError{Value: TypeOfErrorNotUnderstood},
 			})
 		case CriticalityIgnore:
-			// Ignore and proceed.
 		}
 	}
-	return msgIe, nil // Return the populated msgIe and a nil error
+	return msgIe, nil
 }

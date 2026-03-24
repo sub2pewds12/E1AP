@@ -3,34 +3,51 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // EndpointIPAddressAndPort is a generated SEQUENCE type.
 type EndpointIPAddressAndPort struct {
-	EndpointIPAddress TransportLayerAddress       `aper:"lb:1,ub:160,mandatory"`
-	PortNumber        PortNumber                  `aper:"lb:16,ub:16,mandatory"`
-	IEExtensions      *ProtocolExtensionContainer `aper:"optional"`
+	EndpointIPAddress TransportLayerAddress
+	PortNumber        PortNumber
+	IEExtensions      *EndpointIPAddressAndPortExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *EndpointIPAddressAndPort) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *EndpointIPAddressAndPort) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "endpoint-IP-Address", Optional: false},
+			per.ComponentInfo{Name: "portNumber", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteBitString(s.EndpointIPAddress.Value.Bytes, uint(s.EndpointIPAddress.Value.NumBits), &aper.Constraint{Lb: 1, Ub: 160}, false); err != nil {
+
+	if err = w.EncodeBitString(s.EndpointIPAddress.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)}); err != nil {
 		return fmt.Errorf("encode EndpointIPAddress failed: %w", err)
 	}
-	if err = w.WriteBitString(s.PortNumber.Value.Bytes, uint(s.PortNumber.Value.NumBits), &aper.Constraint{Lb: 16, Ub: 16}, false); err != nil {
+	if err = w.EncodeBitString(s.PortNumber.Value, per.SizeConstraints{Extensible: false, Min: int64Ptr(16), Max: int64Ptr(16)}); err != nil {
 		return fmt.Errorf("encode PortNumber failed: %w", err)
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
@@ -40,29 +57,46 @@ func (s *EndpointIPAddressAndPort) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *EndpointIPAddressAndPort) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *EndpointIPAddressAndPort) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "endpoint-IP-Address", Optional: false},
+			per.ComponentInfo{Name: "portNumber", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.EndpointIPAddress.Decode(r); err != nil {
-		return fmt.Errorf("decode EndpointIPAddress failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.PortNumber.Decode(r); err != nil {
-		return fmt.Errorf("decode PortNumber failed: %w", err)
-	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
-		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(1), Max: int64Ptr(160)})
+		if err != nil {
+			return fmt.Errorf("decode EndpointIPAddress failed: %w", err)
 		}
+		s.EndpointIPAddress.Value = val
 	}
-	if isExtensible { /* TODO: Implement extension skipping for EndpointIPAddressAndPort */
+
+	{
+		val, err := r.DecodeBitString(per.SizeConstraints{Extensible: false, Min: int64Ptr(16), Max: int64Ptr(16)})
+		if err != nil {
+			return fmt.Errorf("decode PortNumber failed: %w", err)
+		}
+		s.PortNumber.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(EndpointIPAddressAndPortExtensions)
+		if err = s.IEExtensions.Decode(r); err != nil {
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		}
 	}
 	return nil
 }

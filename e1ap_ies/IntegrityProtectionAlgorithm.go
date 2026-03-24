@@ -1,33 +1,36 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // IntegrityProtectionAlgorithm is a generated ENUMERATED type.
 type IntegrityProtectionAlgorithm struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	IntegrityProtectionAlgorithmNIA0     aper.Enumerated = 0
-	IntegrityProtectionAlgorithmI128NIA1 aper.Enumerated = 1
-	IntegrityProtectionAlgorithmI128NIA2 aper.Enumerated = 2
-	IntegrityProtectionAlgorithmI128NIA3 aper.Enumerated = 3
+	IntegrityProtectionAlgorithmNIA0     int64 = 0
+	IntegrityProtectionAlgorithmI128NIA1 int64 = 1
+	IntegrityProtectionAlgorithmI128NIA2 int64 = 2
+	IntegrityProtectionAlgorithmI128NIA3 int64 = 3
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *IntegrityProtectionAlgorithm) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 3}, true)
+// Encode implements the MessageEncoder interface for IntegrityProtectionAlgorithm.
+func (e *IntegrityProtectionAlgorithm) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 4), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *IntegrityProtectionAlgorithm) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for IntegrityProtectionAlgorithm.
+func (e *IntegrityProtectionAlgorithm) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 3}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 4), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

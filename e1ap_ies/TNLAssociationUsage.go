@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // TNLAssociationUsage is a generated ENUMERATED type.
 type TNLAssociationUsage struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	TNLAssociationUsageUe    aper.Enumerated = 0
-	TNLAssociationUsageNonUe aper.Enumerated = 1
-	TNLAssociationUsageBoth  aper.Enumerated = 2
+	TNLAssociationUsageUe    int64 = 0
+	TNLAssociationUsageNonUe int64 = 1
+	TNLAssociationUsageBoth  int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *TNLAssociationUsage) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
+// Encode implements the MessageEncoder interface for TNLAssociationUsage.
+func (e *TNLAssociationUsage) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *TNLAssociationUsage) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for TNLAssociationUsage.
+func (e *TNLAssociationUsage) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

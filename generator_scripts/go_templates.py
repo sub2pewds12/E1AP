@@ -12,14 +12,14 @@ def render_enum_struct(
     for i, val in enumerate(enum_values):
         member_name = pascal_case_converter(val).replace("_", "")
         const_name = f"{go_name}{member_name}"
-        const_lines.append(f"\t{const_name} aper.Enumerated = {i}")
+        const_lines.append(f"\t{const_name} int64 = {i}")
 
     const_block = "const (\n" + "\n".join(const_lines) + "\n)"
 
     struct_block = f"""\
 // {go_name} is a generated ENUMERATED type.
 type {go_name} struct {{
-	Value aper.Enumerated
+	Value int64
 }}"""
 
     return f"{struct_block}\n\n{const_block}\n"
@@ -43,11 +43,9 @@ def render_sequence_struct(
 
         final_go_type = ""
         if member.type == "ProtocolExtensionContainer" and hasattr(member, 'extension_set_name'):
-             extension_set = extension_sets.get(member.extension_set_name)
-             if extension_set:
-                 final_go_type = pascal_case_converter(item.name) + "Extensions"
-             else:
-                 final_go_type = base_go_type
+             # Always use the specialized type, even if the extension set is empty,
+             # because we now generate specialized extension structs for all such fields.
+             final_go_type = pascal_case_converter(item.name) + "Extensions"
         else:
              final_go_type = pascal_case_converter(member.type)
         if final_go_type == "ANY":
@@ -57,17 +55,7 @@ def render_sequence_struct(
         is_optional = member.presence in ["optional", "conditional"]
         pointer = "*" if is_optional else ""
 
-        tag_parts = []
-        if concrete_def and hasattr(concrete_def, "min_val") and concrete_def.min_val is not None:
-            tag_parts.append(f"lb:{go_value_formatter(concrete_def.min_val)}")
-        if concrete_def and hasattr(concrete_def, "max_val") and concrete_def.max_val is not None:
-            tag_parts.append(f"ub:{go_value_formatter(concrete_def.max_val)}")
-        tag_parts.append(member.presence)
-        if item.is_extensible:
-            tag_parts.append("ext")
-
-        tag_string = f'`aper:"{",".join(tag_parts)}"`'
-        field_lines.append(f"\t{member_go_name}\t{pointer}{final_go_type}\t{tag_string}")
+        field_lines.append(f"\t{member_go_name}\t{pointer}{final_go_type}")
     
     struct_body = "\n".join(field_lines)
     struct_block = f"// {go_name} is a generated SEQUENCE type.\ntype {go_name} struct {{\n{struct_body}\n}}"

@@ -3,89 +3,155 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // QOSFlowRemovedItem is a generated SEQUENCE type.
 type QOSFlowRemovedItem struct {
-	QOSFlowIdentifier             QOSFlowIdentifier                                `aper:"lb:0,ub:63,mandatory,ext"`
-	QOSFlowReleasedInSession      *QOSFlowRemovedItemQOSFlowReleasedInSession      `aper:"optional,ext"`
-	QOSFlowAccumulatedSessionTime *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime `aper:"lb:5,ub:5,optional,ext"`
-	IEExtensions                  *ProtocolExtensionContainer                      `aper:"optional,ext"`
+	QOSFlowIdentifier             QOSFlowIdentifier
+	QOSFlowReleasedInSession      *QOSFlowRemovedItemQOSFlowReleasedInSession
+	QOSFlowAccumulatedSessionTime *QOSFlowRemovedItemQOSFlowAccumulatedSessionTime
+	IEExtensions                  *QOSFlowRemovedItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *QOSFlowRemovedItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *QOSFlowRemovedItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "qoS-Flow-Identifier", Optional: false},
+			per.ComponentInfo{Name: "qoS-Flow-Released-In-Session", Optional: true},
+			per.ComponentInfo{Name: "qoS-Flow-Accumulated-Session-Time", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.QOSFlowReleasedInSession != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.QOSFlowAccumulatedSessionTime != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.QOSFlowIdentifier.Value), &aper.Constraint{Lb: 0, Ub: 63}, false); err != nil {
+
+	if err = w.EncodeInteger(int64(s.QOSFlowIdentifier.Value), per.Constrained(0, 63)); err != nil {
 		return fmt.Errorf("encode QOSFlowIdentifier failed: %w", err)
 	}
+
 	if s.QOSFlowReleasedInSession != nil {
-		if err = w.WriteEnumerate(uint64((*s.QOSFlowReleasedInSession).Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-			return fmt.Errorf("encode QOSFlowReleasedInSession failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.QOSFlowReleasedInSession).Value), enumC); err != nil {
+				return fmt.Errorf("encode QOSFlowReleasedInSession failed: %w", err)
+			}
 		}
 	}
+
 	if s.QOSFlowAccumulatedSessionTime != nil {
-		if err = w.WriteOctetString([]byte((*s.QOSFlowAccumulatedSessionTime).Value), &aper.Constraint{Lb: 5, Ub: 5}, false); err != nil {
+		if err = w.EncodeOctetString([]byte((*s.QOSFlowAccumulatedSessionTime).Value), per.SizeConstraints{Extensible: false, Min: int64Ptr(5), Max: int64Ptr(5)}); err != nil {
 			return fmt.Errorf("encode QOSFlowAccumulatedSessionTime failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *QOSFlowRemovedItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *QOSFlowRemovedItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "qoS-Flow-Identifier", Optional: false},
+			per.ComponentInfo{Name: "qoS-Flow-Released-In-Session", Optional: true},
+			per.ComponentInfo{Name: "qoS-Flow-Accumulated-Session-Time", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.QOSFlowIdentifier.Decode(r); err != nil {
-		return fmt.Errorf("decode QOSFlowIdentifier failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		val, err := r.DecodeInteger(per.Constrained(0, 63))
+		if err != nil {
+			return fmt.Errorf("decode QOSFlowIdentifier failed: %w", err)
+		}
+		s.QOSFlowIdentifier.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.QOSFlowReleasedInSession = new(QOSFlowRemovedItemQOSFlowReleasedInSession)
-		if err = s.QOSFlowReleasedInSession.Decode(r); err != nil {
-			return fmt.Errorf("decode QOSFlowReleasedInSession failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode QOSFlowReleasedInSession failed: %w", err)
+			}
+			s.QOSFlowReleasedInSession.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.QOSFlowAccumulatedSessionTime = new(QOSFlowRemovedItemQOSFlowAccumulatedSessionTime)
-		if err = s.QOSFlowAccumulatedSessionTime.Decode(r); err != nil {
-			return fmt.Errorf("decode QOSFlowAccumulatedSessionTime failed: %w", err)
+
+		{
+			val, err := r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: int64Ptr(5), Max: int64Ptr(5)})
+			if err != nil {
+				return fmt.Errorf("decode QOSFlowAccumulatedSessionTime failed: %w", err)
+			}
+			s.QOSFlowAccumulatedSessionTime.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(3) {
+		s.IEExtensions = new(QOSFlowRemovedItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for QOSFlowRemovedItem */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

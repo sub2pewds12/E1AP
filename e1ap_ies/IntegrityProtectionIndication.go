@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // IntegrityProtectionIndication is a generated ENUMERATED type.
 type IntegrityProtectionIndication struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	IntegrityProtectionIndicationRequired  aper.Enumerated = 0
-	IntegrityProtectionIndicationPreferred aper.Enumerated = 1
-	IntegrityProtectionIndicationNotNeeded aper.Enumerated = 2
+	IntegrityProtectionIndicationRequired  int64 = 0
+	IntegrityProtectionIndicationPreferred int64 = 1
+	IntegrityProtectionIndicationNotNeeded int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *IntegrityProtectionIndication) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
+// Encode implements the MessageEncoder interface for IntegrityProtectionIndication.
+func (e *IntegrityProtectionIndication) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *IntegrityProtectionIndication) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for IntegrityProtectionIndication.
+func (e *IntegrityProtectionIndication) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

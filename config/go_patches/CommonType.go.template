@@ -1,290 +1,183 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper" // NOTE: Ensure this is the correct import path for YOUR aper library
+"bytes"
+"fmt"
+
+"github.com/lvdund/asn1go/per"
 )
 
-// =================================================================================
-// == IE Container (Manually Written)
-// =================================================================================
+// IE is the interface that all encodable/decodable types must implement.
+type IE interface {
+	Encode(w *per.Encoder) error
+	Decode(r *per.Decoder) error
+}
 
-// E1APMessageIE is the generic container for all Information Elements in a PDU.
-// This is a foundational type for the PDU encoding/decoding pattern.
 type E1APMessageIE struct {
 	ID          ProtocolIEID
 	Criticality Criticality
-	Value       aper.IE
+	Value       IE
 }
 
-// ProtocolIEField is an alias for E1APMessageIE, ensuring compatibility with generated code.
 type ProtocolIEField = E1APMessageIE
-
-// ProtocolIESingleContainer is effectively a single IE field in E1AP usage.
 type ProtocolIESingleContainer = E1APMessageIE
-
-// ProtocolIEContainer is a list of IEs.
 type ProtocolIEContainer = []E1APMessageIE
-
-// ProtocolIEContainerList is a list of containers (rarely used, but aliased for safety).
 type ProtocolIEContainerList = []ProtocolIEContainer
-
-// PrivateIEContainer is a list of Private IEs (conceptually similar to extensions).
 type PrivateIEContainer = []ProtocolExtensionField
 
-// Encode implements the aper.AperMarshaller interface.
-func (ie *E1APMessageIE) Encode(w *aper.AperWriter) error {
-	// 1. Encode the ID
-	if err := w.WriteInteger(int64(ie.ID.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+func (ie *E1APMessageIE) Encode(w *per.Encoder) error {
+	if err := w.EncodeInteger(ie.ID.Value, per.Constrained(0, 65535)); err != nil {
 		return fmt.Errorf("encode IE ID failed: %w", err)
 	}
-
-	// 2. Encode the Criticality
 	if err := ie.Criticality.Encode(w); err != nil {
 		return fmt.Errorf("encode IE Criticality failed: %w", err)
 	}
-
-	// 3. Encode the Value as an Open Type
-	var buf bytes.Buffer
-	ieWriter := aper.NewWriter(&buf)
-	if err := ie.Value.Encode(ieWriter); err != nil {
+	valEncoder := per.NewEncoder(per.APER)
+	if err := ie.Value.Encode(valEncoder); err != nil {
 		return fmt.Errorf("encode IE Value failed: %w", err)
 	}
-	if err := ieWriter.Close(); err != nil {
-		return fmt.Errorf("close IE Value writer failed: %w", err)
-	}
-	
-	if err := w.WriteOpenType(buf.Bytes()); err != nil {
+	if err := w.EncodeOctetString(valEncoder.Bytes(), per.SizeConstraints{Extensible: false, Min: nil, Max: nil}); err != nil {
 		return fmt.Errorf("encode IE Value as OpenType failed: %w", err)
 	}
-
 	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-// NOTE: This Decode is not used by the PDU decoding logic, which parses fields manually.
-// It is included to fully satisfy the aper.IE interface.
-func (ie *E1APMessageIE) Decode(r *aper.AperReader) error {
-	// Decoding is handled by the PDU's decodeIE callback, so this can be a placeholder.
+func (ie *E1APMessageIE) Decode(r *per.Decoder) error {
 	return fmt.Errorf("E1APMessageIE.Decode should not be called directly")
 }
 
-// =================================================================================
-// == Primitive Type Wrappers (Manually Written)
-// =================================================================================
-// These structs are used as temporary wrappers inside the toIes and decodeIE
-// methods to bundle a primitive value with its encoding constraints.
-
-// --- INTEGER WRAPPER ---
 type INTEGER struct {
-	Value aper.Integer
-	c     aper.Constraint
-	ext   bool
+	Value int64
+	c     per.IntegerConstraints
 }
 
-func NewINTEGER(v int64, c aper.Constraint, ext bool) INTEGER {
-	return INTEGER{
-		Value: aper.Integer(v),
-		c:     c,
-		ext:   ext,
-	}
+func NewINTEGER(v int64, c per.IntegerConstraints) INTEGER {
+	return INTEGER{Value: v, c: c}
 }
-func (t *INTEGER) Encode(w *aper.AperWriter) (err error) {
-	err = w.WriteInteger(int64(t.Value), &t.c, t.ext)
-	return
-}
-func (t *INTEGER) Decode(r *aper.AperReader) (err error) {
-	v, err := r.ReadInteger(&t.c, t.ext)
-	t.Value = aper.Integer(v)
-	return
-}
-
-// --- OCTETSTRING WRAPPER ---
-type OCTETSTRING struct {
-	Value aper.OctetString
-	c     aper.Constraint
-	ext   bool
-}
-
-func NewOCTETSTRING(v []byte, c aper.Constraint, ext bool) OCTETSTRING {
-	return OCTETSTRING{
-		Value: v,
-		c:     c,
-		ext:   ext,
-	}
-}
-func (t *OCTETSTRING) Encode(w *aper.AperWriter) (err error) {
-	if t.c.Lb == t.c.Ub && t.c.Lb == 0 {
-		err = w.WriteOctetString(t.Value, nil, t.ext)
-	} else {
-		err = w.WriteOctetString(t.Value, &t.c, t.ext)
-	}
-	return
-}
-func (t *OCTETSTRING) Decode(r *aper.AperReader) (err error) {
-	var v aper.OctetString
-	if t.c.Lb == t.c.Ub && t.c.Lb == 0 {
-		if v, err = r.ReadOctetString(nil, t.ext); err != nil {
-			return
-		}
-	} else {
-		if v, err = r.ReadOctetString(&t.c, t.ext); err != nil {
-			return
-		}
-	}
+func (t *INTEGER) Encode(w *per.Encoder) (err error) { return w.EncodeInteger(t.Value, t.c) }
+func (t *INTEGER) Decode(r *per.Decoder) (err error) {
+	v, err := r.DecodeInteger(t.c)
+	if err != nil { return }
 	t.Value = v
 	return
 }
 
-// --- BITSTRING WRAPPER ---
+type OCTETSTRING struct {
+	Value []byte
+	c     per.SizeConstraints
+}
+
+func NewOCTETSTRING(v []byte, c per.SizeConstraints) OCTETSTRING {
+	return OCTETSTRING{Value: v, c: c}
+}
+func (t *OCTETSTRING) Encode(w *per.Encoder) (err error) { return w.EncodeOctetString(t.Value, t.c) }
+func (t *OCTETSTRING) Decode(r *per.Decoder) (err error) {
+	v, err := r.DecodeOctetString(t.c)
+	if err != nil { return }
+	t.Value = v
+	return
+}
+
 type BITSTRING struct {
-	Value aper.BitString
-	c     aper.Constraint
-	ext   bool
+	Value per.BitString
+	c     per.SizeConstraints
 }
 
-func NewBITSTRING(v aper.BitString, c aper.Constraint, ext bool) BITSTRING {
-	return BITSTRING{
-		Value: aper.BitString{
-			Bytes:   v.Bytes,
-			NumBits: v.NumBits,
-		},
-		c:   c,
-		ext: ext,
-	}
+func NewBITSTRING(v per.BitString, c per.SizeConstraints) BITSTRING {
+	return BITSTRING{Value: v, c: c}
 }
-func (t *BITSTRING) Encode(w *aper.AperWriter) (err error) {
-	// If NumBits is not set, assume the full length of the byte slice.
-	if t.Value.NumBits == 0 && len(t.Value.Bytes) > 0 {
-		t.Value.NumBits = uint64(len(t.Value.Bytes) * 8)
-	}
-	err = w.WriteBitString(t.Value.Bytes, uint(t.Value.NumBits), &t.c, t.ext)
-	return
-}
-func (t *BITSTRING) Decode(r *aper.AperReader) (err error) {
-	var v []byte
-	var n uint
-	if v, n, err = r.ReadBitString(&t.c, t.ext); err != nil {
-		return
-	}
-	t.Value.Bytes = v
-	t.Value.NumBits = uint64(n)
+func (t *BITSTRING) Encode(w *per.Encoder) (err error) { return w.EncodeBitString(t.Value, t.c) }
+func (t *BITSTRING) Decode(r *per.Decoder) (err error) {
+	v, err := r.DecodeBitString(t.c)
+	if err != nil { return }
+	t.Value = v
 	return
 }
 
-// --- ENUMERATED WRAPPER ---
 type ENUMERATED struct {
-	Value aper.Enumerated
-	c     aper.Constraint
-	ext   bool
+	Value int64
+	c     per.EnumeratedConstraints
 }
 
-func NewENUMERATED(v int64, c aper.Constraint, ext bool) ENUMERATED {
-	return ENUMERATED{
-		Value: aper.Enumerated(v),
-		c:     c,
-		ext:   ext,
-	}
+func NewENUMERATED(v int64, c per.EnumeratedConstraints) ENUMERATED {
+	return ENUMERATED{Value: v, c: c}
 }
-func (t *ENUMERATED) Encode(w *aper.AperWriter) (err error) {
-	err = w.WriteEnumerate(uint64(t.Value), t.c, t.ext)
-	return
-}
-func (t *ENUMERATED) Decode(r *aper.AperReader) (err error) {
-	v, err := r.ReadEnumerate(t.c, t.ext)
-	t.Value = aper.Enumerated(v)
+func (t *ENUMERATED) Encode(w *per.Encoder) (err error) { return w.EncodeEnumerated(t.Value, t.c) }
+func (t *ENUMERATED) Decode(r *per.Decoder) (err error) {
+	v, err := r.DecodeEnumerated(t.c)
+	if err != nil { return }
+	t.Value = v
 	return
 }
 
-// =================================================================================
-// == Generic SEQUENCE OF / List Wrapper (Manually Written)
-// =================================================================================
-
-type Sequence[T aper.IE] struct {
+type Sequence[T IE] struct {
 	Value []T
-	c     aper.Constraint
-	ext   bool
+	c     per.SizeConstraints
 }
 
-func NewSequence[T aper.IE](items []T, c aper.Constraint, ext bool) Sequence[T] {
-	return Sequence[T]{
-		Value: items,
-		c:     c,
-		ext:   ext,
+func NewSequence[T IE](items []T, c per.SizeConstraints) Sequence[T] {
+	return Sequence[T]{Value: items, c: c}
+}
+
+func (s *Sequence[T]) Encode(w *per.Encoder) (err error) {
+	if err = w.EncodeLengthDeterminant(int64(len(s.Value)), s.c); err != nil {
+		return fmt.Errorf("encode sequence length failed: %w", err)
 	}
-}
-
-func (s *Sequence[T]) Encode(w *aper.AperWriter) (err error) {
-	if err = aper.WriteSequenceOf[T](s.Value, w, &s.c, s.ext); err != nil {
-		return
+	for i := range s.Value {
+		if err = s.Value[i].Encode(w); err != nil {
+			return fmt.Errorf("encode sequence item %d failed: %w", i, err)
+		}
 	}
 	return
 }
 
-func (s *Sequence[T]) Decode(r *aper.AperReader) (err error) {
-	// This function now has the correct signature but is a placeholder.
-	// Decoding of lists will be handled specially inside the decodeIE switch case.
-	return fmt.Errorf("decode for generic Sequence[T] should not be called directly. Use the specific list decoder logic")
+func (s *Sequence[T]) Decode(r *per.Decoder) (err error) {
+	return fmt.Errorf("decode for generic Sequence[T] should not be called directly")
 }
 
 type ProtocolExtensionContainer struct {
 	Value []ProtocolExtensionField
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ProtocolExtensionContainer) Encode(w *aper.AperWriter) (err error) {
-	// This is a complex encoding process involving a bitmap and open types.
-	// For now, a placeholder is acceptable to get the code compiling.
-	// TODO: Implement the real APER extension container encoding logic.
-	return nil
-}
+func (s *ProtocolExtensionContainer) Encode(w *per.Encoder) (err error) { return nil }
+func (s *ProtocolExtensionContainer) Decode(r *per.Decoder) (err error) { return nil }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ProtocolExtensionContainer) Decode(r *aper.AperReader) (err error) {
-	// TODO: Implement the real APER extension container decoding logic.
-	return nil
-}
-
-// ProtocolExtensionField is the item within the container.
 type ProtocolExtensionField struct {
 	ID             ProtocolIEID
 	Criticality    Criticality
-	ExtensionValue aper.IE
-	ValueBytes     []byte // To store raw bytes during decoding
+	ExtensionValue IE
+	ValueBytes     []byte
 }
 
-// Encode implements the aper.AperMarshaller interface.
-func (s *ProtocolExtensionField) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteInteger(int64(s.ID.Value), &aper.Constraint{Lb: 0, Ub: 65535}, false); err != nil {
+func (s *ProtocolExtensionField) Encode(w *per.Encoder) (err error) {
+	if err = w.EncodeInteger(s.ID.Value, per.Constrained(0, 65535)); err != nil {
 		return fmt.Errorf("encode ProtocolExtensionField ID failed: %w", err)
 	}
 	if err = s.Criticality.Encode(w); err != nil {
 		return fmt.Errorf("encode ProtocolExtensionField Criticality failed: %w", err)
 	}
-	// Encode ExtensionValue as Open Type
-	var buf bytes.Buffer
-	extWriter := aper.NewWriter(&buf)
-	if err = s.ExtensionValue.Encode(extWriter); err != nil {
+	
+	valEncoder := per.NewEncoder(per.APER)
+	if err = s.ExtensionValue.Encode(valEncoder); err != nil {
 		return fmt.Errorf("encode ProtocolExtensionField ExtensionValue failed: %w", err)
 	}
-	if err = extWriter.Close(); err != nil {
-		return fmt.Errorf("close ProtocolExtensionField writer failed: %w", err)
-	}
-	if err = w.WriteOpenType(buf.Bytes()); err != nil {
+	
+	if err = w.EncodeOctetString(valEncoder.Bytes(), per.SizeConstraints{Extensible: false, Min: nil, Max: nil}); err != nil {
 		return fmt.Errorf("encode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
 	}
 	return nil
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (s *ProtocolExtensionField) Decode(r *aper.AperReader) (err error) {
-	if err = s.ID.Decode(r); err != nil {
+func (s *ProtocolExtensionField) Decode(r *per.Decoder) (err error) {
+	val, err := r.DecodeInteger(per.Constrained(0, 65535))
+	if err != nil {
 		return fmt.Errorf("decode ProtocolExtensionField ID failed: %w", err)
 	}
+	s.ID = ProtocolIEID{Value: val}
 	if err = s.Criticality.Decode(r); err != nil {
 		return fmt.Errorf("decode ProtocolExtensionField Criticality failed: %w", err)
 	}
-	// Read Open Type into ValueBytes
-	if s.ValueBytes, err = r.ReadOpenType(); err != nil {
+	if s.ValueBytes, err = r.DecodeOctetString(per.SizeConstraints{Extensible: false, Min: nil, Max: nil}); err != nil {
 		return fmt.Errorf("decode ProtocolExtensionField ExtensionValue as OpenType failed: %w", err)
 	}
 	return nil

@@ -3,39 +3,60 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // GNBCUUPTNLAToRemoveItem is a generated SEQUENCE type.
 type GNBCUUPTNLAToRemoveItem struct {
-	TNLAssociationTransportLayerAddress        CPTNLInformation            `aper:"mandatory"`
-	TNLAssociationTransportLayerAddressgNBCUCP *CPTNLInformation           `aper:"optional"`
-	IEExtensions                               *ProtocolExtensionContainer `aper:"optional"`
+	TNLAssociationTransportLayerAddress        CPTNLInformation
+	TNLAssociationTransportLayerAddressgNBCUCP *CPTNLInformation
+	IEExtensions                               *GNBCUUPTNLAToRemoveItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *GNBCUUPTNLAToRemoveItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *GNBCUUPTNLAToRemoveItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "tNLAssociationTransportLayerAddress", Optional: false},
+			per.ComponentInfo{Name: "tNLAssociationTransportLayerAddressgNBCUCP", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.TNLAssociationTransportLayerAddressgNBCUCP != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if err = s.TNLAssociationTransportLayerAddress.Encode(w); err != nil {
 		return fmt.Errorf("encode TNLAssociationTransportLayerAddress failed: %w", err)
 	}
+
 	if s.TNLAssociationTransportLayerAddressgNBCUCP != nil {
 		if err = s.TNLAssociationTransportLayerAddressgNBCUCP.Encode(w); err != nil {
 			return fmt.Errorf("encode TNLAssociationTransportLayerAddressgNBCUCP failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
@@ -45,32 +66,41 @@ func (s *GNBCUUPTNLAToRemoveItem) Encode(w *aper.AperWriter) (err error) {
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *GNBCUUPTNLAToRemoveItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *GNBCUUPTNLAToRemoveItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: false,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "tNLAssociationTransportLayerAddress", Optional: false},
+			per.ComponentInfo{Name: "tNLAssociationTransportLayerAddressgNBCUCP", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
 	if err = s.TNLAssociationTransportLayerAddress.Decode(r); err != nil {
-		return fmt.Errorf("decode TNLAssociationTransportLayerAddress failed: %w", err)
+		return fmt.Errorf("Decode TNLAssociationTransportLayerAddress failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.TNLAssociationTransportLayerAddressgNBCUCP = new(CPTNLInformation)
 		if err = s.TNLAssociationTransportLayerAddressgNBCUCP.Decode(r); err != nil {
-			return fmt.Errorf("decode TNLAssociationTransportLayerAddressgNBCUCP failed: %w", err)
+			return fmt.Errorf("Decode TNLAssociationTransportLayerAddressgNBCUCP failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(GNBCUUPTNLAToRemoveItemExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
-	}
-	if isExtensible { /* TODO: Implement extension skipping for GNBCUUPTNLAToRemoveItem */
 	}
 	return nil
 }

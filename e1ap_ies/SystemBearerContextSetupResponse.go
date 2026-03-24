@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // SystemBearerContextSetupResponse is a generated CHOICE type.
@@ -20,21 +20,29 @@ const (
 )
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *SystemBearerContextSetupResponse) Encode(w *aper.AperWriter) (err error) {
+func (s *SystemBearerContextSetupResponse) Encode(w *per.Encoder) (err error) {
 
-	// 1. Write the choice index.
-	// fmt.Printf("--- GO DEBUG: Encoding CHOICE SystemBearerContextSetupResponse | Choice: %d, UpperBound: 1, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
-	if err = w.WriteChoice(uint64(s.Choice), 1, false); err != nil {
-		return fmt.Errorf("Encode choice index failed for SystemBearerContextSetupResponse: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "DRB-Setup-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Failed-List-EUTRAN", Tag: 0},
+		},
 	}
+	choiceEncoder := w.NewChoiceEncoder(c)
 
-	// 2. Encode the selected member.
 	switch s.Choice {
 	case SystemBearerContextSetupResponsePresentDRBSetupListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(0, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBSetupListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBSetupListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextSetupResponsePresentDRBFailedListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(1, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBFailedListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBFailedListEUTRAN failed: %w", err)
 		}
@@ -45,29 +53,41 @@ func (s *SystemBearerContextSetupResponse) Encode(w *aper.AperWriter) (err error
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *SystemBearerContextSetupResponse) Decode(r *aper.AperReader) (err error) {
+func (s *SystemBearerContextSetupResponse) Decode(r *per.Decoder) (err error) {
 
-	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	choice, err := r.ReadChoice(1, false)
-	if err != nil {
-		return fmt.Errorf("read choice index failed: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "DRB-Setup-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Failed-List-EUTRAN", Tag: 0},
+		},
 	}
-	s.Choice = choice // Choice is 1-based from ReadChoice
+	choiceDecoder := r.NewChoiceDecoder(c)
 
-	// 2. Decode the selected member.
-	switch choice {
-	case 1:
+	choiceIndex, isExtension, _, err := choiceDecoder.DecodeChoice()
+	if err != nil {
+		return fmt.Errorf("decode choice index failed: %w", err)
+	}
+
+	if isExtension {
+		return fmt.Errorf("extension choices are not fully supported yet")
+	}
+
+	s.Choice = uint64(choiceIndex + 1) // 1-based internal Choice enum
+
+	switch choiceIndex {
+	case 0:
 		s.DRBSetupListEUTRAN = new(DRBSetupListEUTRAN)
 		if err = s.DRBSetupListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBSetupListEUTRAN failed: %w", err)
 		}
-	case 2:
+	case 1:
 		s.DRBFailedListEUTRAN = new(DRBFailedListEUTRAN)
 		if err = s.DRBFailedListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBFailedListEUTRAN failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("decode choice of SystemBearerContextSetupResponse with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemBearerContextSetupResponse with unknown choice index %d", choiceIndex)
 	}
 	return nil
 }

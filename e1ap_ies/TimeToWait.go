@@ -1,35 +1,38 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // TimeToWait is a generated ENUMERATED type.
 type TimeToWait struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	TimeToWaitV1s  aper.Enumerated = 0
-	TimeToWaitV2s  aper.Enumerated = 1
-	TimeToWaitV5s  aper.Enumerated = 2
-	TimeToWaitV10s aper.Enumerated = 3
-	TimeToWaitV20s aper.Enumerated = 4
-	TimeToWaitV60s aper.Enumerated = 5
+	TimeToWaitV1s  int64 = 0
+	TimeToWaitV2s  int64 = 1
+	TimeToWaitV5s  int64 = 2
+	TimeToWaitV10s int64 = 3
+	TimeToWaitV20s int64 = 4
+	TimeToWaitV60s int64 = 5
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *TimeToWait) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 5}, true)
+// Encode implements the MessageEncoder interface for TimeToWait.
+func (e *TimeToWait) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 6), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *TimeToWait) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for TimeToWait.
+func (e *TimeToWait) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 5}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 6), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // QosMonitoringRequest is a generated ENUMERATED type.
 type QosMonitoringRequest struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	QosMonitoringRequestUl   aper.Enumerated = 0
-	QosMonitoringRequestDl   aper.Enumerated = 1
-	QosMonitoringRequestBoth aper.Enumerated = 2
+	QosMonitoringRequestUl   int64 = 0
+	QosMonitoringRequestDl   int64 = 1
+	QosMonitoringRequestBoth int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *QosMonitoringRequest) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, false)
+// Encode implements the MessageEncoder interface for QosMonitoringRequest.
+func (e *QosMonitoringRequest) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *QosMonitoringRequest) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for QosMonitoringRequest.
+func (e *QosMonitoringRequest) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false)
+	c := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

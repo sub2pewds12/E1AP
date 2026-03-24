@@ -3,64 +3,138 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // TNLAvailableCapacityIndicator is a generated SEQUENCE type.
 type TNLAvailableCapacityIndicator struct {
-	DLTNLOfferedCapacity   TNLAvailableCapacityIndicatorDLTNLOfferedCapacity   `aper:"lb:0,ub:16777216,mandatory,ext"`
-	DLTNLAvailableCapacity TNLAvailableCapacityIndicatorDLTNLAvailableCapacity `aper:"lb:0,ub:100,mandatory,ext"`
-	ULTNLOfferedCapacity   TNLAvailableCapacityIndicatorULTNLOfferedCapacity   `aper:"lb:0,ub:16777216,mandatory,ext"`
-	ULTNLAvailableCapacity TNLAvailableCapacityIndicatorULTNLAvailableCapacity `aper:"lb:0,ub:100,mandatory,ext"`
-	IEExtensions           ProtocolExtensionContainer                          `aper:"mandatory,ext"`
+	DLTNLOfferedCapacity   TNLAvailableCapacityIndicatorDLTNLOfferedCapacity
+	DLTNLAvailableCapacity TNLAvailableCapacityIndicatorDLTNLAvailableCapacity
+	ULTNLOfferedCapacity   TNLAvailableCapacityIndicatorULTNLOfferedCapacity
+	ULTNLAvailableCapacity TNLAvailableCapacityIndicatorULTNLAvailableCapacity
+	IEExtensions           *TNLAvailableCapacityIndicatorExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *TNLAvailableCapacityIndicator) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *TNLAvailableCapacityIndicator) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dL-TNL-OfferedCapacity", Optional: false},
+			per.ComponentInfo{Name: "dL-TNL-AvailableCapacity", Optional: false},
+			per.ComponentInfo{Name: "uL-TNL-OfferedCapacity", Optional: false},
+			per.ComponentInfo{Name: "uL-TNL-AvailableCapacity", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	if err = w.WriteInteger(int64(s.DLTNLOfferedCapacity.Value), &aper.Constraint{Lb: 0, Ub: 16777216}, true); err != nil {
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
+	if s.IEExtensions != nil {
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
+	}
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
+	}
+
+	if err = w.EncodeInteger(int64(s.DLTNLOfferedCapacity.Value), per.ConstrainedExtensible(0, 16777216)); err != nil {
 		return fmt.Errorf("encode DLTNLOfferedCapacity failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.DLTNLAvailableCapacity.Value), &aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
+	if err = w.EncodeInteger(int64(s.DLTNLAvailableCapacity.Value), per.ConstrainedExtensible(0, 100)); err != nil {
 		return fmt.Errorf("encode DLTNLAvailableCapacity failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.ULTNLOfferedCapacity.Value), &aper.Constraint{Lb: 0, Ub: 16777216}, true); err != nil {
+	if err = w.EncodeInteger(int64(s.ULTNLOfferedCapacity.Value), per.ConstrainedExtensible(0, 16777216)); err != nil {
 		return fmt.Errorf("encode ULTNLOfferedCapacity failed: %w", err)
 	}
-	if err = w.WriteInteger(int64(s.ULTNLAvailableCapacity.Value), &aper.Constraint{Lb: 0, Ub: 100}, true); err != nil {
+	if err = w.EncodeInteger(int64(s.ULTNLAvailableCapacity.Value), per.ConstrainedExtensible(0, 100)); err != nil {
 		return fmt.Errorf("encode ULTNLAvailableCapacity failed: %w", err)
 	}
-	if err = s.IEExtensions.Encode(w); err != nil {
-		return fmt.Errorf("encode IEExtensions failed: %w", err)
+
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
+		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *TNLAvailableCapacityIndicator) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *TNLAvailableCapacityIndicator) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "dL-TNL-OfferedCapacity", Optional: false},
+			per.ComponentInfo{Name: "dL-TNL-AvailableCapacity", Optional: false},
+			per.ComponentInfo{Name: "uL-TNL-OfferedCapacity", Optional: false},
+			per.ComponentInfo{Name: "uL-TNL-AvailableCapacity", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	if err = s.DLTNLOfferedCapacity.Decode(r); err != nil {
-		return fmt.Errorf("decode DLTNLOfferedCapacity failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.DLTNLAvailableCapacity.Decode(r); err != nil {
-		return fmt.Errorf("decode DLTNLAvailableCapacity failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.ULTNLOfferedCapacity.Decode(r); err != nil {
-		return fmt.Errorf("decode ULTNLOfferedCapacity failed: %w", err)
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16777216))
+		if err != nil {
+			return fmt.Errorf("decode DLTNLOfferedCapacity failed: %w", err)
+		}
+		s.DLTNLOfferedCapacity.Value = val
 	}
-	if err = s.ULTNLAvailableCapacity.Decode(r); err != nil {
-		return fmt.Errorf("decode ULTNLAvailableCapacity failed: %w", err)
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 100))
+		if err != nil {
+			return fmt.Errorf("decode DLTNLAvailableCapacity failed: %w", err)
+		}
+		s.DLTNLAvailableCapacity.Value = val
 	}
-	if err = s.IEExtensions.Decode(r); err != nil {
-		return fmt.Errorf("decode IEExtensions failed: %w", err)
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 16777216))
+		if err != nil {
+			return fmt.Errorf("decode ULTNLOfferedCapacity failed: %w", err)
+		}
+		s.ULTNLOfferedCapacity.Value = val
 	}
-	if isExtensible { /* TODO: Implement extension skipping for TNLAvailableCapacityIndicator */
+
+	{
+		val, err := r.DecodeInteger(per.ConstrainedExtensible(0, 100))
+		if err != nil {
+			return fmt.Errorf("decode ULTNLAvailableCapacity failed: %w", err)
+		}
+		s.ULTNLAvailableCapacity.Value = val
 	}
+
+	if seqDecoder.IsComponentPresent(4) {
+		s.IEExtensions = new(TNLAvailableCapacityIndicatorExtensions)
+		if err = s.IEExtensions.Decode(r); err != nil {
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		}
+	}
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
+	}
+
 	return nil
 }

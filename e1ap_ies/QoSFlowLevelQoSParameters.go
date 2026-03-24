@@ -3,141 +3,246 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // QoSFlowLevelQoSParameters is a generated SEQUENCE type.
 type QoSFlowLevelQoSParameters struct {
-	QOSCharacteristics               QOSCharacteristics                                 `aper:"mandatory,ext"`
-	NGRANallocationRetentionPriority NGRANAllocationAndRetentionPriority                `aper:"mandatory,ext"`
-	GBRQOSFlowInformation            *GBRQoSFlowInformation                             `aper:"optional,ext"`
-	ReflectiveQOSAttribute           *QoSFlowLevelQoSParametersReflectiveQOSAttribute   `aper:"optional,ext"`
-	AdditionalQOSInformation         *QoSFlowLevelQoSParametersAdditionalQOSInformation `aper:"optional,ext"`
-	PagingPolicyIndicator            *QoSFlowLevelQoSParametersPagingPolicyIndicator    `aper:"lb:1,ub:8,optional,ext"`
-	ReflectiveQOSIndicator           *QoSFlowLevelQoSParametersReflectiveQOSIndicator   `aper:"optional,ext"`
-	IEExtensions                     *QoSFlowLevelQoSParametersExtensions               `aper:"optional,ext"`
+	QOSCharacteristics               QOSCharacteristics
+	NGRANallocationRetentionPriority NGRANAllocationAndRetentionPriority
+	GBRQOSFlowInformation            *GBRQoSFlowInformation
+	ReflectiveQOSAttribute           *QoSFlowLevelQoSParametersReflectiveQOSAttribute
+	AdditionalQOSInformation         *QoSFlowLevelQoSParametersAdditionalQOSInformation
+	PagingPolicyIndicator            *QoSFlowLevelQoSParametersPagingPolicyIndicator
+	ReflectiveQOSIndicator           *QoSFlowLevelQoSParametersReflectiveQOSIndicator
+	IEExtensions                     *QoSFlowLevelQoSParametersExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *QoSFlowLevelQoSParameters) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *QoSFlowLevelQoSParameters) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "qoS-Characteristics", Optional: false},
+			per.ComponentInfo{Name: "nGRANallocationRetentionPriority", Optional: false},
+			per.ComponentInfo{Name: "gBR-QoS-Flow-Information", Optional: true},
+			per.ComponentInfo{Name: "reflective-QoS-Attribute", Optional: true},
+			per.ComponentInfo{Name: "additional-QoS-Information", Optional: true},
+			per.ComponentInfo{Name: "paging-Policy-Indicator", Optional: true},
+			per.ComponentInfo{Name: "reflective-QoS-Indicator", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.GBRQOSFlowInformation != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.ReflectiveQOSAttribute != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.AdditionalQOSInformation != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.PagingPolicyIndicator != nil {
-		optionalityBitmap[0] |= 1 << 4
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.ReflectiveQOSIndicator != nil {
-		optionalityBitmap[0] |= 1 << 3
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 2
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(6), &aper.Constraint{Lb: 6, Ub: 6}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if err = s.QOSCharacteristics.Encode(w); err != nil {
 		return fmt.Errorf("encode QOSCharacteristics failed: %w", err)
 	}
 	if err = s.NGRANallocationRetentionPriority.Encode(w); err != nil {
 		return fmt.Errorf("encode NGRANallocationRetentionPriority failed: %w", err)
 	}
+
 	if s.GBRQOSFlowInformation != nil {
 		if err = s.GBRQOSFlowInformation.Encode(w); err != nil {
 			return fmt.Errorf("encode GBRQOSFlowInformation failed: %w", err)
 		}
 	}
+
 	if s.ReflectiveQOSAttribute != nil {
-		if err = w.WriteEnumerate(uint64((*s.ReflectiveQOSAttribute).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode ReflectiveQOSAttribute failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.ReflectiveQOSAttribute).Value), enumC); err != nil {
+				return fmt.Errorf("encode ReflectiveQOSAttribute failed: %w", err)
+			}
 		}
 	}
+
 	if s.AdditionalQOSInformation != nil {
-		if err = w.WriteEnumerate(uint64((*s.AdditionalQOSInformation).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode AdditionalQOSInformation failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.AdditionalQOSInformation).Value), enumC); err != nil {
+				return fmt.Errorf("encode AdditionalQOSInformation failed: %w", err)
+			}
 		}
 	}
+
 	if s.PagingPolicyIndicator != nil {
-		if err = w.WriteInteger(int64((*s.PagingPolicyIndicator).Value), &aper.Constraint{Lb: 1, Ub: 8}, true); err != nil {
+		if err = w.EncodeInteger(int64((*s.PagingPolicyIndicator).Value), per.ConstrainedExtensible(1, 8)); err != nil {
 			return fmt.Errorf("encode PagingPolicyIndicator failed: %w", err)
 		}
 	}
+
 	if s.ReflectiveQOSIndicator != nil {
-		if err = w.WriteEnumerate(uint64((*s.ReflectiveQOSIndicator).Value), aper.Constraint{Lb: 0, Ub: 0}, true); err != nil {
-			return fmt.Errorf("encode ReflectiveQOSIndicator failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			if err = w.EncodeEnumerated(int64((*s.ReflectiveQOSIndicator).Value), enumC); err != nil {
+				return fmt.Errorf("encode ReflectiveQOSIndicator failed: %w", err)
+			}
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *QoSFlowLevelQoSParameters) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *QoSFlowLevelQoSParameters) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "qoS-Characteristics", Optional: false},
+			per.ComponentInfo{Name: "nGRANallocationRetentionPriority", Optional: false},
+			per.ComponentInfo{Name: "gBR-QoS-Flow-Information", Optional: true},
+			per.ComponentInfo{Name: "reflective-QoS-Attribute", Optional: true},
+			per.ComponentInfo{Name: "additional-QoS-Information", Optional: true},
+			per.ComponentInfo{Name: "paging-Policy-Indicator", Optional: true},
+			per.ComponentInfo{Name: "reflective-QoS-Indicator", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 6, Ub: 6}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
 	if err = s.QOSCharacteristics.Decode(r); err != nil {
-		return fmt.Errorf("decode QOSCharacteristics failed: %w", err)
+		return fmt.Errorf("Decode QOSCharacteristics failed: %w", err)
 	}
 	if err = s.NGRANallocationRetentionPriority.Decode(r); err != nil {
-		return fmt.Errorf("decode NGRANallocationRetentionPriority failed: %w", err)
+		return fmt.Errorf("Decode NGRANallocationRetentionPriority failed: %w", err)
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if seqDecoder.IsComponentPresent(2) {
 		s.GBRQOSFlowInformation = new(GBRQoSFlowInformation)
 		if err = s.GBRQOSFlowInformation.Decode(r); err != nil {
-			return fmt.Errorf("decode GBRQOSFlowInformation failed: %w", err)
+			return fmt.Errorf("Decode GBRQOSFlowInformation failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(3) {
 		s.ReflectiveQOSAttribute = new(QoSFlowLevelQoSParametersReflectiveQOSAttribute)
-		if err = s.ReflectiveQOSAttribute.Decode(r); err != nil {
-			return fmt.Errorf("decode ReflectiveQOSAttribute failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode ReflectiveQOSAttribute failed: %w", err)
+			}
+			s.ReflectiveQOSAttribute.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
+
+	if seqDecoder.IsComponentPresent(4) {
 		s.AdditionalQOSInformation = new(QoSFlowLevelQoSParametersAdditionalQOSInformation)
-		if err = s.AdditionalQOSInformation.Decode(r); err != nil {
-			return fmt.Errorf("decode AdditionalQOSInformation failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode AdditionalQOSInformation failed: %w", err)
+			}
+			s.AdditionalQOSInformation.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<4) > 0 {
+
+	if seqDecoder.IsComponentPresent(5) {
 		s.PagingPolicyIndicator = new(QoSFlowLevelQoSParametersPagingPolicyIndicator)
-		if err = s.PagingPolicyIndicator.Decode(r); err != nil {
-			return fmt.Errorf("decode PagingPolicyIndicator failed: %w", err)
+
+		{
+			val, err := r.DecodeInteger(per.ConstrainedExtensible(1, 8))
+			if err != nil {
+				return fmt.Errorf("decode PagingPolicyIndicator failed: %w", err)
+			}
+			s.PagingPolicyIndicator.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<3) > 0 {
+
+	if seqDecoder.IsComponentPresent(6) {
 		s.ReflectiveQOSIndicator = new(QoSFlowLevelQoSParametersReflectiveQOSIndicator)
-		if err = s.ReflectiveQOSIndicator.Decode(r); err != nil {
-			return fmt.Errorf("decode ReflectiveQOSIndicator failed: %w", err)
+
+		{
+			enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 1), ExtValues: nil}
+			val, err := r.DecodeEnumerated(enumC)
+			if err != nil {
+				return fmt.Errorf("decode ReflectiveQOSIndicator failed: %w", err)
+			}
+			s.ReflectiveQOSIndicator.Value = val
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<2) > 0 {
+
+	if seqDecoder.IsComponentPresent(7) {
 		s.IEExtensions = new(QoSFlowLevelQoSParametersExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for QoSFlowLevelQoSParameters */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

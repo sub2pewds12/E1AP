@@ -3,73 +3,138 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // SDAPConfiguration is a generated SEQUENCE type.
 type SDAPConfiguration struct {
-	DefaultDRB   DefaultDRB                  `aper:"mandatory,ext"`
-	SDAPHeaderUL SDAPHeaderUL                `aper:"mandatory,ext"`
-	SDAPHeaderDL SDAPHeaderDL                `aper:"mandatory,ext"`
-	IEExtensions *ProtocolExtensionContainer `aper:"optional,ext"`
+	DefaultDRB   DefaultDRB
+	SDAPHeaderUL SDAPHeaderUL
+	SDAPHeaderDL SDAPHeaderDL
+	IEExtensions *SDAPConfigurationExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *SDAPConfiguration) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *SDAPConfiguration) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "defaultDRB", Optional: false},
+			per.ComponentInfo{Name: "sDAP-Header-UL", Optional: false},
+			per.ComponentInfo{Name: "sDAP-Header-DL", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(1), &aper.Constraint{Lb: 1, Ub: 1}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteEnumerate(uint64(s.DefaultDRB.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("encode DefaultDRB failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.DefaultDRB.Value), enumC); err != nil {
+			return fmt.Errorf("encode DefaultDRB failed: %w", err)
+		}
 	}
-	if err = w.WriteEnumerate(uint64(s.SDAPHeaderUL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("encode SDAPHeaderUL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.SDAPHeaderUL.Value), enumC); err != nil {
+			return fmt.Errorf("encode SDAPHeaderUL failed: %w", err)
+		}
 	}
-	if err = w.WriteEnumerate(uint64(s.SDAPHeaderDL.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("encode SDAPHeaderDL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.SDAPHeaderDL.Value), enumC); err != nil {
+			return fmt.Errorf("encode SDAPHeaderDL failed: %w", err)
+		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *SDAPConfiguration) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *SDAPConfiguration) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "defaultDRB", Optional: false},
+			per.ComponentInfo{Name: "sDAP-Header-UL", Optional: false},
+			per.ComponentInfo{Name: "sDAP-Header-DL", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 1, Ub: 1}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.DefaultDRB.Decode(r); err != nil {
-		return fmt.Errorf("decode DefaultDRB failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.SDAPHeaderUL.Decode(r); err != nil {
-		return fmt.Errorf("decode SDAPHeaderUL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode DefaultDRB failed: %w", err)
+		}
+		s.DefaultDRB.Value = val
 	}
-	if err = s.SDAPHeaderDL.Decode(r); err != nil {
-		return fmt.Errorf("decode SDAPHeaderDL failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode SDAPHeaderUL failed: %w", err)
+		}
+		s.SDAPHeaderUL.Value = val
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode SDAPHeaderDL failed: %w", err)
+		}
+		s.SDAPHeaderDL.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(3) {
+		s.IEExtensions = new(SDAPConfigurationExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for SDAPConfiguration */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

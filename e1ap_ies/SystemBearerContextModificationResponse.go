@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // SystemBearerContextModificationResponse is a generated CHOICE type.
@@ -26,33 +26,53 @@ const (
 )
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *SystemBearerContextModificationResponse) Encode(w *aper.AperWriter) (err error) {
+func (s *SystemBearerContextModificationResponse) Encode(w *per.Encoder) (err error) {
 
-	// 1. Write the choice index.
-	// fmt.Printf("--- GO DEBUG: Encoding CHOICE SystemBearerContextModificationResponse | Choice: %d, UpperBound: 4, Extensible: false\n", s.Choice-1) // UNCOMMENT FOR DEEP DEBUGGING
-	if err = w.WriteChoice(uint64(s.Choice), 4, false); err != nil {
-		return fmt.Errorf("Encode choice index failed for SystemBearerContextModificationResponse: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "DRB-Setup-Mod-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Failed-Mod-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Modified-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Failed-To-Modify-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "RetainabilityMeasurementsInfo", Tag: 0},
+		},
 	}
+	choiceEncoder := w.NewChoiceEncoder(c)
 
-	// 2. Encode the selected member.
 	switch s.Choice {
 	case SystemBearerContextModificationResponsePresentDRBSetupModListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(0, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBSetupModListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBSetupModListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBFailedModListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(1, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBFailedModListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBFailedModListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBModifiedListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(2, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBModifiedListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBModifiedListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentDRBFailedToModifyListEUTRAN:
+		if err = choiceEncoder.EncodeChoice(3, false, nil); err != nil {
+			return err
+		}
 		if err = s.DRBFailedToModifyListEUTRAN.Encode(w); err != nil {
 			return fmt.Errorf("encode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
 	case SystemBearerContextModificationResponsePresentRetainabilityMeasurementsInfo:
+		if err = choiceEncoder.EncodeChoice(4, false, nil); err != nil {
+			return err
+		}
 		if err = s.RetainabilityMeasurementsInfo.Encode(w); err != nil {
 			return fmt.Errorf("encode RetainabilityMeasurementsInfo failed: %w", err)
 		}
@@ -63,44 +83,59 @@ func (s *SystemBearerContextModificationResponse) Encode(w *aper.AperWriter) (er
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *SystemBearerContextModificationResponse) Decode(r *aper.AperReader) (err error) {
+func (s *SystemBearerContextModificationResponse) Decode(r *per.Decoder) (err error) {
 
-	// 1. Read the choice index (0-based) and assign it to the struct's Choice field.
-	choice, err := r.ReadChoice(4, false)
-	if err != nil {
-		return fmt.Errorf("read choice index failed: %w", err)
+	c := per.ChoiceConstraints{
+		Extensible: false,
+		RootAlternatives: []per.AlternativeInfo{
+			per.AlternativeInfo{Name: "DRB-Setup-Mod-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Failed-Mod-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Modified-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "DRB-Failed-To-Modify-List-EUTRAN", Tag: 0},
+			per.AlternativeInfo{Name: "RetainabilityMeasurementsInfo", Tag: 0},
+		},
 	}
-	s.Choice = choice // Choice is 1-based from ReadChoice
+	choiceDecoder := r.NewChoiceDecoder(c)
 
-	// 2. Decode the selected member.
-	switch choice {
-	case 1:
+	choiceIndex, isExtension, _, err := choiceDecoder.DecodeChoice()
+	if err != nil {
+		return fmt.Errorf("decode choice index failed: %w", err)
+	}
+
+	if isExtension {
+		return fmt.Errorf("extension choices are not fully supported yet")
+	}
+
+	s.Choice = uint64(choiceIndex + 1) // 1-based internal Choice enum
+
+	switch choiceIndex {
+	case 0:
 		s.DRBSetupModListEUTRAN = new(DRBSetupModListEUTRAN)
 		if err = s.DRBSetupModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBSetupModListEUTRAN failed: %w", err)
 		}
-	case 2:
+	case 1:
 		s.DRBFailedModListEUTRAN = new(DRBFailedModListEUTRAN)
 		if err = s.DRBFailedModListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBFailedModListEUTRAN failed: %w", err)
 		}
-	case 3:
+	case 2:
 		s.DRBModifiedListEUTRAN = new(DRBModifiedListEUTRAN)
 		if err = s.DRBModifiedListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBModifiedListEUTRAN failed: %w", err)
 		}
-	case 4:
+	case 3:
 		s.DRBFailedToModifyListEUTRAN = new(DRBFailedToModifyListEUTRAN)
 		if err = s.DRBFailedToModifyListEUTRAN.Decode(r); err != nil {
 			return fmt.Errorf("decode DRBFailedToModifyListEUTRAN failed: %w", err)
 		}
-	case 5:
+	case 4:
 		s.RetainabilityMeasurementsInfo = new(RetainabilityMeasurementsInfo)
 		if err = s.RetainabilityMeasurementsInfo.Decode(r); err != nil {
 			return fmt.Errorf("decode RetainabilityMeasurementsInfo failed: %w", err)
 		}
 	default:
-		return fmt.Errorf("decode choice of SystemBearerContextModificationResponse with unknown choice index %d", choice)
+		return fmt.Errorf("decode choice of SystemBearerContextModificationResponse with unknown choice index %d", choiceIndex)
 	}
 	return nil
 }

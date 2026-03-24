@@ -38,6 +38,7 @@ class ASN1Parser:
         self.procedures: Dict[str, ASN1Procedure] = {}
         self.message_to_procedure_map: Dict[str, str] = {}
         self._prepopulate_builtin_types()
+        self._inject_abstract_types()
         self.state = ParserState.SEARCHING
         self.current_def_lines = []
         self.current_def_start_context = None
@@ -68,6 +69,52 @@ class ASN1Parser:
         for name in builtins:
             item = BuiltinDefinition(name=name, source_file="builtin")
             self.definitions[name] = item
+
+    def _inject_abstract_types(self):
+        """Injects 3GPP abstract containers and fields directly, bypassing patches.yaml."""
+        
+        p_field = SequenceDefinition("ProtocolIE-Field", "builtin", -1, "")
+        p_field.ies = [
+            InformationElement(ie="id", type="ProtocolIE-ID", presence="mandatory"),
+            InformationElement(ie="criticality", type="Criticality", presence="mandatory"),
+            InformationElement(ie="value", type="ANY", presence="mandatory")
+        ]
+        self.definitions["ProtocolIE-Field"] = p_field
+
+        p_cont = ListDefinition("ProtocolIE-Container", "builtin", -1, "")
+        p_cont.of_type = "ProtocolIE-Field"
+        p_cont.max_val = "MaxProtocolIEs"
+        self.definitions["ProtocolIE-Container"] = p_cont
+
+        p_scont = SequenceDefinition("ProtocolIE-SingleContainer", "builtin", -1, "")
+        p_scont.ies = [
+            InformationElement(ie="value", type="ProtocolIE-Field", presence="mandatory")
+        ]
+        self.definitions["ProtocolIE-SingleContainer"] = p_scont
+
+        priv_id = ChoiceDefinition("PrivateIE-ID", "builtin", -1, "")
+        priv_id.ies = [
+            InformationElement(ie="local", type="INTEGER", presence="mandatory"),
+            InformationElement(ie="global", type="OBJECT IDENTIFIER", presence="mandatory")
+        ]
+        self.definitions["PrivateIE-ID"] = priv_id
+
+        priv_field = SequenceDefinition("PrivateIE-Field", "builtin", -1, "")
+        priv_field.ies = [
+            InformationElement(ie="id", type="PrivateIE-ID", presence="mandatory"),
+            InformationElement(ie="criticality", type="Criticality", presence="mandatory"),
+            InformationElement(ie="value", type="ANY", presence="mandatory")
+        ]
+        self.definitions["PrivateIE-Field"] = priv_field
+        self.definitions["PrivateIEField"] = priv_field
+
+        priv_cont = ListDefinition("PrivateIE-Container", "builtin", -1, "")
+        priv_cont.of_type = "PrivateIE-Field"
+        priv_cont.max_val = "MaxPrivateIEs"
+        self.definitions["PrivateIE-Container"] = priv_cont
+
+        self.definitions["PrivateMessage-IEs"] = AliasDefinition("PrivateIE-Container", "PrivateMessage-IEs", "builtin", -1, "")
+        self.definitions["ProtocolIE-ContainerList"] = SequenceDefinition("ProtocolIE-ContainerList", "builtin", -1, "")
 
     def _reset_state(self):
         """Resets the state machine variables for the next definition."""
@@ -306,7 +353,7 @@ class ASN1Parser:
                 return item
 
             is_complex_list = (
-                "SEQUENCE" in def_part_stripped and " OF " in def_part_stripped
+                "SEQUENCE" in def_part_stripped and bool(re.search(r"\bOF\b", def_part_stripped))
             )
             is_simple_alias = (
                 base_type[0].isupper()
@@ -417,7 +464,7 @@ class ASN1Parser:
             ie_name_to_add = member_name
             type_name_to_add = None
 
-            is_inline_list = " OF " in raw_type_str
+            is_inline_list = bool(re.search(r"\bOF\b", raw_type_str))
 
             if is_inline_list:
                 synthetic_type_name = f"{name}-{member_name}"
@@ -695,9 +742,7 @@ class ASN1Parser:
             self._reset_state()
             return
 
-        
-        
-        elif "SEQUENCE" in def_part and " OF " in def_part:
+        elif "SEQUENCE" in def_part and re.search(r"\bOF\b", def_part):
             item = self._parse_sequence_of(name_part, def_part, source_file, source_line, full_def_str)
         
         elif ("SEQUENCE" in def_part or "CHOICE" in def_part) and "{" in def_part:
@@ -871,27 +916,7 @@ class ASN1Parser:
         logger.info("PASS 2: Parsing all other ASN.1 definitions...")
         i = 0
 
-        patched_definitions_to_skip = {
-            "UE-associatedLogicalE1-ConnectionListRes",
-            "UE-associatedLogicalE1-ConnectionListResAck",
-        }
-        lines_to_skip = set()
-        for i in range(len(self.lines)):
-            line_text, _, _ = self.lines[i]
-            if "::=" in line_text:
-                name_part = line_text.split("::=", 1)[0].strip()
-                if name_part in patched_definitions_to_skip:
-                    _, end_index = self._extract_full_definition(i)
-                    
-                    for skip_line_num in range(i, end_index + 1):
-                        lines_to_skip.add(skip_line_num)
-
-        
         for i, (line_text, source_file, source_line) in enumerate(self.lines):
-            
-            if i in lines_to_skip:
-                continue
-
             cleaned_line = line_text.split("--", 1)[0].strip()
             if not cleaned_line:
                 continue

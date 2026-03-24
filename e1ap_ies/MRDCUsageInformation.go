@@ -3,82 +3,125 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // MRDCUsageInformation is a generated SEQUENCE type.
 type MRDCUsageInformation struct {
-	DataUsagePerPDUSessionReport *DataUsagePerPDUSessionReport `aper:"lb:1,ub:Maxnooftimeperiods,optional,ext"`
-	DataUsagePerQOSFlowList      *DataUsagePerQOSFlowList      `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
-	IEExtensions                 *ProtocolExtensionContainer   `aper:"optional,ext"`
+	DataUsagePerPDUSessionReport *DataUsagePerPDUSessionReport
+	DataUsagePerQOSFlowList      *DataUsagePerQOSFlowList
+	IEExtensions                 *MRDCUsageInformationExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *MRDCUsageInformation) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *MRDCUsageInformation) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "data-Usage-per-PDU-Session-Report", Optional: true},
+			per.ComponentInfo{Name: "data-Usage-per-QoS-Flow-List", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.DataUsagePerPDUSessionReport != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.DataUsagePerQOSFlowList != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 5
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(3), &aper.Constraint{Lb: 3, Ub: 3}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
+
 	if s.DataUsagePerPDUSessionReport != nil {
 		if err = s.DataUsagePerPDUSessionReport.Encode(w); err != nil {
 			return fmt.Errorf("encode DataUsagePerPDUSessionReport failed: %w", err)
 		}
 	}
+
 	if s.DataUsagePerQOSFlowList != nil {
 		if err = s.DataUsagePerQOSFlowList.Encode(w); err != nil {
 			return fmt.Errorf("encode DataUsagePerQOSFlowList failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *MRDCUsageInformation) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *MRDCUsageInformation) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "data-Usage-per-PDU-Session-Report", Optional: true},
+			per.ComponentInfo{Name: "data-Usage-per-QoS-Flow-List", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 3, Ub: 3}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
+	}
+
+	if seqDecoder.IsComponentPresent(0) {
 		s.DataUsagePerPDUSessionReport = new(DataUsagePerPDUSessionReport)
 		if err = s.DataUsagePerPDUSessionReport.Decode(r); err != nil {
-			return fmt.Errorf("decode DataUsagePerPDUSessionReport failed: %w", err)
+			return fmt.Errorf("Decode DataUsagePerPDUSessionReport failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.DataUsagePerQOSFlowList = new(DataUsagePerQOSFlowList)
 		if err = s.DataUsagePerQOSFlowList.Decode(r); err != nil {
-			return fmt.Errorf("decode DataUsagePerQOSFlowList failed: %w", err)
+			return fmt.Errorf("Decode DataUsagePerQOSFlowList failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<5) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(MRDCUsageInformationExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for MRDCUsageInformation */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }

@@ -3,50 +3,133 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // CriticalityDiagnosticsIEItem is a generated SEQUENCE type.
 type CriticalityDiagnosticsIEItem struct {
-	IECriticality Criticality  `aper:"mandatory"`
-	IEID          ProtocolIEID `aper:"lb:0,ub:MaxProtocolIEs,mandatory"`
-	TypeOfError   TypeOfError  `aper:"mandatory"`
+	IECriticality Criticality
+	IEID          ProtocolIEID
+	TypeOfError   TypeOfError
+	IEExtensions  *CriticalityDiagnosticsIEItemExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *CriticalityDiagnosticsIEItem) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(false); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *CriticalityDiagnosticsIEItem) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "iECriticality", Optional: false},
+			per.ComponentInfo{Name: "iE-ID", Optional: false},
+			per.ComponentInfo{Name: "typeOfError", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	if err = w.WriteEnumerate(uint64(s.IECriticality.Value), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode IECriticality failed: %w", err)
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
 	}
-	if err = w.WriteInteger(int64(s.IEID.Value), &aper.Constraint{Lb: 0, Ub: MaxProtocolIEs}, false); err != nil {
+
+	optionalBitmap := make([]bool, 0)
+
+	if s.IEExtensions != nil {
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
+	}
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
+	}
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.IECriticality.Value), enumC); err != nil {
+			return fmt.Errorf("encode IECriticality failed: %w", err)
+		}
+	}
+	if err = w.EncodeInteger(int64(s.IEID.Value), per.Constrained(0, MaxProtocolIEs)); err != nil {
 		return fmt.Errorf("encode IEID failed: %w", err)
 	}
-	if err = w.WriteEnumerate(uint64(s.TypeOfError.Value), aper.Constraint{Lb: 0, Ub: 1}, true); err != nil {
-		return fmt.Errorf("encode TypeOfError failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.TypeOfError.Value), enumC); err != nil {
+			return fmt.Errorf("encode TypeOfError failed: %w", err)
+		}
 	}
+
+	if s.IEExtensions != nil {
+		if err = s.IEExtensions.Encode(w); err != nil {
+			return fmt.Errorf("encode IEExtensions failed: %w", err)
+		}
+	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *CriticalityDiagnosticsIEItem) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *CriticalityDiagnosticsIEItem) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "iECriticality", Optional: false},
+			per.ComponentInfo{Name: "iE-ID", Optional: false},
+			per.ComponentInfo{Name: "typeOfError", Optional: false},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	if err = s.IECriticality.Decode(r); err != nil {
-		return fmt.Errorf("decode IECriticality failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.IEID.Decode(r); err != nil {
-		return fmt.Errorf("decode IEID failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if err = s.TypeOfError.Decode(r); err != nil {
-		return fmt.Errorf("decode TypeOfError failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: false, RootValues: make([]int64, 3), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode IECriticality failed: %w", err)
+		}
+		s.IECriticality.Value = val
 	}
-	if isExtensible { /* TODO: Implement extension skipping for CriticalityDiagnosticsIEItem */
+
+	{
+		val, err := r.DecodeInteger(per.Constrained(0, MaxProtocolIEs))
+		if err != nil {
+			return fmt.Errorf("decode IEID failed: %w", err)
+		}
+		s.IEID.Value = val
 	}
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 2), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode TypeOfError failed: %w", err)
+		}
+		s.TypeOfError.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(3) {
+		s.IEExtensions = new(CriticalityDiagnosticsIEItemExtensions)
+		if err = s.IEExtensions.Decode(r); err != nil {
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
+		}
+	}
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
+	}
+
 	return nil
 }

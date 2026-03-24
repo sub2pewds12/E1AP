@@ -1,0 +1,44 @@
+package e1ap_test
+
+import (
+	"bytes"
+	"testing"
+
+	"github.com/lvdund/ngap/aper"
+	"github.com/sub2pewds12/E1AP/e1ap_ies"
+)
+
+func TestCompareStringEncoding(t *testing.T) {
+	// 1. The String
+	testStr := "mytestgNB" // 9 chars
+
+	// 2. Encode using Go (Standard APER)
+	// GNB-CU-UP-Name is usually a PrintableString or VisibleString in ASN.1
+	// We use OctetString wrapper which is standard for APER string encoding in this library
+	ie := e1ap_ies.GNBCUCPName{
+		Value: aper.OctetString(testStr),
+	}
+	var buf bytes.Buffer
+	w := aper.NewWriter(&buf)
+	if err := ie.Encode(w); err != nil {
+		t.Fatalf("Go Encode failed: %v", err)
+	}
+	w.Close()
+	goBytes := buf.Bytes()
+
+	t.Logf("Go Encoded Bytes: %X", goBytes)
+
+	// 3. Compare with OAI Bytes (from your log)
+	// Your log showed: ... 04 00 6D 79 74 65 73 74 67 4E 42 ...
+	// The container was 11 bytes.
+	// The Value part started at 04.
+	oaiBytes := []byte{0x04, 0x00, 0x6D, 0x79, 0x74, 0x65, 0x73, 0x74, 0x67, 0x4E, 0x42}
+
+	if bytes.Equal(goBytes, oaiBytes) {
+		t.Log("MATCH: Both libraries speak the exact same APER.")
+	} else {
+		t.Log("MISMATCH: They are using different alignment rules.")
+		t.Logf("OAI Bytes: %X", oaiBytes)
+		t.Logf("Go  Bytes: %X", goBytes)
+	}
+}

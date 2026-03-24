@@ -1,32 +1,35 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DataForwardingRequest is a generated ENUMERATED type.
 type DataForwardingRequest struct {
-	Value aper.Enumerated
+	Value int64
 }
 
 const (
-	DataForwardingRequestUL   aper.Enumerated = 0
-	DataForwardingRequestDL   aper.Enumerated = 1
-	DataForwardingRequestBoth aper.Enumerated = 2
+	DataForwardingRequestUL   int64 = 0
+	DataForwardingRequestDL   int64 = 1
+	DataForwardingRequestBoth int64 = 2
 )
 
-// Encode implements the aper.AperMarshaller interface.
-func (e *DataForwardingRequest) Encode(w *aper.AperWriter) error {
-	return w.WriteEnumerate(uint64(e.Value), aper.Constraint{Lb: 0, Ub: 2}, true)
+// Encode implements the MessageEncoder interface for DataForwardingRequest.
+func (e *DataForwardingRequest) Encode(w *per.Encoder) error {
+
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	return w.EncodeEnumerated(int64(e.Value), c)
 }
 
-// Decode implements the aper.AperUnmarshaller interface.
-func (e *DataForwardingRequest) Decode(r *aper.AperReader) error {
+// Decode implements the MessageDecoder interface for DataForwardingRequest.
+func (e *DataForwardingRequest) Decode(r *per.Decoder) error {
 
-	val, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, true)
+	c := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+	val, err := r.DecodeEnumerated(c)
 	if err != nil {
 		return err
 	}
-	e.Value = aper.Enumerated(val)
+	e.Value = val
 	return nil
 }

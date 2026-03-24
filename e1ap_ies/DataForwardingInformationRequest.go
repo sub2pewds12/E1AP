@@ -3,74 +3,122 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/ngap/aper"
+	"github.com/lvdund/asn1go/per"
 )
 
 // DataForwardingInformationRequest is a generated SEQUENCE type.
 type DataForwardingInformationRequest struct {
-	DataForwardingRequest         DataForwardingRequest       `aper:"mandatory,ext"`
-	QOSFlowsForwardedOnFwdTunnels *QOSFlowMappingList         `aper:"lb:1,ub:MaxnoofQoSFlows,optional,ext"`
-	IEExtensions                  *ProtocolExtensionContainer `aper:"optional,ext"`
+	DataForwardingRequest         DataForwardingRequest
+	QOSFlowsForwardedOnFwdTunnels *QOSFlowMappingList
+	IEExtensions                  *DataForwardingInformationRequestExtensions
 }
 
 // Encode implements the aper.AperMarshaller interface.
-func (s *DataForwardingInformationRequest) Encode(w *aper.AperWriter) (err error) {
-	if err = w.WriteBool(true); err != nil {
-		return fmt.Errorf("encode extensibility bool failed: %w", err)
+func (s *DataForwardingInformationRequest) Encode(w *per.Encoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "data-Forwarding-Request", Optional: false},
+			per.ComponentInfo{Name: "qoS-Flows-Forwarded-On-Fwd-Tunnels", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	var optionalityBitmap [1]byte
+	seqEncoder := w.NewSequenceEncoder(c)
+	if err := seqEncoder.EncodeExtensionBit(false); err != nil {
+		return err
+	}
+
+	optionalBitmap := make([]bool, 0)
+
 	if s.QOSFlowsForwardedOnFwdTunnels != nil {
-		optionalityBitmap[0] |= 1 << 7
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
+
 	if s.IEExtensions != nil {
-		optionalityBitmap[0] |= 1 << 6
+		optionalBitmap = append(optionalBitmap, true)
+	} else {
+		optionalBitmap = append(optionalBitmap, false)
 	}
-	if err = w.WriteBitString(optionalityBitmap[:], uint(2), &aper.Constraint{Lb: 2, Ub: 2}, false); err != nil {
-		return fmt.Errorf("encode optionality bitmap failed: %w", err)
+
+	if err := seqEncoder.EncodePreamble(optionalBitmap); err != nil {
+		return err
 	}
-	if err = w.WriteEnumerate(uint64(s.DataForwardingRequest.Value), aper.Constraint{Lb: 0, Ub: 2}, true); err != nil {
-		return fmt.Errorf("encode DataForwardingRequest failed: %w", err)
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+		if err = w.EncodeEnumerated(int64(s.DataForwardingRequest.Value), enumC); err != nil {
+			return fmt.Errorf("encode DataForwardingRequest failed: %w", err)
+		}
 	}
+
 	if s.QOSFlowsForwardedOnFwdTunnels != nil {
 		if err = s.QOSFlowsForwardedOnFwdTunnels.Encode(w); err != nil {
 			return fmt.Errorf("encode QOSFlowsForwardedOnFwdTunnels failed: %w", err)
 		}
 	}
+
 	if s.IEExtensions != nil {
 		if err = s.IEExtensions.Encode(w); err != nil {
 			return fmt.Errorf("encode IEExtensions failed: %w", err)
 		}
 	}
+
+	if err := seqEncoder.EncodeExtensionAdditions([]bool{}, [][]byte{}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Decode implements the aper.AperUnmarshaller interface.
-func (s *DataForwardingInformationRequest) Decode(r *aper.AperReader) (err error) {
-	isExtensible, err := r.ReadBool()
-	if err != nil {
-		return fmt.Errorf("read extensibility bool failed: %w", err)
+func (s *DataForwardingInformationRequest) Decode(r *per.Decoder) (err error) {
+
+	c := per.SequenceConstraints{
+		Extensible: true,
+		RootComponents: []per.ComponentInfo{
+			per.ComponentInfo{Name: "data-Forwarding-Request", Optional: false},
+			per.ComponentInfo{Name: "qoS-Flows-Forwarded-On-Fwd-Tunnels", Optional: true},
+			per.ComponentInfo{Name: "iE-Extensions", Optional: true},
+		},
 	}
-	_ = isExtensible
-	optionalityBitmap, _, err := r.ReadBitString(&aper.Constraint{Lb: 2, Ub: 2}, false)
-	if err != nil {
-		return fmt.Errorf("read optionality bitmap failed: %w", err)
+	seqDecoder := r.NewSequenceDecoder(c)
+	if err := seqDecoder.DecodeExtensionBit(); err != nil {
+		return err
 	}
-	if err = s.DataForwardingRequest.Decode(r); err != nil {
-		return fmt.Errorf("decode DataForwardingRequest failed: %w", err)
+
+	if err := seqDecoder.DecodePreamble(); err != nil {
+		return err
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<7) > 0 {
+
+	{
+		enumC := per.EnumeratedConstraints{Extensible: true, RootValues: make([]int64, 3), ExtValues: nil}
+		val, err := r.DecodeEnumerated(enumC)
+		if err != nil {
+			return fmt.Errorf("decode DataForwardingRequest failed: %w", err)
+		}
+		s.DataForwardingRequest.Value = val
+	}
+
+	if seqDecoder.IsComponentPresent(1) {
 		s.QOSFlowsForwardedOnFwdTunnels = new(QOSFlowMappingList)
 		if err = s.QOSFlowsForwardedOnFwdTunnels.Decode(r); err != nil {
-			return fmt.Errorf("decode QOSFlowsForwardedOnFwdTunnels failed: %w", err)
+			return fmt.Errorf("Decode QOSFlowsForwardedOnFwdTunnels failed: %w", err)
 		}
 	}
-	if len(optionalityBitmap) > 0 && optionalityBitmap[0]&(1<<6) > 0 {
-		s.IEExtensions = new(ProtocolExtensionContainer)
+
+	if seqDecoder.IsComponentPresent(2) {
+		s.IEExtensions = new(DataForwardingInformationRequestExtensions)
 		if err = s.IEExtensions.Decode(r); err != nil {
-			return fmt.Errorf("decode IEExtensions failed: %w", err)
+			return fmt.Errorf("Decode IEExtensions failed: %w", err)
 		}
 	}
-	if isExtensible { /* TODO: Implement extension skipping for DataForwardingInformationRequest */
+
+	if _, err := seqDecoder.DecodeExtensionAdditions(); err != nil {
+		return err
 	}
+
 	return nil
 }
