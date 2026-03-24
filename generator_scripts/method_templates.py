@@ -24,7 +24,7 @@ def render_pdu_methods(
     Generates the full set of methods for a Top-Level PDU (SEQUENCE type).
     This includes toIes, Encode, Decode, and the Decoder helper struct/method.
     """
-    required_imports = {"io", "fmt", "bytes", "github.com/lvdund/asn1go/per"}
+    required_imports = {"io", "fmt", "bytes", "asn1go/per"}
 
     to_ies_code = _generate_to_ies(go_name, item, parser)
     encode_code = _generate_pdu_encode(go_name, item, message_to_procedure_map, procedures, parser)
@@ -332,7 +332,7 @@ def render_internal_struct_methods(
     """
     Generates Encode and Decode methods for an internal SEQUENCE or CHOICE struct.
     """
-    required_imports = {"fmt", "math", "github.com/lvdund/asn1go/per"}
+    required_imports = {"fmt", "math", "asn1go/per"}
     if any(ie.presence in ["optional", "conditional"] for ie in item.ies):
         required_imports.add("io")
 
@@ -367,7 +367,7 @@ def render_enum_methods(go_name: str, item: EnumDefinition) -> Tuple[str, Set[st
     """
     Generates Encode and Decode methods for an ENUMERATED type.
     """
-    required_imports = {"fmt", "github.com/lvdund/asn1go/per"} 
+    required_imports = {"fmt", "asn1go/per"} 
 
     
     num_enums = len(item.enum_values)
@@ -406,7 +406,7 @@ func (e *{go_name}) Decode(r *per.Decoder) error {{
 
 
 def render_extension_methods(go_name: str, extension_set: list, parser: ASN1Parser) -> Tuple[str, Set[str]]:
-    required_imports = {"io", "fmt", "bytes", "github.com/lvdund/asn1go/per"}
+    required_imports = {"io", "fmt", "bytes", "asn1go/per"}
     pascal_case_converter = parser.pascal_case_converter
 
     encode_checks = []
@@ -501,7 +501,7 @@ func (s *{go_name}) Decode(r *per.Decoder) error {{
 def render_list_methods(
     go_name: str, item: ListDefinition, parser: ASN1Parser
 ) -> Tuple[str, Set[str]]:
-    required_imports = {"fmt", "github.com/lvdund/asn1go/per"}
+    required_imports = {"fmt", "asn1go/per"}
 
     of_type_go_name = parser.pascal_case_converter(item.of_type)
     pascal_case_converter = parser.pascal_case_converter

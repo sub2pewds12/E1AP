@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 // E1ReleaseResponse is a generated SEQUENCE type.

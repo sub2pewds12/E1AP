@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 // UEAssociatedLogicalE1ConnectionItem is a generated SEQUENCE type.

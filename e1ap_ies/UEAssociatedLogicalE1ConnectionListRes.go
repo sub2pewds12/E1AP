@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 // UEAssociatedLogicalE1ConnectionListRes is a generated LIST type.

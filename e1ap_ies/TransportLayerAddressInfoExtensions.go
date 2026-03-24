@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 // TransportLayerAddressInfoExtensions is a generated type-safe wrapper for extensions.

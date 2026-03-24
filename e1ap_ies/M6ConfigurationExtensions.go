@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 // M6ConfigurationExtensions is a generated type-safe wrapper for extensions.

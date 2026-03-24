@@ -3,7 +3,7 @@ package e1ap_ies
 import (
 	"fmt"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 // IE is the interface that all encodable/decodable types must implement.

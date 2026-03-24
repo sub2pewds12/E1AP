@@ -362,7 +362,7 @@ class GoCodeGenerator:
             logger.info("No simple types found to generate in common file.")
             return
 
-        go_code = 'package e1ap_ies\n\nimport (\n\t"github.com/lvdund/asn1go/per"\n)\n\nfunc int64Ptr(v int64) *int64 { return &v }\n\n'
+        go_code = 'package e1ap_ies\n\nimport (\n\t"asn1go/per"\n)\n\nfunc int64Ptr(v int64) *int64 { return &v }\n\n'
 
         sorted_items = sorted(simple_items, key=lambda x: self._standard_string(x.name))
         total_count = 0

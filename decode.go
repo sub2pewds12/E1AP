@@ -3,7 +3,7 @@ package e1ap
 import (
 	"fmt"
 
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 	"github.com/sub2pewds12/E1AP/e1ap_ies"
 )
 

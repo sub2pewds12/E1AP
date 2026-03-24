@@ -1,7 +1,7 @@
 package e1ap_ies
 
 import (
-	"github.com/lvdund/asn1go/per"
+	"asn1go/per"
 )
 
 func int64Ptr(v int64) *int64 { return &v }
